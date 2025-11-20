@@ -1,13 +1,14 @@
-# IaC Dharma Platform
+# IaC Dharma Platform - Citadel Edition
 
-> **AI-Powered Infrastructure as Code Management Platform with Integrated CMDB**
+> **AI-Powered Infrastructure as Code Management Platform with Integrated CMDB & Data Leakage Control**
 
-A comprehensive platform for managing infrastructure blueprints, deployments, and configuration management with AI-powered insights and automated agent distribution.
+A comprehensive enterprise platform for managing infrastructure blueprints, deployments, configuration management, and security monitoring with AI-powered insights and automated agent distribution featuring Data Loss Prevention (DLP).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
+[![Security](https://img.shields.io/badge/Security-DLP%20Enabled-red.svg)](docs/DATA_LEAKAGE_CONTROL_IMPLEMENTATION.md)
 
 ## 🌟 Features
 
@@ -24,6 +25,15 @@ A comprehensive platform for managing infrastructure blueprints, deployments, an
 - 📊 **Relationship Mapping** - Visualize dependencies between components
 - 🤝 **Multi-Agent Support** - Deploy agents across your infrastructure
 - 📦 **Professional Installers** - One-click installation packages
+
+### 🔐 Data Leakage Control (DLP) **NEW**
+- 📋 **Clipboard Monitoring** - Detect sensitive data in clipboard (SSN, credit cards, API keys, passwords)
+- 💾 **USB Write Detection** - Monitor and block unauthorized USB data transfers
+- 📁 **File Access Watchdog** - Track sensitive folder access (Documents, Desktop, Downloads)
+- 🌐 **Network Exfiltration Guard** - Detect suspicious network connections (FTP, SSH, RDP, reverse shells)
+- ⚡ **Auto-Blocking** - Automatic threat response for high-severity events
+- 📊 **Security Dashboard** - Real-time DLP event visualization and analytics
+- 🎯 **Compliance Ready** - ISO 27001, SOC 2, GDPR, PCI DSS, HIPAA, NIST 800-53
 
 ### Analytics & Insights
 - 📈 **Performance Analytics** - Track system and deployment performance
