@@ -167,4 +167,41 @@ export class CMDBClient {
       return false;
     }
   }
+
+  /**
+   * Send security event to CMDB
+   */
+  async sendSecurityEvent(eventPayload: any): Promise<boolean> {
+    try {
+      logger.debug('Sending security event to CMDB', { 
+        eventType: eventPayload.eventType,
+        eventId: eventPayload.eventId,
+      });
+
+      const response = await this.client.post('/security/events', eventPayload);
+
+      if (response.status === 200 || response.status === 201) {
+        logger.debug('Security event sent successfully', { 
+          eventId: eventPayload.eventId,
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Failed to send security event', {
+          eventId: eventPayload.eventId,
+          status: error.response?.status,
+          message: error.message,
+        });
+      } else {
+        logger.error('Failed to send security event', { 
+          eventId: eventPayload.eventId,
+          error,
+        });
+      }
+      return false;
+    }
+  }
 }

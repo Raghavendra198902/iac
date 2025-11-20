@@ -113,6 +113,7 @@ import telemetryRoutes from './routes/telemetry';
 import agentsRoutes from './routes/agents';
 import enforcementRoutes, { setSocketIO } from './routes/enforcement';
 import cmdbRoutes from './routes/cmdb';
+import securityRoutes from './routes/security';
 
 // Inject Socket.IO into enforcement routes
 setSocketIO(io);
@@ -122,6 +123,7 @@ app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/agents', agentsRoutes);
 app.use('/api/enforcement', enforcementRoutes);
 app.use('/api/cmdb', cmdbRoutes); // CMDB needs to be public for agent registration
+app.use('/api/security', securityRoutes); // Security events - public for agent reporting
 
 // Authentication middleware for protected routes
 app.use('/api', authMiddleware);

@@ -3,15 +3,20 @@ import logger from '../utils/logger';
 import { CMDBClient } from './cmdbClient';
 import { SystemMonitor } from './systemMonitor';
 import { CIData, AgentConfig } from '../types';
+import { ClipboardMonitor } from '../monitors/ClipboardMonitor';
+import { DataLeakageMonitor } from '../monitors/DataLeakageMonitor';
 
 export class CMDBAgent {
   private cmdbClient: CMDBClient;
   private systemMonitor: SystemMonitor;
+  private clipboardMonitor: ClipboardMonitor;
+  private dataLeakageMonitor: DataLeakageMonitor;
   private config: AgentConfig;
   private ciId: string;
   private registrationComplete: boolean = false;
   private errorCount: number = 0;
   private lastSync: string = '';
+  private securityEventCount: number = 0;
 
   constructor(config: AgentConfig) {
     this.config = config;
@@ -21,11 +26,14 @@ export class CMDBAgent {
       process.env.CMDB_TENANT_ID || 'default'
     );
     this.systemMonitor = new SystemMonitor();
+    this.clipboardMonitor = new ClipboardMonitor();
+    this.dataLeakageMonitor = new DataLeakageMonitor();
     this.ciId = `ci-${config.agentId}`;
 
-    logger.info('CMDB Agent initialized', {
+    logger.info('CMDB Agent initialized with Data Leakage Control', {
       agentId: config.agentId,
       environment: config.environment,
+      dlpEnabled: true,
     });
   }
 
@@ -164,6 +172,126 @@ export class CMDBAgent {
     }
   }
 
+  /**
+   * Monitor for data leakage attempts
+   */
+  async monitorDataLeakage(): Promise<void> {
+    try {
+      logger.debug('Starting data leakage monitoring cycle...');
+
+      // Monitor clipboard for sensitive data
+      const clipboardEvent = await this.clipboardMonitor.monitorClipboard();
+      if (clipboardEvent && clipboardEvent.severity !== 'low') {
+        logger.warn('Clipboard security event', {
+          eventId: clipboardEvent.id,
+          severity: clipboardEvent.severity,
+          patterns: clipboardEvent.sensitivePatterns.length,
+        });
+
+        // Send security event to CMDB
+        await this.sendSecurityEvent('clipboard', clipboardEvent);
+        this.securityEventCount++;
+
+        // Auto-block if high severity
+        if (clipboardEvent.severity === 'high') {
+          await this.clipboardMonitor.blockClipboard();
+          logger.info('High-severity clipboard threat blocked');
+        }
+      }
+
+      // Monitor USB write operations
+      const usbEvents = await this.dataLeakageMonitor.monitorUSBWrites();
+      for (const usbEvent of usbEvents) {
+        logger.warn('USB write operation detected', {
+          eventId: usbEvent.id,
+          deviceId: usbEvent.deviceId,
+          sizeMB: (usbEvent.fileSize / (1024 * 1024)).toFixed(2),
+          severity: usbEvent.severity,
+        });
+
+        await this.sendSecurityEvent('usb-write', usbEvent);
+        this.securityEventCount++;
+
+        // Block high-severity USB writes
+        if (usbEvent.severity === 'high') {
+          await this.dataLeakageMonitor.blockUSBWrite(usbEvent.deviceId);
+          logger.info('High-severity USB write blocked', { deviceId: usbEvent.deviceId });
+        }
+      }
+
+      // Monitor sensitive file access
+      const fileAccessEvents = await this.dataLeakageMonitor.monitorFileAccess();
+      for (const fileEvent of fileAccessEvents) {
+        if (fileEvent.severity !== 'low') {
+          logger.info('Sensitive file access detected', {
+            eventId: fileEvent.id,
+            filePath: fileEvent.filePath,
+            severity: fileEvent.severity,
+          });
+
+          await this.sendSecurityEvent('file-access', fileEvent);
+          this.securityEventCount++;
+        }
+      }
+
+      // Monitor network exfiltration attempts
+      const networkEvents = await this.dataLeakageMonitor.monitorNetworkExfiltration();
+      for (const netEvent of networkEvents) {
+        logger.warn('Suspicious network activity detected', {
+          eventId: netEvent.id,
+          process: netEvent.processName,
+          remoteAddress: netEvent.remoteAddress,
+          remotePort: netEvent.remotePort,
+          severity: netEvent.severity,
+        });
+
+        await this.sendSecurityEvent('network-exfiltration', netEvent);
+        this.securityEventCount++;
+
+        // Block high-severity network threats
+        if (netEvent.severity === 'high' && netEvent.isAnomaly) {
+          await this.dataLeakageMonitor.blockProcessNetwork(netEvent.pid, netEvent.processName);
+          logger.info('High-severity network threat blocked', { 
+            process: netEvent.processName,
+            pid: netEvent.pid,
+          });
+        }
+      }
+
+      logger.debug('Data leakage monitoring cycle complete', {
+        clipboardEvents: clipboardEvent ? 1 : 0,
+        usbEvents: usbEvents.length,
+        fileEvents: fileAccessEvents.length,
+        networkEvents: networkEvents.length,
+      });
+    } catch (error) {
+      logger.error('Data leakage monitoring failed', { error });
+      this.errorCount++;
+    }
+  }
+
+  /**
+   * Send security event to CMDB
+   */
+  private async sendSecurityEvent(eventType: string, eventData: any): Promise<void> {
+    try {
+      const securityPayload = {
+        ciId: this.ciId,
+        eventType,
+        severity: eventData.severity,
+        timestamp: eventData.timestamp,
+        eventId: eventData.id,
+        details: eventData,
+      };
+
+      // Send to CMDB API
+      await this.cmdbClient.sendSecurityEvent(securityPayload);
+      logger.debug('Security event sent to CMDB', { eventType, eventId: eventData.id });
+    } catch (error) {
+      logger.error('Failed to send security event', { error, eventType });
+    }
+  }
+
   async performDiscovery(): Promise<void> {
     if (!this.config.autoDiscovery) {
       return;
@@ -234,6 +362,9 @@ export class CMDBAgent {
   }
 
   getStatus() {
+    const clipboardStatus = this.clipboardMonitor.getStatus();
+    const dlpStatus = this.dataLeakageMonitor.getStatus();
+
     return {
       registered: this.registrationComplete,
       ciId: this.ciId,
@@ -241,10 +372,29 @@ export class CMDBAgent {
       lastSync: this.lastSync,
       agentId: this.config.agentId,
       environment: this.config.environment,
+      security: {
+        totalEvents: this.securityEventCount,
+        clipboardMonitoring: clipboardStatus.enabled,
+        usbDevicesMonitored: dlpStatus.usbDevices,
+        sensitiveFolders: dlpStatus.sensitiveFolders,
+        networkConnections: dlpStatus.networkConnections,
+      },
     };
   }
 
   isHealthy(): boolean {
     return this.registrationComplete && this.errorCount < 10;
   }
+
+  /**
+   * Get data leakage monitoring statistics
+   */
+  getSecurityStats() {
+    return {
+      totalSecurityEvents: this.securityEventCount,
+      clipboardMonitor: this.clipboardMonitor.getStatus(),
+      dataLeakageMonitor: this.dataLeakageMonitor.getStatus(),
+    };
+  }
 }
+

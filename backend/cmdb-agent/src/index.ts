@@ -67,6 +67,15 @@ app.get('/status', (req: Request, res: Response) => {
   });
 });
 
+// Security stats endpoint
+app.get('/security/stats', (req: Request, res: Response) => {
+  const stats = agent.getSecurityStats();
+  res.json({
+    ...stats,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Force sync endpoint
 app.post('/sync', async (req: Request, res: Response) => {
   try {
@@ -139,6 +148,16 @@ async function startAgent() {
       logger.debug('Running scheduled metric collection');
       await agent.collectAndSendMetrics();
     });
+
+    // Schedule data leakage monitoring (every 30 seconds)
+    const dlpInterval = parseInt(
+      process.env.DLP_MONITORING_INTERVAL_SECONDS || '30'
+    );
+    cron.schedule(`*/${dlpInterval} * * * * *`, async () => {
+      logger.debug('Running scheduled data leakage monitoring');
+      await agent.monitorDataLeakage();
+    });
+    logger.info('Data Leakage Control monitoring enabled', { intervalSeconds: dlpInterval });
 
     // Schedule discovery (every scan interval minutes)
     if (config.autoDiscovery) {
