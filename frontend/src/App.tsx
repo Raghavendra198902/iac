@@ -21,6 +21,7 @@ import CMDB from './pages/CMDB';
 import DownloadsPage from './pages/DownloadsPage';
 import AgentsPage from './pages/AgentsPage';
 import SecurityDashboard from './pages/SecurityDashboard';
+import Security from './pages/Security';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import ToastProvider from './components/ToastProvider';
@@ -123,6 +124,9 @@ function InnerRoutes() {
                 
                 {/* Security Dashboard - Enforcement monitoring */}
                 <Route path="security" element={<SecurityDashboard />} />
+                
+                {/* Data Leakage Control - DLP monitoring */}
+                <Route path="security/dlp" element={<Security />} />
                 
                 {/* UI Showcase - All roles */}
                 <Route path="ui-showcase" element={<UIShowcase />} />
