@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "agentName": "rrd-VMware-Virtual-Platform",
+  "apiServerUrl": "http://localhost:3000",
+  "autoUpdate": true,
+  "updateCheckIntervalHours": 24,
+  "monitoring": {
+    "processes": true,
+    "registry": true,
+    "usb": true,
+    "network": true,
+    "filesystem": true
+  },
+  "telemetry": {
+    "batchSize": 100,
+    "flushIntervalSeconds": 60
+  }
+}

@@ -1,0 +1,273 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "dharma-overview",
+    "title": "Dharma IAC Platform - Overview",
+    "tags": ["dharma", "overview", "platform"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Platform Health Status",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "count(up{job=~\"api-gateway|blueprint-service|iac-generator|guardrails-engine|costing-service|orchestrator-service|automation-engine|monitoring-service|ai-engine\"} == 1)",
+            "legendFormat": "Services Up"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 7, "color": "yellow"},
+                {"value": 9, "color": "green"}
+              ]
+            },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Request Rate",
+        "type": "graph",
+        "gridPos": {"x": 6, "y": 0, "w": 9, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m]))",
+            "legendFormat": "Total Requests/sec"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"x": 15, "y": 0, "w": 9, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100",
+            "legendFormat": "Error Rate %"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Error Rate"},
+          {"format": "short"}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [5], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Error Rate",
+          "noDataState": "no_data"
+        }
+      },
+      {
+        "id": 4,
+        "title": "Response Time (p95)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"api-gateway\"}[5m]))",
+            "legendFormat": "API Gateway p95"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"blueprint-service\"}[5m]))",
+            "legendFormat": "Blueprint Service p95"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"iac-generator\"}[5m]))",
+            "legendFormat": "IAC Generator p95"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Response Time"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Service Request Rates",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"api-gateway\"}[5m])",
+            "legendFormat": "API Gateway"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"blueprint-service\"}[5m])",
+            "legendFormat": "Blueprint Service"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"iac-generator\"}[5m])",
+            "legendFormat": "IAC Generator"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"guardrails-engine\"}[5m])",
+            "legendFormat": "Guardrails Engine"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage by Service",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 10, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(container_memory_usage_bytes{namespace=\"dharma\"}) by (pod)",
+            "legendFormat": "{{pod}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "bytes", "label": "Memory"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "CPU Usage by Service",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 10, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"dharma\"}[5m])) by (pod)",
+            "legendFormat": "{{pod}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "CPU Usage"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Business Metrics - Blueprints Created (24h)",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "increase(blueprints_created_total[24h])",
+            "legendFormat": "Blueprints"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 9,
+        "title": "IAC Generation Success Rate",
+        "type": "gauge",
+        "gridPos": {"x": 6, "y": 16, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "rate(iac_generation_success_total[1h]) / rate(iac_generation_total[1h]) * 100",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 90, "color": "yellow"},
+                {"value": 95, "color": "green"}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Guardrails Violations (1h)",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 16, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "increase(guardrails_violations_total[1h])",
+            "legendFormat": "Violations"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "textMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Database Connections",
+        "type": "graph",
+        "gridPos": {"x": 18, "y": 16, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "Active Connections"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Connections"},
+          {"format": "short"}
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: iacdharma-dev
+
+namePrefix: dev-
+
+commonLabels:
+  environment: development
+
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - deployment-patches.yaml
+  - ingress-patch.yaml
+
+replicas:
+  - name: api-gateway
+    count: 1
+  - name: blueprint-service
+    count: 1
+  - name: frontend
+    count: 1
+  - name: postgres
+    count: 1
+  - name: redis
+    count: 1
+
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - ENABLE_DEBUG=true
+
+secretGenerator:
+  - name: app-secrets
+    behavior: merge
+    literals:
+      - JWT_SECRET=dev_jwt_secret_change_me_32_chars
+      - SESSION_SECRET=dev_session_secret_32_chars
+
+images:
+  - name: ghcr.io/OWNER/iacdharma-api-gateway
+    newTag: dev
+  - name: ghcr.io/OWNER/iacdharma-frontend
+    newTag: dev

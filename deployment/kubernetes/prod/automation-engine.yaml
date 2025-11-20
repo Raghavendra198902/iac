@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: automation-engine
+  namespace: iac-dharma-prod
+  labels:
+    app: automation-engine
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: automation-engine
+  template:
+    metadata:
+      labels:
+        app: automation-engine
+    spec:
+      containers:
+      - name: automation-engine
+        image: iacdharma/automation-engine:latest
+        ports:
+        - containerPort: 3006
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3006"
+        - name: REDIS_HOST
+          value: "redis"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: AI_ENGINE_URL
+          value: "http://ai-engine:8000"
+        - name: BLUEPRINT_SERVICE_URL
+          value: "http://blueprint-service:3001"
+        - name: IAC_GENERATOR_URL
+          value: "http://iac-generator:3002"
+        - name: GUARDRAILS_ENGINE_URL
+          value: "http://guardrails-engine:3003"
+        - name: COSTING_SERVICE_URL
+          value: "http://costing-service:3004"
+        - name: ORCHESTRATOR_SERVICE_URL
+          value: "http://orchestrator:3005"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: automation-engine
+  namespace: iac-dharma-prod
+  labels:
+    app: automation-engine
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3006
+    targetPort: 3006
+    protocol: TCP
+    name: http
+  selector:
+    app: automation-engine
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: automation-engine-hpa
+  namespace: iac-dharma-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: automation-engine
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

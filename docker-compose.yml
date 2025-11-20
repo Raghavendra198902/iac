@@ -1,0 +1,275 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: dharma-postgres
+    environment:
+      POSTGRES_DB: iac_dharma
+      POSTGRES_USER: dharma_admin
+      POSTGRES_PASSWORD: dharma_pass_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/schemas:/docker-entrypoint-initdb.d
+    networks:
+      - dharma-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: dharma-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - dharma-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: dharma-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+      - AGENT_SOURCE_PATH=/cmdb-agent
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - dharma-network
+    volumes:
+      - ./backend/cmdb-agent:/cmdb-agent:ro
+      - ./backend/api-gateway/public:/app/public:ro
+    # volumes:
+    #   - ./backend/api-gateway:/app
+    #   - /app/node_modules
+
+  # Blueprint Service
+  blueprint-service:
+    build:
+      context: ./backend/blueprint-service
+      dockerfile: Dockerfile
+    container_name: dharma-blueprint-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - dharma-network
+
+  # IaC Generator
+  iac-generator:
+    build:
+      context: ./backend/iac-generator
+      dockerfile: Dockerfile
+    container_name: dharma-iac-generator
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+    depends_on:
+      - postgres
+    networks:
+      - dharma-network
+
+  # AI Engine
+  ai-engine:
+    build:
+      context: ./backend/ai-engine
+      dockerfile: Dockerfile
+    container_name: dharma-ai-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHON_ENV=development
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+    networks:
+      - dharma-network
+    volumes:
+      - ./ml-models:/app/models
+
+  # Guardrails Engine
+  guardrails-engine:
+    build:
+      context: ./backend/guardrails-engine
+      dockerfile: Dockerfile
+    container_name: dharma-guardrails
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+    depends_on:
+      - postgres
+    networks:
+      - dharma-network
+
+  # Costing Service
+  costing-service:
+    build:
+      context: ./backend/costing-service
+      dockerfile: Dockerfile
+    container_name: dharma-costing-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+      - PORT=3004
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - dharma-network
+
+  # Orchestrator Service
+  orchestrator-service:
+    build:
+      context: ./backend/orchestrator-service
+      dockerfile: Dockerfile
+    container_name: dharma-orchestrator
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+      - PORT=3005
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - dharma-network
+
+  # Automation Engine
+  automation-engine:
+    build:
+      context: ./backend/automation-engine
+      dockerfile: Dockerfile
+    container_name: dharma-automation-engine
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+      - PORT=3006
+      - AI_ENGINE_URL=http://ai-engine:8000
+      - BLUEPRINT_SERVICE_URL=http://blueprint-service:3001
+      - IAC_GENERATOR_URL=http://iac-generator:3002
+      - GUARDRAILS_ENGINE_URL=http://guardrails-engine:3003
+      - COSTING_SERVICE_URL=http://costing-service:3004
+      - ORCHESTRATOR_SERVICE_URL=http://orchestrator-service:3005
+    depends_on:
+      - redis
+      - ai-engine
+      - blueprint-service
+      - iac-generator
+      - guardrails-engine
+      - costing-service
+      - orchestrator-service
+    networks:
+      - dharma-network
+
+  # Monitoring Service
+  monitoring-service:
+    build:
+      context: ./backend/monitoring-service
+      dockerfile: Dockerfile
+    container_name: dharma-monitoring-service
+    ports:
+      - "3007:3007"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+      - ORCHESTRATOR_URL=http://orchestrator-service:3005
+      - IAC_GENERATOR_URL=http://iac-generator:3002
+      - COSTING_SERVICE_URL=http://costing-service:3004
+      - BLUEPRINT_SERVICE_URL=http://blueprint-service:3001
+      - DRIFT_CHECK_INTERVAL=300000
+      - HEALTH_CHECK_INTERVAL=60000
+      - COST_CHECK_INTERVAL=3600000
+    depends_on:
+      - postgres
+      - redis
+      - orchestrator-service
+    networks:
+      - dharma-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: dharma-frontend
+    ports:
+      - "5173:5173"
+    # Remove VITE_API_URL to use dynamic URL based on browser hostname
+    # environment:
+    #   - VITE_API_URL=http://localhost:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - dharma-network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dharma-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deployment/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - dharma-network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dharma-grafana
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - dharma-network
+
+volumes:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  dharma-network:
+    driver: bridge

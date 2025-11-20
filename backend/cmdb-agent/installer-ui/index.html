@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMDB Agent Installer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .installer-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 700px;
+      max-width: 90vw;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+
+    input[type="text"],
+    input[type="url"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus,
+    input[type="url"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .checkbox-group label {
+      margin-bottom: 0;
+      font-weight: normal;
+      cursor: pointer;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .btn-success {
+      background: #4caf50;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .progress-container {
+      margin: 20px 0;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 30px;
+      background: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .progress-message {
+      margin-top: 12px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .system-info {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .system-info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .system-info-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .system-info-value {
+      color: #333;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .feature-list {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      background: #4caf50;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="installer-container">
+    <div class="header">
+      <h1>CMDB Agent Installer</h1>
+      <p>Enterprise Endpoint Monitoring & Security</p>
+    </div>
+
+    <div class="content">
+      <!-- Step 1: Welcome -->
+      <div class="step active" id="step-welcome">
+        <h2>Welcome</h2>
+        <p style="margin: 20px 0; color: #666; line-height: 1.6;">
+          This wizard will guide you through the installation of the CMDB Agent on your system.
+          The agent provides comprehensive endpoint monitoring, security enforcement, and compliance management.
+        </p>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Real-time process and system monitoring</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>USB device control and enforcement</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Network activity tracking and analysis</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Automatic security updates</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>AI-powered threat detection</div>
+          </div>
+        </div>
+
+        <div class="system-info" id="system-info">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="button-group">
+          <button class="btn-secondary" onclick="window.close()">Cancel</button>
+          <button class="btn-primary" onclick="nextStep()">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Configuration -->
+      <div class="step" id="step-config">
+        <h2>Configuration</h2>
+        <p style="margin-bottom: 20px; color: #666;">
+          Please configure the agent settings
+        </p>
+
+        <div class="form-group">
+          <label for="install-path">Installation Path</label>
+          <input type="text" id="install-path" placeholder="C:\Program Files\CMDB Agent">
+        </div>
+
+        <div class="form-group">
+          <label for="api-url">API Server URL</label>
+          <input type="url" id="api-url" placeholder="http://192.168.1.10:3000" value="http://192.168.1.10:3000">
+        </div>
+
+        <div class="form-group">
+          <label for="agent-name">Agent Name (Hostname)</label>
+          <input type="text" id="agent-name" placeholder="my-workstation">
+        </div>
+
+        <div class="form-group">
+          <label for="org-id">Organization ID (Optional)</label>
+          <input type="text" id="org-id" placeholder="Enter organization ID">
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="auto-start" checked>
+          <label for="auto-start">Start service automatically after installation</label>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="auto-update" checked>
+          <label for="auto-update">Enable automatic updates</label>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="create-shortcuts" checked>
+          <label for="create-shortcuts">Create Start Menu shortcuts</label>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-secondary" onclick="prevStep()">Back</button>
+          <button class="btn-primary" onclick="testAndNext()">Test & Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Installation -->
+      <div class="step" id="step-install">
+        <h2>Installing</h2>
+        <p style="margin-bottom: 20px; color: #666;">
+          Please wait while the agent is being installed...
+        </p>
+
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+          </div>
+          <div class="progress-message" id="progress-message">Preparing installation...</div>
+        </div>
+
+        <div id="install-error" class="error" style="display: none;"></div>
+      </div>
+
+      <!-- Step 4: Complete -->
+      <div class="step" id="step-complete">
+        <h2>Installation Complete</h2>
+        
+        <div class="success">
+          <strong>Success!</strong> CMDB Agent has been installed successfully.
+        </div>
+
+        <p style="margin: 20px 0; color: #666; line-height: 1.6;">
+          The CMDB Agent service is now running on your system. It will automatically start monitoring
+          and sending telemetry data to the configured API server.
+        </p>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Service installed and running</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Configuration saved</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Auto-start enabled</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Monitoring active</div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-success" onclick="window.close()">Finish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    // Load system information
+    window.electronAPI.getSystemInfo().then(info => {
+      const systemInfoHtml = `
+        <div class="system-info-item">
+          <span class="system-info-label">Platform:</span>
+          <span class="system-info-value">${info.platformName} (${info.arch})</span>
+        </div>
+        <div class="system-info-item">
+          <span class="system-info-label">Hostname:</span>
+          <span class="system-info-value">${info.hostname}</span>
+        </div>
+        <div class="system-info-item">
+          <span class="system-info-label">Admin Rights:</span>
+          <span class="system-info-value">${info.isAdmin ? 'Yes' : 'No (Required)'}</span>
+        </div>
+      `;
+      document.getElementById('system-info').innerHTML = systemInfoHtml;
+
+      // Set default values
+      document.getElementById('install-path').value = info.defaultInstallPath;
+      document.getElementById('agent-name').value = info.hostname;
+    });
+
+    function nextStep() {
+      document.getElementById(`step-${getStepName(currentStep)}`).classList.remove('active');
+      currentStep++;
+      document.getElementById(`step-${getStepName(currentStep)}`).classList.add('active');
+
+      if (currentStep === 3) {
+        performInstallation();
+      }
+    }
+
+    function prevStep() {
+      document.getElementById(`step-${getStepName(currentStep)}`).classList.remove('active');
+      currentStep--;
+      document.getElementById(`step-${getStepName(currentStep)}`).classList.add('active');
+    }
+
+    function getStepName(step) {
+      const names = ['', 'welcome', 'config', 'install', 'complete'];
+      return names[step];
+    }
+
+    async function testAndNext() {
+      const apiUrl = document.getElementById('api-url').value;
+
+      // Test connection
+      const result = await window.electronAPI.testConnection(apiUrl);
+
+      if (!result.success) {
+        alert(`Connection test failed: ${result.error}\n\nPlease check the API server URL and try again.`);
+        return;
+      }
+
+      nextStep();
+    }
+
+    async function performInstallation() {
+      const config = {
+        installPath: document.getElementById('install-path').value,
+        apiServerUrl: document.getElementById('api-url').value,
+        agentName: document.getElementById('agent-name').value,
+        organizationId: document.getElementById('org-id').value,
+        autoStart: document.getElementById('auto-start').checked,
+        autoUpdate: document.getElementById('auto-update').checked,
+        createShortcuts: document.getElementById('create-shortcuts').checked,
+      };
+
+      // Listen for progress updates
+      window.electronAPI.onInstallProgress((data) => {
+        const { message, progress } = data;
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+        document.getElementById('progress-fill').textContent = `${progress}%`;
+        document.getElementById('progress-message').textContent = message;
+      });
+
+      // Start installation
+      const result = await window.electronAPI.install(config);
+
+      if (result.success) {
+        nextStep();
+      } else {
+        document.getElementById('install-error').textContent = `Installation failed: ${result.error}`;
+        document.getElementById('install-error').style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

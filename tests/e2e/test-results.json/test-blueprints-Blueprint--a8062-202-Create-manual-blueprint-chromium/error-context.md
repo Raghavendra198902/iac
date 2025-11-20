@@ -1,0 +1,96 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - heading "IAC DHARMA" [level=1] [ref=e6]
+    - navigation [ref=e7]:
+      - link "Dashboard" [ref=e8] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e9]
+        - text: Dashboard
+      - link "Blueprints" [ref=e14] [cursor=pointer]:
+        - /url: /blueprints
+        - img [ref=e15]
+        - text: Blueprints
+      - link "AI Designer" [ref=e18] [cursor=pointer]:
+        - /url: /designer
+        - img [ref=e19]
+        - text: AI Designer
+      - link "Risk Assessment" [ref=e22] [cursor=pointer]:
+        - /url: /risk
+        - img [ref=e23]
+        - text: Risk Assessment
+      - link "Cost Management" [ref=e25] [cursor=pointer]:
+        - /url: /cost
+        - img [ref=e26]
+        - text: Cost Management
+      - link "Deployments" [ref=e28] [cursor=pointer]:
+        - /url: /deployments
+        - img [ref=e29]
+        - text: Deployments
+    - generic [ref=e32]:
+      - generic [ref=e33]: Version 1.0.0
+      - generic [ref=e34]: © 2024 IAC DHARMA
+  - generic [ref=e35]:
+    - banner [ref=e36]:
+      - button "Admin User admin@iac.dharma" [ref=e39]:
+        - img [ref=e41]
+        - generic [ref=e44]:
+          - generic [ref=e45]: Admin User
+          - generic [ref=e46]: admin@iac.dharma
+    - main [ref=e47]:
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - img [ref=e51]
+          - generic [ref=e54]:
+            - heading "AI Blueprint Designer" [level=1] [ref=e55]
+            - paragraph [ref=e56]: Generate infrastructure from natural language descriptions
+        - generic [ref=e57]:
+          - generic [ref=e59]:
+            - heading "Describe Your Infrastructure" [level=2] [ref=e60]
+            - generic [ref=e61]:
+              - generic [ref=e62]:
+                - text: What do you need?
+                - textbox "Describe your infrastructure needs in plain English... e.g., 'I need a scalable web application...'" [ref=e63]
+              - generic [ref=e64]:
+                - generic [ref=e65]:
+                  - text: Cloud Provider (Optional)
+                  - combobox [ref=e66]:
+                    - option "Auto-detect" [selected]
+                    - option "Azure"
+                    - option "AWS"
+                    - option "GCP"
+                - generic [ref=e67]:
+                  - text: Environment (Optional)
+                  - combobox [ref=e68]:
+                    - option "Auto-detect" [selected]
+                    - option "Development"
+                    - option "Staging"
+                    - option "Production"
+                - generic [ref=e69]:
+                  - text: Budget (Optional)
+                  - spinbutton [ref=e70]
+                - generic [ref=e71]:
+                  - text: Region (Optional)
+                  - textbox "e.g., eastus, us-west-2" [ref=e72]
+              - button "Generate Blueprint" [disabled] [ref=e73]:
+                - img [ref=e74]
+                - text: Generate Blueprint
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - heading "Example Prompts" [level=3] [ref=e79]
+              - generic [ref=e80]:
+                - button "I need a scalable web application on Azure with a PostgreSQL database and load balancer for production" [ref=e81]
+                - button "Create a microservices architecture on AWS with Kubernetes, Redis caching, and RDS database" [ref=e82]
+                - button "Setup a data analytics pipeline on GCP with Cloud Storage, BigQuery, and Dataflow for processing" [ref=e83]
+                - button "Deploy a high-availability WordPress site on Azure with CDN, auto-scaling VMs, and MySQL database" [ref=e84]
+            - generic [ref=e85]:
+              - heading "💡 Tips" [level=3] [ref=e86]
+              - list [ref=e87]:
+                - listitem [ref=e88]: • Be specific about your requirements
+                - listitem [ref=e89]: • Mention cloud provider if you have a preference
+                - listitem [ref=e90]: • Include environment (dev/staging/prod)
+                - listitem [ref=e91]: • Specify budget constraints if any
+                - listitem [ref=e92]: • Describe scaling and HA needs
+```

@@ -1,0 +1,197 @@
+# Promtail Configuration for Dharma IAC Platform
+# Log collection agent for Kubernetes pods
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+# Position tracking
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 102400
+    timeout: 10s
+
+scrape_configs:
+  # Kubernetes pod logs
+  - job_name: kubernetes-pods
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+            - dharma
+            - kube-system
+    
+    pipeline_stages:
+      # Extract log level
+      - regex:
+          expression: '^(?P<timestamp>\S+)\s+(?P<level>\w+)\s+'
+      
+      # Parse JSON logs
+      - json:
+          expressions:
+            level: level
+            msg: msg
+            service: service
+            trace_id: trace_id
+            span_id: span_id
+      
+      # Add labels
+      - labels:
+          level:
+          service:
+          trace_id:
+      
+      # Drop debug logs in production
+      - match:
+          selector: '{level="debug", environment="production"}'
+          action: drop
+      
+      # Rate limiting for high-volume logs
+      - limit:
+          rate: 1000
+          burst: 2000
+          drop: true
+    
+    relabel_configs:
+      # Only scrape running pods
+      - source_labels: [__meta_kubernetes_pod_phase]
+        regex: Pending|Succeeded|Failed
+        action: drop
+      
+      # Add namespace label
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      
+      # Add pod name
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      
+      # Add container name
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      
+      # Add app label
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        target_label: app
+      
+      # Add environment label
+      - source_labels: [__meta_kubernetes_pod_label_environment]
+        target_label: environment
+      
+      # Add service label
+      - source_labels: [__meta_kubernetes_pod_label_service]
+        target_label: service
+      
+      # Set path to log file
+      - source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
+        target_label: __path__
+        separator: /
+        replacement: /var/log/pods/*$1/*.log
+
+  # Application-specific log scraping
+  - job_name: api-gateway
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+            - dharma
+    
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            message: msg
+            method: req.method
+            path: req.url
+            status: res.statusCode
+            duration: duration
+            user_id: user.id
+            request_id: req.id
+      
+      - labels:
+          level:
+          method:
+          status:
+      
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+    
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: api-gateway
+        action: keep
+      
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+
+  # Database logs (PostgreSQL)
+  - job_name: postgres
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: postgres
+          __path__: /var/log/postgresql/*.log
+    
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+)\s+\[(?P<pid>\d+)\]\s+(?P<level>\w+):\s+(?P<message>.*)$'
+      
+      - labels:
+          level:
+          pid:
+      
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05.000 MST'
+
+  # Nginx access logs
+  - job_name: nginx
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          __path__: /var/log/nginx/access.log
+    
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>[\w\.]+) - (?P<remote_user>[\w]+) \[(?P<time_local>.*)\] "(?P<method>\w+) (?P<request>.*) HTTP/[\d\.]+" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>.*)" "(?P<http_user_agent>.*)"$'
+      
+      - labels:
+          method:
+          status:
+      
+      - timestamp:
+          source: time_local
+          format: '02/Jan/2006:15:04:05 -0700'
+
+  # System logs
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
+    
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\w+\s+\d+\s+\d+:\d+:\d+)\s+(?P<hostname>\S+)\s+(?P<app>\w+)(\[(?P<pid>\d+)\])?: (?P<message>.*)$'
+      
+      - labels:
+          hostname:
+          app:
+      
+      - timestamp:
+          source: timestamp
+          format: 'Jan 02 15:04:05'

@@ -1,0 +1,70 @@
+# ==========================================
+# SECURITY WARNING
+# ==========================================
+# This file contains sensitive configuration
+# NEVER commit actual secrets to version control
+# Use AWS Secrets Manager for production secrets
+# ==========================================
+
+# Environment files
+.env
+.env.*
+*.env
+.env.local
+.env.development.local
+.env.staging.local
+.env.production.local
+
+# SSL/TLS Private Keys
+config/ssl/**/*.key
+config/ssl/**/*.pem
+config/ssl/**/*.p12
+config/ssl/**/*.pfx
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Certificate Signing Requests (may contain sensitive info)
+*.csr
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Terraform state files (may contain secrets)
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+*.tfvars
+
+# AWS credentials
+.aws/
+aws-credentials
+
+# Secret management
+secrets/
+*.secret
+
+# Database dumps (may contain sensitive data)
+*.sql
+*.dump
+
+# Logs (may contain sensitive information)
+*.log
+logs/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules
+node_modules/

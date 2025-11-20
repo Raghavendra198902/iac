@@ -1,0 +1,65 @@
+{
+  "service_strategies": [
+    {
+      "service": "api-gateway",
+      "type": "probabilistic",
+      "param": 1.0,
+      "operation_strategies": [
+        {
+          "operation": "/health",
+          "type": "probabilistic",
+          "param": 0.01
+        },
+        {
+          "operation": "/metrics",
+          "type": "probabilistic",
+          "param": 0.01
+        }
+      ]
+    },
+    {
+      "service": "blueprint-service",
+      "type": "probabilistic",
+      "param": 0.5
+    },
+    {
+      "service": "iac-generator",
+      "type": "probabilistic",
+      "param": 1.0
+    },
+    {
+      "service": "guardrails-engine",
+      "type": "probabilistic",
+      "param": 0.8
+    },
+    {
+      "service": "costing-service",
+      "type": "probabilistic",
+      "param": 0.3
+    },
+    {
+      "service": "orchestrator-service",
+      "type": "probabilistic",
+      "param": 1.0
+    },
+    {
+      "service": "automation-engine",
+      "type": "probabilistic",
+      "param": 0.5
+    },
+    {
+      "service": "monitoring-service",
+      "type": "probabilistic",
+      "param": 0.1
+    },
+    {
+      "service": "ai-engine",
+      "type": "probabilistic",
+      "param": 0.7
+    }
+  ],
+  "default_strategy": {
+    "type": "probabilistic",
+    "param": 0.1
+  }
+}

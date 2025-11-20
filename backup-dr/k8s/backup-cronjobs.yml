@@ -1,0 +1,199 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: database-backup
+  namespace: dharma
+spec:
+  # Run daily at 2 AM
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: database-backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: backup-service-account
+          containers:
+            - name: backup
+              image: postgres:15-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  apk add --no-cache aws-cli openssl
+                  /scripts/backup-database.sh
+              env:
+                - name: DB_HOST
+                  value: "postgres.dharma"
+                - name: DB_PORT
+                  value: "5432"
+                - name: DB_NAME
+                  value: "dharma"
+                - name: DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: username
+                - name: DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: password
+                - name: S3_BUCKET
+                  value: "dharma-backups"
+                - name: S3_PREFIX
+                  value: "database"
+                - name: RETENTION_DAYS
+                  value: "30"
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: secret-access-key
+                - name: AWS_DEFAULT_REGION
+                  value: "us-west-2"
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-notifications
+                      key: slack-webhook-url
+                      optional: true
+                - name: ALERT_EMAIL
+                  value: "ops@dharma.example.com"
+              volumeMounts:
+                - name: backup-scripts
+                  mountPath: /scripts
+                - name: backup-storage
+                  mountPath: /var/backups/postgresql
+                - name: encryption-key
+                  mountPath: /etc/backup
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 250m
+                  memory: 512Mi
+                limits:
+                  cpu: 1000m
+                  memory: 2Gi
+          volumes:
+            - name: backup-scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755
+            - name: backup-storage
+              emptyDir: {}
+            - name: encryption-key
+              secret:
+                secretName: backup-encryption-key
+                defaultMode: 0600
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-verification
+  namespace: dharma
+spec:
+  # Run daily at 4 AM (2 hours after backup)
+  schedule: "0 4 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: backup-verification
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: backup-service-account
+          containers:
+            - name: verify
+              image: postgres:15-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  apk add --no-cache aws-cli openssl
+                  /scripts/verify-backups.sh
+              env:
+                - name: S3_BUCKET
+                  value: "dharma-backups"
+                - name: S3_PREFIX
+                  value: "database"
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: secret-access-key
+                - name: AWS_DEFAULT_REGION
+                  value: "us-west-2"
+              volumeMounts:
+                - name: backup-scripts
+                  mountPath: /scripts
+                - name: encryption-key
+                  mountPath: /etc/backup
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: backup-scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755
+            - name: encryption-key
+              secret:
+                secretName: backup-encryption-key
+                defaultMode: 0600
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup-service-account
+  namespace: dharma
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: backup-role
+  namespace: dharma
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: backup-role-binding
+  namespace: dharma
+subjects:
+  - kind: ServiceAccount
+    name: backup-service-account
+    namespace: dharma
+roleRef:
+  kind: Role
+  name: backup-role
+  apiGroup: rbac.authorization.k8s.io

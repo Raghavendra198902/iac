@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring-service
+  namespace: iac-dharma-prod
+  labels:
+    app: monitoring-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: monitoring-service
+  template:
+    metadata:
+      labels:
+        app: monitoring-service
+    spec:
+      containers:
+      - name: monitoring-service
+        image: iacdharma/monitoring-service:latest
+        ports:
+        - containerPort: 3007
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3007"
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: host
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "iac_dharma"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+        - name: REDIS_HOST
+          value: "redis"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: ORCHESTRATOR_URL
+          value: "http://orchestrator:3005"
+        - name: IAC_GENERATOR_URL
+          value: "http://iac-generator:3002"
+        - name: COSTING_SERVICE_URL
+          value: "http://costing-service:3004"
+        - name: BLUEPRINT_SERVICE_URL
+          value: "http://blueprint-service:3001"
+        - name: DRIFT_CHECK_INTERVAL
+          value: "300000"
+        - name: HEALTH_CHECK_INTERVAL
+          value: "60000"
+        - name: COST_CHECK_INTERVAL
+          value: "3600000"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: AZURE_SUBSCRIPTION_ID
+          valueFrom:
+            secretKeyRef:
+              name: azure-credentials
+              key: subscription-id
+              optional: true
+        - name: AZURE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: azure-credentials
+              key: client-id
+              optional: true
+        - name: AZURE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: azure-credentials
+              key: client-secret
+              optional: true
+        - name: AZURE_TENANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: azure-credentials
+              key: tenant-id
+              optional: true
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3007
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3007
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-service
+  namespace: iac-dharma-prod
+  labels:
+    app: monitoring-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3007
+    targetPort: 3007
+    protocol: TCP
+    name: http
+  selector:
+    app: monitoring-service
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: monitoring-service-hpa
+  namespace: iac-dharma-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: monitoring-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

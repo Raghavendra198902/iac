@@ -1,0 +1,77 @@
+# Jaeger Distributed Tracing Configuration for Dharma IAC Platform
+
+# Collector configuration
+collector:
+  zipkin:
+    host-port: 9411
+  grpc:
+    host-port: 14250
+  http:
+    host-port: 14268
+  
+  # Queue configuration
+  queue:
+    num-workers: 50
+    queue-size: 2000
+  
+  # Log configuration
+  log-level: info
+
+# Storage backend (Elasticsearch)
+storage:
+  type: elasticsearch
+  elasticsearch:
+    server-urls: http://elasticsearch:9200
+    index-prefix: jaeger
+    max-span-age: 72h  # 3 days retention
+    num-shards: 5
+    num-replicas: 1
+    bulk:
+      size: 5000000  # 5MB
+      workers: 10
+      flush-interval: 200ms
+
+# Sampling strategies
+sampling:
+  strategies-file: /etc/jaeger/sampling-strategies.json
+  default:
+    type: probabilistic
+    param: 0.1  # Sample 10% of traces
+
+# Agent configuration
+agent:
+  processor:
+    jaeger-compact:
+      server-host-port: 6831
+    jaeger-binary:
+      server-host-port: 6832
+  
+  # Sampling configuration
+  reporter:
+    type: grpc
+    grpc:
+      host-port: jaeger-collector:14250
+      retry:
+        max-backoff: 5s
+
+# Query service configuration
+query:
+  base-path: /
+  port: 16686
+  log-level: info
+  
+  # Additional query options
+  max-clock-skew-adjustment: 0s
+  
+  # UI configuration
+  ui-config:
+    dependencies:
+      menuEnabled: true
+    archiveEnabled: true
+    tracking:
+      gaID: ${GOOGLE_ANALYTICS_ID}
+
+# Ingester for Kafka (optional)
+ingester:
+  parallelism: 1000
+  deadlockInterval: 1m

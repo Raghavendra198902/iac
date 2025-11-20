@@ -1,0 +1,138 @@
+# Prometheus Configuration for IAC DHARMA Platform
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'iac-dharma'
+    environment: 'development'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - '/etc/prometheus/alert-rules.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:3000']
+        labels:
+          service: 'api-gateway'
+          tier: 'gateway'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Blueprint Service
+  - job_name: 'blueprint-service'
+    static_configs:
+      - targets: ['blueprint-service:3001']
+        labels:
+          service: 'blueprint-service'
+          tier: 'backend'
+    metrics_path: '/metrics'
+
+  # IaC Generator
+  - job_name: 'iac-generator'
+    static_configs:
+      - targets: ['iac-generator:3002']
+        labels:
+          service: 'iac-generator'
+          tier: 'backend'
+    metrics_path: '/metrics'
+
+  # Guardrails Engine
+  - job_name: 'guardrails-engine'
+    static_configs:
+      - targets: ['guardrails-engine:3003']
+        labels:
+          service: 'guardrails-engine'
+          tier: 'backend'
+    metrics_path: '/metrics'
+
+  # Orchestrator Service
+  - job_name: 'orchestrator-service'
+    static_configs:
+      - targets: ['orchestrator-service:3004']
+        labels:
+          service: 'orchestrator-service'
+          tier: 'backend'
+    metrics_path: '/metrics'
+
+  # Costing Service
+  - job_name: 'costing-service'
+    static_configs:
+      - targets: ['costing-service:3005']
+        labels:
+          service: 'costing-service'
+          tier: 'backend'
+    metrics_path: '/metrics'
+
+  # Monitoring Service
+  - job_name: 'monitoring-service'
+    static_configs:
+      - targets: ['monitoring-service:3006']
+        labels:
+          service: 'monitoring-service'
+          tier: 'backend'
+    metrics_path: '/metrics'
+
+  # Automation Engine
+  - job_name: 'automation-engine'
+    static_configs:
+      - targets: ['automation-engine:3007']
+        labels:
+          service: 'automation-engine'
+          tier: 'backend'
+    metrics_path: '/metrics'
+
+  # AI Engine
+  - job_name: 'ai-engine'
+    static_configs:
+      - targets: ['ai-engine:8000']
+        labels:
+          service: 'ai-engine'
+          tier: 'ai'
+    metrics_path: '/metrics'
+    scrape_interval: 20s
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          tier: 'database'
+    scrape_interval: 30s
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          tier: 'cache'
+    scrape_interval: 30s
+
+  # Node Exporter (system metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
+          tier: 'infrastructure'
+    scrape_interval: 30s

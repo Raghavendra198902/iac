@@ -1,0 +1,319 @@
+# Prometheus Alerting Rules for Dharma IAC Platform
+
+groups:
+  # Service Health Alerts
+  - name: service_health
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"api-gateway|blueprint-service|iac-generator|guardrails-engine|costing-service|orchestrator-service|automation-engine|monitoring-service|ai-engine"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} on {{ $labels.pod }} has been down for more than 2 minutes."
+          dashboard: "https://grafana.example.com/d/service-overview"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "Error rate is {{ $value | humanizePercentage }} on {{ $labels.job }}"
+
+      - alert: CriticalErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.10
+        for: 3m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "Critical error rate on {{ $labels.job }}"
+          description: "Error rate is {{ $value | humanizePercentage }} on {{ $labels.job }}. Immediate action required."
+
+  # Performance Alerts
+  - name: performance
+    interval: 30s
+    rules:
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High latency detected on {{ $labels.job }}"
+          description: "95th percentile latency is {{ $value | humanizeDuration }} on {{ $labels.job }}"
+
+      - alert: CriticalLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 3.0
+        for: 5m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "Critical latency on {{ $labels.job }}"
+          description: "95th percentile latency is {{ $value | humanizeDuration }} on {{ $labels.job }}"
+
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[5m]) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          category: capacity
+        annotations:
+          summary: "High request rate on {{ $labels.job }}"
+          description: "Request rate is {{ $value | humanize }} req/s on {{ $labels.job }}"
+
+  # Resource Utilization Alerts
+  - name: resources
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High memory usage on {{ $labels.pod }}"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.pod }}"
+
+      - alert: CriticalMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          category: resources
+        annotations:
+          summary: "Critical memory usage on {{ $labels.pod }}"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.pod }}. Pod may be OOM killed."
+
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.85
+        for: 15m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High CPU usage on {{ $labels.pod }}"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.pod }}"
+
+      - alert: CriticalCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.95
+        for: 10m
+        labels:
+          severity: critical
+          category: resources
+        annotations:
+          summary: "Critical CPU usage on {{ $labels.pod }}"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.pod }}"
+
+      - alert: PodRestarting
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          category: stability
+        annotations:
+          summary: "Pod {{ $labels.pod }} is restarting"
+          description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
+
+  # Database Alerts
+  - name: database
+    interval: 30s
+    rules:
+      - alert: DatabaseDown
+        expr: up{job="postgres"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL has been down for more than 2 minutes"
+
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 10m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "High number of database connections"
+          description: "Database has {{ $value }} active connections"
+
+      - alert: DatabaseSlowQueries
+        expr: rate(pg_stat_statements_mean_time_seconds[5m]) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Database queries are slow"
+          description: "Average query time is {{ $value | humanizeDuration }}"
+
+      - alert: DatabaseReplicationLag
+        expr: pg_replication_lag_seconds > 60
+        for: 5m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "Database replication lag detected"
+          description: "Replication lag is {{ $value | humanizeDuration }}"
+
+  # Redis Alerts
+  - name: redis
+    interval: 30s
+    rules:
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 2 minutes"
+
+      - alert: RedisHighMemoryUsage
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) > 0.90
+        for: 10m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: RedisRejectedConnections
+        expr: rate(redis_rejected_connections_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          category: cache
+        annotations:
+          summary: "Redis is rejecting connections"
+          description: "Redis rejected {{ $value }} connections in the last 5 minutes"
+
+  # Kubernetes Alerts
+  - name: kubernetes
+    interval: 30s
+    rules:
+      - alert: KubernetesNodeNotReady
+        expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+        for: 10m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Kubernetes node {{ $labels.node }} is not ready"
+          description: "Node has been not ready for more than 10 minutes"
+
+      - alert: KubernetesPodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 5
+        for: 5m
+        labels:
+          severity: critical
+          category: stability
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash looping"
+          description: "Pod has restarted {{ $value }} times in 15 minutes"
+
+      - alert: KubernetesPVCFull
+        expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) > 0.90
+        for: 10m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "PVC {{ $labels.persistentvolumeclaim }} is almost full"
+          description: "Volume usage is {{ $value | humanizePercentage }}"
+
+  # Business Logic Alerts
+  - name: business_metrics
+    interval: 60s
+    rules:
+      - alert: LowBlueprintCreationRate
+        expr: rate(blueprints_created_total[1h]) < 1
+        for: 2h
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Blueprint creation rate is low"
+          description: "Only {{ $value }} blueprints created per hour in the last 2 hours"
+
+      - alert: HighIACGenerationFailureRate
+        expr: rate(iac_generation_failed_total[15m]) / rate(iac_generation_total[15m]) > 0.10
+        for: 30m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High IAC generation failure rate"
+          description: "{{ $value | humanizePercentage }} of IAC generations are failing"
+
+      - alert: GuardrailsViolationSpike
+        expr: rate(guardrails_violations_total[15m]) > 10
+        for: 30m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Spike in guardrails violations"
+          description: "{{ $value }} guardrails violations per second detected"
+
+  # Security Alerts
+  - name: security
+    interval: 30s
+    rules:
+      - alert: UnauthorizedAccessAttempts
+        expr: rate(http_requests_total{status="401"}[5m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High rate of unauthorized access attempts"
+          description: "{{ $value }} unauthorized attempts per second on {{ $labels.job }}"
+
+      - alert: SuspiciousActivity
+        expr: rate(http_requests_total{status="403"}[5m]) > 5
+        for: 10m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "{{ $value }} forbidden access attempts per second on {{ $labels.job }}"
+
+  # SLO-based Alerts
+  - name: slo
+    interval: 60s
+    rules:
+      - alert: APIAvailabilitySLOBreach
+        expr: (rate(http_requests_total{status!~"5.."}[30m]) / rate(http_requests_total[30m])) < 0.999
+        for: 15m
+        labels:
+          severity: critical
+          category: slo
+        annotations:
+          summary: "API availability SLO breach"
+          description: "API availability is {{ $value | humanizePercentage }} (target: 99.9%)"
+
+      - alert: APILatencySLOBreach
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[30m])) > 0.5
+        for: 15m
+        labels:
+          severity: warning
+          category: slo
+        annotations:
+          summary: "API latency SLO breach"
+          description: "p95 latency is {{ $value | humanizeDuration }} (target: 500ms)"

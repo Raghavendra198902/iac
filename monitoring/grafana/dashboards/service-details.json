@@ -1,0 +1,179 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "dharma-services",
+    "title": "Dharma IAC Platform - Service Details",
+    "tags": ["dharma", "services", "microservices"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "templating": {
+      "list": [
+        {
+          "name": "service",
+          "type": "query",
+          "query": "label_values(http_requests_total, job)",
+          "current": {
+            "text": "api-gateway",
+            "value": "api-gateway"
+          },
+          "multi": false,
+          "includeAll": false
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "$service - Request Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"$service\"}[5m])",
+            "legendFormat": "{{method}} {{path}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "$service - Error Rate by Status Code",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"$service\",status=~\"4..\"}[5m])",
+            "legendFormat": "4xx {{status}}"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"$service\",status=~\"5..\"}[5m])",
+            "legendFormat": "5xx {{status}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Errors/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "$service - Latency Percentiles",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"$service\"}[5m]))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"$service\"}[5m]))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"$service\"}[5m]))",
+            "legendFormat": "p99"
+          },
+          {
+            "expr": "histogram_quantile(0.999, rate(http_request_duration_seconds_bucket{job=\"$service\"}[5m]))",
+            "legendFormat": "p99.9"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "$service - Memory Usage",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{pod=~\".*$service.*\"}",
+            "legendFormat": "{{pod}}"
+          },
+          {
+            "expr": "container_spec_memory_limit_bytes{pod=~\".*$service.*\"}",
+            "legendFormat": "Limit - {{pod}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "bytes", "label": "Memory"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "$service - CPU Usage",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{pod=~\".*$service.*\"}[5m])",
+            "legendFormat": "{{pod}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "CPU Usage"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "$service - Network I/O",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(container_network_receive_bytes_total{pod=~\".*$service.*\"}[5m])",
+            "legendFormat": "Received - {{pod}}"
+          },
+          {
+            "expr": "rate(container_network_transmit_bytes_total{pod=~\".*$service.*\"}[5m])",
+            "legendFormat": "Transmitted - {{pod}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "Bps", "label": "Bytes/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "$service - Pod Restarts",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 24, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "kube_pod_container_status_restarts_total{pod=~\".*$service.*\"}",
+            "legendFormat": "{{pod}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Restart Count"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "$service - Request Duration Heatmap",
+        "type": "heatmap",
+        "gridPos": {"x": 12, "y": 24, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "rate(http_request_duration_seconds_bucket{job=\"$service\"}[5m])",
+            "format": "heatmap",
+            "legendFormat": "{{le}}"
+          }
+        ],
+        "dataFormat": "tsbuckets"
+      }
+    ]
+  }
+}

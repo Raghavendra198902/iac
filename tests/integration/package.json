@@ -1,0 +1,27 @@
+{
+  "name": "iac-dharma-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for IAC DHARMA platform",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
+    "test:api-gateway": "jest test-api-gateway.spec.ts",
+    "test:auth": "jest test-auth-flow.spec.ts",
+    "test:blueprint": "jest test-blueprint-workflow.spec.ts",
+    "test:ai": "jest test-ai-integration.spec.ts"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard - IAC DHARMA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <h1 class="text-3xl font-bold text-gray-900">Security Enforcement Dashboard</h1>
+                <p class="mt-2 text-sm text-gray-600">Real-time monitoring - <span id="status" class="font-semibold"></span></p>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <main class="max-w-7xl mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-sm font-medium text-gray-500">Total Events</div>
+                    <div class="text-3xl font-bold text-blue-600" id="totalEvents">0</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-sm font-medium text-gray-500">Critical</div>
+                    <div class="text-3xl font-bold text-red-600" id="criticalEvents">0</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-sm font-medium text-gray-500">High</div>
+                    <div class="text-3xl font-bold text-orange-600" id="highEvents">0</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-sm font-medium text-gray-500">Connection</div>
+                    <div class="flex items-center gap-2">
+                        <div id="connectionDot" class="w-3 h-3 rounded-full bg-gray-400"></div>
+                        <span id="connectionStatus" class="text-lg font-semibold">Connecting...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events List -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Recent Events</h2>
+                </div>
+                <div class="p-6">
+                    <div id="eventsList" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin.replace(':5173', ':3000').replace(':80', ':3000').replace(':443', ':3000');
+        console.log('API URL:', API_URL);
+
+        let socket;
+        let events = [];
+
+        // Fetch events from API
+        async function loadEvents() {
+            try {
+                const response = await fetch(`${API_URL}/api/enforcement/events?limit=20`);
+                const data = await response.json();
+                events = data.events || [];
+                updateStats();
+                renderEvents();
+            } catch (error) {
+                console.error('Failed to load events:', error);
+                document.getElementById('status').textContent = 'Error loading data';
+                document.getElementById('status').className = 'font-semibold text-red-600';
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = events.length;
+            const critical = events.filter(e => e.severity === 'critical').length;
+            const high = events.filter(e => e.severity === 'high').length;
+
+            document.getElementById('totalEvents').textContent = total;
+            document.getElementById('criticalEvents').textContent = critical;
+            document.getElementById('highEvents').textContent = high;
+        }
+
+        // Render events
+        function renderEvents() {
+            const container = document.getElementById('eventsList');
+            
+            if (events.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No events recorded yet</p>';
+                return;
+            }
+
+            container.innerHTML = events.slice(0, 20).map(event => {
+                const severityColors = {
+                    critical: 'bg-red-100 text-red-800 border-red-300',
+                    high: 'bg-orange-100 text-orange-800 border-orange-300',
+                    medium: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                    low: 'bg-green-100 text-green-800 border-green-300'
+                };
+
+                const color = severityColors[event.severity] || 'bg-gray-100 text-gray-800 border-gray-300';
+                const timestamp = new Date(event.timestamp).toLocaleString();
+
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full border ${color}">
+                                        ${event.severity.toUpperCase()}
+                                    </span>
+                                    <span class="text-sm text-gray-500">${timestamp}</span>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-1">${event.policyName}</h3>
+                                <p class="text-sm text-gray-600">Agent: <span class="font-medium">${event.agentName}</span></p>
+                                <p class="text-sm text-gray-600">Policy ID: <span class="font-mono text-xs">${event.policyId}</span></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-sm text-gray-700">Event Type: <span class="font-medium">${event.event.type || 'N/A'}</span></p>
+                            ${event.actions && event.actions.length > 0 ? `
+                                <p class="text-sm text-gray-700">Actions: ${event.actions.map(a => a.type).join(', ')}</p>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Connect to WebSocket
+        function connectWebSocket() {
+            try {
+                socket = io(API_URL);
+
+                socket.on('connect', () => {
+                    console.log('WebSocket connected');
+                    document.getElementById('connectionDot').className = 'w-3 h-3 rounded-full bg-green-500 animate-pulse';
+                    document.getElementById('connectionStatus').textContent = 'Live';
+                    document.getElementById('connectionStatus').className = 'text-lg font-semibold text-green-600';
+                    document.getElementById('status').textContent = 'Connected';
+                    document.getElementById('status').className = 'font-semibold text-green-600';
+                });
+
+                socket.on('disconnect', () => {
+                    console.log('WebSocket disconnected');
+                    document.getElementById('connectionDot').className = 'w-3 h-3 rounded-full bg-red-500';
+                    document.getElementById('connectionStatus').textContent = 'Disconnected';
+                    document.getElementById('connectionStatus').className = 'text-lg font-semibold text-red-600';
+                });
+
+                socket.on('enforcement:event', (event) => {
+                    console.log('New event received:', event);
+                    events.unshift(event);
+                    events = events.slice(0, 100);
+                    updateStats();
+                    renderEvents();
+                });
+
+            } catch (error) {
+                console.error('WebSocket connection error:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            connectWebSocket();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: iacdharma-prod
+
+namePrefix: prod-
+
+commonLabels:
+  environment: production
+
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - deployment-patches.yaml
+  - ingress-patch.yaml
+  - resource-quotas.yaml
+
+replicas:
+  - name: api-gateway
+    count: 3
+  - name: blueprint-service
+    count: 3
+  - name: frontend
+    count: 5
+  - name: postgres
+    count: 1  # Consider external managed database in production
+  - name: redis
+    count: 1  # Consider Redis cluster/managed service
+
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - ENABLE_DEBUG=false
+      - ENABLE_METRICS=true
+      - ENABLE_TRACING=true
+
+images:
+  - name: ghcr.io/OWNER/iacdharma-api-gateway
+    newTag: v1.0.0
+  - name: ghcr.io/OWNER/iacdharma-frontend
+    newTag: v1.0.0

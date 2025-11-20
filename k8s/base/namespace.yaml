@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iacdharma
+  labels:
+    name: iacdharma
+    environment: base
+    app: iac-dharma-platform

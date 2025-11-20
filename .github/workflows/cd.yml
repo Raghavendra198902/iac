@@ -1,0 +1,326 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+      version:
+        description: 'Version tag (leave empty for latest)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/iacdharma
+
+jobs:
+  # Build and push Docker images
+  build-and-push:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - blueprint-service
+          - iac-generator
+          - guardrails
+          - costing-service
+          - orchestrator
+          - automation-engine
+          - monitoring-service
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/${{ matrix.service }}
+          file: ./backend/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+  # Deploy to development environment
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'dev'
+    environment:
+      name: development
+      url: https://dev.iacdharma.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DEV }}" | base64 -d > ~/.kube/config
+      
+      - name: Deploy to Kubernetes
+        run: |
+          # Update image tags in manifests
+          cd k8s/overlays/dev
+          
+          # Apply configurations
+          kubectl apply -k .
+          
+          # Wait for rollout
+          kubectl rollout status deployment/api-gateway -n dev --timeout=5m
+          kubectl rollout status deployment/blueprint-service -n dev --timeout=5m
+      
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n dev
+          kubectl get services -n dev
+      
+      - name: Run smoke tests
+        run: |
+          # Wait for services to be ready
+          sleep 30
+          
+          # Basic health check
+          curl -f https://dev.iacdharma.com/health || exit 1
+          echo "✅ Dev deployment successful!"
+      
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "Deployment to Development: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Status:* ${{ job.status }}\n*Environment:* Development\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Deploy to staging environment
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-dev]
+    if: github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.iacdharma.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > ~/.kube/config
+      
+      - name: Deploy to Kubernetes
+        run: |
+          cd k8s/overlays/staging
+          kubectl apply -k .
+          kubectl rollout status deployment/api-gateway -n staging --timeout=10m
+      
+      - name: Run integration tests
+        run: |
+          sleep 60
+          cd tests/integration
+          API_BASE_URL=https://staging.iacdharma.com npm test
+      
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "Deployment to Staging: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Status:* ${{ job.status }}\n*Environment:* Staging\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Deploy to production environment
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging]
+    if: github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://iacdharma.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > ~/.kube/config
+      
+      - name: Create backup before deployment
+        run: |
+          echo "Creating database backup..."
+          # Backup command here
+          kubectl exec -n production deployment/postgres -- pg_dump -U iacdharma iacdharma > backup-pre-deploy.sql
+      
+      - name: Deploy to Kubernetes (Blue-Green)
+        run: |
+          cd k8s/overlays/production
+          
+          # Deploy green version
+          kubectl apply -k . --selector=deployment-slot=green
+          
+          # Wait for green to be ready
+          kubectl rollout status deployment/api-gateway-green -n production --timeout=15m
+          
+          # Run health checks on green
+          GREEN_URL=$(kubectl get svc api-gateway-green -n production -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          curl -f http://$GREEN_URL/health || exit 1
+          
+          # Switch traffic to green
+          kubectl patch service api-gateway -n production -p '{"spec":{"selector":{"deployment-slot":"green"}}}'
+          
+          # Wait and verify
+          sleep 60
+          
+          # Delete blue version
+          kubectl delete deployment -n production --selector=deployment-slot=blue
+      
+      - name: Run production smoke tests
+        run: |
+          sleep 30
+          curl -f https://iacdharma.com/health || exit 1
+          curl -f https://iacdharma.com/api || exit 1
+          echo "✅ Production deployment successful!"
+      
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 PRODUCTION DEPLOYMENT: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Status:* ${{ job.status }}\n*Environment:* PRODUCTION\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}\n*URL:* https://iacdharma.com"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      
+      - name: Create GitHub Release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            Production deployment successful!
+            
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            Deployment time: ${{ github.event.head_commit.timestamp }}
+          draft: false
+          prerelease: false
+
+  # Rollback capability
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: failure()
+    
+    steps:
+      - name: Rollback to previous version
+        run: |
+          echo "Rolling back deployment..."
+          # Implement rollback logic here
+          kubectl rollout undo deployment/api-gateway -n ${{ github.event.inputs.environment }}
+          
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "⚠️ ROLLBACK INITIATED",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Rollback Status:* Initiated\n*Environment:* ${{ github.event.inputs.environment }}\n*Reason:* Deployment failure\n*Commit:* ${{ github.sha }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

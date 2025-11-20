@@ -1,0 +1,210 @@
+# Alert Rules for IAC DHARMA Platform
+
+groups:
+  - name: service_availability
+    interval: 30s
+    rules:
+      # Service down alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute."
+
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          category: reliability
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Service {{ $labels.service }} has error rate above 5% for the last 5 minutes."
+
+  - name: performance
+    interval: 30s
+    rules:
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High response time on {{ $labels.service }}"
+          description: "95th percentile response time for {{ $labels.service }} is above 2 seconds."
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: process_cpu_seconds_total > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High CPU usage on {{ $labels.service }}"
+          description: "Service {{ $labels.service }} CPU usage is above 80% for 10 minutes."
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1073741824 > 2
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "Service {{ $labels.service }} memory usage is above 2GB for 10 minutes."
+
+  - name: database
+    interval: 30s
+    rules:
+      # PostgreSQL down
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute."
+
+      # High database connections
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "High number of database connections"
+          description: "PostgreSQL has more than 80 active connections for 5 minutes."
+
+      # Redis down
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been down for more than 1 minute."
+
+      # High Redis memory usage
+      - alert: HighRedisMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is above 80% for 5 minutes."
+
+  - name: cost_management
+    interval: 60s
+    rules:
+      # Budget threshold exceeded
+      - alert: BudgetThresholdExceeded
+        expr: monthly_cost_estimate > 20000 * 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: cost
+        annotations:
+          summary: "Monthly budget threshold exceeded"
+          description: "Current month's estimated cost has exceeded 80% of the $20,000 budget."
+
+      # High cost increase rate
+      - alert: HighCostIncreaseRate
+        expr: rate(monthly_cost_estimate[1h]) > 500
+        for: 30m
+        labels:
+          severity: warning
+          category: cost
+        annotations:
+          summary: "Rapid cost increase detected"
+          description: "Monthly cost is increasing at a rate of more than $500/hour."
+
+  - name: security
+    interval: 60s
+    rules:
+      # High risk score
+      - alert: HighRiskScore
+        expr: blueprint_risk_score > 70
+        for: 5m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "High risk score detected"
+          description: "Blueprint has a risk score above 70, indicating critical security concerns."
+
+      # Failed authentication attempts
+      - alert: HighFailedAuthRate
+        expr: rate(auth_failures_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High rate of failed authentication attempts"
+          description: "More than 10 failed authentication attempts per second for 5 minutes."
+
+  - name: deployment
+    interval: 30s
+    rules:
+      # Deployment failure
+      - alert: DeploymentFailed
+        expr: deployment_status{status="failed"} > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: deployment
+        annotations:
+          summary: "Deployment failed for {{ $labels.blueprint_id }}"
+          description: "Deployment {{ $labels.deployment_id }} has failed."
+
+      # Long running deployment
+      - alert: LongRunningDeployment
+        expr: deployment_duration_seconds > 1800
+        for: 5m
+        labels:
+          severity: warning
+          category: deployment
+        annotations:
+          summary: "Deployment taking too long"
+          description: "Deployment {{ $labels.deployment_id }} has been running for more than 30 minutes."
+
+  - name: drift_detection
+    interval: 60s
+    rules:
+      # Infrastructure drift detected
+      - alert: InfrastructureDrift
+        expr: drift_detected > 0
+        for: 5m
+        labels:
+          severity: warning
+          category: compliance
+        annotations:
+          summary: "Infrastructure drift detected"
+          description: "Drift detected in deployment {{ $labels.deployment_id }}. {{ $labels.drift_count }} resources have drifted."
+
+      # Critical drift
+      - alert: CriticalDrift
+        expr: drift_severity == "critical"
+        for: 1m
+        labels:
+          severity: critical
+          category: compliance
+        annotations:
+          summary: "Critical infrastructure drift"
+          description: "Critical drift detected in deployment {{ $labels.deployment_id }}. Immediate attention required."

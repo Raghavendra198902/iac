@@ -1,0 +1,74 @@
+{
+  "appId": "com.cmdb.agent.installer",
+  "productName": "CMDB Agent Installer",
+  "directories": {
+    "output": "dist-packages",
+    "buildResources": "assets"
+  },
+  "files": [
+    "dist-installer/**/*",
+    "installer-ui/**/*",
+    "dist/cmdb-agent-win.exe",
+    "dist/cmdb-agent-linux",
+    "package.json"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "assets/icon.ico"
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64"]
+      },
+      {
+        "target": "deb",
+        "arch": ["x64"]
+      },
+      {
+        "target": "rpm",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "assets/icon.png",
+    "category": "System",
+    "maintainer": "IAC DHARMA <support@iac-dharma.com>"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "allowElevation": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "runAfterFinish": true,
+    "installerIcon": "assets/installer-icon.ico",
+    "uninstallerIcon": "assets/uninstaller-icon.ico",
+    "license": "LICENSE",
+    "warningsAsErrors": false
+  },
+  "mac": {
+    "target": ["dmg"],
+    "icon": "assets/icon.icns",
+    "category": "public.app-category.utilities"
+  },
+  "dmg": {
+    "contents": [
+      {
+        "x": 130,
+        "y": 220
+      },
+      {
+        "x": 410,
+        "y": 220,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ]
+  }
+}

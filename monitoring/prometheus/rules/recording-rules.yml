@@ -1,0 +1,146 @@
+# Prometheus Recording Rules for Dharma IAC Platform
+# Pre-calculate expensive queries for dashboard performance
+
+groups:
+  # Request Rate Rules
+  - name: request_rates
+    interval: 30s
+    rules:
+      - record: job:http_requests:rate5m
+        expr: rate(http_requests_total[5m])
+
+      - record: job:http_requests:rate1h
+        expr: rate(http_requests_total[1h])
+
+      - record: job:http_requests_success:rate5m
+        expr: rate(http_requests_total{status!~"5.."}[5m])
+
+      - record: job:http_requests_errors:rate5m
+        expr: rate(http_requests_total{status=~"5.."}[5m])
+
+      - record: job:http_requests_error_ratio:rate5m
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])
+
+  # Latency Rules
+  - name: latency
+    interval: 30s
+    rules:
+      - record: job:http_request_duration:p50
+        expr: histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))
+
+      - record: job:http_request_duration:p95
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+
+      - record: job:http_request_duration:p99
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
+
+      - record: job:http_request_duration:avg
+        expr: rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m])
+
+  # Resource Utilization Rules
+  - name: resource_utilization
+    interval: 30s
+    rules:
+      - record: pod:memory_usage:ratio
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes
+
+      - record: pod:cpu_usage:ratio
+        expr: rate(container_cpu_usage_seconds_total[5m])
+
+      - record: node:cpu_usage:avg
+        expr: 1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) by (node)
+
+      - record: node:memory_usage:ratio
+        expr: 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+
+  # Business Metrics Rules
+  - name: business_metrics
+    interval: 60s
+    rules:
+      - record: business:blueprints_created:rate1h
+        expr: rate(blueprints_created_total[1h])
+
+      - record: business:blueprints_created:total_24h
+        expr: increase(blueprints_created_total[24h])
+
+      - record: business:iac_generated:rate1h
+        expr: rate(iac_generation_total[1h])
+
+      - record: business:iac_generation_success_ratio:rate1h
+        expr: rate(iac_generation_success_total[1h]) / rate(iac_generation_total[1h])
+
+      - record: business:guardrails_violations:rate1h
+        expr: rate(guardrails_violations_total[1h])
+
+      - record: business:cost_estimates:avg_24h
+        expr: avg_over_time(cost_estimate_total[24h])
+
+  # SLI (Service Level Indicator) Rules
+  - name: sli
+    interval: 60s
+    rules:
+      - record: sli:api_availability:30m
+        expr: rate(http_requests_total{status!~"5.."}[30m]) / rate(http_requests_total[30m])
+
+      - record: sli:api_latency_p95:30m
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[30m]))
+
+      - record: sli:api_error_rate:30m
+        expr: rate(http_requests_total{status=~"5.."}[30m]) / rate(http_requests_total[30m])
+
+      - record: sli:database_availability:5m
+        expr: up{job="postgres"}
+
+      - record: sli:cache_availability:5m
+        expr: up{job="redis"}
+
+  # Service-Specific Rules
+  - name: service_metrics
+    interval: 30s
+    rules:
+      # API Gateway
+      - record: service:api_gateway:request_rate:5m
+        expr: rate(http_requests_total{job="api-gateway"}[5m])
+
+      - record: service:api_gateway:error_rate:5m
+        expr: rate(http_requests_total{job="api-gateway",status=~"5.."}[5m]) / rate(http_requests_total{job="api-gateway"}[5m])
+
+      # Blueprint Service
+      - record: service:blueprint:creation_rate:1h
+        expr: rate(blueprints_created_total[1h])
+
+      - record: service:blueprint:validation_time:avg
+        expr: rate(blueprint_validation_duration_seconds_sum[5m]) / rate(blueprint_validation_duration_seconds_count[5m])
+
+      # IAC Generator
+      - record: service:iac_generator:generation_rate:1h
+        expr: rate(iac_generation_total[1h])
+
+      - record: service:iac_generator:success_ratio:1h
+        expr: rate(iac_generation_success_total[1h]) / rate(iac_generation_total[1h])
+
+      # Guardrails Engine
+      - record: service:guardrails:check_rate:1h
+        expr: rate(guardrails_checks_total[1h])
+
+      - record: service:guardrails:violation_ratio:1h
+        expr: rate(guardrails_violations_total[1h]) / rate(guardrails_checks_total[1h])
+
+  # Aggregated Metrics
+  - name: aggregated
+    interval: 60s
+    rules:
+      - record: platform:total_requests:rate5m
+        expr: sum(rate(http_requests_total[5m]))
+
+      - record: platform:total_errors:rate5m
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m]))
+
+      - record: platform:avg_latency:p95
+        expr: avg(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])))
+
+      - record: platform:total_memory_usage:bytes
+        expr: sum(container_memory_usage_bytes{namespace="dharma"})
+
+      - record: platform:total_cpu_usage:cores
+        expr: sum(rate(container_cpu_usage_seconds_total{namespace="dharma"}[5m]))

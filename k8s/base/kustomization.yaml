@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: iacdharma
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secrets.yaml
+  - postgres.yaml
+  - redis.yaml
+  - api-gateway.yaml
+  - blueprint-service.yaml
+  - backend-services.yaml
+  - frontend.yaml
+  - ingress.yaml
+
+commonLabels:
+  app.kubernetes.io/name: iac-dharma-platform
+  app.kubernetes.io/version: "1.0.0"
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: ghcr.io/OWNER/iacdharma-api-gateway
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-blueprint-service
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-iac-generator
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-guardrails
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-costing-service
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-orchestrator
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-automation-engine
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-monitoring-service
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-ai-engine
+    newTag: latest
+  - name: ghcr.io/OWNER/iacdharma-frontend
+    newTag: latest

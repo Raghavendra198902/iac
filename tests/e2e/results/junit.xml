@@ -1,0 +1,794 @@
+<testsuites id="" name="" tests="35" failures="16" skipped="16" errors="0" time="143.529211">
+<testsuite name="test-ai-designer.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="4" failures="4" skipped="0" time="117.619" errors="0">
+<testcase name="AI Designer E2E Tests › TC101: Generate simple infrastructure (single VM)" classname="test-ai-designer.spec.ts" time="9.266">
+<failure message="test-ai-designer.spec.ts:23:7 TC101: Generate simple infrastructure (single VM)" type="FAILURE">
+<![CDATA[  [chromium] › test-ai-designer.spec.ts:23:7 › AI Designer E2E Tests › TC101: Generate simple infrastructure (single VM) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('textarea[name="prompt"], [data-testid="ai-prompt"], input[placeholder*="describe"]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('textarea[name="prompt"], [data-testid="ai-prompt"], input[placeholder*="describe"]')
+
+
+      28 |     // Find AI prompt input
+      29 |     const promptInput = page.locator('textarea[name="prompt"], [data-testid="ai-prompt"], input[placeholder*="describe"]');
+    > 30 |     await expect(promptInput).toBeVisible({ timeout: 5000 });
+         |                               ^
+      31 |
+      32 |     // Enter simple prompt
+      33 |     await promptInput.fill('Create a single virtual machine for development');
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-ai-designer.spec.ts:30:31
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Design-0b27b-e-infrastructure-single-VM--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Design-0b27b-e-infrastructure-single-VM--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Design-0b27b-e-infrastructure-single-VM--chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Design-0b27b-e-infrastructure-single-VM--chromium/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="AI Designer E2E Tests › TC102: Generate complex multi-tier architecture" classname="test-ai-designer.spec.ts" time="35.217">
+<failure message="test-ai-designer.spec.ts:61:7 TC102: Generate complex multi-tier architecture" type="FAILURE">
+<![CDATA[  [chromium] › test-ai-designer.spec.ts:61:7 › AI Designer E2E Tests › TC102: Generate complex multi-tier architecture 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('textarea[name="prompt"], [data-testid="ai-prompt"]')
+
+
+      66 |     // Enter complex prompt
+      67 |     const promptInput = page.locator('textarea[name="prompt"], [data-testid="ai-prompt"]');
+    > 68 |     await promptInput.fill('Create a three-tier web application with load balancer, auto-scaling web servers, application servers, and a database cluster with read replicas');
+         |                       ^
+      69 |
+      70 |     // Select cloud provider
+      71 |     const providerSelect = page.locator('select[name="cloudProvider"]');
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-ai-designer.spec.ts:68:23
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Design-e6ac7-lex-multi-tier-architecture-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Design-e6ac7-lex-multi-tier-architecture-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Design-e6ac7-lex-multi-tier-architecture-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Design-e6ac7-lex-multi-tier-architecture-chromium/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="AI Designer E2E Tests › TC103: Edit generated blueprint" classname="test-ai-designer.spec.ts" time="34.696">
+<failure message="test-ai-designer.spec.ts:92:7 TC103: Edit generated blueprint" type="FAILURE">
+<![CDATA[  [chromium] › test-ai-designer.spec.ts:92:7 › AI Designer E2E Tests › TC103: Edit generated blueprint 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('textarea[name="prompt"], [data-testid="ai-prompt"]')
+
+
+       96 |
+       97 |     const promptInput = page.locator('textarea[name="prompt"], [data-testid="ai-prompt"]');
+    >  98 |     await promptInput.fill('Create a simple web server with database');
+          |                       ^
+       99 |     
+      100 |     await page.click('button:has-text("Generate")');
+      101 |     await page.waitForTimeout(5000);
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-ai-designer.spec.ts:98:23
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Design-000e9-03-Edit-generated-blueprint-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Design-000e9-03-Edit-generated-blueprint-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Design-000e9-03-Edit-generated-blueprint-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Design-000e9-03-Edit-generated-blueprint-chromium/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="AI Designer E2E Tests › TC104: Save blueprint" classname="test-ai-designer.spec.ts" time="38.44">
+<failure message="test-ai-designer.spec.ts:132:7 TC104: Save blueprint" type="FAILURE">
+<![CDATA[  [chromium] › test-ai-designer.spec.ts:132:7 › AI Designer E2E Tests › TC104: Save blueprint ──────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('textarea[name="prompt"], [data-testid="ai-prompt"]')
+
+
+      136 |
+      137 |     const promptInput = page.locator('textarea[name="prompt"], [data-testid="ai-prompt"]');
+    > 138 |     await promptInput.fill('Create a containerized application with Kubernetes cluster');
+          |                       ^
+      139 |     
+      140 |     await page.click('button:has-text("Generate")');
+      141 |     await page.waitForTimeout(5000);
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-ai-designer.spec.ts:138:23
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Designer-E2E-Tests-TC104-Save-blueprint-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-ai-designer-AI-Designer-E2E-Tests-TC104-Save-blueprint-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Designer-E2E-Tests-TC104-Save-blueprint-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-ai-designer-AI-Designer-E2E-Tests-TC104-Save-blueprint-chromium/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="test-auth.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="5" failures="5" skipped="0" time="58.121" errors="0">
+<testcase name="Authentication E2E Tests › TC002: Successful Login with valid credentials" classname="test-auth.spec.ts" time="3.949">
+<failure message="test-auth.spec.ts:27:7 TC002: Successful Login with valid credentials" type="FAILURE">
+<![CDATA[  [chromium] › test-auth.spec.ts:27:7 › Authentication E2E Tests › TC002: Successful Login with valid credentials 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      40 |     // Verify user is logged in - check for user menu or user info display
+      41 |     const userMenuVisible = await page.locator('button:has-text("Admin User"), .user-menu, [data-testid="user-menu"]').isVisible();
+    > 42 |     expect(userMenuVisible).toBeTruthy();
+         |                             ^
+      43 |
+      44 |     // Verify email appears somewhere (user menu, header, profile)
+      45 |     const emailVisible = await page.locator(`text=${TEST_USER.email}`).isVisible();
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-auth.spec.ts:42:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-9d006-ogin-with-valid-credentials-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-9d006-ogin-with-valid-credentials-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-auth-Authentication-E-9d006-ogin-with-valid-credentials-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-9d006-ogin-with-valid-credentials-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-9d006-ogin-with-valid-credentials-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-9d006-ogin-with-valid-credentials-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication E2E Tests › TC003: Failed Login with invalid credentials" classname="test-auth.spec.ts" time="6.249">
+<failure message="test-auth.spec.ts:49:7 TC003: Failed Login with invalid credentials" type="FAILURE">
+<![CDATA[  [chromium] › test-auth.spec.ts:49:7 › Authentication E2E Tests › TC003: Failed Login with invalid credentials 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      65 |     
+      66 |     // For mock authentication, either shows error or stays on login
+    > 67 |     expect(errorVisible || stillOnLogin).toBeTruthy();
+         |                                          ^
+      68 |   });
+      69 |
+      70 |   test('TC004: Session Persistence after page refresh', async ({ page }) => {
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-auth.spec.ts:67:42
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-cfb87-in-with-invalid-credentials-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-cfb87-in-with-invalid-credentials-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-auth-Authentication-E-cfb87-in-with-invalid-credentials-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-cfb87-in-with-invalid-credentials-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-cfb87-in-with-invalid-credentials-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-cfb87-in-with-invalid-credentials-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication E2E Tests › TC004: Session Persistence after page refresh" classname="test-auth.spec.ts" time="5.808">
+<failure message="test-auth.spec.ts:70:7 TC004: Session Persistence after page refresh" type="FAILURE">
+<![CDATA[  [chromium] › test-auth.spec.ts:70:7 › Authentication E2E Tests › TC004: Session Persistence after page refresh 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      82 |     // Verify user is still logged in after refresh
+      83 |     const userMenuVisible = await page.locator('.user-menu, [data-testid="user-menu"], button:has-text("Logout")').isVisible();
+    > 84 |     expect(userMenuVisible).toBeTruthy();
+         |                             ^
+      85 |
+      86 |     // Should not be redirected to login page
+      87 |     const currentUrl = page.url();
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-auth.spec.ts:84:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-69ffa-sistence-after-page-refresh-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-69ffa-sistence-after-page-refresh-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-auth-Authentication-E-69ffa-sistence-after-page-refresh-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-69ffa-sistence-after-page-refresh-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-69ffa-sistence-after-page-refresh-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-69ffa-sistence-after-page-refresh-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication E2E Tests › TC005: Logout Flow and session clear" classname="test-auth.spec.ts" time="37.639">
+<failure message="test-auth.spec.ts:91:7 TC005: Logout Flow and session clear" type="FAILURE">
+<![CDATA[  [chromium] › test-auth.spec.ts:91:7 › Authentication E2E Tests › TC005: Logout Flow and session clear 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('button:has-text("Logout"), a:has-text("Logout"), [data-testid="logout"]')
+
+
+      104 |     // Find and click logout button
+      105 |     const logoutButton = page.locator('button:has-text("Logout"), a:has-text("Logout"), [data-testid="logout"]');
+    > 106 |     await logoutButton.click();
+          |                        ^
+      107 |
+      108 |     // Wait for redirect to login or home page
+      109 |     await page.waitForTimeout(2000);
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-auth.spec.ts:106:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-7089d-gout-Flow-and-session-clear-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-7089d-gout-Flow-and-session-clear-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-auth-Authentication-E-7089d-gout-Flow-and-session-clear-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-7089d-gout-Flow-and-session-clear-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-7089d-gout-Flow-and-session-clear-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-7089d-gout-Flow-and-session-clear-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication E2E Tests › TC002-Extended: Login form validation" classname="test-auth.spec.ts" time="4.476">
+<failure message="test-auth.spec.ts:127:7 TC002-Extended: Login form validation" type="FAILURE">
+<![CDATA[  [chromium] › test-auth.spec.ts:127:7 › Authentication E2E Tests › TC002-Extended: Login form validation 
+
+    Error: locator.isVisible: SyntaxError: Invalid flags supplied to RegExp constructor 'i, button[disabled]'
+        at new RegExp (<anonymous>)
+        at createTextMatcher (<anonymous>:7786:16)
+        at Object.queryAll (<anonymous>:6691:33)
+        at InjectedScript._queryEngineAll (<anonymous>:6664:49)
+        at InjectedScript.querySelectorAll (<anonymous>:6651:30)
+        at InjectedScript.querySelector (<anonymous>:6576:25)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:34)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+    Call log:
+        - checking visibility of locator('text=/required|fill|enter/i, button[disabled]')
+
+        at createTextMatcher (<anonymous>:7786:16)
+        at Object.queryAll (<anonymous>:6691:33)
+        at InjectedScript._queryEngineAll (<anonymous>:6664:49)
+        at InjectedScript.querySelectorAll (<anonymous>:6651:30)
+        at InjectedScript.querySelector (<anonymous>:6576:25)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:34)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-auth.spec.ts:139:97
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-eafd7-ended-Login-form-validation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-auth-Authentication-E-eafd7-ended-Login-form-validation-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-auth-Authentication-E-eafd7-ended-Login-form-validation-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-eafd7-ended-Login-form-validation-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-eafd7-ended-Login-form-validation-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-auth-Authentication-E-eafd7-ended-Login-form-validation-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="test-blueprints.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="6" failures="2" skipped="4" time="32.951" errors="0">
+<testcase name="Blueprint Management E2E Tests › TC201: View blueprints list with pagination" classname="test-blueprints.spec.ts" time="9.212">
+<failure message="test-blueprints.spec.ts:26:7 TC201: View blueprints list with pagination" type="FAILURE">
+<![CDATA[  [chromium] › test-blueprints.spec.ts:26:7 › Blueprint Management E2E Tests › TC201: View blueprints list with pagination 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-testid="blueprints-list"], .blueprints-list, table, .grid')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-testid="blueprints-list"], .blueprints-list, table, .grid')
+
+
+      34 |     // Check for blueprints table/grid
+      35 |     const blueprintsContainer = page.locator('[data-testid="blueprints-list"], .blueprints-list, table, .grid');
+    > 36 |     await expect(blueprintsContainer).toBeVisible({ timeout: 5000 });
+         |                                       ^
+      37 |
+      38 |     // Check for pagination controls if more than 10 items
+      39 |     const paginationVisible = await page.locator('[data-testid="pagination"], .pagination, button:has-text("Next"), button:has-text("Previous")').isVisible();
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-blueprints.spec.ts:36:39
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-blueprints-Blueprint--79a70-prints-list-with-pagination-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-blueprints-Blueprint--79a70-prints-list-with-pagination-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-blueprints-Blueprint--79a70-prints-list-with-pagination-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-blueprints-Blueprint--79a70-prints-list-with-pagination-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-blueprints-Blueprint--79a70-prints-list-with-pagination-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-blueprints-Blueprint--79a70-prints-list-with-pagination-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Blueprint Management E2E Tests › TC202: Create manual blueprint" classname="test-blueprints.spec.ts" time="8.7">
+<failure message="test-blueprints.spec.ts:47:7 TC202: Create manual blueprint" type="FAILURE">
+<![CDATA[  [chromium] › test-blueprints.spec.ts:47:7 › Blueprint Management E2E Tests › TC202: Create manual blueprint 
+
+    TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.
+    Call log:
+      - waiting for locator('input[name="name"], input[id="name"], [data-testid="blueprint-name"]') to be visible
+
+
+      51 |     
+      52 |     // Wait for form
+    > 53 |     await page.waitForSelector('input[name="name"], input[id="name"], [data-testid="blueprint-name"]', { timeout: 5000 });
+         |                ^
+      54 |
+      55 |     // Fill blueprint form
+      56 |     await page.fill('input[name="name"], [data-testid="blueprint-name"]', 'E2E Test Blueprint');
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-blueprints.spec.ts:53:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-blueprints-Blueprint--a8062-202-Create-manual-blueprint-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-blueprints-Blueprint--a8062-202-Create-manual-blueprint-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-blueprints-Blueprint--a8062-202-Create-manual-blueprint-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-blueprints-Blueprint--a8062-202-Create-manual-blueprint-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-blueprints-Blueprint--a8062-202-Create-manual-blueprint-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-blueprints-Blueprint--a8062-202-Create-manual-blueprint-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Blueprint Management E2E Tests › TC203: View blueprint details" classname="test-blueprints.spec.ts" time="3.548">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Blueprint Management E2E Tests › TC204: Edit blueprint" classname="test-blueprints.spec.ts" time="4.98">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Blueprint Management E2E Tests › TC205: Delete blueprint" classname="test-blueprints.spec.ts" time="2.632">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Blueprint Management E2E Tests › TC206: Blueprint versioning" classname="test-blueprints.spec.ts" time="3.879">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="test-cost-optimization.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="3" failures="2" skipped="1" time="15.017" errors="0">
+<testcase name="Cost Optimization E2E Tests › TC501: View cost optimization recommendations" classname="test-cost-optimization.spec.ts" time="4.855">
+<failure message="test-cost-optimization.spec.ts:23:7 TC501: View cost optimization recommendations" type="FAILURE">
+<![CDATA[  [chromium] › test-cost-optimization.spec.ts:23:7 › Cost Optimization E2E Tests › TC501: View cost optimization recommendations 
+
+    Error: locator.isVisible: Error: strict mode violation: locator('h1:has-text("Cost"), h2:has-text("Cost")') resolved to 2 elements:
+        1) <h1 class="text-2xl font-bold text-gray-900">Cost Management</h1> aka getByRole('heading', { name: 'Cost Management' })
+        2) <h2 class="text-lg font-semibold text-gray-900 mb-4">Cost Optimization Recommendations</h2> aka getByRole('heading', { name: 'Cost Optimization' })
+
+    Call log:
+        - checking visibility of locator('h1:has-text("Cost"), h2:has-text("Cost")')
+
+
+      27 |
+      28 |     // Alternative: cost tab in blueprint
+    > 29 |     if (!(await page.locator('h1:has-text("Cost"), h2:has-text("Cost")').isVisible())) {
+         |                                                                          ^
+      30 |       await page.goto(`${BASE_URL}/blueprints`);
+      31 |       await page.waitForLoadState('networkidle');
+      32 |
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-cost-optimization.spec.ts:29:74
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-cost-optimization-Cos-4d961-ptimization-recommendations-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-cost-optimization-Cos-4d961-ptimization-recommendations-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-cost-optimization-Cos-4d961-ptimization-recommendations-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-cost-optimization-Cos-4d961-ptimization-recommendations-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-cost-optimization-Cos-4d961-ptimization-recommendations-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-cost-optimization-Cos-4d961-ptimization-recommendations-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cost Optimization E2E Tests › TC502: Apply cost optimization" classname="test-cost-optimization.spec.ts" time="4.406">
+<failure message="test-cost-optimization.spec.ts:85:7 TC502: Apply cost optimization" type="FAILURE">
+<![CDATA[  [chromium] › test-cost-optimization.spec.ts:85:7 › Cost Optimization E2E Tests › TC502: Apply cost optimization 
+
+    Error: locator.isVisible: Error: strict mode violation: locator('h1:has-text("Cost"), h2:has-text("Cost")') resolved to 2 elements:
+        1) <h1 class="text-2xl font-bold text-gray-900">Cost Management</h1> aka getByRole('heading', { name: 'Cost Management' })
+        2) <h2 class="text-lg font-semibold text-gray-900 mb-4">Cost Optimization Recommendations</h2> aka getByRole('heading', { name: 'Cost Optimization' })
+
+    Call log:
+        - checking visibility of locator('h1:has-text("Cost"), h2:has-text("Cost")')
+
+
+      89 |
+      90 |     // Via blueprint if direct navigation doesn't work
+    > 91 |     if (!(await page.locator('h1:has-text("Cost"), h2:has-text("Cost")').isVisible())) {
+         |                                                                          ^
+      92 |       await page.goto(`${BASE_URL}/blueprints`);
+      93 |       const firstBlueprint = page.locator('[data-testid="blueprint-item"], .blueprint-card, tr').first();
+      94 |       
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-cost-optimization.spec.ts:91:74
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-cost-optimization-Cos-eff37-502-Apply-cost-optimization-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-cost-optimization-Cos-eff37-502-Apply-cost-optimization-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-cost-optimization-Cos-eff37-502-Apply-cost-optimization-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-cost-optimization-Cos-eff37-502-Apply-cost-optimization-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-cost-optimization-Cos-eff37-502-Apply-cost-optimization-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-cost-optimization-Cos-eff37-502-Apply-cost-optimization-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cost Optimization E2E Tests › TC503: Compare cost scenarios" classname="test-cost-optimization.spec.ts" time="5.756">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="test-error-handling.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="4" failures="0" skipped="1" time="21.059" errors="0">
+<testcase name="Error Handling &amp; Edge Cases E2E Tests › TC701: Handle network errors" classname="test-error-handling.spec.ts" time="5.313">
+</testcase>
+<testcase name="Error Handling &amp; Edge Cases E2E Tests › TC702: Handle API timeouts" classname="test-error-handling.spec.ts" time="5.454">
+</testcase>
+<testcase name="Error Handling &amp; Edge Cases E2E Tests › TC703: Invalid form submissions" classname="test-error-handling.spec.ts" time="5.286">
+</testcase>
+<testcase name="Error Handling &amp; Edge Cases E2E Tests › TC704: Concurrent edit conflicts" classname="test-error-handling.spec.ts" time="5.006">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="test-monitoring.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="3" failures="1" skipped="2" time="42.812" errors="0">
+<testcase name="Monitoring &amp; Drift Detection E2E Tests › TC601: View deployment metrics" classname="test-monitoring.spec.ts" time="31.234">
+<failure message="test-monitoring.spec.ts:23:7 TC601: View deployment metrics" type="FAILURE">
+<![CDATA[  [chromium] › test-monitoring.spec.ts:23:7 › Monitoring & Drift Detection E2E Tests › TC601: View deployment metrics 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="deployment-item"], .deployment-card, tr').first()
+
+
+      42 |
+      43 |     // Click on first deployment
+    > 44 |     await deploymentItem.first().click();
+         |                                  ^
+      45 |     await page.waitForTimeout(1000);
+      46 |
+      47 |     // Look for metrics tab
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-monitoring.spec.ts:44:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-monitoring-Monitoring-99c4d-601-View-deployment-metrics-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-monitoring-Monitoring-99c4d-601-View-deployment-metrics-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-monitoring-Monitoring-99c4d-601-View-deployment-metrics-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-monitoring-Monitoring-99c4d-601-View-deployment-metrics-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-monitoring-Monitoring-99c4d-601-View-deployment-metrics-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-monitoring-Monitoring-99c4d-601-View-deployment-metrics-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Monitoring &amp; Drift Detection E2E Tests › TC602: Drift detection" classname="test-monitoring.spec.ts" time="5.44">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Monitoring &amp; Drift Detection E2E Tests › TC603: Alert configuration" classname="test-monitoring.spec.ts" time="6.138">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="test-provisioning.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="7" failures="1" skipped="6" time="32.828" errors="0">
+<testcase name="Provisioning Workflow E2E Tests › TC301: Run guardrails check" classname="test-provisioning.spec.ts" time="5.204">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Provisioning Workflow E2E Tests › TC302: Generate Terraform code" classname="test-provisioning.spec.ts" time="4.477">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Provisioning Workflow E2E Tests › TC303: Generate Bicep code" classname="test-provisioning.spec.ts" time="3.982">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Provisioning Workflow E2E Tests › TC304: Validate generated IaC" classname="test-provisioning.spec.ts" time="4.548">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Provisioning Workflow E2E Tests › TC305: Estimate costs" classname="test-provisioning.spec.ts" time="4.662">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Provisioning Workflow E2E Tests › TC306: Create deployment (dry run)" classname="test-provisioning.spec.ts" time="4.534">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Provisioning Workflow E2E Tests › TC307: View deployment history" classname="test-provisioning.spec.ts" time="5.421">
+<failure message="test-provisioning.spec.ts:246:7 TC307: View deployment history" type="FAILURE">
+<![CDATA[  [chromium] › test-provisioning.spec.ts:246:7 › Provisioning Workflow E2E Tests › TC307: View deployment history 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      271 |     const showsEmptyState = await emptyState.isVisible();
+      272 |
+    > 273 |     expect(hasDeployments || showsEmptyState).toBeTruthy();
+          |                                               ^
+      274 |
+      275 |     // If deployments exist, check for status indicators
+      276 |     if (hasDeployments) {
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-provisioning.spec.ts:273:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-provisioning-Provisio-ef263-307-View-deployment-history-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-provisioning-Provisio-ef263-307-View-deployment-history-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-provisioning-Provisio-ef263-307-View-deployment-history-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-provisioning-Provisio-ef263-307-View-deployment-history-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-provisioning-Provisio-ef263-307-View-deployment-history-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-provisioning-Provisio-ef263-307-View-deployment-history-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="test-security.spec.ts" timestamp="2025-11-15T23:03:19.802Z" hostname="chromium" tests="3" failures="1" skipped="2" time="11.209" errors="0">
+<testcase name="Security Assessment E2E Tests › TC401: Run security risk assessment" classname="test-security.spec.ts" time="4.727">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Security Assessment E2E Tests › TC402: View risk heatmap" classname="test-security.spec.ts" time="3.071">
+<failure message="test-security.spec.ts:63:7 TC402: View risk heatmap" type="FAILURE">
+<![CDATA[  [chromium] › test-security.spec.ts:63:7 › Security Assessment E2E Tests › TC402: View risk heatmap 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      102 |       const riskMatrix = page.locator('.risk-table, table.matrix');
+      103 |       const matrixVisible = await riskMatrix.isVisible();
+    > 104 |       expect(matrixVisible).toBeTruthy();
+          |                             ^
+      105 |     } else {
+      106 |       expect(heatmapVisible).toBeTruthy();
+      107 |     }
+        at /home/rrd/Documents/Iac/tests/e2e/tests/test-security.spec.ts:104:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/test-security-Security-Ass-0951c-sts-TC402-View-risk-heatmap-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/test-security-Security-Ass-0951c-sts-TC402-View-risk-heatmap-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/test-security-Security-Ass-0951c-sts-TC402-View-risk-heatmap-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../test-results/test-security-Security-Ass-0951c-sts-TC402-View-risk-heatmap-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../test-results/test-security-Security-Ass-0951c-sts-TC402-View-risk-heatmap-chromium/video.webm]]
+
+[[ATTACHMENT|../test-results/test-security-Security-Ass-0951c-sts-TC402-View-risk-heatmap-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Security Assessment E2E Tests › TC403: Apply security recommendations" classname="test-security.spec.ts" time="3.411">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

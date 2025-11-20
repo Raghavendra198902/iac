@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.cover
+.pytest_cache/
+
+# Build outputs
+/dist
+/build
+*.js.map
+*.d.ts
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+.terraform.lock.hcl
+
+# Docker
+*.dockerfile
+
+# Kubernetes secrets
+*secret*.yaml
+*-secret.yaml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# ML Models (large files)
+*.h5
+*.pkl
+*.joblib
+*.model
+
+# Cloud credentials
+*credentials*.json
+*serviceaccount*.json
+*.pem
+*.key
+*.crt
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md

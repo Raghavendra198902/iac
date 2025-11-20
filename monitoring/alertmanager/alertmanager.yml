@@ -1,0 +1,229 @@
+# AlertManager Configuration for Dharma IAC Platform
+# Handles alert routing, grouping, and notifications
+
+global:
+  resolve_timeout: 5m
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  smtp_smarthost: '${SMTP_HOST}:587'
+  smtp_from: 'alerts@dharma.example.com'
+  smtp_auth_username: '${SMTP_USERNAME}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+# Templates for notification messages
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree for alert distribution
+route:
+  # Default receiver for all alerts
+  receiver: 'default'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'cluster', 'service']
+  
+  # Wait before sending first notification
+  group_wait: 30s
+  
+  # Wait before sending notification about new alerts
+  group_interval: 5m
+  
+  # Wait before re-sending notification
+  repeat_interval: 4h
+
+  # Child routes with specific handling
+  routes:
+    # Critical alerts - immediate PagerDuty + Slack
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      group_interval: 10m
+      repeat_interval: 1h
+      routes:
+        # Database issues - notify database team
+        - match:
+            category: database
+          receiver: 'database-team'
+          continue: true
+        
+        # Security issues - notify security team
+        - match:
+            category: security
+          receiver: 'security-team'
+          continue: true
+
+    # Warning alerts - Slack only
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 5m
+      group_interval: 30m
+      repeat_interval: 12h
+
+    # Infrastructure alerts
+    - match:
+        category: infrastructure
+      receiver: 'infrastructure-team'
+      group_wait: 1m
+      group_interval: 10m
+
+    # Business metrics alerts
+    - match:
+        category: business
+      receiver: 'business-alerts'
+      group_wait: 10m
+      group_interval: 1h
+      repeat_interval: 24h
+
+    # Performance degradation
+    - match:
+        category: performance
+      receiver: 'performance-alerts'
+      group_wait: 5m
+      group_interval: 15m
+
+# Inhibition rules - suppress certain alerts based on others
+inhibit_rules:
+  # Suppress warning if critical alert is firing for same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'service', 'instance']
+
+  # Suppress service alerts if service is down
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match_re:
+      alertname: '^(HighErrorRate|HighLatency|HighMemoryUsage)$'
+    equal: ['service']
+
+  # Suppress individual pod alerts if node is down
+  - source_match:
+      alertname: 'KubernetesNodeNotReady'
+    target_match_re:
+      alertname: '^(PodRestarting|HighMemoryUsage|HighCPUUsage)$'
+    equal: ['node']
+
+# Receivers - notification destinations
+receivers:
+  # Default receiver
+  - name: 'default'
+    slack_configs:
+      - channel: '#dharma-alerts'
+        title: 'Dharma IAC Platform Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
+        send_resolved: true
+
+  # Critical alerts - PagerDuty + Slack
+  - name: 'critical-alerts'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: '{{ .GroupLabels.alertname }}: {{ .GroupLabels.service }}'
+        details:
+          severity: '{{ .GroupLabels.severity }}'
+          summary: '{{ .CommonAnnotations.summary }}'
+          description: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    slack_configs:
+      - channel: '#dharma-critical'
+        color: 'danger'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |-
+          {{ range .Alerts }}
+          *Alert:* {{ .Labels.alertname }}
+          *Service:* {{ .Labels.service }}
+          *Severity:* {{ .Labels.severity }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.dashboard }}*Dashboard:* {{ .Annotations.dashboard }}{{ end }}
+          {{ end }}
+        send_resolved: true
+
+  # Warning alerts - Slack only
+  - name: 'warning-alerts'
+    slack_configs:
+      - channel: '#dharma-warnings'
+        color: 'warning'
+        title: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
+        text: |-
+          {{ range .Alerts }}
+          *Alert:* {{ .Labels.alertname }}
+          *Service:* {{ .Labels.service }}
+          *Summary:* {{ .Annotations.summary }}
+          {{ end }}
+        send_resolved: true
+
+  # Database team
+  - name: 'database-team'
+    email_configs:
+      - to: 'database-team@dharma.example.com'
+        headers:
+          Subject: '[Dharma Alert] Database Issue: {{ .GroupLabels.alertname }}'
+        html: |-
+          <h2>Database Alert</h2>
+          {{ range .Alerts }}
+          <p><strong>Alert:</strong> {{ .Labels.alertname }}</p>
+          <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+          <p><strong>Summary:</strong> {{ .Annotations.summary }}</p>
+          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+          <hr>
+          {{ end }}
+    slack_configs:
+      - channel: '#database-alerts'
+        color: 'danger'
+        title: '💾 Database Alert: {{ .GroupLabels.alertname }}'
+        send_resolved: true
+
+  # Security team
+  - name: 'security-team'
+    email_configs:
+      - to: 'security-team@dharma.example.com'
+        headers:
+          Subject: '[Dharma Security] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#security-alerts'
+        color: 'danger'
+        title: '🔒 Security Alert: {{ .GroupLabels.alertname }}'
+        send_resolved: true
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SECURITY_KEY}'
+        severity: 'critical'
+
+  # Infrastructure team
+  - name: 'infrastructure-team'
+    email_configs:
+      - to: 'infrastructure-team@dharma.example.com'
+        headers:
+          Subject: '[Dharma Infrastructure] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#infrastructure-alerts'
+        title: '🏗️ Infrastructure Alert: {{ .GroupLabels.alertname }}'
+        send_resolved: true
+
+  # Business alerts
+  - name: 'business-alerts'
+    slack_configs:
+      - channel: '#business-metrics'
+        color: 'warning'
+        title: '📊 Business Metric Alert: {{ .GroupLabels.alertname }}'
+        text: |-
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: true
+    email_configs:
+      - to: 'product-team@dharma.example.com'
+        headers:
+          Subject: '[Dharma Business] {{ .GroupLabels.alertname }}'
+
+  # Performance alerts
+  - name: 'performance-alerts'
+    slack_configs:
+      - channel: '#performance-alerts'
+        color: 'warning'
+        title: '⚡ Performance Alert: {{ .GroupLabels.alertname }}'
+        send_resolved: true

@@ -1,0 +1,278 @@
+name: IAC Dharma CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Security Scanning with Snyk
+  security-scan:
+    name: Security Scan (Snyk)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --all-projects
+
+      - name: Run Snyk Code Analysis
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: code test
+
+  # Backend Tests
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: security-scan
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - blueprint-service
+          - iac-generator
+          - guardrails-engine
+          - automation-engine
+          - monitoring-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./backend/${{ matrix.service }}
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ./backend/${{ matrix.service }}
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./backend/${{ matrix.service }}
+        run: npm test
+
+  # Frontend Tests
+  frontend-test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: security-scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm test
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+  # Database Migration Test
+  database-test:
+    name: Database Migration Test
+    runs-on: ubuntu-latest
+    needs: security-scan
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run database migrations
+        working-directory: ./database
+        run: |
+          psql -h localhost -U test_user -d test_db -f schemas/V001__core_schema.sql
+          psql -h localhost -U test_user -d test_db -f schemas/V002__blueprint_schema.sql
+
+  # Build Docker Images
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - blueprint-service
+          - iac-generator
+          - ai-engine
+          - guardrails-engine
+          - automation-engine
+          - monitoring-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/${{ matrix.service }}
+          push: true
+          tags: iacdharma/${{ matrix.service }}:${{ github.sha }},iacdharma/${{ matrix.service }}:latest
+          cache-from: type=registry,ref=iacdharma/${{ matrix.service }}:buildcache
+          cache-to: type=registry,ref=iacdharma/${{ matrix.service }}:buildcache,mode=max
+
+  # Test Automation Workflow
+  test-automation:
+    name: Test End-to-End Automation
+    runs-on: ubuntu-latest
+    needs: docker-build
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start automation services
+        run: |
+          docker-compose up -d automation-engine monitoring-service
+
+      - name: Wait for services to be ready
+        run: |
+          sleep 30
+          curl -f http://localhost:3006/health || exit 1
+          curl -f http://localhost:3007/health || exit 1
+
+      - name: Test automation workflow
+        run: |
+          curl -X POST http://localhost:3006/api/automation/start \
+            -H "Content-Type: application/json" \
+            -d '{"requirements": "Test deployment", "automationLevel": 2, "environment": "dev"}' \
+            -o /tmp/workflow-response.json
+          
+          WORKFLOW_ID=$(jq -r '.workflowId' /tmp/workflow-response.json)
+          echo "Testing workflow: $WORKFLOW_ID"
+          
+          # Poll workflow status (simplified test)
+          for i in {1..5}; do
+            curl -f http://localhost:3006/api/automation/status/$WORKFLOW_ID || exit 1
+            sleep 5
+          done
+
+      - name: Stop services
+        if: always()
+        run: docker-compose down
+
+  # Deploy to Development
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment:
+      name: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_DEV }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f deployment/kubernetes/dev/
+          kubectl rollout status deployment/api-gateway -n iac-dharma-dev
+          kubectl rollout status deployment/blueprint-service -n iac-dharma-dev
+
+  # Deploy to Production
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://app.iac-dharma.io
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_PROD }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f deployment/kubernetes/prod/
+          kubectl rollout status deployment/api-gateway -n iac-dharma-prod
+          kubectl rollout status deployment/blueprint-service -n iac-dharma-prod
+
+      - name: Run smoke tests
+        run: |
+          curl -f https://app.iac-dharma.io/health || exit 1

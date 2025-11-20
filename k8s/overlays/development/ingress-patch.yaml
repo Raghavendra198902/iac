@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: iacdharma-ingress
+spec:
+  tls:
+  - hosts:
+    - dev.iacdharma.com
+    - dev-api.iacdharma.com
+    secretName: iacdharma-dev-tls-cert
+  rules:
+  - host: dev.iacdharma.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  - host: dev-api.iacdharma.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway-service
+            port:
+              number: 3000

@@ -1,0 +1,74 @@
+{{ define "slack.default.title" }}
+[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.alertname }}
+{{ end }}
+
+{{ define "slack.default.text" }}
+{{ range .Alerts }}
+*Alert:* {{ .Labels.alertname }} - {{ .Labels.severity }}
+*Service:* {{ .Labels.service | default "N/A" }}
+*Environment:* {{ .Labels.environment | default "production" }}
+*Summary:* {{ .Annotations.summary }}
+*Description:* {{ .Annotations.description }}
+{{ if .Annotations.dashboard }}*Dashboard:* <{{ .Annotations.dashboard }}|View Dashboard>{{ end }}
+*Details:*
+{{ range .Labels.SortedPairs }}  • {{ .Name }}: {{ .Value }}
+{{ end }}
+{{ end }}
+{{ end }}
+
+{{ define "email.default.subject" }}
+[Dharma Alert] {{ .GroupLabels.alertname }} ({{ .Status }})
+{{ end }}
+
+{{ define "email.default.html" }}
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .critical { background-color: #ff4444; color: white; padding: 10px; }
+  .warning { background-color: #ffaa00; color: white; padding: 10px; }
+  .info { background-color: #4444ff; color: white; padding: 10px; }
+  .alert { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+  .label { font-weight: bold; }
+</style>
+</head>
+<body>
+<h1 class="{{ .GroupLabels.severity }}">Dharma IAC Platform Alert</h1>
+
+{{ range .Alerts }}
+<div class="alert">
+  <h2>{{ .Labels.alertname }}</h2>
+  <p><span class="label">Status:</span> {{ .Status }}</p>
+  <p><span class="label">Severity:</span> {{ .Labels.severity }}</p>
+  <p><span class="label">Service:</span> {{ .Labels.service | default "N/A" }}</p>
+  <p><span class="label">Environment:</span> {{ .Labels.environment | default "production" }}</p>
+  
+  <h3>Summary</h3>
+  <p>{{ .Annotations.summary }}</p>
+  
+  <h3>Description</h3>
+  <p>{{ .Annotations.description }}</p>
+  
+  {{ if .Annotations.dashboard }}
+  <p><a href="{{ .Annotations.dashboard }}">View Dashboard</a></p>
+  {{ end }}
+  
+  <h3>Labels</h3>
+  <ul>
+  {{ range .Labels.SortedPairs }}
+    <li>{{ .Name }}: {{ .Value }}</li>
+  {{ end }}
+  </ul>
+  
+  <p><small>Started: {{ .StartsAt }}</small></p>
+</div>
+{{ end }}
+
+</body>
+</html>
+{{ end }}
+
+{{ define "pagerduty.default.description" }}
+{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}
+{{ end }}

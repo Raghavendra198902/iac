@@ -1,0 +1,155 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dharma-config
+  namespace: dharma
+  labels:
+    app: dharma
+    environment: production
+data:
+  # Application Configuration
+  NODE_ENV: "production"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "warn"
+  APP_NAME: "iac-dharma"
+  APP_VERSION: "1.0.0"
+  
+  # API Gateway Configuration
+  API_GATEWAY_PORT: "3000"
+  API_GATEWAY_HOST: "0.0.0.0"
+  API_GATEWAY_TIMEOUT: "30000"
+  API_GATEWAY_RATE_LIMIT: "200"
+  
+  # Database Configuration (non-sensitive)
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "dharma_prod"
+  DATABASE_USER: "dharma_user"
+  DATABASE_SSL: "true"
+  DATABASE_POOL_MIN: "10"
+  DATABASE_POOL_MAX: "50"
+  DATABASE_IDLE_TIMEOUT: "10000"
+  DATABASE_CONNECTION_TIMEOUT: "5000"
+  
+  # Redis Configuration (non-sensitive)
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  REDIS_TLS: "true"
+  REDIS_CLUSTER_MODE: "true"
+  REDIS_KEY_PREFIX: "dharma:prod:"
+  
+  # JWT Configuration (non-sensitive)
+  JWT_EXPIRATION: "8h"
+  JWT_REFRESH_EXPIRATION: "1d"
+  
+  # Session Configuration (non-sensitive)
+  SESSION_MAX_AGE: "28800000"
+  SESSION_SECURE: "true"
+  SESSION_SAME_SITE: "strict"
+  
+  # CORS Configuration
+  CORS_ORIGIN: "https://app.dharma.example.com"
+  CORS_CREDENTIALS: "true"
+  
+  # Microservices URLs (Kubernetes DNS)
+  USER_SERVICE_URL: "http://user-service.dharma:3001"
+  BLUEPRINT_SERVICE_URL: "http://blueprint-service.dharma:3002"
+  IAC_GENERATOR_SERVICE_URL: "http://iac-generator-service.dharma:3003"
+  GUARDRAILS_SERVICE_URL: "http://guardrails-engine.dharma:3004"
+  COSTING_SERVICE_URL: "http://costing-service.dharma:3005"
+  ORCHESTRATOR_SERVICE_URL: "http://orchestrator-service.dharma:3006"
+  AUTOMATION_ENGINE_URL: "http://automation-engine.dharma:3007"
+  MONITORING_SERVICE_URL: "http://monitoring-service.dharma:3008"
+  AI_ENGINE_URL: "http://ai-engine.dharma:3009"
+  
+  # Service Discovery
+  SERVICE_REGISTRY_ENABLED: "true"
+  CONSUL_HOST: "consul.dharma:8500"
+  CONSUL_PORT: "8500"
+  
+  # Message Queue (non-sensitive)
+  RABBITMQ_HOST: "rabbitmq.dharma"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USER: "dharma"
+  RABBITMQ_VHOST: "/production"
+  RABBITMQ_EXCHANGE: "dharma_production"
+  
+  # Cloud Provider Configuration
+  CLOUD_PROVIDER: "aws"
+  AWS_REGION: "us-west-2"
+  
+  # Terraform Configuration
+  TERRAFORM_VERSION: "1.5.0"
+  TERRAFORM_STATE_BUCKET: "dharma-terraform-state-production"
+  TERRAFORM_STATE_REGION: "us-west-2"
+  TERRAFORM_LOCK_TABLE: "terraform-state-lock-production"
+  
+  # Storage Configuration
+  STORAGE_TYPE: "s3"
+  S3_BUCKET: "dharma-storage-production"
+  S3_REGION: "us-west-2"
+  
+  # Email Configuration
+  EMAIL_ENABLED: "true"
+  EMAIL_PROVIDER: "ses"
+  SMTP_HOST: "email-smtp.us-west-2.amazonaws.com"
+  SMTP_PORT: "587"
+  EMAIL_FROM: "noreply@dharma.example.com"
+  
+  # Monitoring & Observability
+  METRICS_ENABLED: "true"
+  METRICS_PORT: "9090"
+  TRACING_ENABLED: "true"
+  JAEGER_ENDPOINT: "http://jaeger-collector.monitoring:14268/api/traces"
+  
+  # Logging Configuration
+  LOG_FORMAT: "json"
+  LOG_OUTPUT: "stdout"
+  
+  # Rate Limiting
+  RATE_LIMIT_WINDOW: "15m"
+  RATE_LIMIT_MAX_REQUESTS: "200"
+  RATE_LIMIT_ENABLED: "true"
+  
+  # Security Configuration (non-sensitive)
+  HELMET_ENABLED: "true"
+  CSRF_ENABLED: "true"
+  SALT_ROUNDS: "12"
+  
+  # Feature Flags
+  FEATURE_AI_RECOMMENDATIONS: "true"
+  FEATURE_COST_OPTIMIZATION: "true"
+  FEATURE_COMPLIANCE_SCANNING: "true"
+  FEATURE_AUTO_REMEDIATION: "false"
+  FEATURE_MULTI_CLOUD: "true"
+  
+  # AI/ML Configuration (non-sensitive)
+  OPENAI_MODEL: "gpt-4"
+  AI_RATE_LIMIT: "20"
+  AI_TIMEOUT: "30000"
+  
+  # Cache Configuration
+  CACHE_TTL: "3600"
+  CACHE_ENABLED: "true"
+  CACHE_STRATEGY: "redis"
+  
+  # Health Check Configuration
+  HEALTH_CHECK_INTERVAL: "30000"
+  HEALTH_CHECK_TIMEOUT: "5000"
+  HEALTH_CHECK_RETRIES: "3"
+  
+  # Backup Configuration
+  BACKUP_ENABLED: "true"
+  BACKUP_SCHEDULE: "0 2 * * *"
+  BACKUP_RETENTION_DAYS: "30"
+  
+  # High Availability Configuration
+  REPLICA_COUNT: "3"
+  AUTO_SCALING_ENABLED: "true"
+  MIN_REPLICAS: "3"
+  MAX_REPLICAS: "10"
+  TARGET_CPU_UTILIZATION: "70"
+  
+  # Disaster Recovery
+  DR_ENABLED: "true"
+  DR_REGION: "us-east-1"
+  CROSS_REGION_BACKUP: "true"

@@ -1,0 +1,65 @@
+{
+  "name": "cmdb-agent",
+  "version": "1.0.0",
+  "description": "CMDB Client Agent for monitoring and auto-registration",
+  "main": "dist/index.js",
+  "bin": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "build:exe": "npm run build && pkg . --targets node18-win-x64 --output dist/cmdb-agent-win.exe",
+    "build:linux": "npm run build && pkg . --targets node18-linux-x64 --output dist/cmdb-agent-linux",
+    "build:all": "npm run build && pkg . --targets node18-win-x64,node18-linux-x64,node18-macos-x64 --out-path dist",
+    "build:installer": "tsc --project tsconfig.installer.json",
+    "package:installer": "npm run build:installer && electron-builder",
+    "lint": "eslint src --ext .ts",
+    "test": "jest",
+    "install-service-win": "node dist/service-installer.js install",
+    "uninstall-service-win": "node dist/service-installer.js uninstall",
+    "install-service-linux": "sudo node dist/service-installer.js install",
+    "uninstall-service-linux": "sudo node dist/service-installer.js uninstall"
+  },
+  "pkg": {
+    "targets": [
+      "node18-win-x64",
+      "node18-linux-x64",
+      "node18-macos-x64"
+    ],
+    "outputPath": "dist",
+    "assets": [
+      "config.example.json",
+      "README.md",
+      "node_modules/axios/dist/node/axios.cjs"
+    ],
+    "scripts": [
+      "dist/**/*.js"
+    ]
+  },
+  "keywords": [
+    "cmdb",
+    "monitoring",
+    "agent",
+    "infrastructure"
+  ],
+  "author": "IAC DHARMA",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "systeminformation": "^5.21.20",
+    "winston": "^3.11.0",
+    "node-cron": "^3.0.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.4",
+    "@types/node-cron": "^3.0.11",
+    "@types/uuid": "^9.0.7",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "pkg": "^5.8.1"
+  }
+}

@@ -1,0 +1,87 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - heading "IAC DHARMA" [level=1] [ref=e6]
+    - navigation [ref=e7]:
+      - link "Dashboard" [ref=e8] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e9]
+        - text: Dashboard
+      - link "Blueprints" [ref=e14] [cursor=pointer]:
+        - /url: /blueprints
+        - img [ref=e15]
+        - text: Blueprints
+      - link "AI Designer" [ref=e18] [cursor=pointer]:
+        - /url: /designer
+        - img [ref=e19]
+        - text: AI Designer
+      - link "Risk Assessment" [ref=e22] [cursor=pointer]:
+        - /url: /risk
+        - img [ref=e23]
+        - text: Risk Assessment
+      - link "Cost Management" [ref=e25] [cursor=pointer]:
+        - /url: /cost
+        - img [ref=e26]
+        - text: Cost Management
+      - link "Deployments" [ref=e28] [cursor=pointer]:
+        - /url: /deployments
+        - img [ref=e29]
+        - text: Deployments
+    - generic [ref=e32]:
+      - generic [ref=e33]: Version 1.0.0
+      - generic [ref=e34]: © 2024 IAC DHARMA
+  - generic [ref=e35]:
+    - banner [ref=e36]:
+      - button "Admin User admin@iac.dharma" [ref=e39]:
+        - img [ref=e41]
+        - generic [ref=e44]:
+          - generic [ref=e45]: Admin User
+          - generic [ref=e46]: admin@iac.dharma
+    - main [ref=e47]:
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - img [ref=e50]
+          - generic [ref=e52]:
+            - heading "Cost Management" [level=1] [ref=e53]
+            - paragraph [ref=e54]: TCO calculation and cost optimization
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: Current Month
+            - paragraph [ref=e58]: $12,450
+            - paragraph [ref=e59]:
+              - img [ref=e60]
+              - text: 15% lower than last month
+          - generic [ref=e63]:
+            - paragraph [ref=e64]: Potential Savings
+            - paragraph [ref=e65]: $2,340
+            - paragraph [ref=e66]: From ML recommendations
+          - generic [ref=e67]:
+            - paragraph [ref=e68]: Budget Utilization
+            - paragraph [ref=e69]: 62%
+            - paragraph [ref=e70]: $12,450 / $20,000
+        - generic [ref=e71]:
+          - heading "Cost Optimization Recommendations" [level=2] [ref=e72]
+          - generic [ref=e73]:
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - heading "Reserved Instances" [level=4] [ref=e77]
+                - paragraph [ref=e78]: Commit to 1-year reserved instances for predictable workloads
+                - generic [ref=e79]:
+                  - generic [ref=e80]: HIGH PRIORITY
+                  - generic [ref=e81]: 85% confidence
+              - generic [ref=e82]:
+                - paragraph [ref=e83]: $1,200
+                - paragraph [ref=e84]: monthly savings
+            - generic [ref=e86]:
+              - generic [ref=e87]:
+                - heading "Storage Lifecycle Policies" [level=4] [ref=e88]
+                - paragraph [ref=e89]: Move infrequently accessed data to cheaper storage tiers
+                - generic [ref=e90]:
+                  - generic [ref=e91]: MEDIUM PRIORITY
+                  - generic [ref=e92]: 78% confidence
+              - generic [ref=e93]:
+                - paragraph [ref=e94]: $450
+                - paragraph [ref=e95]: monthly savings
+```

@@ -1,0 +1,298 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-scripts
+  namespace: dharma
+data:
+  backup-database.sh: |
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Configuration from environment
+    DB_HOST="${DB_HOST:-localhost}"
+    DB_PORT="${DB_PORT:-5432}"
+    DB_NAME="${DB_NAME:-dharma}"
+    DB_USER="${DB_USER:-postgres}"
+    DB_PASSWORD="${DB_PASSWORD}"
+    S3_BUCKET="${S3_BUCKET:-dharma-backups}"
+    S3_PREFIX="${S3_PREFIX:-database}"
+    BACKUP_DIR="${BACKUP_DIR:-/var/backups/postgresql}"
+    RETENTION_DAYS="${RETENTION_DAYS:-30}"
+    ENCRYPTION_KEY_FILE="${ENCRYPTION_KEY_FILE:-/etc/backup/encryption.key}"
+    LOG_FILE="${LOG_FILE:-/var/log/database-backup.log}"
+    
+    # Initialize
+    mkdir -p "$BACKUP_DIR"
+    exec > >(tee -a "$LOG_FILE")
+    exec 2>&1
+    
+    log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+    error() { log "ERROR: $*" >&2; }
+    
+    log "Starting backup process"
+    
+    # Create backup
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    BACKUP_FILE="$BACKUP_DIR/dharma_${DB_NAME}_${TIMESTAMP}.sql"
+    
+    log "Creating database dump..."
+    PGPASSWORD="$DB_PASSWORD" pg_dump \
+      -h "$DB_HOST" \
+      -p "$DB_PORT" \
+      -U "$DB_USER" \
+      -d "$DB_NAME" \
+      --format=plain \
+      --clean \
+      --if-exists \
+      --no-owner \
+      --no-acl \
+      > "$BACKUP_FILE" || { error "pg_dump failed"; exit 1; }
+    
+    log "Compressing backup..."
+    gzip -9 "$BACKUP_FILE" || { error "Compression failed"; exit 1; }
+    BACKUP_FILE="${BACKUP_FILE}.gz"
+    
+    log "Encrypting backup..."
+    openssl enc -aes-256-cbc -pbkdf2 \
+      -in "$BACKUP_FILE" \
+      -out "${BACKUP_FILE}.enc" \
+      -pass file:"$ENCRYPTION_KEY_FILE" || { error "Encryption failed"; exit 1; }
+    
+    rm "$BACKUP_FILE"
+    BACKUP_FILE="${BACKUP_FILE}.enc"
+    
+    log "Generating checksum..."
+    sha256sum "$BACKUP_FILE" > "${BACKUP_FILE}.sha256"
+    
+    log "Uploading to S3..."
+    aws s3 cp "$BACKUP_FILE" "s3://${S3_BUCKET}/${S3_PREFIX}/" \
+      --storage-class STANDARD_IA || { error "S3 upload failed"; exit 1; }
+    aws s3 cp "${BACKUP_FILE}.sha256" "s3://${S3_BUCKET}/${S3_PREFIX}/"
+    
+    log "Cleaning up old backups..."
+    find "$BACKUP_DIR" -name "*.enc" -type f -mtime +$RETENTION_DAYS -delete
+    
+    BACKUP_SIZE=$(stat -f%z "$BACKUP_FILE" 2>/dev/null || stat -c%s "$BACKUP_FILE")
+    log "Backup completed successfully. Size: $BACKUP_SIZE bytes"
+    
+    # Send success notification
+    if [[ -n "${SLACK_WEBHOOK_URL:-}" ]]; then
+      curl -X POST "$SLACK_WEBHOOK_URL" \
+        -H 'Content-Type: application/json' \
+        -d "{\"text\":\"✓ Database backup completed: ${BACKUP_FILE##*/} ($BACKUP_SIZE bytes)\"}" || true
+    fi
+    
+  restore-database.sh: |
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Configuration from environment
+    DB_HOST="${DB_HOST:-localhost}"
+    DB_PORT="${DB_PORT:-5432}"
+    DB_NAME="${DB_NAME:-dharma}"
+    DB_USER="${DB_USER:-postgres}"
+    DB_PASSWORD="${DB_PASSWORD}"
+    S3_BUCKET="${S3_BUCKET:-dharma-backups}"
+    S3_PREFIX="${S3_PREFIX:-database}"
+    ENCRYPTION_KEY_FILE="${ENCRYPTION_KEY_FILE:-/etc/backup/encryption.key}"
+    
+    log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+    error() { log "ERROR: $*" >&2; }
+    
+    list_backups() {
+      log "Available backups:"
+      aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" | grep "\.sql\.gz\.enc$" | sort -r
+    }
+    
+    restore_backup() {
+      local backup_name="$1"
+      local temp_dir=$(mktemp -d)
+      
+      log "Downloading backup: $backup_name"
+      aws s3 cp "s3://${S3_BUCKET}/${S3_PREFIX}/$backup_name" "$temp_dir/" || {
+        error "Failed to download backup"
+        rm -rf "$temp_dir"
+        exit 1
+      }
+      
+      log "Decrypting backup..."
+      openssl enc -d -aes-256-cbc -pbkdf2 \
+        -in "$temp_dir/$backup_name" \
+        -out "${temp_dir}/${backup_name%.enc}" \
+        -pass file:"$ENCRYPTION_KEY_FILE" || {
+        error "Decryption failed"
+        rm -rf "$temp_dir"
+        exit 1
+      }
+      
+      log "Decompressing backup..."
+      gunzip "${temp_dir}/${backup_name%.enc}" || {
+        error "Decompression failed"
+        rm -rf "$temp_dir"
+        exit 1
+      }
+      
+      local sql_file="${temp_dir}/${backup_name%.enc.gz}"
+      
+      log "Restoring database..."
+      PGPASSWORD="$DB_PASSWORD" psql \
+        -h "$DB_HOST" \
+        -p "$DB_PORT" \
+        -U "$DB_USER" \
+        -d "$DB_NAME" \
+        < "$sql_file" || {
+        error "Database restore failed"
+        rm -rf "$temp_dir"
+        exit 1
+      }
+      
+      rm -rf "$temp_dir"
+      log "Restore completed successfully"
+    }
+    
+    case "${1:-}" in
+      --list)
+        list_backups
+        ;;
+      --backup)
+        if [[ -z "${2:-}" ]]; then
+          error "Please specify backup filename"
+          exit 1
+        fi
+        restore_backup "$2"
+        ;;
+      *)
+        echo "Usage: $0 --list | --backup <filename>"
+        exit 1
+        ;;
+    esac
+    
+  verify-backups.sh: |
+    #!/bin/bash
+    set -euo pipefail
+    
+    S3_BUCKET="${S3_BUCKET:-dharma-backups}"
+    S3_PREFIX="${S3_PREFIX:-database}"
+    ENCRYPTION_KEY_FILE="${ENCRYPTION_KEY_FILE:-/etc/backup/encryption.key}"
+    
+    log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+    error() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2; }
+    success() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] ✓ $*"; }
+    
+    TESTS_PASSED=0
+    TESTS_FAILED=0
+    
+    log "Starting backup verification"
+    
+    # Test 1: S3 connectivity
+    if aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" &>/dev/null; then
+      success "S3 bucket accessible"
+      ((TESTS_PASSED++))
+    else
+      error "Cannot access S3 bucket"
+      ((TESTS_FAILED++))
+    fi
+    
+    # Test 2: Latest backup exists
+    latest_backup=$(aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" | grep "\.sql\.gz\.enc$" | sort | tail -1 | awk '{print $4}')
+    if [[ -n "$latest_backup" ]]; then
+      success "Latest backup found: $latest_backup"
+      ((TESTS_PASSED++))
+    else
+      error "No backups found"
+      ((TESTS_FAILED++))
+      exit 1
+    fi
+    
+    # Test 3: Backup age
+    backup_date=$(aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" | grep "\.sql\.gz\.enc$" | sort | tail -1 | awk '{print $1" "$2}')
+    backup_ts=$(date -d "$backup_date" +%s 2>/dev/null || date -j -f "%Y-%m-%d %H:%M:%S" "$backup_date" +%s 2>/dev/null || echo 0)
+    current_ts=$(date +%s)
+    age_hours=$(( (current_ts - backup_ts) / 3600 ))
+    
+    if [[ $age_hours -lt 24 ]]; then
+      success "Backup is fresh ($age_hours hours old)"
+      ((TESTS_PASSED++))
+    else
+      error "Backup is stale ($age_hours hours old)"
+      ((TESTS_FAILED++))
+    fi
+    
+    # Test 4: Download and verify checksum
+    temp_dir=$(mktemp -d)
+    aws s3 cp "s3://${S3_BUCKET}/${S3_PREFIX}/$latest_backup" "$temp_dir/" &>/dev/null
+    aws s3 cp "s3://${S3_BUCKET}/${S3_PREFIX}/${latest_backup}.sha256" "$temp_dir/" &>/dev/null || true
+    
+    if [[ -f "$temp_dir/${latest_backup}.sha256" ]]; then
+      if (cd "$temp_dir" && sha256sum -c "${latest_backup}.sha256" &>/dev/null); then
+        success "Checksum verification passed"
+        ((TESTS_PASSED++))
+      else
+        error "Checksum verification failed"
+        ((TESTS_FAILED++))
+      fi
+    fi
+    
+    # Test 5: Decryption test
+    if openssl enc -d -aes-256-cbc -pbkdf2 \
+      -in "$temp_dir/$latest_backup" \
+      -pass file:"$ENCRYPTION_KEY_FILE" 2>/dev/null | head -c 1000 > /dev/null; then
+      success "Decryption test passed"
+      ((TESTS_PASSED++))
+    else
+      error "Decryption test failed"
+      ((TESTS_FAILED++))
+    fi
+    
+    rm -rf "$temp_dir"
+    
+    log "Tests passed: $TESTS_PASSED, Tests failed: $TESTS_FAILED"
+    
+    if [[ $TESTS_FAILED -eq 0 ]]; then
+      log "✓ All verification tests passed"
+      exit 0
+    else
+      error "Some tests failed"
+      exit 1
+    fi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+  namespace: dharma
+type: Opaque
+stringData:
+  username: postgres
+  password: changeme  # TODO: Update with actual password
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-credentials
+  namespace: dharma
+type: Opaque
+stringData:
+  access-key-id: AKIAIOSFODNN7EXAMPLE  # TODO: Update with actual credentials
+  secret-access-key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY  # TODO: Update
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backup-encryption-key
+  namespace: dharma
+type: Opaque
+stringData:
+  encryption.key: |
+    # Auto-generated encryption key
+    # TODO: Replace with actual secure key
+    $(openssl rand -base64 32)
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backup-notifications
+  namespace: dharma
+type: Opaque
+stringData:
+  slack-webhook-url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL  # TODO: Update

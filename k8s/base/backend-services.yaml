@@ -1,0 +1,499 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iac-generator-service
+  namespace: iacdharma
+  labels:
+    app: iac-generator
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3002
+      targetPort: 3002
+      protocol: TCP
+  selector:
+    app: iac-generator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iac-generator
+  namespace: iacdharma
+  labels:
+    app: iac-generator
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iac-generator
+  template:
+    metadata:
+      labels:
+        app: iac-generator
+        tier: backend
+    spec:
+      containers:
+      - name: iac-generator
+        image: ghcr.io/OWNER/iacdharma-iac-generator:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3002
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: PORT
+          value: "3002"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guardrails-service
+  namespace: iacdharma
+  labels:
+    app: guardrails
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3003
+      targetPort: 3003
+  selector:
+    app: guardrails
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrails
+  namespace: iacdharma
+  labels:
+    app: guardrails
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: guardrails
+  template:
+    metadata:
+      labels:
+        app: guardrails
+        tier: backend
+    spec:
+      containers:
+      - name: guardrails
+        image: ghcr.io/OWNER/iacdharma-guardrails:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3003
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: PORT
+          value: "3003"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3003
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: costing-service
+  namespace: iacdharma
+  labels:
+    app: costing-service
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3004
+      targetPort: 3004
+  selector:
+    app: costing-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: costing-service
+  namespace: iacdharma
+  labels:
+    app: costing-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: costing-service
+  template:
+    metadata:
+      labels:
+        app: costing-service
+        tier: backend
+    spec:
+      containers:
+      - name: costing-service
+        image: ghcr.io/OWNER/iacdharma-costing-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3004
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: PORT
+          value: "3004"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3004
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3004
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orchestrator-service
+  namespace: iacdharma
+  labels:
+    app: orchestrator
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3005
+      targetPort: 3005
+  selector:
+    app: orchestrator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestrator
+  namespace: iacdharma
+  labels:
+    app: orchestrator
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orchestrator
+  template:
+    metadata:
+      labels:
+        app: orchestrator
+        tier: backend
+    spec:
+      containers:
+      - name: orchestrator
+        image: ghcr.io/OWNER/iacdharma-orchestrator:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3005
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: PORT
+          value: "3005"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3005
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3005
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: automation-engine-service
+  namespace: iacdharma
+  labels:
+    app: automation-engine
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3006
+      targetPort: 3006
+  selector:
+    app: automation-engine
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: automation-engine
+  namespace: iacdharma
+  labels:
+    app: automation-engine
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: automation-engine
+  template:
+    metadata:
+      labels:
+        app: automation-engine
+        tier: backend
+    spec:
+      containers:
+      - name: automation-engine
+        image: ghcr.io/OWNER/iacdharma-automation-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3006
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: PORT
+          value: "3006"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3006
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-service
+  namespace: iacdharma
+  labels:
+    app: monitoring-service
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3007
+      targetPort: 3007
+  selector:
+    app: monitoring-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring-service
+  namespace: iacdharma
+  labels:
+    app: monitoring-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: monitoring-service
+  template:
+    metadata:
+      labels:
+        app: monitoring-service
+        tier: backend
+    spec:
+      containers:
+      - name: monitoring-service
+        image: ghcr.io/OWNER/iacdharma-monitoring-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3007
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: PORT
+          value: "3007"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3007
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3007
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-engine-service
+  namespace: iacdharma
+  labels:
+    app: ai-engine
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: ai-engine
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-engine
+  namespace: iacdharma
+  labels:
+    app: ai-engine
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-engine
+  template:
+    metadata:
+      labels:
+        app: ai-engine
+        tier: backend
+    spec:
+      containers:
+      - name: ai-engine
+        image: ghcr.io/OWNER/iacdharma-ai-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: PORT
+          value: "8000"
+        - name: PYTHON_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: ghcr-secret
