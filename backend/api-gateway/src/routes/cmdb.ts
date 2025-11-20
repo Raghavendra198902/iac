@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { getAgentRegistryData } from './agents';
 
 const router = express.Router();
 
@@ -56,51 +57,8 @@ interface NetworkDevice {
   discoveredAt: Date;
 }
 
-let configItems: ConfigItem[] = [
-  {
-    id: 'ci-001',
-    name: 'web-server-prod-01',
-    type: 'Server',
-    environment: 'Production',
-    status: 'Active',
-    ipAddress: '10.0.1.10',
-    hostname: 'web-prod-01.example.com',
-    os: 'Ubuntu 22.04 LTS',
-    location: 'DC-East',
-    department: 'Engineering',
-    owner: 'DevOps Team',
-    tags: ['web', 'nginx', 'production'],
-    metadata: {
-      cpuCores: 8,
-      ramGB: 32,
-      diskGB: 500
-    },
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-11-15')
-  },
-  {
-    id: 'ci-002',
-    name: 'db-server-prod-01',
-    type: 'Database',
-    environment: 'Production',
-    status: 'Active',
-    ipAddress: '10.0.1.20',
-    hostname: 'db-prod-01.example.com',
-    os: 'Ubuntu 22.04 LTS',
-    location: 'DC-East',
-    department: 'Engineering',
-    owner: 'Database Team',
-    tags: ['database', 'postgresql', 'production'],
-    metadata: {
-      dbVersion: '15.3',
-      cpuCores: 16,
-      ramGB: 64,
-      diskGB: 2000
-    },
-    createdAt: new Date('2024-01-20'),
-    updatedAt: new Date('2024-11-15')
-  }
-];
+// NO DEMO DATA - Empty array, will be populated by real agents only
+let configItems: ConfigItem[] = [];
 
 let agents: Agent[] = [];
 let networkDevices: NetworkDevice[] = [];
@@ -301,93 +259,46 @@ router.get('/stats', (req: Request, res: Response) => {
 });
 
 // GET /agents/status - Get all agent statuses for frontend display
+// ONLY returns REAL agents from the agent registry - NO MOCK DATA
 router.get('/agents/status', (req: Request, res: Response) => {
-  const agentStatuses = configItems
-    .filter(ci => ci.id.startsWith('ci-agent-'))
-    .map(ci => {
-      const lastSeenDate = ci.metadata?.lastSeen || ci.updatedAt;
-      const timeDiff = Date.now() - new Date(lastSeenDate).getTime();
-      const isOnline = timeDiff < 60000; // Online if seen within last minute
+  try {
+    // Get real agent data directly from agent registry
+    const agents = getAgentRegistryData();
+    
+    if (!agents || agents.length === 0) {
+      return res.json([]); // No real agents
+    }
+    
+    // Transform real agent data to CMDB format
+    const agentStatuses = agents.map((agent: any) => {
+      const timeDiff = Date.now() - new Date(agent.lastSeen).getTime();
       
-      // Transform metrics to the format expected by frontend
-      let metrics = {
-        cpu: 0,
-        memory: 0,
-        disk: 0,
-        network: 0
-      };
-      
-      if (ci.metrics) {
-        const rawMetrics = ci.metrics as any;
-        metrics = {
-          cpu: rawMetrics.cpu?.usage || rawMetrics.cpu || 0,
-          memory: rawMetrics.memory?.usagePercent || rawMetrics.memory || 0,
-          disk: rawMetrics.disk?.usagePercent || rawMetrics.disk || 0,
-          network: typeof rawMetrics.network === 'number' ? rawMetrics.network : 
-                   rawMetrics.network?.usagePercent || 0
-        };
-      }
+      // Calculate health score based on status
+      let healthScore = 100;
+      if (agent.status === 'warning') healthScore = 75;
+      else if (agent.status === 'offline') healthScore = 0;
       
       return {
-        id: ci.id.replace('ci-agent-', 'agent-'),
-        hostname: ci.hostname || ci.name,
-        status: isOnline ? 'online' : (timeDiff < 300000 ? 'warning' : 'offline'),
-        lastSeen: lastSeenDate,
-        ciCount: parseInt(ci.metadata?.ciCount || '0'),
-        healthScore: ci.metadata?.healthScore || 100,
-        metrics
+        id: `agent-${agent.agentName.replace(/[^a-zA-Z0-9-]/g, '-')}`,
+        hostname: agent.agentName,
+        status: agent.status,
+        lastSeen: agent.lastSeen.toISOString(),
+        ciCount: 0, // Real agents don't track CIs yet
+        healthScore,
+        metrics: {
+          cpu: 0,
+          memory: 0,
+          disk: 0,
+          network: 0
+        }
       };
     });
-  
-  // If no agents found, add mock/demo agents for testing
-  if (agentStatuses.length === 0) {
-    agentStatuses.push(
-      {
-        id: 'agent-001',
-        hostname: 'web-server-prod-01',
-        status: 'online',
-        lastSeen: new Date().toISOString(),
-        ciCount: 5,
-        healthScore: 98,
-        metrics: {
-          cpu: 45,
-          memory: 62,
-          disk: 38,
-          network: 25,
-        },
-      },
-      {
-        id: 'agent-002',
-        hostname: 'api-server-prod-01',
-        status: 'online',
-        lastSeen: new Date(Date.now() - 15000).toISOString(),
-        ciCount: 8,
-        healthScore: 95,
-        metrics: {
-          cpu: 68,
-          memory: 71,
-          disk: 42,
-          network: 34,
-        },
-      },
-      {
-        id: 'agent-003',
-        hostname: 'db-server-prod-01',
-        status: 'warning',
-        lastSeen: new Date(Date.now() - 900000).toISOString(),
-        ciCount: 3,
-        healthScore: 78,
-        metrics: {
-          cpu: 82,
-          memory: 88,
-          disk: 75,
-          network: 15,
-        },
-      }
-    );
+    
+    res.json(agentStatuses);
+  } catch (error: any) {
+    console.error('Error fetching real agents:', error.message);
+    res.json([]); // Return empty array on error - NO MOCK DATA
   }
-  
-  res.json(agentStatuses);
 });
 
 // Agent registration endpoint

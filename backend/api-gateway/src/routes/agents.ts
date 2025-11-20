@@ -27,6 +27,11 @@ interface AgentData {
 
 const agentRegistry = new Map<string, AgentData>();
 
+// Export function to get agent registry data for internal use
+export function getAgentRegistryData(): AgentData[] {
+  return Array.from(agentRegistry.values());
+}
+
 // Update agent data from telemetry
 export function updateAgentFromTelemetry(data: any): void {
   const agentName = data.agentName || 'unknown';
