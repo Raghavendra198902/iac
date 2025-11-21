@@ -1,0 +1,283 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "rate-limiting-v1",
+    "title": "Rate Limiting & Quota Management",
+    "tags": ["dharma", "rate-limiting", "quotas"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Rate Limit Requests by Result",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (result) (rate(api_gateway_rate_limit_requests_total[5m]))",
+            "legendFormat": "{{result}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "fillOpacity": 20,
+              "stacking": {
+                "mode": "normal"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Rate Limit Block Rate",
+        "type": "gauge",
+        "gridPos": {"x": 12, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(api_gateway_rate_limit_blocks_total[5m])) / sum(rate(api_gateway_rate_limit_requests_total[5m])) * 100",
+            "legendFormat": "Block Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 5, "color": "yellow"},
+                {"value": 10, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Total Blocks (Last Hour)",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(api_gateway_rate_limit_blocks_total[1h]))",
+            "legendFormat": "Blocks",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "textMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 100, "color": "yellow"},
+                {"value": 1000, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Rate Limit Usage by Subscription Tier",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "avg by (subscription_tier) (api_gateway_rate_limit_usage_percent)",
+            "legendFormat": "{{subscription_tier}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "fillOpacity": 10
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 90, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Rate Limit Blocks by Tier",
+        "type": "barchart",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "sum by (subscription_tier) (increase(api_gateway_rate_limit_blocks_total[1h]))",
+            "legendFormat": "{{subscription_tier}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Top Users by Rate Limit Usage",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 15, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "topk(20, avg by (user_id, subscription_tier, operation) (api_gateway_rate_limit_usage_percent))",
+            "legendFormat": "",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "user_id": "User ID",
+                "subscription_tier": "Tier",
+                "operation": "Operation",
+                "Value": "Usage %"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Usage %"},
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                },
+                {
+                  "id": "unit",
+                  "value": "percent"
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {"value": 0, "color": "green"},
+                      {"value": 70, "color": "yellow"},
+                      {"value": 90, "color": "red"}
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "Rate Limit Quota Remaining by Operation",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 15, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "avg by (operation) (api_gateway_rate_limit_quota_remaining)",
+            "legendFormat": "{{operation}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Rate Limit Blocks by Operation",
+        "type": "piechart",
+        "gridPos": {"x": 0, "y": 23, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "sum by (operation) (increase(api_gateway_rate_limit_blocks_total[1h]))",
+            "legendFormat": "{{operation}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["value", "percent"]
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Users Near Rate Limit",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 23, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "count(api_gateway_rate_limit_usage_percent > 90)",
+            "legendFormat": ">90% Usage",
+            "refId": "A"
+          },
+          {
+            "expr": "count(api_gateway_rate_limit_usage_percent > 80)",
+            "legendFormat": ">80% Usage",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

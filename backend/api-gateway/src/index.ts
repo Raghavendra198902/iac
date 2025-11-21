@@ -12,6 +12,7 @@ import { authMiddleware } from './middleware/auth';
 import { userRateLimit, ipRateLimit } from './middleware/rateLimit';
 import { performanceMiddleware } from './utils/performance';
 import { correlationIdMiddleware, userContextMiddleware } from './middleware/correlationId';
+import { metricsMiddleware, metricsHandler, initializeMetricsCollectors } from './utils/metrics';
 import routes from './routes';
 import { setupSwaggerDocs } from './docs/swagger-setup';
 import healthRouter, { markAppAsInitialized } from './routes/health';
@@ -46,6 +47,9 @@ app.use(helmet({
 
 // Performance monitoring middleware
 app.use(performanceMiddleware);
+
+// Prometheus metrics middleware
+app.use(metricsMiddleware);
 
 // CORS configuration  
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'];
@@ -141,25 +145,7 @@ app.get('/security', (req: Request, res: Response) => {
 });
 
 // Prometheus metrics endpoint
-app.get('/metrics', (req: Request, res: Response) => {
-  const metrics = `# HELP api_gateway_uptime_seconds API Gateway uptime in seconds
-# TYPE api_gateway_uptime_seconds gauge
-api_gateway_uptime_seconds ${process.uptime()}
-
-# HELP api_gateway_memory_usage_bytes Memory usage in bytes
-# TYPE api_gateway_memory_usage_bytes gauge
-api_gateway_memory_usage_bytes{type="rss"} ${process.memoryUsage().rss}
-api_gateway_memory_usage_bytes{type="heapTotal"} ${process.memoryUsage().heapTotal}
-api_gateway_memory_usage_bytes{type="heapUsed"} ${process.memoryUsage().heapUsed}
-
-# HELP nodejs_version Node.js version info
-# TYPE nodejs_version gauge
-nodejs_version{version="${process.version}"} 1
-`;
-  
-  res.setHeader('Content-Type', 'text/plain');
-  res.send(metrics);
-});
+app.get('/metrics', metricsHandler);
 
 // 404 handler
 // 404 handler for undefined routes
@@ -190,6 +176,11 @@ async function startServer() {
     logger.info('🔄 Running database migrations...');
     await runMigrations();
     logger.info('✅ Database migrations completed');
+
+    // Initialize Prometheus metrics collectors
+    logger.info('🔄 Initializing metrics collectors...');
+    initializeMetricsCollectors();
+    logger.info('✅ Metrics collectors initialized');
 
     // Mark app as initialized for startup probe
     markAppAsInitialized();

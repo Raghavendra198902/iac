@@ -1,0 +1,232 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "cache-performance-v1",
+    "title": "Cache Performance & Hit Rates",
+    "tags": ["dharma", "cache", "performance"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 0, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(api_gateway_cache_hits_total[5m])) / (sum(rate(api_gateway_cache_hits_total[5m])) + sum(rate(api_gateway_cache_misses_total[5m]))) * 100",
+            "legendFormat": "Overall Hit Rate",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Cache Hit Rate by Type",
+        "type": "timeseries",
+        "gridPos": {"x": 8, "y": 0, "w": 16, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (cache_type) (rate(api_gateway_cache_hits_total[5m])) / (sum by (cache_type) (rate(api_gateway_cache_hits_total[5m])) + sum by (cache_type) (rate(api_gateway_cache_misses_total[5m]))) * 100",
+            "legendFormat": "{{cache_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "lastNotNull", "max"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "fillOpacity": 10,
+              "spanNulls": true
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Cache Operations (Rate)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "sum by (operation, cache_type) (rate(api_gateway_cache_operations_total[5m]))",
+            "legendFormat": "{{operation}} ({{cache_type}})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cache Size",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "api_gateway_cache_size_bytes",
+            "legendFormat": "{{cache_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decbytes",
+            "custom": {
+              "fillOpacity": 20
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Cache Entry Count",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 15, "w": 6, "h": 5},
+        "targets": [
+          {
+            "expr": "api_gateway_cache_entries",
+            "legendFormat": "{{cache_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 6,
+        "title": "Cache Operation Duration (p95)",
+        "type": "timeseries",
+        "gridPos": {"x": 6, "y": 15, "w": 9, "h": 5},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(api_gateway_cache_operation_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{operation}} ({{cache_type}})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 0.05, "color": "yellow"},
+                {"value": 0.1, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Cache Hits vs Misses (Total)",
+        "type": "piechart",
+        "gridPos": {"x": 15, "y": 15, "w": 9, "h": 5},
+        "targets": [
+          {
+            "expr": "sum(increase(api_gateway_cache_hits_total[1h]))",
+            "legendFormat": "Hits",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(increase(api_gateway_cache_misses_total[1h]))",
+            "legendFormat": "Misses",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["value", "percent"]
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Top Cache Key Patterns by Hit Rate",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 20, "w": 24, "h": 6},
+        "targets": [
+          {
+            "expr": "topk(10, sum by (key_pattern, cache_type) (rate(api_gateway_cache_hits_total[5m])) / (sum by (key_pattern, cache_type) (rate(api_gateway_cache_hits_total[5m])) + sum by (key_pattern, cache_type) (rate(api_gateway_cache_misses_total[5m]))) * 100)",
+            "legendFormat": "",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Value"},
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                },
+                {
+                  "id": "unit",
+                  "value": "percent"
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {"value": 0, "color": "red"},
+                      {"value": 50, "color": "yellow"},
+                      {"value": 80, "color": "green"}
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

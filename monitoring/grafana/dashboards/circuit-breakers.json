@@ -1,0 +1,219 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "circuit-breakers-v1",
+    "title": "Circuit Breakers & Resilience",
+    "tags": ["dharma", "circuit-breakers", "resilience"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Circuit Breaker States",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "api_gateway_circuit_breaker_state",
+            "legendFormat": "{{service}}/{{breaker_name}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["lastNotNull"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {"value": 0, "text": "Closed", "color": "green"},
+              {"value": 1, "text": "Open", "color": "red"},
+              {"value": 2, "text": "Half-Open", "color": "yellow"}
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 0.5, "color": "yellow"},
+                {"value": 1.5, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Circuit Breaker Call Success Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(api_gateway_circuit_breaker_calls_total{result=\"success\"}[5m]) / (rate(api_gateway_circuit_breaker_calls_total{result=\"success\"}[5m]) + rate(api_gateway_circuit_breaker_calls_total{result=\"failure\"}[5m])) * 100",
+            "legendFormat": "{{service}}/{{breaker_name}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "lastNotNull"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 50, "color": "yellow"},
+                {"value": 90, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Circuit Breaker Calls (Rate)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "rate(api_gateway_circuit_breaker_calls_total[5m])",
+            "legendFormat": "{{service}}/{{breaker_name}} - {{result}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Circuit Breaker Failures by Error Type",
+        "type": "piechart",
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum by (error_type) (rate(api_gateway_circuit_breaker_failures_total[5m]))",
+            "legendFormat": "{{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["value", "percent"]
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Fallback Execution Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 16, "y": 8, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "rate(api_gateway_circuit_breaker_fallbacks_total[5m])",
+            "legendFormat": "{{service}}/{{breaker_name}} - {{fallback_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Circuit Breaker Call Duration (p95)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 15, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(api_gateway_circuit_breaker_call_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{service}}/{{breaker_name}} - {{result}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Circuit Breaker Status Summary",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 15, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "count by (service, breaker_name) (api_gateway_circuit_breaker_state == 1)",
+            "legendFormat": "Open: {{service}}/{{breaker_name}}",
+            "refId": "A"
+          },
+          {
+            "expr": "count by (service, breaker_name) (api_gateway_circuit_breaker_state == 2)",
+            "legendFormat": "Half-Open: {{service}}/{{breaker_name}}",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "textMode": "value_and_name",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "red"}
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}
