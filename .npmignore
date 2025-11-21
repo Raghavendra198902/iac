@@ -1,0 +1,61 @@
+# Exclude development and documentation files
+node_modules/
+.git/
+.github/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Exclude test files
+tests/
+**/*.test.ts
+**/*.test.js
+**/*.spec.ts
+**/*.spec.js
+coverage/
+.nyc_output/
+
+# Exclude build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Exclude environment files
+.env
+.env.*
+!.env.example
+
+# Exclude IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Exclude OS files
+.DS_Store
+Thumbs.db
+
+# Exclude Docker development files
+docker-compose.override.yml
+Dockerfile.dev
+
+# Exclude large directories
+ml-models/
+backup-dr/
+
+# Exclude database files
+database/migrations/
+database/seeds/
+*.sql
+
+# Keep essential files for package
+!cli/
+!QUICK_START.md
+!RELEASE_NOTES.md
+!CHANGELOG.md
+!README.npm.md
+!.env.example
+!docker-compose.yml
+!package.json

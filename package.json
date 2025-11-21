@@ -1,12 +1,26 @@
 {
-  "name": "iac-dharma",
+  "name": "@raghavendra198902/iac-dharma",
   "version": "1.0.0",
-  "description": "Intelligent Infrastructure Design & Deployment Platform",
-  "private": true,
+  "description": "Enterprise Infrastructure as Code automation platform with AI-powered recommendations, multi-cloud support, and comprehensive observability",
+  "private": false,
   "workspaces": [
     "backend/*",
     "frontend",
     "connectors/*"
+  ],
+  "main": "cli/index.js",
+  "bin": {
+    "iac-dharma": "./cli/index.js"
+  },
+  "files": [
+    "cli/",
+    "QUICK_START.md",
+    "RELEASE_NOTES.md",
+    "CHANGELOG.md",
+    "README.md",
+    ".env.example",
+    "docker-compose.yml",
+    "LICENSE"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
@@ -29,7 +43,13 @@
     "docker:down": "docker-compose down",
     "k8s:deploy": "kubectl apply -f deployment/kubernetes/",
     "security:scan": "npm run security:snyk",
-    "security:snyk": "snyk test --all-projects"
+    "security:snyk": "snyk test --all-projects",
+    "prepublishOnly": "cp README.npm.md README.md",
+    "postpublish": "git checkout README.md"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -50,12 +70,38 @@
   "keywords": [
     "infrastructure",
     "iac",
+    "infrastructure-as-code",
     "terraform",
+    "cloudformation",
     "cloud",
     "automation",
     "ai",
-    "architecture"
+    "machine-learning",
+    "multi-cloud",
+    "aws",
+    "azure",
+    "gcp",
+    "devops",
+    "observability",
+    "monitoring",
+    "architecture",
+    "enterprise",
+    "microservices",
+    "kubernetes",
+    "docker"
   ],
-  "author": "IAC Dharma Team",
-  "license": "UNLICENSED"
+  "author": {
+    "name": "Raghavendra",
+    "email": "raghavendra198902@gmail.com",
+    "url": "https://github.com/Raghavendra198902"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Raghavendra198902/iac.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Raghavendra198902/iac/issues"
+  },
+  "homepage": "https://github.com/Raghavendra198902/iac#readme",
+  "license": "MIT"
 }
