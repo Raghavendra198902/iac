@@ -258,34 +258,53 @@ router.get('/stats', (req: Request, res: Response) => {
   res.json(stats);
 });
 
+// GET /cis - Get all configuration items (for frontend display)
+router.get('/cis', (req: Request, res: Response) => {
+  try {
+    // Return all CIs registered by agents
+    res.json(configItems);
+  } catch (error: any) {
+    console.error('Error fetching CIs:', error.message);
+    res.status(500).json({ error: 'Failed to fetch configuration items' });
+  }
+});
+
 // GET /agents/status - Get all agent statuses for frontend display
-// ONLY returns REAL agents from the agent registry - NO MOCK DATA
 router.get('/agents/status', (req: Request, res: Response) => {
   try {
-    // Get real agent data directly from agent registry
-    const agents = getAgentRegistryData();
+    // Update agent status based on last sync time
+    const now = new Date();
+    agents.forEach(agent => {
+      const timeSinceSync = now.getTime() - agent.lastSync.getTime();
+      if (timeSinceSync > 300000) { // 5 minutes
+        agent.status = 'inactive';
+      } else if (timeSinceSync > 120000) { // 2 minutes
+        agent.status = 'error';
+      } else {
+        agent.status = 'active';
+      }
+    });
     
-    if (!agents || agents.length === 0) {
-      return res.json([]); // No real agents
-    }
-    
-    // Transform real agent data to CMDB format
-    const agentStatuses = agents.map((agent: any) => {
-      const timeDiff = Date.now() - new Date(agent.lastSeen).getTime();
+    // Format agents for frontend display
+    const agentStatuses = agents.map(agent => {
+      const timeDiff = now.getTime() - agent.lastSync.getTime();
       
       // Calculate health score based on status
       let healthScore = 100;
-      if (agent.status === 'warning') healthScore = 75;
-      else if (agent.status === 'offline') healthScore = 0;
+      if (agent.status === 'error') healthScore = 50;
+      else if (agent.status === 'inactive') healthScore = 0;
+      
+      // Count CIs registered by this agent
+      const ciCount = configItems.filter(ci => ci.metadata?.agentId === agent.agentId).length;
       
       return {
-        id: `agent-${agent.agentName.replace(/[^a-zA-Z0-9-]/g, '-')}`,
+        id: agent.agentId,
         hostname: agent.agentName,
-        status: agent.status,
-        lastSeen: agent.lastSeen.toISOString(),
-        ciCount: 0, // Real agents don't track CIs yet
+        status: agent.status === 'active' ? 'online' : agent.status === 'error' ? 'warning' : 'offline',
+        lastSeen: agent.lastSync.toISOString(),
+        ciCount,
         healthScore,
-        metrics: {
+        metrics: agent.metrics || {
           cpu: 0,
           memory: 0,
           disk: 0,
@@ -296,8 +315,8 @@ router.get('/agents/status', (req: Request, res: Response) => {
     
     res.json(agentStatuses);
   } catch (error: any) {
-    console.error('Error fetching real agents:', error.message);
-    res.json([]); // Return empty array on error - NO MOCK DATA
+    console.error('Error fetching agents:', error.message);
+    res.json([]); // Return empty array on error
   }
 });
 

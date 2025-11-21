@@ -1,4 +1,5 @@
-import { CheckSquare, DollarSign, Clock, TrendingUp, Calendar, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckSquare, DollarSign, Clock, TrendingUp, TrendingDown, Calendar, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
@@ -23,6 +24,7 @@ export default function PMDashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: CheckSquare,
+      color: 'from-blue-500 to-blue-600',
     },
     {
       name: 'Budget Utilization',
@@ -31,6 +33,7 @@ export default function PMDashboard() {
       changeType: 'neutral' as const,
       trend: 'up' as const,
       icon: DollarSign,
+      color: 'from-green-500 to-green-600',
     },
     {
       name: 'Pending Approvals',
@@ -39,6 +42,7 @@ export default function PMDashboard() {
       changeType: 'positive' as const,
       trend: 'down' as const,
       icon: Clock,
+      color: 'from-orange-500 to-orange-600',
     },
     {
       name: 'On-Time Delivery',
@@ -47,6 +51,7 @@ export default function PMDashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: TrendingUp,
+      color: 'from-purple-500 to-purple-600',
     },
   ];
 
@@ -163,51 +168,53 @@ export default function PMDashboard() {
     },
   ];
 
-  const budgetData = [
-    { name: 'Jan', budgeted: 38000, actual: 35000 },
-    { name: 'Feb', budgeted: 40000, actual: 38500 },
-    { name: 'Mar', budgeted: 42000, actual: 41000 },
-    { name: 'Apr', budgeted: 45000, actual: 47000 },
-    { name: 'May', budgeted: 43000, actual: 42000 },
-    { name: 'Jun', budgeted: 48000, actual: 45000 },
-  ];
+  // Load real data from APIs - no demo data
+  const [budgetData, setBudgetData] = useState<any[]>([]);
+  const [deliveryData, setDeliveryData] = useState<any[]>([]);
 
-  const deliveryData = [
-    { name: 'Week 1', value: 88 },
-    { name: 'Week 2', value: 90 },
-    { name: 'Week 3', value: 92 },
-    { name: 'Week 4', value: 94 },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [budgetRes, deliveryRes] = await Promise.all([
+          fetch('/api/pm/budget'),
+          fetch('/api/pm/delivery')
+        ]);
+        if (budgetRes.ok) setBudgetData(await budgetRes.json());
+        if (deliveryRes.ok) setDeliveryData(await deliveryRes.json());
+      } catch (error) {
+        console.error('Failed to load PM dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   return (
     <PageTransition>
       <div className="space-y-6">
-        {/* Header */}
+        {/* Hero Section */}
         <FadeIn>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Project Manager Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Project Oversight, Approvals & Cost Management
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Link
-                to="/projects/new"
-                className="btn-primary flex items-center gap-2"
-              >
-                <CheckSquare className="w-4 h-4" />
-                New Project
-              </Link>
-              <Link
-                to="/cost"
-                className="btn-secondary flex items-center gap-2"
-              >
-                <DollarSign className="w-4 h-4" />
-                Cost Analysis
-              </Link>
+          <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white p-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-white/10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold flex items-center gap-3">
+                    Project Manager Dashboard
+                    <CheckSquare className="w-8 h-8" />
+                  </h1>
+                  <p className="text-indigo-100 mt-2 text-lg">
+                    Project Oversight, Approvals & Cost Management
+                  </p>
+                </div>
+                <Link
+                  to="/projects/new"
+                  className="bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
+                >
+                  <CheckSquare className="w-5 h-5" />
+                  New Project
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
             </div>
           </div>
         </FadeIn>
@@ -216,28 +223,32 @@ export default function PMDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {projectMetrics.map((metric, idx) => (
             <FadeIn key={metric.name} delay={idx * 100}>
-              <div className="card p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{metric.name}</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
-                      {metric.value}
-                    </p>
-                    <div className="flex items-center gap-1 mt-2">
-                      {metric.trend === 'up' ? (
-                        <TrendingUp className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <TrendingUp className="w-4 h-4 text-green-500 rotate-180" />
-                      )}
-                      <span className={`text-sm ${
-                        metric.changeType === 'positive' ? 'text-green-600' : 'text-orange-600'
-                      }`}>
-                        {metric.change}
-                      </span>
+              <div className="relative group">
+                <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity`} />
+                <div className="card p-6 relative">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">{metric.name}</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
+                        {metric.value}
+                      </p>
+                      <div className="flex items-center gap-1 mt-3">
+                        {metric.trend === 'up' ? (
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-green-500" />
+                        )}
+                        <span className={`text-sm font-semibold ${
+                          metric.changeType === 'positive' ? 'text-green-600' : 'text-orange-600'
+                        }`}>
+                          {metric.change}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-1">vs last month</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                    <metric.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    <div className={`p-4 rounded-2xl bg-gradient-to-br ${metric.color} shadow-lg`}>
+                      <metric.icon className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </div>
               </div>

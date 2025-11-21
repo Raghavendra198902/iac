@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Activity, Server, AlertTriangle, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import Badge from '../components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
@@ -24,60 +24,29 @@ interface SystemMetric {
 }
 
 const MonitoringDashboard = () => {
-  const [services] = useState<ServiceHealth[]>([
-    {
-      id: '1',
-      name: 'API Gateway',
-      status: 'healthy',
-      uptime: 99.98,
-      responseTime: 45,
-      errorRate: 0.02,
-      requests: 15420,
-    },
-    {
-      id: '2',
-      name: 'Blueprint Service',
-      status: 'healthy',
-      uptime: 99.95,
-      responseTime: 120,
-      errorRate: 0.05,
-      requests: 8340,
-    },
-    {
-      id: '3',
-      name: 'IAC Generator',
-      status: 'degraded',
-      uptime: 98.50,
-      responseTime: 350,
-      errorRate: 1.2,
-      requests: 5230,
-    },
-    {
-      id: '4',
-      name: 'Guardrails Engine',
-      status: 'healthy',
-      uptime: 99.99,
-      responseTime: 80,
-      errorRate: 0.01,
-      requests: 12100,
-    },
-    {
-      id: '5',
-      name: 'Costing Service',
-      status: 'healthy',
-      uptime: 99.92,
-      responseTime: 95,
-      errorRate: 0.08,
-      requests: 6780,
-    },
-  ]);
+  // Load real monitoring data from APIs - no demo data
+  const [services, setServices] = useState<ServiceHealth[]>([]);
+  const [metrics, setMetrics] = useState<SystemMetric[]>([]);
 
-  const [metrics] = useState<SystemMetric[]>([
-    { name: 'CPU Usage', value: 45, unit: '%', trend: 'stable', status: 'good' },
-    { name: 'Memory Usage', value: 68, unit: '%', trend: 'up', status: 'warning' },
-    { name: 'Disk I/O', value: 32, unit: 'MB/s', trend: 'down', status: 'good' },
-    { name: 'Network Traffic', value: 125, unit: 'Mbps', trend: 'up', status: 'good' },
-  ]);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [servicesRes, metricsRes] = await Promise.all([
+          fetch('/api/monitoring/services'),
+          fetch('/api/monitoring/metrics')
+        ]);
+        if (servicesRes.ok) setServices(await servicesRes.json());
+        if (metricsRes.ok) setMetrics(await metricsRes.json());
+      } catch (error) {
+        console.error('Failed to load monitoring data:', error);
+      }
+    };
+    loadData();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getStatusVariant = (status: string) => {
     switch (status) {

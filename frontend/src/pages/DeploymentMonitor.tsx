@@ -1,12 +1,24 @@
 import { Activity, CheckCircle, Loader2, XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function DeploymentMonitor() {
-  const deployments = [
-    { id: '1', blueprint: 'Production Web App', status: 'completed', progress: 100, time: '1 hour ago' },
-    { id: '2', blueprint: 'Dev Environment', status: 'in_progress', progress: 65, time: '30 mins ago' },
-    { id: '3', blueprint: 'Staging Database', status: 'completed', progress: 100, time: '3 hours ago' },
-    { id: '4', blueprint: 'Test Infrastructure', status: 'failed', progress: 45, time: '2 hours ago' },
-  ];
+  // Load real deployments from API - no demo data
+  const [deployments, setDeployments] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadDeployments = async () => {
+      try {
+        const response = await fetch('/api/deployments');
+        if (response.ok) {
+          const data = await response.json();
+          setDeployments(data);
+        }
+      } catch (error) {
+        console.error('Failed to load deployments:', error);
+      }
+    };
+    loadDeployments();
+  }, []);
 
   const getStatusIcon = (status: string) => {
     switch (status) {

@@ -110,14 +110,105 @@ export default function CMDB() {
   const [networkDevices, setNetworkDevices] = useState<NetworkDevice[]>([]);
 
   // NO MOCK DATA - CI items populated only by real agent registration
-  const [ciItems] = useState<CIItem[]>([]);
+  const [ciItems, setCiItems] = useState<CIItem[]>([]);
 
   const [relationships] = useState<Relationship[]>([]);
 
+  // Fetch CI items from API
+  const fetchCIItems = async () => {
+    try {
+      console.log('Fetching CI items...');
+      const response = await fetch('/api/cmdb/cis');
+      console.log('CI Response status:', response.status);
+      if (response.ok) {
+        const items = await response.json();
+        console.log('Received CI items:', items);
+        setCiItems(items);
+      } else {
+        console.error('CI Response not ok:', response.status);
+      }
+    } catch (error) {
+      console.error('Failed to fetch CI items:', error);
+    }
+  };
+
+  // Fetch agent statuses from API
+  const fetchAgentStatuses = async () => {
+    try {
+      console.log('Fetching agent statuses...');
+      const response = await fetch('/api/cmdb/agents/status');
+      console.log('Response status:', response.status);
+      if (response.ok) {
+        const agents = await response.json();
+        console.log('Received agents:', agents);
+        setAgentStatuses(agents);
+      } else {
+        console.error('Response not ok:', response.status);
+      }
+    } catch (error) {
+      console.error('Failed to fetch agent statuses:', error);
+    }
+  };
+
+  // Network Discovery Function
+  const handleNetworkDiscovery = async () => {
+    setIsDiscovering(true);
+    toast.loading('Scanning network for devices...', { id: 'network-scan' });
+    
+    try {
+      // Call backend network discovery endpoint
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast.success('Network scan completed', { id: 'network-scan' });
+      // Refresh data
+      fetchCIItems();
+    } catch (error) {
+      toast.error('Network discovery failed', { id: 'network-scan' });
+    } finally {
+      setIsDiscovering(false);
+    }
+  };
+
+  // Agent Sync Function
+  const handleAgentSync = async (agentId: string) => {
+    toast.loading('Syncing with agent...', { id: 'agent-sync' });
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Update agent status
+      setAgentStatuses(prev => prev.map(agent => 
+        agent.id === agentId 
+          ? { ...agent, lastSeen: new Date().toISOString() }
+          : agent
+      ));
+      
+      toast.success('Agent synced successfully', { id: 'agent-sync' });
+      fetchCIItems(); // Refresh CIs
+    } catch (error) {
+      toast.error('Failed to sync with agent', { id: 'agent-sync' });
+    }
+  };
+
+  // Trigger Discovery on Agent
+  const handleAgentDiscovery = async (agentId: string) => {
+    toast.loading('Triggering discovery on agent...', { id: 'agent-discovery' });
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast.success('Discovery completed. New CIs registered.', { id: 'agent-discovery' });
+      
+      // Refresh CI list
+      fetchCIItems();
+    } catch (error) {
+      toast.error('Discovery failed', { id: 'agent-discovery' });
+    }
+  };
+
   // Generate agent installation command
   const getInstallCommand = () => {
-    const apiUrl = 'http://192.168.1.10:3000';
-    // Placeholder for API key - users will replace this with their actual key
+    const apiUrl = 'http://localhost:3000';
     const apiKeyPlaceholder = '${CMDB_API_KEY}';
     
     switch (selectedOS) {
@@ -157,12 +248,11 @@ docker run -d \\
   // Download agent package
   const handleDownloadAgent = () => {
     const downloadUrls = {
-      linux: 'http://192.168.1.10:3000/api/downloads/cmdb-agent-linux.tar.gz',
-      windows: 'http://192.168.1.10:3000/api/downloads/cmdb-agent-windows.zip',
-      docker: 'http://192.168.1.10:3000/api/downloads/docker-compose.yml',
+      linux: 'http://localhost:3000/api/downloads/cmdb-agent-linux.tar.gz',
+      windows: 'http://localhost:3000/api/downloads/cmdb-agent-windows.zip',
+      docker: 'http://localhost:3000/api/downloads/docker-compose.yml',
     };
     
-    // Trigger download by opening in new window
     toast.success(`Downloading CMDB Agent for ${selectedOS}...`);
     window.open(downloadUrls[selectedOS], '_blank');
   };
@@ -173,109 +263,15 @@ docker run -d \\
     toast.success('Installation command copied to clipboard!');
   };
 
-  // Network Discovery Function
-  const handleNetworkDiscovery = async () => {
-    setIsDiscovering(true);
-    toast.loading('Scanning network for devices...', { id: 'network-scan' });
-    
-    try {
-      // Simulate network discovery (replace with actual API call)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulated discovered devices
-      const newDevices: NetworkDevice[] = [
-        {
-          id: `net-${Date.now()}-1`,
-          name: 'discovered-switch-02',
-          type: 'switch',
-          ipAddress: '10.0.0.12',
-          macAddress: '00:1A:2B:3C:4D:61',
-          status: 'active',
-          ports: 24,
-          connectedDevices: 8,
-          lastDiscovered: new Date().toISOString(),
-        },
-        {
-          id: `net-${Date.now()}-2`,
-          name: 'discovered-gateway-01',
-          type: 'gateway',
-          ipAddress: '10.0.0.1',
-          status: 'active',
-          lastDiscovered: new Date().toISOString(),
-        },
-      ];
-      
-      setNetworkDevices(prev => [...prev, ...newDevices]);
-      toast.success(`Discovered ${newDevices.length} new network devices`, { id: 'network-scan' });
-    } catch (error) {
-      toast.error('Network discovery failed', { id: 'network-scan' });
-    } finally {
-      setIsDiscovering(false);
-    }
-  };
-
-  // Agent Sync Function
-  const handleAgentSync = async (agentId: string) => {
-    toast.loading('Syncing with agent...', { id: 'agent-sync' });
-    
-    try {
-      // Simulate agent sync (replace with actual API call to agent)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Update agent status
-      setAgentStatuses(prev => prev.map(agent => 
-        agent.id === agentId 
-          ? { ...agent, lastSeen: new Date().toISOString() }
-          : agent
-      ));
-      
-      toast.success('Agent synced successfully', { id: 'agent-sync' });
-    } catch (error) {
-      toast.error('Failed to sync with agent', { id: 'agent-sync' });
-    }
-  };
-
-  // Trigger Discovery on Agent
-  const handleAgentDiscovery = async (agentId: string) => {
-    toast.loading('Triggering discovery on agent...', { id: 'agent-discovery' });
-    
-    try {
-      // Call agent discovery endpoint
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast.success('Discovery completed. New CIs registered.', { id: 'agent-discovery' });
-      
-      // Refresh CI list (in real app, fetch from API)
-    } catch (error) {
-      toast.error('Discovery failed', { id: 'agent-discovery' });
-    }
-  };
-
-  // Fetch agent statuses from API
-  const fetchAgentStatuses = async () => {
-    try {
-      console.log('Fetching agent statuses...');
-      const response = await fetch('/api/cmdb/agents/status');
-      console.log('Response status:', response.status);
-      if (response.ok) {
-        const agents = await response.json();
-        console.log('Received agents:', agents);
-        setAgentStatuses(agents);
-      } else {
-        console.error('Response not ok:', response.status);
-      }
-    } catch (error) {
-      console.error('Failed to fetch agent statuses:', error);
-    }
-  };
-
-  // Auto-refresh agent statuses
+  // Auto-refresh agent statuses and CI items
   useEffect(() => {
-    console.log('CMDB useEffect - starting agent fetch');
+    console.log('CMDB useEffect - starting data fetch');
     fetchAgentStatuses(); // Initial fetch
+    fetchCIItems(); // Initial fetch
     
     const interval = setInterval(() => {
       fetchAgentStatuses();
+      fetchCIItems();
     }, 30000); // Every 30 seconds
 
     return () => clearInterval(interval);

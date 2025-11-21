@@ -50,29 +50,9 @@ export default function BlueprintEdit() {
         }
       }
       
-      // Fallback to mock data
-      setBlueprint({
-        id: blueprintId,
-        name: 'Sample Infrastructure Blueprint',
-        description: 'A sample blueprint for demonstration purposes',
-        version: '1.0.0',
-        targetCloud: 'aws',
-        environment: 'production',
-        resources: [
-          {
-            id: '1',
-            type: 'vpc',
-            name: 'main-vpc',
-            quantity: 1,
-            properties: { cidr: '10.0.0.0/16' },
-            estimatedCost: 0,
-          },
-        ],
-        metadata: {},
-        createdBy: 'demo@example.com',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+      // No fallback mock data - show error if blueprint not found
+      toast.error('Blueprint not found. Please create a blueprint first.');
+      navigate('/blueprints');
     } finally {
       setLoading(false);
     }

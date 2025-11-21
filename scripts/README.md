@@ -1,23 +1,186 @@
-# Citadel CMDB - Utility Scripts
+# IAC Dharma - Utility Scripts
 
-This directory contains utility scripts for the Citadel CMDB platform.
+Comprehensive collection of utility scripts organized by function for easy maintenance and discovery.
 
-## Demo Data Seeder
+> 📖 **Quick Links**: [Main README](../README.md) | [Documentation Index](../docs/README.md) | [Deployment Guide](../docs/deployment/DEPLOYMENT_GUIDE.md)
 
-Seeds the database with realistic demo data matching the production UI.
+## 📚 Related Documentation
 
-### What Gets Created
+- **[Deployment Guide](../docs/deployment/DEPLOYMENT_GUIDE.md)** - How to deploy the platform
+- **[CMDB Documentation](../docs/cmdb/CMDB_COMPLETE_DOCUMENTATION.md)** - CMDB setup and usage
+- **[Testing Guide](../docs/testing/)** - Testing strategies
+- **[CI/CD Guide](../docs/ci-cd/CI_CD_GUIDE.md)** - Continuous integration
 
-**Agents (3):**
-- `web-server-prod-01` - 98% health, online
-- `api-server-prod-01` - 95% health, online  
-- `db-server-prod-01` - 78% health, warning
+## 📁 Directory Structure
 
-**Configuration Items (16 total):**
-- 5 CIs for web-server
-- 8 CIs for api-server
-- 3 CIs for db-server
-- Types: Application, Operating System, Network, Hardware, Storage, Database
+### `/database`
+Database backup, restore, and management
+- **backup-database.sh** - Backup PostgreSQL database
+- **restore-database.sh** - Restore database from backup
+
+Usage:
+```bash
+./scripts/database/backup-database.sh
+./scripts/database/restore-database.sh <backup-file>
+```
+
+📖 **Documentation**: [Deployment Guide](../docs/deployment/DEPLOYMENT_GUIDE.md) | [Database Schemas](../database/)
+
+### `/testing`
+Testing and validation scripts
+- **test-integration.sh** - Run integration tests
+- **test-load.sh** - Load testing script (moved from load-test.sh)
+- **test-websocket.sh** - WebSocket connectivity tests
+
+Usage:
+```bash
+./scripts/testing/test-integration.sh
+./scripts/testing/test-load.sh
+./scripts/testing/test-websocket.sh
+```
+
+📖 **Documentation**: [Testing Guide](../docs/testing/) | [Test Summary](../docs/testing/TEST_SUMMARY.md) | [Load Testing Report](../docs/testing/LOAD_TESTING_REPORT.md)
+
+### `/deployment`
+Platform deployment and orchestration
+- **start-platform.sh** - Start all platform services
+- **stop-platform.sh** - Stop all platform services
+- **k8s-deploy.sh** - Deploy to Kubernetes
+- **k8s-status.sh** - Check Kubernetes deployment status
+- **validate-deployment.sh** - Validate deployment health
+
+Usage:
+```bash
+./scripts/deployment/start-platform.sh
+./scripts/deployment/k8s-deploy.sh
+./scripts/deployment/validate-deployment.sh
+```
+
+📖 **Documentation**: [Deployment Guide](../docs/deployment/DEPLOYMENT_GUIDE.md) | [Kubernetes Guide](../docs/deployment/KUBERNETES_GUIDE.md) | [CI/CD Guide](../docs/ci-cd/CI_CD_GUIDE.md)
+
+### `/monitoring`
+System monitoring and health checks
+- **health-check.sh** - Platform health check
+- **logs.sh** - View service logs
+- **performance-profile.sh** - Performance profiling
+
+Usage:
+```bash
+./scripts/monitoring/health-check.sh
+./scripts/monitoring/logs.sh [service-name]
+./scripts/monitoring/performance-profile.sh
+```
+
+📖 **Documentation**: [Performance Report](../docs/performance/performance-profiling-report.md) | [Troubleshooting Guide](../docs/troubleshooting/) | [CMDB Monitoring](../docs/cmdb/CMDB_COMPLETE_DOCUMENTATION.md)
+
+### `/security`
+Security auditing and DLP testing
+- **security-audit.sh** - Run security audit
+- **test-dlp.sh** - Test DLP functionality (Linux)
+- **test-agent-dlp.ps1** - Test agent DLP (Windows PowerShell)
+- **enable-audit-policy.ps1** - Enable Windows audit policies
+
+Usage:
+```bash
+./scripts/security/security-audit.sh
+./scripts/security/test-dlp.sh
+
+# Windows
+powershell -ExecutionPolicy Bypass ./scripts/security/test-agent-dlp.ps1
+```
+
+📖 **Documentation**: [DLP Implementation](../docs/security/DATA_LEAKAGE_CONTROL_IMPLEMENTATION.md) | [DLP Quick Reference](../docs/security/DLP_QUICK_REFERENCE.md) | [Security Audit Report](../docs/security/security-audit-report.md)
+
+### `/data`
+Data seeding and demo data management
+- **seed-demo-data.sh** - Seed demo data
+- **seed-demo-data.ts** - TypeScript data seeding
+- **seed-all.sh** - Seed all data types
+- **seed-cmdb-data.js** - CMDB-specific data
+- **seed-network-devices.js** - Network device data
+- **clean-demo-data.js** - Remove demo data
+
+Usage:
+```bash
+./scripts/data/seed-all.sh
+./scripts/data/clean-demo-data.js
+```
+
+📖 **Documentation**: [CMDB Guide](../docs/cmdb/CMDB_COMPLETE_DOCUMENTATION.md) | [Mock Data Removal](../docs/status/MOCK_DATA_REMOVAL_SUMMARY.md)
+
+### `/validation`
+Validation and verification scripts
+- **verify-ci-cd-setup.sh** - Verify CI/CD configuration
+- **verify-demo-data.sh** - Check demo data integrity
+- **verify-real-data-only.sh** - Ensure no demo data present
+
+Usage:
+```bash
+./scripts/validation/verify-ci-cd-setup.sh
+./scripts/validation/verify-real-data-only.sh
+```
+
+📖 **Documentation**: [CI/CD Guide](../docs/ci-cd/CI_CD_GUIDE.md) | [Testing Guide](../docs/testing/) | [Project Status](../docs/status/)
+
+## 📚 Quick Workflows
+
+### Complete Platform Deployment
+```bash
+# 1. Deploy platform
+./scripts/deployment/start-platform.sh
+
+# 2. Validate deployment
+./scripts/deployment/validate-deployment.sh
+
+# 3. Check health
+./scripts/monitoring/health-check.sh
+
+# 4. Seed data (optional)
+./scripts/data/seed-all.sh
+```
+
+### Testing Workflow
+```bash
+# 1. Run integration tests
+./scripts/testing/test-integration.sh
+
+# 2. Run load tests
+./scripts/testing/test-load.sh
+
+# 3. Verify deployment
+./scripts/validation/verify-real-data-only.sh
+```
+
+### Security Audit
+```bash
+# 1. Run security audit
+./scripts/security/security-audit.sh
+
+# 2. Test DLP functionality
+./scripts/security/test-dlp.sh
+
+# 3. Review audit results
+cat ../docs/security/security-audit-report.md
+```
+
+## 🔗 Related Resources
+
+- **[Complete Documentation](../docs/README.md)** - All documentation organized
+- **[Main README](../README.md)** - Project overview
+- **[Deployment Guide](../docs/deployment/DEPLOYMENT_GUIDE.md)** - Deployment instructions
+- **[Quick Reference](../docs/guides/QUICK_REFERENCE.md)** - Common commands
+
+## 🔧 Prerequisites
+
+Most scripts require:
+- Docker and Docker Compose installed
+- Appropriate permissions (some may need sudo)
+- Environment variables configured (see `.env.example`)
+- For PowerShell scripts: Windows PowerShell 5.1+ or PowerShell Core 7+
+
+## 📝 Adding New Scripts
+
+When adding new scripts:
 
 **Network Devices (3):**
 - `core-router-01` - 48 ports, 32 connected devices

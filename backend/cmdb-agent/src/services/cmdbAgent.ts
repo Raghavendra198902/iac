@@ -51,6 +51,9 @@ export class CMDBAgent {
       const systemInfo = await this.systemMonitor.getSystemInfo();
       logger.info('System information collected', { hostname: systemInfo.hostname });
 
+      // Register agent itself first
+      await this.registerAgent(systemInfo);
+
       // Check if already registered
       const existingCI = await this.cmdbClient.getCIById(this.ciId);
 
@@ -67,6 +70,32 @@ export class CMDBAgent {
     } catch (error) {
       logger.error('Agent initialization failed', { error });
       throw error;
+    }
+  }
+
+  private async registerAgent(systemInfo: any): Promise<void> {
+    try {
+      const agentData = {
+        agentId: this.config.agentId,
+        agentName: this.config.agentName,
+        ipAddress: systemInfo.primaryIP,
+        hostname: systemInfo.hostname,
+        os: `${systemInfo.platform} ${systemInfo.osRelease}`,
+        metadata: {
+          agentVersion: process.env.AGENT_VERSION || '1.0.0',
+          environment: this.config.environment,
+          platform: systemInfo.platform,
+          osDistro: systemInfo.osDistro,
+          cpuModel: systemInfo.cpuModel,
+          cpuCores: systemInfo.cpuCores,
+        },
+      };
+
+      await this.cmdbClient.registerAgent(agentData);
+      logger.info('Agent registered successfully', { agentId: this.config.agentId });
+    } catch (error) {
+      logger.error('Failed to register agent', { error });
+      // Don't throw - continue with CI registration
     }
   }
 
@@ -155,6 +184,9 @@ export class CMDBAgent {
   async collectAndSendMetrics(): Promise<void> {
     try {
       const metrics = await this.systemMonitor.getSystemMetrics();
+      
+      // Send heartbeat to keep agent status active
+      await this.cmdbClient.sendHeartbeat(this.config.agentId, metrics);
       
       const success = await this.cmdbClient.sendMetrics(this.ciId, metrics);
       

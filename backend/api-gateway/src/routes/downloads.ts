@@ -205,6 +205,91 @@ router.get('/docker-compose.yml', downloadLimiter, (req: Request, res: Response)
 });
 
 /**
+ * @route   GET /api/downloads/agent-manual.pdf
+ * @desc    Download CMDB Agent user manual (README as HTML)
+ * @access  Public
+ */
+router.get('/agent-manual.pdf', downloadLimiter, (req: Request, res: Response) => {
+  try {
+    const readmePath = path.join(AGENT_SOURCE_PATH, 'README.md');
+    
+    if (!fs.existsSync(readmePath)) {
+      return res.status(404).json({ error: 'Agent manual not found' });
+    }
+
+    const readmeContent = fs.readFileSync(readmePath, 'utf8');
+    
+    // Convert markdown to simple HTML for display
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CMDB Agent User Manual</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+    h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 30px; }
+    h3 { color: #7f8c8d; margin-top: 20px; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    pre {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    pre code {
+      background: transparent;
+      color: #ecf0f1;
+    }
+    ul, ol { margin-left: 20px; }
+    li { margin-bottom: 8px; }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      margin: -20px -20px 30px -20px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 style="color: white; border: none; margin: 0;">CMDB Agent User Manual</h1>
+    <p style="margin: 10px 0 0 0; opacity: 0.9;">Infrastructure Auto-Discovery & Monitoring Agent</p>
+  </div>
+  <pre>${readmeContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+  <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #7f8c8d; text-align: center;">
+    <p>Generated: ${new Date().toLocaleString()}</p>
+  </div>
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Disposition', 'inline; filename="agent-manual.html"');
+    res.send(htmlContent);
+    
+    logger.info('Agent manual served');
+  } catch (error) {
+    logger.error('Error serving agent manual:', error);
+    res.status(500).json({ error: 'Failed to retrieve agent manual' });
+  }
+});
+
+/**
  * @route   GET /api/downloads/agent-info
  * @desc    Get CMDB Agent package information
  * @access  Public

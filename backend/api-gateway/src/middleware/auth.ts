@@ -25,6 +25,24 @@ export const authMiddleware = async (
       return next();
     }
 
+    // Allow CMDB agent endpoints with API key authentication
+    if (req.path.startsWith('/cmdb')) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const apiKey = authHeader.substring(7);
+        // For development, accept any API key. In production, validate against stored keys
+        if (apiKey) {
+          req.user = {
+            id: 'agent-system',
+            email: 'agent@system',
+            roles: ['agent'],
+            tenantId: 'default-tenant'
+          };
+          return next();
+        }
+      }
+    }
+
     // Extract token from Authorization header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

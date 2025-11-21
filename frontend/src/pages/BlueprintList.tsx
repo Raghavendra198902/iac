@@ -1,13 +1,38 @@
 import { FileText, Plus, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
+interface Blueprint {
+  id: string;
+  name: string;
+  cloud: string;
+  environment: string;
+  resources: number;
+  status: string;
+  updatedAt: string;
+}
 
 export default function BlueprintList() {
-  const blueprints = [
-    { id: '1', name: 'Production Web App', cloud: 'Azure', environment: 'Production', resources: 12, status: 'Active', updatedAt: '2 hours ago' },
-    { id: '2', name: 'Microservices Stack', cloud: 'AWS', environment: 'Production', resources: 24, status: 'Active', updatedAt: '5 hours ago' },
-    { id: '3', name: 'Data Analytics Pipeline', cloud: 'GCP', environment: 'Staging', resources: 8, status: 'Draft', updatedAt: '1 day ago' },
-    { id: '4', name: 'Dev Environment', cloud: 'Azure', environment: 'Development', resources: 5, status: 'Active', updatedAt: '2 days ago' },
-  ];
+  // Load blueprints from API - no demo data
+  const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadBlueprints = async () => {
+      try {
+        const response = await fetch('/api/blueprints');
+        if (response.ok) {
+          const data = await response.json();
+          setBlueprints(data);
+        }
+      } catch (error) {
+        console.error('Failed to load blueprints:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBlueprints();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -44,7 +69,26 @@ export default function BlueprintList() {
         </div>
 
         <div className="space-y-3">
-          {blueprints.map((blueprint) => (
+          {loading ? (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              Loading blueprints...
+            </div>
+          ) : blueprints.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                No blueprints yet
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Create your first blueprint using the AI Designer
+              </p>
+              <Link to="/designer" className="btn-primary inline-flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Create Blueprint
+              </Link>
+            </div>
+          ) : (
+            blueprints.map((blueprint) => (
             <Link
               key={blueprint.id}
               to={`/blueprints/${blueprint.id}`}
@@ -68,7 +112,8 @@ export default function BlueprintList() {
                 <span className="text-sm text-gray-500 dark:text-gray-400">{blueprint.updatedAt}</span>
               </div>
             </Link>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

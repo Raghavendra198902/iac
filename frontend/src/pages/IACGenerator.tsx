@@ -21,64 +21,26 @@ interface IACTemplate {
 }
 
 const IACGenerator = () => {
-  const [templates, setTemplates] = useState<IACTemplate[]>([
-    {
-      id: '1',
-      name: 'AWS VPC with Public Subnets',
-      provider: 'aws',
-      description: 'Production-ready VPC with 3 availability zones',
-      resources: 15,
-      status: 'validated',
-    },
-    {
-      id: '2',
-      name: 'Kubernetes Cluster (EKS)',
-      provider: 'aws',
-      description: 'Managed Kubernetes with auto-scaling node groups',
-      resources: 24,
-      status: 'validated',
-    },
-    {
-      id: '3',
-      name: 'Azure App Service + SQL',
-      provider: 'azure',
-      description: 'Web app with managed database',
-      resources: 12,
-      status: 'draft',
-    },
-    {
-      id: '4',
-      name: 'AWS Lambda + API Gateway',
-      provider: 'aws',
-      description: 'Serverless API with Lambda functions',
-      resources: 18,
-      status: 'validated',
-    },
-    {
-      id: '5',
-      name: 'AWS RDS Multi-AZ + Read Replicas',
-      provider: 'aws',
-      description: 'High-availability PostgreSQL database',
-      resources: 10,
-      status: 'validated',
-    },
-    {
-      id: '6',
-      name: 'AWS S3 + CloudFront CDN',
-      provider: 'aws',
-      description: 'Static website with global CDN',
-      resources: 8,
-      status: 'validated',
-    },
-    {
-      id: '7',
-      name: 'GCP Compute + Load Balancer',
-      provider: 'gcp',
-      description: 'Auto-scaling compute instances with global LB',
-      resources: 14,
-      status: 'draft',
-    },
-  ]);
+  // Templates will be loaded from API or created by users - no demo data
+  const [templates, setTemplates] = useState<IACTemplate[]>([]);
+
+  // Load templates from API on mount
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        // TODO: Replace with actual API endpoint when backend is ready
+        // const response = await fetch('/api/iac/templates');
+        // const data = await response.json();
+        // setTemplates(data);
+        
+        // For now, templates will be created by users or imported from AI Designer
+        setTemplates([]);
+      } catch (error) {
+        console.error('Failed to load templates:', error);
+      }
+    };
+    loadTemplates();
+  }, []);
 
   const [selectedTemplate, setSelectedTemplate] = useState<IACTemplate | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -1155,6 +1117,14 @@ output "load_balancer_ip" {
     }
   };
 
+  // Calculate real stats from templates
+  const stats = {
+    total: templates.length,
+    validated: templates.filter(t => t.status === 'validated').length,
+    deployed: templates.filter(t => t.status === 'deployed').length,
+    resources: templates.reduce((sum, t) => sum + t.resources, 0),
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -1167,7 +1137,10 @@ output "load_balancer_ip" {
             Generate, validate, and deploy infrastructure code
           </p>
         </div>
-        <button className="btn btn-primary flex items-center gap-2">
+        <button 
+          className="btn btn-primary flex items-center gap-2"
+          onClick={() => setShowCreateTemplate(true)}
+        >
           <Code className="w-4 h-4" />
           New Template
         </button>
@@ -1179,7 +1152,7 @@ output "load_balancer_ip" {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Total Templates</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">24</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
             </div>
             <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
@@ -1189,7 +1162,7 @@ output "load_balancer_ip" {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Validated</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">18</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.validated}</p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
@@ -1199,7 +1172,7 @@ output "load_balancer_ip" {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Deployed</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">12</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.deployed}</p>
             </div>
             <Play className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
           </div>
@@ -1209,7 +1182,7 @@ output "load_balancer_ip" {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Resources</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">347</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.resources}</p>
             </div>
             <Settings className="w-8 h-8 text-purple-600 dark:text-purple-400" />
           </div>
@@ -1240,8 +1213,26 @@ output "load_balancer_ip" {
 
           <TabsContent value="all">
             <div className="p-6">
-              <div className="space-y-4">
-                {templates.map((template) => (
+              {templates.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No templates yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Create your first infrastructure template or import from AI Designer
+                  </p>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => setShowCreateTemplate(true)}
+                  >
+                    <Code className="w-4 h-4 mr-2" />
+                    Create Template
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {templates.map((template) => (
                   <div
                     key={template.id}
                     className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer"
@@ -1293,11 +1284,23 @@ output "load_balancer_ip" {
                   </div>
                 ))}
               </div>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="aws">
             <div className="p-6">
+              {templates.filter((t) => t.provider === 'aws').length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-orange-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No AWS templates
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Create AWS infrastructure templates
+                  </p>
+                </div>
+              ) : (
               <div className="space-y-4">
                 {templates
                   .filter((t) => t.provider === 'aws')
@@ -1350,11 +1353,23 @@ output "load_balancer_ip" {
                     </div>
                   ))}
               </div>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="azure">
             <div className="p-6">
+              {templates.filter((t) => t.provider === 'azure').length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No Azure templates
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Create Azure infrastructure templates
+                  </p>
+                </div>
+              ) : (
               <div className="space-y-4">
                 {templates
                   .filter((t) => t.provider === 'azure')
@@ -1407,11 +1422,23 @@ output "load_balancer_ip" {
                     </div>
                   ))}
               </div>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="gcp">
             <div className="p-6">
+              {templates.filter((t) => t.provider === 'gcp').length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No GCP templates
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Create Google Cloud Platform infrastructure templates
+                  </p>
+                </div>
+              ) : (
               <div className="space-y-4">
                 {templates
                   .filter((t) => t.provider === 'gcp')
@@ -1464,11 +1491,30 @@ output "load_balancer_ip" {
                     </div>
                   ))}
               </div>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="inhouse">
             <div className="p-6">
+              {templates.filter((t) => t.provider === 'inhouse').length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No in-house templates
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Create custom infrastructure templates for your organization
+                  </p>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => setShowCreateTemplate(true)}
+                  >
+                    <Code className="w-4 h-4 mr-2" />
+                    Create Template
+                  </button>
+                </div>
+              ) : (
               <div className="space-y-4">
                 {templates
                   .filter((t) => t.provider === 'inhouse')
@@ -1520,25 +1566,8 @@ output "load_balancer_ip" {
                       </div>
                     </div>
                   ))}
-                {templates.filter((t) => t.provider === 'inhouse').length === 0 && (
-                  <div className="text-center py-12">
-                    <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      No In-House Templates Yet
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
-                      Create custom templates for your organization's specific needs
-                    </p>
-                    <button 
-                      className="btn btn-primary"
-                      onClick={() => setShowCreateTemplate(true)}
-                    >
-                      <Code className="w-4 h-4 mr-2" />
-                      Create Custom Template
-                    </button>
-                  </div>
-                )}
               </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

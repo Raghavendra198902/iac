@@ -1,4 +1,5 @@
-import { Lightbulb, FileText, Sparkles, TrendingUp, DollarSign, Zap } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Lightbulb, FileText, Sparkles, TrendingUp, TrendingDown, DollarSign, Zap, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
@@ -23,6 +24,7 @@ export default function SADashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: FileText,
+      color: 'from-blue-500 to-blue-600',
     },
     {
       name: 'AI Suggestions Used',
@@ -31,6 +33,7 @@ export default function SADashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: Sparkles,
+      color: 'from-purple-500 to-purple-600',
     },
     {
       name: 'Est. Cost Savings',
@@ -39,6 +42,7 @@ export default function SADashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: DollarSign,
+      color: 'from-green-500 to-green-600',
     },
     {
       name: 'Design Quality Score',
@@ -47,136 +51,66 @@ export default function SADashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: TrendingUp,
+      color: 'from-orange-500 to-orange-600',
     },
   ];
 
-  const myBlueprints = [
-    {
-      id: '1',
-      name: 'E-Commerce Platform - AWS',
-      status: 'In Progress',
-      cloud: 'AWS',
-      resources: 47,
-      estimatedCost: '$3,200/mo',
-      aiOptimizations: 8,
-      lastModified: '2 hours ago',
-      completeness: 75,
-    },
-    {
-      id: '2',
-      name: 'Data Analytics Pipeline - Azure',
-      status: 'Ready for Review',
-      cloud: 'Azure',
-      resources: 32,
-      estimatedCost: '$2,100/mo',
-      aiOptimizations: 12,
-      lastModified: '1 day ago',
-      completeness: 95,
-    },
-    {
-      id: '3',
-      name: 'IoT Backend - GCP',
-      status: 'Draft',
-      cloud: 'GCP',
-      resources: 28,
-      estimatedCost: '$1,800/mo',
-      aiOptimizations: 5,
-      lastModified: '3 days ago',
-      completeness: 45,
-    },
-  ];
+  // Load real data from APIs - no demo data
+  const [myBlueprints, setMyBlueprints] = useState<any[]>([]);
+  const [aiRecommendations, setAiRecommendations] = useState<any[]>([]);
+  const [patternUsage, setPatternUsage] = useState<any[]>([]);
+  const [costProjections, setCostProjections] = useState<any[]>([]);
+  const [designQualityData, setDesignQualityData] = useState<any[]>([]);
 
-  const aiRecommendations = [
-    {
-      id: '1',
-      type: 'Cost Optimization',
-      blueprint: 'E-Commerce Platform',
-      suggestion: 'Switch to Reserved Instances for RDS',
-      impact: 'High',
-      savings: '$890/mo',
-      confidence: 95,
-    },
-    {
-      id: '2',
-      type: 'Performance',
-      blueprint: 'Data Analytics Pipeline',
-      suggestion: 'Add CloudFront CDN for static assets',
-      impact: 'Medium',
-      savings: 'Latency -40%',
-      confidence: 88,
-    },
-    {
-      id: '3',
-      type: 'Security',
-      blueprint: 'IoT Backend',
-      suggestion: 'Enable encryption at rest for all storage',
-      impact: 'High',
-      savings: 'Risk -60%',
-      confidence: 92,
-    },
-    {
-      id: '4',
-      type: 'Scalability',
-      blueprint: 'E-Commerce Platform',
-      suggestion: 'Implement auto-scaling for API tier',
-      impact: 'High',
-      savings: 'Capacity +200%',
-      confidence: 90,
-    },
-  ];
-
-  const patternUsage = [
-    { name: 'Microservices', count: 12, trend: 'up', description: 'Container-based architecture' },
-    { name: 'Serverless API', count: 8, trend: 'up', description: 'Lambda + API Gateway' },
-    { name: 'Data Lake', count: 5, trend: 'stable', description: 'S3 + Athena + Glue' },
-    { name: 'Event-Driven', count: 7, trend: 'up', description: 'SNS/SQS messaging' },
-    { name: 'CDN + WAF', count: 10, trend: 'stable', description: 'CloudFront security' },
-  ];
-
-  const costProjections = [
-    { name: 'Jan', value: 18500 },
-    { name: 'Feb', value: 19200 },
-    { name: 'Mar', value: 17800 },
-    { name: 'Apr', value: 21000 },
-    { name: 'May', value: 19500 },
-    { name: 'Jun', value: 18200 },
-  ];
-
-  const designQualityData = [
-    { name: 'Week 1', value: 8.2 },
-    { name: 'Week 2', value: 8.5 },
-    { name: 'Week 3', value: 8.7 },
-    { name: 'Week 4', value: 8.9 },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [blueprintsRes, recommendationsRes, patternsRes, costsRes, qualityRes] = await Promise.all([
+          fetch('/api/sa/blueprints'),
+          fetch('/api/sa/recommendations'),
+          fetch('/api/sa/patterns'),
+          fetch('/api/metrics/cost-projections'),
+          fetch('/api/metrics/design-quality')
+        ]);
+        if (blueprintsRes.ok) setMyBlueprints(await blueprintsRes.json());
+        if (recommendationsRes.ok) setAiRecommendations(await recommendationsRes.json());
+        if (patternsRes.ok) setPatternUsage(await patternsRes.json());
+        if (costsRes.ok) setCostProjections(await costsRes.json());
+        if (qualityRes.ok) setDesignQualityData(await qualityRes.json());
+      } catch (error) {
+        console.error('Failed to load SA dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   return (
     <PageTransition>
       <div className="space-y-6">
-        {/* Header */}
+        {/* Hero Section */}
         <FadeIn>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Solution Architect Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Blueprint Design & AI-Assisted Architecture
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Link
-                to="/designer"
-                className="btn-primary flex items-center gap-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                AI Designer
-              </Link>
-              <Link
-                to="/blueprints/new"
-                className="btn-secondary"
-              >
-                New Blueprint
-              </Link>
+          <div className="rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white p-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-white/10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold flex items-center gap-3">
+                    Solution Architect Dashboard
+                    <Sparkles className="w-8 h-8" />
+                  </h1>
+                  <p className="text-blue-100 mt-2 text-lg">
+                    Blueprint Design & AI-Assisted Architecture
+                  </p>
+                </div>
+                <Link
+                  to="/designer"
+                  className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  AI Designer
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
             </div>
           </div>
         </FadeIn>
@@ -185,36 +119,32 @@ export default function SADashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {designMetrics.map((metric, idx) => (
             <FadeIn key={metric.name} delay={idx * 100}>
-              <div className="card p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{metric.name}</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
-                      {metric.value}
-                    </p>
-                    <div className="flex items-center gap-1 mt-2">
-                      {metric.trend === 'up' ? (
-                        <TrendingUp className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <TrendingUp className="w-4 h-4 text-red-500 rotate-180" />
-                      )}
-                      <span className={`text-sm ${
-                        metric.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {metric.change}
-                      </span>
+              <div className="relative group">
+                <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity`} />
+                <div className="card p-6 relative">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">{metric.name}</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
+                        {metric.value}
+                      </p>
+                      <div className="flex items-center gap-1 mt-3">
+                        {metric.trend === 'up' ? (
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-500" />
+                        )}
+                        <span className={`text-sm font-semibold ${
+                          metric.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {metric.change}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-1">vs last month</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className={`p-3 rounded-lg ${
-                    metric.changeType === 'positive' 
-                      ? 'bg-blue-100 dark:bg-blue-900/20' 
-                      : 'bg-red-100 dark:bg-red-900/20'
-                  }`}>
-                    <metric.icon className={`w-6 h-6 ${
-                      metric.changeType === 'positive' 
-                        ? 'text-blue-600 dark:text-blue-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`} />
+                    <div className={`p-4 rounded-2xl bg-gradient-to-br ${metric.color} shadow-lg`}>
+                      <metric.icon className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </div>
               </div>

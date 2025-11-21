@@ -26,10 +26,62 @@ export default function NLPDesigner() {
   const [activeTab, setActiveTab] = useState<'blueprint' | 'command'>('blueprint');
 
   const examples = [
+    // Web Applications
     "I need a scalable web application on Azure with a PostgreSQL database and load balancer for production",
-    "Create a microservices architecture on AWS with Kubernetes, Redis caching, and RDS database",
-    "Setup a data analytics pipeline on GCP with Cloud Storage, BigQuery, and Dataflow for processing",
     "Deploy a high-availability WordPress site on Azure with CDN, auto-scaling VMs, and MySQL database",
+    "Create a React app with Node.js backend on AWS using ECS, ALB, and RDS PostgreSQL",
+    "Setup a Django web app on GCP with Cloud SQL, Cloud Storage for static files, and Cloud Run",
+    
+    // Microservices & Containers
+    "Create a microservices architecture on AWS with Kubernetes, Redis caching, and RDS database",
+    "Deploy a Docker-based microservices platform on Azure with AKS, Service Mesh, and Cosmos DB",
+    "Setup Kubernetes cluster on GCP with Istio service mesh, Cloud SQL, and Cloud Memorystore",
+    "Build a serverless microservices architecture on AWS with Lambda, API Gateway, and DynamoDB",
+    
+    // Data & Analytics
+    "Setup a data analytics pipeline on GCP with Cloud Storage, BigQuery, and Dataflow for processing",
+    "Create a real-time data streaming platform on AWS with Kinesis, Lambda, and Redshift",
+    "Deploy a data lake on Azure with Data Lake Storage, Databricks, and Synapse Analytics",
+    "Build an ETL pipeline on GCP with Pub/Sub, Dataflow, and BigQuery for data warehousing",
+    
+    // Machine Learning & AI
+    "Setup a machine learning platform on AWS with SageMaker, S3, and model deployment infrastructure",
+    "Create an ML training pipeline on GCP with Vertex AI, Cloud Storage, and GPU instances",
+    "Deploy an AI inference service on Azure with AKS, ML models, and Application Insights",
+    
+    // E-commerce & Retail
+    "Build a scalable e-commerce platform on AWS with product catalog, shopping cart, and payment processing",
+    "Create an online store on Azure with inventory management, order processing, and CDN for images",
+    "Setup a multi-region e-commerce site on GCP with global load balancing and Cloud SQL",
+    
+    // Mobile Backend
+    "Create a mobile app backend on AWS with user authentication, push notifications, and file storage",
+    "Setup a mobile API on Azure with App Service, Cosmos DB, and Notification Hubs",
+    "Build a Firebase-based mobile backend on GCP with authentication, Firestore, and Cloud Functions",
+    
+    // IoT & Real-time
+    "Deploy an IoT platform on AWS with IoT Core, time-series database, and real-time analytics",
+    "Create an IoT solution on Azure with IoT Hub, Stream Analytics, and Cosmos DB",
+    "Setup a sensor data processing pipeline on GCP with IoT Core, Pub/Sub, and BigQuery",
+    
+    // Gaming
+    "Build a multiplayer game backend on AWS with GameLift, DynamoDB, and ElastiCache",
+    "Create a game server infrastructure on Azure with PlayFab integration and Azure Functions",
+    
+    // DevOps & CI/CD
+    "Setup a complete CI/CD pipeline on AWS with CodePipeline, CodeBuild, and ECS deployment",
+    "Create a DevOps platform on Azure with Azure DevOps, Container Registry, and AKS",
+    "Build a GitOps workflow on GCP with Cloud Build, Artifact Registry, and GKE",
+    
+    // Content & Media
+    "Create a video streaming platform on AWS with CloudFront CDN, S3 storage, and MediaConvert",
+    "Setup a content delivery network on Azure with CDN, Blob Storage, and Media Services",
+    "Build a media processing pipeline on GCP with Cloud Storage, Transcoder API, and Cloud CDN",
+    
+    // Security & Compliance
+    "Deploy a secure multi-tier application on AWS with VPC isolation, WAF, and encrypted databases",
+    "Create a PCI-DSS compliant payment processing infrastructure on Azure with HSM and Key Vault",
+    "Setup a HIPAA-compliant healthcare application on GCP with encrypted storage and audit logging",
   ];
 
   const commandExamples = [
@@ -39,6 +91,10 @@ export default function NLPDesigner() {
     "Check the cost estimate for this blueprint",
     "Generate Terraform configuration",
     "Destroy the staging environment",
+    "Validate the infrastructure configuration",
+    "Apply changes to development environment",
+    "Show resource dependencies",
+    "Export blueprint as CloudFormation template",
   ];
 
   const handleGenerate = async () => {

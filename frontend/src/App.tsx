@@ -22,6 +22,8 @@ import DownloadsPage from './pages/DownloadsPage';
 import AgentsPage from './pages/AgentsPage';
 import SecurityDashboard from './pages/SecurityDashboard';
 import Security from './pages/Security';
+import ProjectsList from './pages/ProjectsList';
+import NewProject from './pages/NewProject';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import ToastProvider from './components/ToastProvider';
@@ -29,6 +31,13 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute, RoleBasedRoute } from './components/ProtectedRoute';
+
+// Role-based Dashboards
+import SADashboard from './pages/dashboards/SADashboard';
+import EADashboard from './pages/dashboards/EADashboard';
+import PMDashboard from './pages/dashboards/PMDashboard';
+import TADashboard from './pages/dashboards/TADashboard';
+import SEDashboard from './pages/dashboards/SEDashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +86,13 @@ function InnerRoutes() {
                   <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardEnhanced />} />
                 
+                {/* Role-based Dashboards */}
+                <Route path="dashboards/sa" element={<SADashboard />} />
+                <Route path="dashboards/ea" element={<EADashboard />} />
+                <Route path="dashboards/pm" element={<PMDashboard />} />
+                <Route path="dashboards/ta" element={<TADashboard />} />
+                <Route path="dashboards/se" element={<SEDashboard />} />
+                
                 {/* Blueprint Routes - All authenticated users */}
                 <Route path="blueprints" element={<BlueprintList />} />
                 <Route path="blueprints/:id" element={<BlueprintDetail />} />
@@ -115,6 +131,10 @@ function InnerRoutes() {
                 
                 {/* CMDB - Configuration Management Database */}
                 <Route path="cmdb" element={<CMDB />} />
+                
+                {/* Projects Management */}
+                <Route path="projects" element={<ProjectsList />} />
+                <Route path="projects/new" element={<NewProject />} />
                 
                 {/* Downloads - Agent installer packages */}
                 <Route path="downloads" element={<DownloadsPage />} />

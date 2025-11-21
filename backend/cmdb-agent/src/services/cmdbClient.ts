@@ -169,6 +169,72 @@ export class CMDBClient {
   }
 
   /**
+   * Register agent in CMDB
+   */
+  async registerAgent(agentData: any): Promise<boolean> {
+    try {
+      logger.info('Registering agent in CMDB', { 
+        agentId: agentData.agentId,
+        agentName: agentData.agentName,
+      });
+
+      const response = await this.client.post('/agents/register', agentData);
+
+      if (response.status === 200 || response.status === 201) {
+        logger.info('Agent registered successfully', { 
+          agentId: agentData.agentId,
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Failed to register agent', {
+          agentId: agentData.agentId,
+          status: error.response?.status,
+          message: error.message,
+        });
+      } else {
+        logger.error('Failed to register agent', { 
+          agentId: agentData.agentId,
+          error,
+        });
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Send agent heartbeat to keep agent status active
+   */
+  async sendHeartbeat(agentId: string, metrics?: any): Promise<boolean> {
+    try {
+      logger.debug('Sending heartbeat to CMDB', { agentId });
+
+      const response = await this.client.post(`/agents/${agentId}/heartbeat`, { metrics });
+
+      if (response.status === 200) {
+        logger.debug('Heartbeat sent successfully', { agentId });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Failed to send heartbeat', {
+          agentId,
+          status: error.response?.status,
+          message: error.message,
+        });
+      } else {
+        logger.error('Failed to send heartbeat', { agentId, error });
+      }
+      return false;
+    }
+  }
+
+  /**
    * Send security event to CMDB
    */
   async sendSecurityEvent(eventPayload: any): Promise<boolean> {

@@ -1,4 +1,5 @@
-import { Rocket, Activity, AlertTriangle, CheckCircle2, Clock, Server, Terminal, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Rocket, Activity, AlertTriangle, CheckCircle2, Clock, Server, Terminal, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
@@ -23,6 +24,7 @@ export default function SEDashboard() {
       changeType: 'neutral' as const,
       trend: 'up' as const,
       icon: Rocket,
+      color: 'from-blue-500 to-blue-600',
     },
     {
       name: 'System Health',
@@ -31,6 +33,7 @@ export default function SEDashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: Activity,
+      color: 'from-green-500 to-green-600',
     },
     {
       name: 'Open Incidents',
@@ -39,6 +42,7 @@ export default function SEDashboard() {
       changeType: 'positive' as const,
       trend: 'down' as const,
       icon: AlertTriangle,
+      color: 'from-orange-500 to-orange-600',
     },
     {
       name: 'Success Rate',
@@ -47,6 +51,7 @@ export default function SEDashboard() {
       changeType: 'positive' as const,
       trend: 'up' as const,
       icon: CheckCircle2,
+      color: 'from-purple-500 to-purple-600',
     },
   ];
 
@@ -195,55 +200,93 @@ export default function SEDashboard() {
     },
   ];
 
-  const deploymentSuccessData = [
-    { name: 'Week 1', value: 95 },
-    { name: 'Week 2', value: 96 },
-    { name: 'Week 3', value: 94 },
-    { name: 'Week 4', value: 97 },
-  ];
+  // Load real data from APIs - no demo data
+  const [deploymentSuccessData, setDeploymentSuccessData] = useState<any[]>([]);
+  const [systemUptimeData, setSystemUptimeData] = useState<any[]>([]);
 
-  const systemUptimeData = [
-    { name: 'Mon', value: 99.2 },
-    { name: 'Tue', value: 99.5 },
-    { name: 'Wed', value: 98.8 },
-    { name: 'Thu', value: 99.1 },
-    { name: 'Fri', value: 99.4 },
-    { name: 'Sat', value: 99.6 },
-    { name: 'Sun', value: 98.2 },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [deploymentRes, uptimeRes] = await Promise.all([
+          fetch('/api/se/deployment-success'),
+          fetch('/api/se/system-uptime')
+        ]);
+        if (deploymentRes.ok) setDeploymentSuccessData(await deploymentRes.json());
+        if (uptimeRes.ok) setSystemUptimeData(await uptimeRes.json());
+      } catch (error) {
+        console.error('Failed to load SE dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   return (
     <PageTransition>
       <div className="space-y-6">
-        {/* Header */}
+        {/* Hero Section */}
         <FadeIn>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                System Engineer Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Deployments, Monitoring & Incident Management
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Link
-                to="/deployments/new"
-                className="btn-primary flex items-center gap-2"
-              >
-                <Rocket className="w-4 h-4" />
-                New Deployment
-              </Link>
-              <Link
-                to="/incidents/new"
-                className="btn-secondary flex items-center gap-2"
-              >
-                <AlertTriangle className="w-4 h-4" />
-                Report Incident
-              </Link>
+          <div className="rounded-3xl bg-gradient-to-br from-cyan-600 via-cyan-700 to-blue-800 text-white p-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-white/10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold flex items-center gap-3">
+                    System Engineer Dashboard
+                    <Rocket className="w-8 h-8" />
+                  </h1>
+                  <p className="text-cyan-100 mt-2 text-lg">
+                    Deployments, Monitoring & Incident Management
+                  </p>
+                </div>
+                <Link
+                  to="/deployments/new"
+                  className="bg-white text-cyan-600 hover:bg-cyan-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
+                >
+                  <Rocket className="w-5 h-5" />
+                  New Deployment
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
             </div>
           </div>
         </FadeIn>
+
+        {/* Operational Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {operationalMetrics.map((metric, idx) => (
+            <FadeIn key={metric.name} delay={idx * 100}>
+              <div className="relative group">
+                <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity`} />
+                <div className="card p-6 relative">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">{metric.name}</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
+                        {metric.value}
+                      </p>
+                      <div className="flex items-center gap-1 mt-3">
+                        {metric.trend === 'up' ? (
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-green-500" />
+                        )}
+                        <span className={`text-sm font-semibold ${
+                          metric.changeType === 'positive' ? 'text-green-600' : 'text-orange-600'
+                        }`}>
+                          {metric.change}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-1">vs last month</span>
+                      </div>
+                    </div>
+                    <div className={`p-4 rounded-2xl bg-gradient-to-br ${metric.color} shadow-lg`}>
+                      <metric.icon className="w-7 h-7 text-white" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
 
         {/* Operational Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

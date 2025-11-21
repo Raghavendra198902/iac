@@ -8,7 +8,23 @@ A comprehensive enterprise platform for managing infrastructure blueprints, depl
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
-[![Security](https://img.shields.io/badge/Security-DLP%20Enabled-red.svg)](docs/DATA_LEAKAGE_CONTROL_IMPLEMENTATION.md)
+[![Security](https://img.shields.io/badge/Security-DLP%20Enabled-red.svg)](docs/security/DATA_LEAKAGE_CONTROL_IMPLEMENTATION.md)
+
+## 📚 Documentation
+
+> **[📖 Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Comprehensive guide to all documentation and scripts  
+> **[⚡ Quick Navigation](QUICK_NAV.md)** - Fast access to common tasks and documentation
+
+### Quick Links
+- **[Quick Navigation Guide](QUICK_NAV.md)** - "I want to..." task-based navigation
+- **[Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Master index of all docs and scripts
+- **[Documentation Categories](docs/README.md)** - All documentation organized by category
+- **[Quick Start Guide](docs/deployment/DEPLOYMENT_GUIDE.md)** - Get started in minutes
+- **[API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API reference
+- **[CMDB Guide](docs/cmdb/CMDB_COMPLETE_DOCUMENTATION.md)** - CMDB setup and usage
+- **[Security & DLP](docs/security/)** - Security features and DLP implementation
+- **[Scripts Reference](scripts/README.md)** - Utility scripts documentation
+- **[Recent Changes](REORGANIZATION_SUMMARY.md)** - Project reorganization summary
 
 ## 🌟 Features
 
@@ -26,6 +42,8 @@ A comprehensive enterprise platform for managing infrastructure blueprints, depl
 - 🤝 **Multi-Agent Support** - Deploy agents across your infrastructure
 - 📦 **Professional Installers** - One-click installation packages
 
+📖 **Learn More**: [CMDB Complete Documentation](docs/cmdb/CMDB_COMPLETE_DOCUMENTATION.md) | [Agent User Manual](docs/cmdb/AGENT_USER_MANUAL.md)
+
 ### 🔐 Data Leakage Control (DLP) **NEW**
 - 📋 **Clipboard Monitoring** - Detect sensitive data in clipboard (SSN, credit cards, API keys, passwords)
 - 💾 **USB Write Detection** - Monitor and block unauthorized USB data transfers
@@ -34,6 +52,8 @@ A comprehensive enterprise platform for managing infrastructure blueprints, depl
 - ⚡ **Auto-Blocking** - Automatic threat response for high-severity events
 - 📊 **Security Dashboard** - Real-time DLP event visualization and analytics
 - 🎯 **Compliance Ready** - ISO 27001, SOC 2, GDPR, PCI DSS, HIPAA, NIST 800-53
+
+📖 **Learn More**: [DLP Implementation Guide](docs/security/DATA_LEAKAGE_CONTROL_IMPLEMENTATION.md) | [DLP Quick Reference](docs/security/DLP_QUICK_REFERENCE.md) | [Security Audit](docs/security/security-audit-report.md)
 
 ### Analytics & Insights
 - 📈 **Performance Analytics** - Track system and deployment performance
@@ -47,6 +67,8 @@ A comprehensive enterprise platform for managing infrastructure blueprints, depl
 - 🔔 **Smart Alerts** - Intelligent alerting and notifications
 - 🔄 **Auto-remediation** - Automatic issue resolution
 - 📅 **Scheduled Tasks** - Recurring automation workflows
+
+📖 **Learn More**: [Automation Guide](docs/automation/AUTOMATION.md) | [End-to-End Automation](docs/automation/END_TO_END_AUTOMATION.md)
 
 ## 🚀 Quick Start
 
@@ -96,6 +118,60 @@ Download pre-built installers from the Downloads page:
 - **Portable**: Standalone executables (no Node.js required)
 
 Visit: `http://your-server:5173/downloads`
+
+## 📁 Project Structure
+
+```
+iac/
+├── backend/                    # Backend microservices
+│   ├── api-gateway/           # Main API gateway
+│   ├── ai-engine/             # AI/ML services
+│   ├── automation-engine/     # Automation workflows
+│   ├── blueprint-service/     # Blueprint management
+│   ├── cmdb-agent/            # CMDB agent service
+│   ├── cmdb-agent-gui/        # Agent GUI installer
+│   ├── costing-service/       # Cost analytics
+│   ├── guardrails-engine/     # Policy enforcement
+│   ├── iac-generator/         # IaC code generation
+│   ├── monitoring-service/    # System monitoring
+│   └── orchestrator-service/  # Deployment orchestration
+│
+├── frontend/                   # React frontend
+│   ├── src/
+│   │   ├── components/        # Reusable UI components
+│   │   ├── pages/             # Page components
+│   │   ├── services/          # API clients
+│   │   └── contexts/          # React contexts
+│   └── public/                # Static assets
+│
+├── docs/                       # Documentation (organized)
+│   ├── api/                   # API documentation
+│   ├── automation/            # Automation guides
+│   ├── cmdb/                  # CMDB documentation
+│   ├── security/              # Security & DLP docs
+│   ├── testing/               # Testing guides
+│   ├── deployment/            # Deployment guides
+│   ├── ci-cd/                 # CI/CD documentation
+│   ├── guides/                # User guides
+│   ├── status/                # Project status reports
+│   └── architecture/          # System architecture
+│
+├── scripts/                    # Utility scripts (organized)
+│   ├── database/              # Database scripts
+│   └── testing/               # Testing scripts
+│
+├── config/                     # Configuration files
+├── database/                   # Database schemas & migrations
+├── deployment/                 # Deployment configurations
+│   ├── kubernetes/            # K8s manifests
+│   └── monitoring/            # Monitoring configs
+├── iac-templates/             # Infrastructure templates
+├── tests/                      # Test suites
+├── terraform/                  # Terraform modules
+└── docker-compose.yml         # Docker orchestration
+```
+
+See [docs/README.md](docs/README.md) for detailed documentation structure.
 
 ## 📦 CMDB Agent Distribution
 
