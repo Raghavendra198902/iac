@@ -1,5 +1,7 @@
 import express, { Request, Response } from 'express';
 import { getAgentRegistryData } from './agents';
+import { cacheGet, cacheSet, cacheInvalidateByTag, cacheSetWithTags } from '../utils/cache';
+import { shortCache, mediumCache } from '../middleware/httpCache';
 
 const router = express.Router();
 
@@ -116,9 +118,18 @@ const logAudit = (log: Omit<AuditLog, 'id' | 'timestamp'>) => {
   return auditEntry;
 };
 
-// GET all configuration items
-router.get('/items', (req: Request, res: Response) => {
+// GET all configuration items (with caching)
+router.get('/items', shortCache, async (req: Request, res: Response) => {
   const { type, environment, status, search } = req.query;
+  
+  // Generate cache key based on query params
+  const cacheKey = `cmdb:items:${type || 'all'}:${environment || 'all'}:${status || 'all'}:${search || ''}`;
+  
+  // Try to get from cache
+  const cached = await cacheGet<{ total: number; items: ConfigItem[] }>(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
   
   let filtered = [...configItems];
   
@@ -143,10 +154,15 @@ router.get('/items', (req: Request, res: Response) => {
     );
   }
   
-  res.json({
+  const result = {
     total: filtered.length,
     items: filtered
-  });
+  };
+  
+  // Cache the result for 5 minutes
+  await cacheSet(cacheKey, result, 300);
+  
+  res.json(result);
 });
 
 // GET single configuration item
@@ -161,7 +177,7 @@ router.get('/items/:id', (req: Request, res: Response) => {
 });
 
 // CREATE configuration item
-router.post('/items', (req: Request, res: Response) => {
+router.post('/items', async (req: Request, res: Response) => {
   const newItem: ConfigItem = {
     id: `ci-${Date.now()}`,
     ...req.body,
@@ -179,11 +195,14 @@ router.post('/items', (req: Request, res: Response) => {
     metadata: { type: newItem.type, environment: newItem.environment }
   });
   
+  // Invalidate cache after creating item
+  await cacheInvalidateByTag('cmdb:items');
+  
   res.status(201).json(newItem);
 });
 
 // UPDATE configuration item
-router.put('/items/:id', (req: Request, res: Response) => {
+router.put('/items/:id', async (req: Request, res: Response) => {
   const index = configItems.findIndex(ci => ci.id === req.params.id);
   
   if (index === -1) {
@@ -213,11 +232,14 @@ router.put('/items/:id', (req: Request, res: Response) => {
     changes
   });
   
+  // Invalidate cache after update
+  await cacheInvalidateByTag('cmdb:items');
+  
   res.json(configItems[index]);
 });
 
 // DELETE configuration item
-router.delete('/items/:id', (req: Request, res: Response) => {
+router.delete('/items/:id', async (req: Request, res: Response) => {
   const index = configItems.findIndex(ci => ci.id === req.params.id);
   
   if (index === -1) {
@@ -235,17 +257,20 @@ router.delete('/items/:id', (req: Request, res: Response) => {
   });
   
   configItems.splice(index, 1);
+  
+  // Invalidate cache after delete
+  await cacheInvalidateByTag('cmdb:items');
+  
   res.status(204).send();
 });
 
 // POST /ci - Register a configuration item (CI) from agent
-router.post('/ci', (req: Request, res: Response) => {
+router.post('/ci', async (req: Request, res: Response) => {
   const ciData = req.body;
   
   if (!ciData.id || !ciData.name) {
     return res.status(400).json({ error: 'CI id and name are required' });
   }
-  
   const existingCI = configItems.find(ci => ci.id === ciData.id);
   
   if (existingCI) {

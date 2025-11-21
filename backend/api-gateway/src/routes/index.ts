@@ -12,6 +12,7 @@ import saRoutes from './sa';
 import performanceRoutes from './performance';
 import cmdbRoutes from './cmdb';
 import downloadsRoutes from './downloads';
+import cacheRoutes from './cache';
 
 const router = Router();
 
@@ -34,6 +35,7 @@ router.get('/', (req, res) => {
       performance: '/api/performance',
       downloads: '/api/downloads',
       cmdb: '/api/cmdb',
+      cache: '/api/cache',
     },
   });
 });
@@ -50,6 +52,7 @@ router.use('/ea', eaRoutes);
 router.use('/ta', taRoutes);
 router.use('/sa', saRoutes);
 router.use('/performance', performanceRoutes);
+router.use('/cache', cacheRoutes);
 // cmdb moved to public routes in index.ts
 router.use('/downloads', downloadsRoutes);
 
