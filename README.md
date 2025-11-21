@@ -1,27 +1,64 @@
-# IaC Dharma Platform - Citadel Edition
+# IaC Dharma Platform - Enterprise Edition
 
-> **AI-Powered Infrastructure as Code Management Platform with Integrated CMDB & Data Leakage Control**
+> **AI-Powered Multi-Cloud Infrastructure as Code Management Platform with Integrated CMDB, SSO & Advanced Analytics**
 
-A comprehensive enterprise platform for managing infrastructure blueprints, deployments, configuration management, and security monitoring with AI-powered insights and automated agent distribution featuring Data Loss Prevention (DLP).
+A comprehensive enterprise platform for managing infrastructure blueprints, deployments, configuration management, and security monitoring with AI-powered insights, multi-cloud support, enterprise SSO, mobile access, and advanced analytics capabilities.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
-[![Security](https://img.shields.io/badge/Security-DLP%20Enabled-red.svg)](docs/security/DATA_LEAKAGE_CONTROL_IMPLEMENTATION.md)
+[![Multi-Cloud](https://img.shields.io/badge/Multi--Cloud-AWS%20%7C%20Azure%20%7C%20GCP-orange.svg)](ENTERPRISE_FEATURES.md)
+[![Security](https://img.shields.io/badge/Security-SSO%20%7C%20DLP-red.svg)](docs/security/)
+
+## 🚀 What's New - Enterprise Features
+
+**✨ NEW: Enterprise Edition Features** - [Complete Documentation](ENTERPRISE_FEATURES.md)
+
+1. **🌐 Multi-Cloud Support** - Unified management for AWS, Azure, and GCP
+   - Cost comparison across providers
+   - Cross-cloud migration recommendations
+   - Unified resource inventory
+
+2. **🤖 Advanced AI Recommendations** - Intelligent optimization and insights
+   - Cost optimization suggestions
+   - Security vulnerability detection
+   - Performance recommendations
+   - Predictive analytics
+
+3. **📱 Mobile Application** - iOS & Android apps for on-the-go management
+   - Real-time monitoring
+   - Push notifications
+   - Biometric authentication
+   - Offline mode
+
+4. **🔐 Enterprise SSO Integration** - Single Sign-On support
+   - SAML 2.0 & OAuth2
+   - Azure AD, Google Workspace, Okta
+   - Role mapping from SSO groups
+   - Session management
+
+5. **📊 Advanced Analytics** - Comprehensive reporting and insights
+   - Custom dashboard builder
+   - Automated report generation
+   - Multi-format exports (PDF, Excel, CSV)
+   - Scheduled reports
 
 ## 📚 Documentation
 
 > **[📖 Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Comprehensive guide to all documentation and scripts  
-> **[⚡ Quick Navigation](QUICK_NAV.md)** - Fast access to common tasks and documentation
+> **[⚡ Quick Navigation](QUICK_NAV.md)** - Fast access to common tasks and documentation  
+> **[🎯 Enterprise Features Guide](ENTERPRISE_FEATURES.md)** - Complete enterprise features documentation
 
 ### Quick Links
 - **[Quick Navigation Guide](QUICK_NAV.md)** - "I want to..." task-based navigation
 - **[Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Master index of all docs and scripts
+- **[Enterprise Features](ENTERPRISE_FEATURES.md)** - Multi-cloud, AI, SSO, Mobile, Analytics
 - **[Documentation Categories](docs/README.md)** - All documentation organized by category
 - **[Quick Start Guide](docs/deployment/DEPLOYMENT_GUIDE.md)** - Get started in minutes
 - **[API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API reference
 - **[CMDB Guide](docs/cmdb/CMDB_COMPLETE_DOCUMENTATION.md)** - CMDB setup and usage
+- **[Mobile App Guide](docs/mobile/README.md)** - Mobile app setup and usage
 - **[Security & DLP](docs/security/)** - Security features and DLP implementation
 - **[Scripts Reference](scripts/README.md)** - Utility scripts documentation
 - **[Recent Changes](REORGANIZATION_SUMMARY.md)** - Project reorganization summary
@@ -35,6 +72,23 @@ A comprehensive enterprise platform for managing infrastructure blueprints, depl
 - 🚀 **Deployment Monitor** - Real-time deployment tracking and management
 - 🛡️ **Guardrails** - Policy enforcement and compliance checking
 
+### Multi-Cloud Support **NEW**
+- 🌐 **Unified Management** - Single pane of glass for AWS, Azure, GCP
+- 💰 **Cost Comparison** - Compare costs across cloud providers
+- 🔄 **Migration Tools** - Cross-cloud migration recommendations
+- 📊 **Multi-Cloud Inventory** - Unified resource discovery and tracking
+
+📖 **Learn More**: [Multi-Cloud Documentation](ENTERPRISE_FEATURES.md#1-multi-cloud-support)
+
+### AI & Machine Learning **NEW**
+- 💡 **Cost Optimization** - AI-powered cost reduction recommendations
+- 🔒 **Security Insights** - Automated vulnerability detection
+- ⚡ **Performance Tuning** - ML-driven performance optimization
+- 📈 **Predictive Analytics** - Forecast costs and resource needs
+- 🎯 **Anomaly Detection** - Identify unusual patterns and issues
+
+📖 **Learn More**: [AI Recommendations Documentation](ENTERPRISE_FEATURES.md#2-advanced-ai-recommendations)
+
 ### Configuration Management Database (CMDB)
 - 💾 **Asset Discovery** - Automatic discovery and registration of IT assets
 - 🔄 **Real-time Monitoring** - Live system metrics and health monitoring
@@ -44,7 +98,34 @@ A comprehensive enterprise platform for managing infrastructure blueprints, depl
 
 📖 **Learn More**: [CMDB Complete Documentation](docs/cmdb/CMDB_COMPLETE_DOCUMENTATION.md) | [Agent User Manual](docs/cmdb/AGENT_USER_MANUAL.md)
 
-### 🔐 Data Leakage Control (DLP) **NEW**
+### Enterprise Authentication & SSO **NEW**
+- 🔐 **SAML 2.0 Support** - Enterprise SSO integration
+- 🌐 **OAuth2/OIDC** - Google, Azure AD, Okta support
+- 👥 **Role Mapping** - Automatic role assignment from SSO groups
+- 📝 **Audit Logging** - Complete authentication audit trail
+- 🔄 **Session Management** - Centralized session control
+
+📖 **Learn More**: [SSO Documentation](ENTERPRISE_FEATURES.md#4-enterprise-sso-integration)
+
+### Mobile Access **NEW**
+- 📱 **Native Apps** - iOS and Android applications
+- 🔔 **Push Notifications** - Real-time alerts and updates
+- 👆 **Biometric Auth** - Face ID / Touch ID support
+- 📡 **Offline Mode** - Work without connectivity, sync later
+- 📊 **Mobile Dashboard** - Monitor infrastructure on the go
+
+📖 **Learn More**: [Mobile App Documentation](docs/mobile/README.md)
+
+### Advanced Analytics & Reporting **NEW**
+- 📊 **Custom Dashboards** - Build your own analytics dashboards
+- 📈 **Predictive Analytics** - Forecast trends and capacity needs
+- 📄 **Automated Reports** - Schedule and generate reports automatically
+- 💾 **Multi-Format Export** - PDF, Excel, CSV, PowerPoint
+- 📧 **Email Reports** - Scheduled report delivery
+
+📖 **Learn More**: [Analytics Documentation](docs/features/ADVANCED_ANALYTICS.md)
+
+### 🔐 Data Leakage Control (DLP)
 - 📋 **Clipboard Monitoring** - Detect sensitive data in clipboard (SSN, credit cards, API keys, passwords)
 - 💾 **USB Write Detection** - Monitor and block unauthorized USB data transfers
 - 📁 **File Access Watchdog** - Track sensitive folder access (Documents, Desktop, Downloads)

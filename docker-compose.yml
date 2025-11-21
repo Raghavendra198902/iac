@@ -264,6 +264,67 @@ services:
     networks:
       - dharma-network
 
+  # Cloud Provider Service
+  cloud-provider-service:
+    build:
+      context: ./backend/cloud-provider-service
+      dockerfile: Dockerfile
+    container_name: dharma-cloud-provider
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=development
+      - AWS_REGION=us-east-1
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+    networks:
+      - dharma-network
+
+  # AI Recommendations Service
+  ai-recommendations-service:
+    build:
+      context: ./backend/ai-recommendations-service
+      dockerfile: Dockerfile
+    container_name: dharma-ai-recommendations
+    ports:
+      - "3011:3011"
+    environment:
+      - NODE_ENV=development
+      - MONITORING_SERVICE_URL=http://monitoring-service:3007
+      - COSTING_SERVICE_URL=http://costing-service:3004
+    depends_on:
+      - monitoring-service
+      - costing-service
+    networks:
+      - dharma-network
+
+  # SSO Service
+  sso-service:
+    build:
+      context: ./backend/sso-service
+      dockerfile: Dockerfile
+    container_name: dharma-sso
+    ports:
+      - "3012:3012"
+    environment:
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - JWT_SECRET=development_secret_key_change_in_production_12345678
+      - SESSION_SECRET=session_secret_change_in_production_98765
+      - FRONTEND_URL=http://localhost:5173
+      - SAML_ENTRY_POINT=${SAML_ENTRY_POINT}
+      - SAML_ISSUER=iac-dharma
+      - SAML_CERT=${SAML_CERT}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+    depends_on:
+      - redis
+    networks:
+      - dharma-network
+
 volumes:
   postgres-data:
   redis-data:
