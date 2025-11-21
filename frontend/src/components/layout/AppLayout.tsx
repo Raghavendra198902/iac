@@ -32,6 +32,9 @@ import {
   Home,
   Layers,
   Package,
+  BarChart3,
+  Cloud,
+  TrendingUp,
 } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useAuth } from '../../contexts/AuthContext';
@@ -82,6 +85,7 @@ const navigationGroups = [
   {
     name: 'Analytics',
     items: [
+      { name: 'Advanced Analytics', href: '/analytics', icon: BarChart3 },
       { name: 'AI Insights', href: '/ai', icon: Brain },
       { name: 'Cost Management', href: '/cost', icon: DollarSign },
     ]

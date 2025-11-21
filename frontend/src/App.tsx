@@ -32,6 +32,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute, RoleBasedRoute } from './components/ProtectedRoute';
 
+// Enterprise Features
+import { AnalyticsDashboard } from './pages/AnalyticsDashboard';
+import { SSOLoginPage } from './components/SSOLogin';
+
 // Role-based Dashboards
 import SADashboard from './pages/dashboards/SADashboard';
 import EADashboard from './pages/dashboards/EADashboard';
@@ -77,6 +81,7 @@ function InnerRoutes() {
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
+      <Route path="/sso-login" element={<SSOLoginPage />} />
                 
                 <Route path="/" element={
                   <ProtectedRoute>
@@ -92,6 +97,9 @@ function InnerRoutes() {
                 <Route path="dashboards/pm" element={<PMDashboard />} />
                 <Route path="dashboards/ta" element={<TADashboard />} />
                 <Route path="dashboards/se" element={<SEDashboard />} />
+                
+                {/* Enterprise Features */}
+                <Route path="analytics" element={<AnalyticsDashboard />} />
                 
                 {/* Blueprint Routes - All authenticated users */}
                 <Route path="blueprints" element={<BlueprintList />} />
