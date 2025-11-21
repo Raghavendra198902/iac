@@ -12,7 +12,13 @@ import {
   Zap,
   BarChart3,
   Heart,
+  Brain,
+  Cloud,
+  Lock,
+  Eye,
 } from 'lucide-react';
+import AIRecommendationsPanel from '../components/AIRecommendationsPanel';
+import FadeIn from '../components/ui/FadeIn';
 import Badge, { type BadgeVariant } from '../components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import Alert from '../components/ui/Alert';
@@ -44,6 +50,17 @@ const SecurityDashboard = () => {
   const [connected, setConnected] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [securityMetrics] = useState({
+    overallScore: 87,
+    aiThreatDetections: 12,
+    multiCloudSecurity: {
+      aws: { score: 92, vulnerabilities: 3 },
+      azure: { score: 85, vulnerabilities: 7 },
+      gcp: { score: 89, vulnerabilities: 5 },
+    },
+    complianceRate: 94,
+    automatedRemediations: 28,
+  });
 
   useEffect(() => {
     // Load notification preferences
@@ -227,7 +244,39 @@ const SecurityDashboard = () => {
 
       {/* Statistics Overview */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Security Score</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{securityMetrics.overallScore}%</p>
+                <div className="flex items-center gap-1 mt-2 text-green-600 dark:text-green-400">
+                  <TrendingUp className="w-3 h-3" />
+                  <span className="text-xs font-medium">+3% this month</span>
+                </div>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-lg">
+                <Shield className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">AI Threat Detections</p>
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-1">{securityMetrics.aiThreatDetections}</p>
+                <div className="flex items-center gap-1 mt-2 text-purple-600 dark:text-purple-400">
+                  <Brain className="w-3 h-3" />
+                  <span className="text-xs font-medium">ML-powered</span>
+                </div>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-lg">
+                <Brain className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+          </Card>
+
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -257,32 +306,95 @@ const SecurityDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">High Severity</p>
-                <p className="text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">
-                  {stats.bySeverity.high}
-                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Compliance Rate</p>
+                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{securityMetrics.complianceRate}%</p>
+                <div className="flex items-center gap-1 mt-2 text-blue-600 dark:text-blue-400">
+                  <CheckCircle className="w-3 h-3" />
+                  <span className="text-xs font-medium">SOC 2 compliant</span>
+                </div>
               </div>
-              <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                <Zap className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Quarantined Files</p>
-                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-1">
-                  {quarantinedFiles.length}
-                </p>
-              </div>
-              <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                <FileWarning className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-lg">
+                <Lock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </Card>
         </div>
       )}
+
+      {/* Multi-Cloud Security Posture */}
+      <FadeIn delay={0.3}>
+        <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+              <Cloud className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Multi-Cloud Security Posture</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Security scores across cloud providers</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border border-orange-200 dark:border-orange-800">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-orange-900 dark:text-orange-300">AWS</span>
+                <span className="text-xs px-2 py-1 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Secure</span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <p className="text-3xl font-bold text-orange-900 dark:text-orange-300">{securityMetrics.multiCloudSecurity.aws.score}</p>
+                <span className="text-sm text-orange-700 dark:text-orange-400">/100</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-orange-700 dark:text-orange-400">{securityMetrics.multiCloudSecurity.aws.vulnerabilities} vulnerabilities</span>
+                <Eye className="h-3 w-3 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-blue-900 dark:text-blue-300">Azure</span>
+                <span className="text-xs px-2 py-1 rounded-lg bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Warning</span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">{securityMetrics.multiCloudSecurity.azure.score}</p>
+                <span className="text-sm text-blue-700 dark:text-blue-400">/100</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-blue-700 dark:text-blue-400">{securityMetrics.multiCloudSecurity.azure.vulnerabilities} vulnerabilities</span>
+                <Eye className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-800">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-red-900 dark:text-red-300">GCP</span>
+                <span className="text-xs px-2 py-1 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Secure</span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <p className="text-3xl font-bold text-red-900 dark:text-red-300">{securityMetrics.multiCloudSecurity.gcp.score}</p>
+                <span className="text-sm text-red-700 dark:text-red-400">/100</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-red-700 dark:text-red-400">{securityMetrics.multiCloudSecurity.gcp.vulnerabilities} vulnerabilities</span>
+                <Eye className="h-3 w-3 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </FadeIn>
+
+      {/* AI-Powered Threat Intelligence */}
+      <FadeIn delay={0.4}>
+        <div className="rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-6 border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <Brain className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">AI-Powered Threat Intelligence</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Machine learning security recommendations</p>
+            </div>
+          </div>
+          <AIRecommendationsPanel />
+        </div>
+      </FadeIn>
 
       {/* Tabs */}
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>

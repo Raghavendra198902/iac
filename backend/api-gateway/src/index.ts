@@ -136,6 +136,27 @@ app.get('/security', (req: Request, res: Response) => {
   res.sendFile('public/security.html', { root: process.cwd() });
 });
 
+// Prometheus metrics endpoint
+app.get('/metrics', (req: Request, res: Response) => {
+  const metrics = `# HELP api_gateway_uptime_seconds API Gateway uptime in seconds
+# TYPE api_gateway_uptime_seconds gauge
+api_gateway_uptime_seconds ${process.uptime()}
+
+# HELP api_gateway_memory_usage_bytes Memory usage in bytes
+# TYPE api_gateway_memory_usage_bytes gauge
+api_gateway_memory_usage_bytes{type="rss"} ${process.memoryUsage().rss}
+api_gateway_memory_usage_bytes{type="heapTotal"} ${process.memoryUsage().heapTotal}
+api_gateway_memory_usage_bytes{type="heapUsed"} ${process.memoryUsage().heapUsed}
+
+# HELP nodejs_version Node.js version info
+# TYPE nodejs_version gauge
+nodejs_version{version="${process.version}"} 1
+`;
+  
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(metrics);
+});
+
 // 404 handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({

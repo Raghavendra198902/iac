@@ -240,7 +240,7 @@ export default function SEDashboard() {
                 </div>
                 <Link
                   to="/deployments/new"
-                  className="bg-white text-cyan-600 hover:bg-cyan-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
+                  className="bg-white dark:bg-cyan-600 text-cyan-600 dark:text-white hover:bg-cyan-50 dark:hover:bg-cyan-700 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
                 >
                   <Rocket className="w-5 h-5" />
                   New Deployment

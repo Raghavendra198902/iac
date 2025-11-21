@@ -104,7 +104,7 @@ export default function SADashboard() {
                 </div>
                 <Link
                   to="/designer"
-                  className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
+                  className="bg-white dark:bg-blue-600 text-blue-600 dark:text-white hover:bg-blue-50 dark:hover:bg-blue-700 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
                 >
                   <Sparkles className="w-5 h-5" />
                   AI Designer

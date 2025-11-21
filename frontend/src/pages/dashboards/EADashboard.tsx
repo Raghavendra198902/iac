@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Shield, FileText, Users, TrendingUp, TrendingDown, AlertCircle, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
+import { Shield, FileText, Users, TrendingUp, TrendingDown, AlertCircle, CheckCircle2, Clock, ArrowRight, Brain, Cloud, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
 import ChartCard from '../../components/ui/ChartCard';
+import AIRecommendationsPanel from '../../components/AIRecommendationsPanel';
 
 /**
  * Enterprise Architect (EA) Dashboard
@@ -17,6 +18,24 @@ import ChartCard from '../../components/ui/ChartCard';
  */
 export default function EADashboard() {
   const governanceMetrics = [
+    {
+      name: 'AI Governance Score',
+      value: '92%',
+      change: '+5%',
+      changeType: 'positive' as const,
+      trend: 'up' as const,
+      icon: Brain,
+      color: 'from-purple-500 to-indigo-600',
+    },
+    {
+      name: 'Multi-Cloud Compliance',
+      value: '89%',
+      change: '+4%',
+      changeType: 'positive' as const,
+      trend: 'up' as const,
+      icon: Cloud,
+      color: 'from-blue-500 to-blue-600',
+    },
     {
       name: 'Policy Compliance',
       value: '94%',
@@ -45,13 +64,13 @@ export default function EADashboard() {
       color: 'from-purple-500 to-purple-600',
     },
     {
-      name: 'Governance Score',
-      value: '8.7/10',
-      change: '+0.3',
+      name: 'Security Posture',
+      value: '87/100',
+      change: '+3',
       changeType: 'positive' as const,
       trend: 'up' as const,
-      icon: TrendingUp,
-      color: 'from-orange-500 to-orange-600',
+      icon: Lock,
+      color: 'from-red-500 to-red-600',
     },
   ];
 
@@ -224,6 +243,63 @@ export default function EADashboard() {
             color="#3b82f6"
           />
         </div>
+
+        {/* Multi-Cloud Governance Intelligence */}
+        <FadeIn delay={300}>
+          <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                <Cloud className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Multi-Cloud Governance</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Policy compliance across cloud providers</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border border-orange-200 dark:border-orange-800">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-orange-900 dark:text-orange-300">AWS</span>
+                  <span className="text-xs px-2 py-1 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Compliant</span>
+                </div>
+                <p className="text-3xl font-bold text-orange-900 dark:text-orange-300">93%</p>
+                <p className="text-xs text-orange-700 dark:text-orange-400 mt-2">18 policies enforced</p>
+              </div>
+              <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-blue-900 dark:text-blue-300">Azure</span>
+                  <span className="text-xs px-2 py-1 rounded-lg bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Warning</span>
+                </div>
+                <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">87%</p>
+                <p className="text-xs text-blue-700 dark:text-blue-400 mt-2">15 policies enforced</p>
+              </div>
+              <div className="p-4 rounded-xl bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-800">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-red-900 dark:text-red-300">GCP</span>
+                  <span className="text-xs px-2 py-1 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Compliant</span>
+                </div>
+                <p className="text-3xl font-bold text-red-900 dark:text-red-300">91%</p>
+                <p className="text-xs text-red-700 dark:text-red-400 mt-2">12 policies enforced</p>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* AI-Powered Architecture Recommendations */}
+        <FadeIn delay={350}>
+          <div className="rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-6 border border-purple-200 dark:border-purple-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                <Brain className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">AI-Powered Architecture Insights</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Machine learning recommendations for governance improvements</p>
+              </div>
+            </div>
+            <AIRecommendationsPanel />
+          </div>
+        </FadeIn>
 
         {/* Pending Approvals */}
         <FadeIn delay={200}>

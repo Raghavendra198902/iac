@@ -200,7 +200,7 @@ export default function TADashboard() {
                 </div>
                 <Link
                   to="/iac"
-                  className="bg-white text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
+                  className="bg-white dark:bg-purple-600 text-purple-600 dark:text-white hover:bg-purple-50 dark:hover:bg-purple-700 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
                 >
                   <Code2 className="w-5 h-5" />
                   Generate IaC

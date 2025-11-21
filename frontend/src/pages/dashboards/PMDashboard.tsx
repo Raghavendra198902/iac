@@ -208,7 +208,7 @@ export default function PMDashboard() {
                 </div>
                 <Link
                   to="/projects/new"
-                  className="bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
+                  className="bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white hover:bg-indigo-50 dark:hover:bg-indigo-700 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 group shadow-lg"
                 >
                   <CheckSquare className="w-5 h-5" />
                   New Project

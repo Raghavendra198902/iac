@@ -34,7 +34,7 @@ body {
 
 /* Legacy class support */
 .card {
-  @apply bg-white rounded-lg border border-gray-200 shadow-sm p-6;
+  @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6;
 }
 
 .btn-primary {

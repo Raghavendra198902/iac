@@ -15,7 +15,16 @@ import {
   Edit,
   Trash2,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Shield,
+  TrendingUp,
+  Brain,
+  Users,
+  Clock,
+  Star,
+  Share2,
+  Copy,
+  MoreVertical
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer, Table, TableCell, TableRow, WidthType, BorderStyle } from 'docx';
@@ -26,6 +35,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs'
 import type { Blueprint } from '../types';
 import toast from 'react-hot-toast';
 import { exportTemplates, defaultTemplate, type ExportTemplate } from '../config/exportTemplates';
+import FadeIn from '../components/ui/FadeIn';
 
 export default function BlueprintDetail() {
   const { id } = useParams();
@@ -546,97 +556,158 @@ export default function BlueprintDetail() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-            <FileText className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{blueprint.name}</h1>
-              <span className="badge badge-gray">v{blueprint.version}</span>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300">{blueprint.description}</p>
-            <div className="flex items-center gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <User className="h-4 w-4" />
-                {blueprint.createdBy}
-              </span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {new Date(blueprint.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={() => navigate('/blueprints')} className="btn-secondary">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <Button onClick={handleDeploy} className="btn-primary">
-            <Play className="h-4 w-4 mr-2" />
-            Deploy
-          </Button>
-          <Button onClick={() => navigate(`/blueprints/${id}/edit`)} className="btn-secondary">
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button onClick={handleDelete} className="btn-danger">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      {/* Back Navigation */}
+      <FadeIn>
+        <button 
+          onClick={() => navigate('/blueprints')} 
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="font-medium">Back to Blueprints</span>
+        </button>
+      </FadeIn>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card bg-white dark:bg-gray-800 border dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Cloud className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      {/* Hero Header */}
+      <FadeIn delay={100}>
+        <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-purple-700 rounded-2xl p-8 text-white shadow-2xl">
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <FileText className="w-10 h-10" />
+              </div>
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl font-bold">{blueprint.name}</h1>
+                  <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-sm font-semibold">v{blueprint.version}</span>
+                  <button className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+                    <Star className="w-5 h-5" />
+                  </button>
+                </div>
+                <p className="text-primary-100 text-lg mb-3">{blueprint.description}</p>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg">
+                    <User className="w-4 h-4" />
+                    {blueprint.createdBy}
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(blueprint.createdAt).toLocaleDateString()}
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg">
+                    <Clock className="w-4 h-4" />
+                    Updated {new Date(blueprint.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Cloud Provider</p>
-              <p className="font-semibold text-gray-900 dark:text-white uppercase">{blueprint.targetCloud}</p>
+            <div className="flex items-center gap-2">
+              <button className="p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl transition-all border border-white/20">
+                <Share2 className="w-5 h-5" />
+              </button>
+              <button className="p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl transition-all border border-white/20">
+                <Copy className="w-5 h-5" />
+              </button>
+              <button className="p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl transition-all border border-white/20">
+                <MoreVertical className="w-5 h-5" />
+              </button>
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <Button onClick={handleDeploy} className="bg-white text-primary-600 hover:bg-primary-50 px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg">
+              <Play className="h-5 w-5 mr-2" />
+              Deploy Now
+            </Button>
+            <Button onClick={() => navigate(`/blueprints/${id}/edit`)} className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-6 py-2.5 rounded-xl font-semibold transition-all border border-white/20">
+              <Edit className="h-5 w-5 mr-2" />
+              Edit Blueprint
+            </Button>
+            <Button onClick={handleDelete} className="bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm text-white px-6 py-2.5 rounded-xl font-semibold transition-all border border-red-400/30">
+              <Trash2 className="h-5 w-5 mr-2" />
+              Delete
+            </Button>
+          </div>
         </div>
+      </FadeIn>
 
-        <div className="card bg-white dark:bg-gray-800 border dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <Server className="h-5 w-5 text-green-600 dark:text-green-400" />
+      {/* Enhanced Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <FadeIn delay={200}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Cloud className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <TrendingUp className="w-4 h-4 text-green-500" />
             </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Environment</p>
-              <p className="font-semibold text-gray-900 dark:text-white capitalize">{blueprint.environment}</p>
-            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Cloud Provider</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white uppercase">{blueprint.targetCloud}</p>
           </div>
-        </div>
+        </FadeIn>
 
-        <div className="card bg-white dark:bg-gray-800 border dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <Server className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+        <FadeIn delay={250}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <Server className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <TrendingUp className="w-4 h-4 text-green-500" />
             </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Resources</p>
-              <p className="font-semibold text-gray-900 dark:text-white">{blueprint.resources.length}</p>
-            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Environment</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white capitalize">{blueprint.environment}</p>
           </div>
-        </div>
+        </FadeIn>
 
-        <div className="card bg-white dark:bg-gray-800 border dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-              <DollarSign className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+        <FadeIn delay={300}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <Server className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <TrendingUp className="w-4 h-4 text-green-500" />
             </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Est. Monthly Cost</p>
-              <p className="font-semibold text-gray-900 dark:text-white">${totalCost.toFixed(2)}</p>
-            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Resources</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{blueprint.resources.length}</p>
           </div>
-        </div>
+        </FadeIn>
+
+        <FadeIn delay={350}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <DollarSign className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Monthly Cost</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">${totalCost.toFixed(2)}</p>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={400}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                <Shield className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+              </div>
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Compliance</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">98%</p>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={450}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                <Brain className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">AI Score</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">94%</p>
+          </div>
+        </FadeIn>
       </div>
 
       {/* Tabs Content */}
