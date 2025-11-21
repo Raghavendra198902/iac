@@ -29,6 +29,8 @@
     "@types/cors": "^2.8.13",
     "@types/passport": "^1.0.12",
     "@types/passport-saml": "^1.1.4",
+    "@types/passport-google-oauth20": "^2.0.11",
+    "@types/passport-azure-ad": "^4.3.1",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/bcryptjs": "^2.4.2",
     "@types/express-session": "^1.17.7",

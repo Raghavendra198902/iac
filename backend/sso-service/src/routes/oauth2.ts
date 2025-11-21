@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { OIDCStrategy } from 'passport-azure-ad';
+import { Strategy as GoogleStrategy, Profile as GoogleProfile } from 'passport-google-oauth20';
+import { OIDCStrategy, IProfile } from 'passport-azure-ad';
 import jwt from 'jsonwebtoken';
 
 const router = Router();
@@ -15,7 +15,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: '/api/auth/oauth2/google/callback'
     },
-    (accessToken, refreshToken, profile, done) => {
+    (accessToken: string, refreshToken: string, profile: GoogleProfile, done: any) => {
       return done(null, {
         id: profile.id,
         email: profile.emails?.[0].value,
@@ -38,12 +38,13 @@ if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET) {
       responseMode: 'form_post',
       redirectUrl: '/api/auth/oauth2/azuread/callback',
       allowHttpForRedirectUrl: true,
+      passReqToCallback: false,
       scope: ['profile', 'email']
     },
-    (iss, sub, profile, accessToken, refreshToken, done) => {
+    (iss: string, sub: string, profile: IProfile, accessToken: string, refreshToken: string, done: any) => {
       return done(null, {
-        id: profile.oid,
-        email: profile.upn || profile.email,
+        id: (profile as any).oid,
+        email: (profile as any).upn || (profile as any).email,
         name: profile.displayName,
         role: 'user',
         provider: 'azuread'
