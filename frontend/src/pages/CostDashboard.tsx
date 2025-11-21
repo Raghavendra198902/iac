@@ -1,5 +1,6 @@
 import { DollarSign, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { AIRecommendationsPanel } from '../components/AIRecommendationsPanel';
 
 export default function CostDashboard() {
   // Load real cost data from APIs - no demo data
@@ -68,13 +69,16 @@ export default function CostDashboard() {
         </div>
       </div>
 
+      {/* AI-Powered Recommendations */}
+      <AIRecommendationsPanel />
+
       <div className="card bg-white dark:bg-gray-800 border dark:border-gray-700">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          Cost Optimization Recommendations
+          Additional Cost Recommendations
         </h2>
         {recommendations.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            No recommendations available yet
+            No additional recommendations at this time
           </div>
         ) : (
           <div className="space-y-3">

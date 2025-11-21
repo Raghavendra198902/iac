@@ -2,6 +2,12 @@
 
 > Fast access to commonly needed documentation and scripts
 
+## 🚀 Enterprise Features (NEW)
+- **Enterprise Features** → [Complete Guide](ENTERPRISE_FEATURES.md) - Multi-cloud, AI recommendations, SSO, mobile, analytics
+- **Quick Start** → [5-Minute Setup](ENTERPRISE_QUICKSTART.md) - Get started with enterprise features
+- **Testing Guide** → [Testing Procedures](ENTERPRISE_TESTING_GUIDE.md) - Comprehensive testing (2-3 hours)
+- **Deployment Status** → [Real-Time Status](DEPLOYMENT_STATUS.md) - Check deployment progress
+
 ## 🎯 I want to...
 
 ### Get Started
