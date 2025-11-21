@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { query } from '../utils/database';
 import { logger } from '../utils/logger';
+import { getAllCircuitBreakerStats } from '../utils/circuitBreaker';
 import axios from 'axios';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
@@ -122,6 +123,10 @@ router.get('/health/ready', async (req: Request, res: Response) => {
       database.status === 'healthy' &&
       cache.status === 'healthy';
 
+    // Get circuit breaker status
+    const circuitBreakers = getAllCircuitBreakerStats();
+    const openCircuits = circuitBreakers.filter(cb => cb.state === 'open').length;
+
     const statusCode = isHealthy ? 200 : 503;
 
     res.status(statusCode).json({
@@ -129,6 +134,12 @@ router.get('/health/ready', async (req: Request, res: Response) => {
       checks: {
         database,
         cache,
+      },
+      circuitBreakers: {
+        total: circuitBreakers.length,
+        open: openCircuits,
+        closed: circuitBreakers.filter(cb => cb.state === 'closed').length,
+        halfOpen: circuitBreakers.filter(cb => cb.state === 'half-open').length,
       },
       uptime: process.uptime(),
       memory: {
