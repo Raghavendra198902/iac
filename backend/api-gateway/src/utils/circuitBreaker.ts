@@ -10,10 +10,12 @@
  * - Fallback strategies for graceful degradation
  * - Metrics and monitoring integration
  * - Retry with exponential backoff
+ * - Distributed tracing integration
  */
 
 import CircuitBreaker from 'opossum';
 import { logger } from './logger';
+import { traceCircuitBreakerCall, addSpanEvent, setSpanAttributes } from './tracing';
 
 export interface CircuitBreakerOptions {
   timeout?: number;

@@ -13,6 +13,7 @@ import { userRateLimit, ipRateLimit } from './middleware/rateLimit';
 import { performanceMiddleware } from './utils/performance';
 import { correlationIdMiddleware, userContextMiddleware } from './middleware/correlationId';
 import { metricsMiddleware, metricsHandler, initializeMetricsCollectors } from './utils/metrics';
+import { initializeTracing, tracingMiddleware, shutdownTracing } from './utils/tracing';
 import routes from './routes';
 import { setupSwaggerDocs } from './docs/swagger-setup';
 import healthRouter, { markAppAsInitialized } from './routes/health';
@@ -29,8 +30,21 @@ const io = new SocketIOServer(httpServer, {
 
 const PORT = Number(process.env.PORT) || 3000;
 
+// Initialize OpenTelemetry tracing (must be first)
+let tracingSDK: any;
+try {
+  tracingSDK = initializeTracing();
+} catch (error) {
+  logger.warn('Tracing initialization failed, continuing without tracing', { error });
+}
+
 // Add correlation ID to all requests
 app.use(correlationIdMiddleware);
+
+// Add tracing middleware (after correlation ID)
+if (tracingSDK) {
+  app.use(tracingMiddleware);
+}
 
 // HTTP request logging with Winston
 app.use(morgan('combined', { stream }));
@@ -203,16 +217,22 @@ async function startServer() {
 }
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
+  if (tracingSDK) {
+    await shutdownTracing(tracingSDK);
+  }
   httpServer.close(() => {
     logger.info('HTTP server closed');
     process.exit(0);
   });
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
+  if (tracingSDK) {
+    await shutdownTracing(tracingSDK);
+  }
   httpServer.close(() => {
     logger.info('HTTP server closed');
     process.exit(0);
