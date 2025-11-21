@@ -14,6 +14,7 @@ import { performanceMiddleware } from './utils/performance';
 import { correlationIdMiddleware, userContextMiddleware } from './middleware/correlationId';
 import { metricsMiddleware, metricsHandler, initializeMetricsCollectors } from './utils/metrics';
 import { initializeTracing, tracingMiddleware, shutdownTracing } from './utils/tracing';
+import { featureFlagMiddleware, initializeFeatureFlags, initializeDefaultFlags } from './utils/featureFlags';
 import routes from './routes';
 import { setupSwaggerDocs } from './docs/swagger-setup';
 import healthRouter, { markAppAsInitialized } from './routes/health';
@@ -146,6 +147,9 @@ app.use('/api', authMiddleware);
 // Add user context after auth
 app.use('/api', userContextMiddleware);
 
+// Feature flags middleware (after auth and user context)
+app.use('/api', featureFlagMiddleware);
+
 // Enhanced rate limiting (after auth, so we have user info)
 app.use('/api', userRateLimit());
 app.use('/api', ipRateLimit());
@@ -195,6 +199,12 @@ async function startServer() {
     logger.info('🔄 Initializing metrics collectors...');
     initializeMetricsCollectors();
     logger.info('✅ Metrics collectors initialized');
+
+    // Initialize feature flags
+    logger.info('🔄 Initializing feature flags...');
+    await initializeFeatureFlags();
+    await initializeDefaultFlags();
+    logger.info('✅ Feature flags initialized');
 
     // Mark app as initialized for startup probe
     markAppAsInitialized();
