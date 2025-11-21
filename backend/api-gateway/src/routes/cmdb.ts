@@ -815,18 +815,18 @@ router.get('/cis/:id/history', (req: Request, res: Response) => {
 
 // GET health metrics
 router.get('/health', (req: Request, res: Response) => {
-  const total = ciDatabase.length;
-  const operational = ciDatabase.filter(ci => ci.status === 'operational').length;
-  const degraded = ciDatabase.filter(ci => ci.status === 'degraded').length;
-  const down = ciDatabase.filter(ci => ci.status === 'down').length;
-  const maintenance = ciDatabase.filter(ci => ci.status === 'maintenance').length;
+  const total = configItems.length;
+  const operational = configItems.filter(ci => ci.status === 'operational').length;
+  const degraded = configItems.filter(ci => ci.status === 'degraded').length;
+  const down = configItems.filter(ci => ci.status === 'down').length;
+  const maintenance = configItems.filter(ci => ci.status === 'maintenance').length;
   
   const overallHealth = total > 0 ? Math.round((operational / total) * 100) : 0;
   
   // Group by environment
   const environments = ['production', 'staging', 'development'];
   const byEnvironment = environments.map(env => {
-    const items = ciDatabase.filter(ci => ci.environment === env);
+    const items = configItems.filter(ci => ci.environment === env);
     const healthyItems = items.filter(ci => ci.status === 'operational').length;
     return {
       name: env,
@@ -839,11 +839,11 @@ router.get('/health', (req: Request, res: Response) => {
   const types = ['server', 'database', 'network', 'application', 'service', 'container'];
   const byType = types.map(type => ({
     name: type,
-    count: ciDatabase.filter(ci => ci.type === type).length
+    count: configItems.filter(ci => ci.type === type).length
   })).filter(t => t.count > 0);
   
   // Recent issues (last 24 hours)
-  const recentIssues = ciDatabase
+  const recentIssues = configItems
     .filter(ci => ci.status === 'degraded' || ci.status === 'down')
     .slice(0, 5)
     .map(ci => ({

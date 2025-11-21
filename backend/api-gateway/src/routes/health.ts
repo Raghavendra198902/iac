@@ -1,8 +1,169 @@
 import { Router, Request, Response } from 'express';
 import { query } from '../utils/database';
 import { logger } from '../utils/logger';
+import axios from 'axios';
+import { Pool } from 'pg';
+import Redis from 'ioredis';
 
 const router = Router();
+
+// Database connection pool
+const pool = new Pool({
+  host: process.env.DB_HOST || 'postgres',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  user: process.env.DB_USER || 'dharma',
+  password: process.env.DB_PASSWORD || 'dharma123',
+  database: process.env.DB_NAME || 'dharma_iac',
+});
+
+// Redis client
+const redis = new Redis({
+  host: process.env.REDIS_HOST || 'redis',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  password: process.env.REDIS_PASSWORD,
+  maxRetriesPerRequest: 3,
+  retryStrategy(times) {
+    return Math.min(times * 50, 2000);
+  },
+});
+
+// Dependency services to check
+const dependencies = [
+  { name: 'costing-service', url: 'http://costing-service:3002/health' },
+  { name: 'blueprint-service', url: 'http://blueprint-service:3003/health' },
+  { name: 'iac-generator', url: 'http://iac-generator:3004/health' },
+  { name: 'cloud-provider-service', url: 'http://cloud-provider-service:3005/health' },
+];
+
+// Startup flag
+let appInitialized = false;
+
+export function markAppAsInitialized() {
+  appInitialized = true;
+}
+
+// Liveness probe - Is the app running?
+router.get('/health/live', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+// Check database connectivity
+async function checkDatabase(): Promise<{ status: string; latency?: number; error?: string }> {
+  const startTime = Date.now();
+  try {
+    await pool.query('SELECT 1');
+    return {
+      status: 'healthy',
+      latency: Date.now() - startTime,
+    };
+  } catch (error: any) {
+    return {
+      status: 'unhealthy',
+      error: error.message,
+    };
+  }
+}
+
+// Check Redis connectivity
+async function checkRedis(): Promise<{ status: string; latency?: number; error?: string }> {
+  const startTime = Date.now();
+  try {
+    await redis.ping();
+    return {
+      status: 'healthy',
+      latency: Date.now() - startTime,
+    };
+  } catch (error: any) {
+    return {
+      status: 'unhealthy',
+      error: error.message,
+    };
+  }
+}
+
+// Check dependent services
+async function checkDependencies(): Promise<{ [key: string]: { status: string; latency?: number; error?: string } }> {
+  const results: { [key: string]: { status: string; latency?: number; error?: string } } = {};
+
+  await Promise.all(
+    dependencies.map(async (dep) => {
+      const startTime = Date.now();
+      try {
+        const response = await axios.get(dep.url, { timeout: 3000 });
+        results[dep.name] = {
+          status: response.status === 200 ? 'healthy' : 'degraded',
+          latency: Date.now() - startTime,
+        };
+      } catch (error: any) {
+        results[dep.name] = {
+          status: 'unhealthy',
+          error: error.message,
+        };
+      }
+    })
+  );
+
+  return results;
+}
+
+// Readiness probe - Is the app ready to serve traffic?
+router.get('/health/ready', async (req: Request, res: Response) => {
+  try {
+    const [database, cache] = await Promise.all([
+      checkDatabase(),
+      checkRedis(),
+    ]);
+
+    const isHealthy =
+      database.status === 'healthy' &&
+      cache.status === 'healthy';
+
+    const statusCode = isHealthy ? 200 : 503;
+
+    res.status(statusCode).json({
+      status: isHealthy ? 'ready' : 'not_ready',
+      checks: {
+        database,
+        cache,
+      },
+      uptime: process.uptime(),
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        external: Math.round(process.memoryUsage().external / 1024 / 1024),
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    res.status(503).json({
+      status: 'error',
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// Startup probe - Has the app finished initialization?
+router.get('/health/startup', (req: Request, res: Response) => {
+  if (!appInitialized) {
+    return res.status(503).json({
+      status: 'initializing',
+      message: 'Application is starting up',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  res.status(200).json({
+    status: 'started',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -27,7 +188,7 @@ interface HealthStatus {
   };
 }
 
-// Simple health check
+// Simple health check (legacy - kept for backward compatibility)
 router.get('/health', async (req: Request, res: Response) => {
   try {
     const startTime = Date.now();

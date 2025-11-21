@@ -5,13 +5,15 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
-import { logger } from './utils/logger';
+import { logger, stream } from './utils/logger';
 import { runMigrations } from './utils/migrations';
-import { errorHandler } from './middleware/errorHandler';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
 import { performanceMiddleware } from './utils/performance';
+import { correlationIdMiddleware, userContextMiddleware } from './middleware/correlationId';
 import routes from './routes';
 import { setupSwaggerDocs } from './docs/swagger-setup';
+import healthRouter, { markAppAsInitialized } from './routes/health';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -24,6 +26,12 @@ const io = new SocketIOServer(httpServer, {
 });
 
 const PORT = Number(process.env.PORT) || 3000;
+
+// Add correlation ID to all requests
+app.use(correlationIdMiddleware);
+
+// HTTP request logging with Winston
+app.use(morgan('combined', { stream }));
 
 // Security middleware - Enhanced helmet with HSTS
 app.use(helmet({
@@ -91,20 +99,8 @@ app.get('/security', (req, res) => {
   res.sendFile('public/security.html', { root: '.' });
 });
 
-// HTTP request logging
-if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan('combined', {
-    stream: {
-      write: (message: string) => {
-        logger.info(message.trim());
-      }
-    }
-  }));
-}
-
-// Health check routes (before auth middleware)
-import healthRoutes from './routes/health';
-app.use('/', healthRoutes);
+// Health check routes (before auth middleware) - MUST be before other middleware
+app.use('/', healthRouter);
 app.set('io', io); // Make io available to health routes
 
 // Public routes (no authentication required)
@@ -127,6 +123,9 @@ app.use('/api/security', securityRoutes); // Security events - public for agent 
 
 // Authentication middleware for protected routes
 app.use('/api', authMiddleware);
+
+// Add user context after auth
+app.use('/api', userContextMiddleware);
 
 // Routes
 app.use('/api', routes);
@@ -158,14 +157,10 @@ nodejs_version{version="${process.version}"} 1
 });
 
 // 404 handler
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    error: 'Not Found',
-    message: `Route ${req.method} ${req.path} not found`
-  });
-});
+// 404 handler for undefined routes
+app.use(notFoundHandler);
 
-// Global error handler
+// Global error handler (must be last)
 app.use(errorHandler);
 
 // Swagger documentation
@@ -191,6 +186,10 @@ async function startServer() {
     await runMigrations();
     logger.info('✅ Database migrations completed');
 
+    // Mark app as initialized for startup probe
+    markAppAsInitialized();
+    logger.info('✅ Application initialized');
+
     // Start HTTP server
     httpServer.listen(PORT, '0.0.0.0', () => {
       logger.info(`🚀 API Gateway running on port ${PORT}`);
@@ -199,12 +198,30 @@ async function startServer() {
       logger.info(`📄 OpenAPI Spec available at /api-docs.json`);
       logger.info(`⚡ WebSocket server ready for real-time updates`);
       logger.info(`💾 Database persistence enabled`);
+      logger.info(`🏥 Health checks: /health/live, /health/ready, /health/startup`);
     });
   } catch (error: any) {
-    logger.error('Failed to start server', { error: error.message });
+    logger.error('Failed to start server', { error: error.message, stack: error.stack });
     process.exit(1);
   }
 }
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  httpServer.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  httpServer.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+});
 
 startServer();
 
