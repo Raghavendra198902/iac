@@ -181,6 +181,7 @@ declare module '../middleware/auth' {
       tenantId: string;
       teamId?: string; // Optional team membership
       projectIds?: string[]; // Optional project assignments
+      subscription?: 'free' | 'basic' | 'pro' | 'enterprise' | 'admin';
     };
   }
 }

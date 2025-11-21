@@ -10,6 +10,7 @@ export interface AuthRequest extends Request {
     tenantId: string;
     teamId?: string;
     projectIds?: string[];
+    subscription?: 'free' | 'basic' | 'pro' | 'enterprise' | 'admin';
   };
 }
 

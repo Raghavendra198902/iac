@@ -1,12 +1,13 @@
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
+import { operationRateLimit } from '../middleware/rateLimit';
 
 const router = Router();
 
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://localhost:3008';
 
 // Generate blueprint from natural language
-router.post('/generate', async (req: Request, res: Response) => {
+router.post('/generate', operationRateLimit('ai_generate'), async (req: Request, res: Response) => {
   try {
     const { userInput, targetCloud, environment, budget, region, constraints } = req.body;
 
@@ -48,7 +49,7 @@ router.post('/generate', async (req: Request, res: Response) => {
 });
 
 // Get optimization suggestions
-router.get('/optimize/:blueprintId', async (req: Request, res: Response) => {
+router.get('/optimize/:blueprintId', operationRateLimit('ai_optimize'), async (req: Request, res: Response) => {
   try {
     const { blueprintId } = req.params;
 

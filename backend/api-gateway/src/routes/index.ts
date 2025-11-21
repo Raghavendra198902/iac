@@ -14,6 +14,7 @@ import cmdbRoutes from './cmdb';
 import downloadsRoutes from './downloads';
 import cacheRoutes from './cache';
 import circuitBreakerRoutes from './circuitBreaker';
+import rateLimitRoutes from './rateLimit';
 
 const router = Router();
 
@@ -38,6 +39,7 @@ router.get('/', (req, res) => {
       cmdb: '/api/cmdb',
       cache: '/api/cache',
       circuitBreakers: '/api/circuit-breakers',
+      rateLimits: '/api/rate-limits',
     },
   });
 });
@@ -56,6 +58,7 @@ router.use('/sa', saRoutes);
 router.use('/performance', performanceRoutes);
 router.use('/cache', cacheRoutes);
 router.use('/circuit-breakers', circuitBreakerRoutes);
+router.use('/rate-limits', rateLimitRoutes);
 // cmdb moved to public routes in index.ts
 router.use('/downloads', downloadsRoutes);
 

@@ -2,11 +2,12 @@ import { Router } from 'express';
 import { AuthRequest, requireRole } from '../middleware/auth';
 import { services } from '../utils/httpService';
 import { asyncHandler } from '../middleware/errorHandler';
+import { operationRateLimit } from '../middleware/rateLimit';
 
 const router = Router();
 
 // Generate IaC from blueprint
-router.post('/generate', requireRole('EA', 'SA', 'TA'), asyncHandler(async (req: AuthRequest, res) => {
+router.post('/generate', requireRole('EA', 'SA', 'TA'), operationRateLimit('iac_generate'), asyncHandler(async (req: AuthRequest, res) => {
   const response = await services.iacGenerator.post('/generate', req.body, {
     headers: { 'X-User-Id': req.user?.id, 'X-Tenant-Id': req.user?.tenantId }
   });

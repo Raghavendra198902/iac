@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import axios from 'axios';
 import { AuthRequest, requireRole } from '../middleware/auth';
+import { operationRateLimit } from '../middleware/rateLimit';
 
 const router = Router();
 const BLUEPRINT_SERVICE_URL = process.env.BLUEPRINT_SERVICE_URL || 'http://blueprint-service:3001';
@@ -36,7 +37,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
 });
 
 // Create blueprint (EA, SA, TA only)
-router.post('/', requireRole('EA', 'SA', 'TA'), async (req: AuthRequest, res) => {
+router.post('/', requireRole('EA', 'SA', 'TA'), operationRateLimit('blueprint_create'), async (req: AuthRequest, res) => {
   try {
     const response = await axios.post(`${BLUEPRINT_SERVICE_URL}/blueprints`, req.body, {
       headers: { 'X-User-Id': req.user?.id, 'X-Tenant-Id': req.user?.tenantId }

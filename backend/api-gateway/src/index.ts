@@ -9,6 +9,7 @@ import { logger, stream } from './utils/logger';
 import { runMigrations } from './utils/migrations';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
+import { userRateLimit, ipRateLimit } from './middleware/rateLimit';
 import { performanceMiddleware } from './utils/performance';
 import { correlationIdMiddleware, userContextMiddleware } from './middleware/correlationId';
 import routes from './routes';
@@ -126,6 +127,10 @@ app.use('/api', authMiddleware);
 
 // Add user context after auth
 app.use('/api', userContextMiddleware);
+
+// Enhanced rate limiting (after auth, so we have user info)
+app.use('/api', userRateLimit());
+app.use('/api', ipRateLimit());
 
 // Routes
 app.use('/api', routes);
