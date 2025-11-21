@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Calendar, DollarSign, Users, FileText, AlertCircle } from 'lucide-react';
+import { CloudProviderSelector } from '../components/CloudProviderSelector';
 
 const NewProject = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const NewProject = () => {
     team: '',
     status: 'planning',
     priority: 'medium',
+    cloudProvider: 'aws',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -135,6 +137,14 @@ const NewProject = () => {
                 {errors.description}
               </p>
             )}
+          </div>
+
+          {/* Cloud Provider Selection */}
+          <div>
+            <CloudProviderSelector
+              selectedProvider={formData.cloudProvider}
+              onProviderChange={(provider) => setFormData(prev => ({ ...prev, cloudProvider: provider }))}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
