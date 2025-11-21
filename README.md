@@ -46,8 +46,15 @@ A comprehensive enterprise platform for managing infrastructure blueprints, depl
 
 ## 📚 Documentation
 
-> **[📖 Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Comprehensive guide to all documentation and scripts  
-> **[⚡ Quick Navigation](QUICK_NAV.md)** - Fast access to common tasks and documentation  
+> **[📖 GitHub Wiki](https://github.com/Raghavendra198902/iac/wiki)** - Complete documentation (35 pages, 1.3MB)  
+> **[⚡ Quick Start](https://github.com/Raghavendra198902/iac/wiki/Quick-Start)** - Get started in 5 minutes  
+> **[📋 Installation Guide](https://github.com/Raghavendra198902/iac/wiki/Installation-Guide)** - Step-by-step setup  
+> **[🏗️ Architecture Overview](https://github.com/Raghavendra198902/iac/wiki/Architecture-Overview)** - System design  
+> **[❓ FAQ](https://github.com/Raghavendra198902/iac/wiki/FAQ)** - Frequently asked questions
+
+### Additional Resources
+> **[📖 Documentation Index](DOCUMENTATION_INDEX.md)** - Local documentation guide  
+> **[⚡ Quick Navigation](QUICK_NAV.md)** - Common tasks reference  
 > **[🎯 Enterprise Features Guide](ENTERPRISE_FEATURES.md)** - Complete enterprise features documentation
 
 ### Quick Links
