@@ -1,0 +1,80 @@
+config:
+  target: "{{ $processEnvironment.TARGET_URL }}"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm-up"
+    - duration: 120
+      arrivalRate: 10
+      name: "Ramp-up load"
+    - duration: 180
+      arrivalRate: 20
+      name: "Sustained load"
+  
+  environments:
+    staging:
+      target: "https://staging.iac-dharma.com"
+    production:
+      target: "https://iac-dharma.com"
+  
+  processor: "./load-test-helpers.js"
+
+scenarios:
+  - name: "Health Check Flow"
+    weight: 20
+    flow:
+      - get:
+          url: "/health/live"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/health/ready"
+          expect:
+            - statusCode: 200
+
+  - name: "API Gateway Flow"
+    weight: 30
+    flow:
+      - get:
+          url: "/api"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+  - name: "Circuit Breakers Flow"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/circuit-breakers"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: success
+
+  - name: "Cache Operations Flow"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/cache/stats"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: stats
+
+  - name: "Rate Limits Flow"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/rate-limits/config"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: data.tiers
+
+  - name: "Blueprint List Flow"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/blueprints"
+          expect:
+            - statusCode: [200, 401]  # May require auth

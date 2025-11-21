@@ -1,0 +1,212 @@
+name: Security Audit
+
+on:
+  schedule:
+    # Run security audit weekly on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+jobs:
+  dependency-check:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        service:
+          - backend/api-gateway
+          - backend/blueprint-service
+          - backend/iac-generator
+          - backend/costing-service
+          - frontend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Run npm audit
+        working-directory: ${{ matrix.service }}
+        run: |
+          npm audit --audit-level=moderate --production || true
+          npm audit --json > audit-results.json || true
+      
+      - name: Upload audit results
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm-audit-${{ matrix.service }}
+          path: ${{ matrix.service }}/audit-results.json
+
+  container-scan:
+    name: Container Image Scanning
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        image:
+          - api-gateway
+          - blueprint-service
+          - iac-generator
+          - costing-service
+          - frontend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: |
+          if [ "${{ matrix.image }}" == "frontend" ]; then
+            docker build -t ${{ matrix.image }}:scan frontend/
+          else
+            docker build -t ${{ matrix.image }}:scan backend/${{ matrix.image }}/
+          fi
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.image }}:scan
+          format: 'sarif'
+          output: 'trivy-${{ matrix.image }}.sarif'
+          severity: 'CRITICAL,HIGH'
+      
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-${{ matrix.image }}.sarif'
+
+  secrets-scan:
+    name: Secrets Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=iac-dharma
+            -Dsonar.organization=your-org
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
+
+  sast-scan:
+    name: Static Application Security Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/owasp-top-ten
+            p/typescript
+            p/react
+
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install license checker
+        run: npm install -g license-checker
+      
+      - name: Check API Gateway licenses
+        run: |
+          cd backend/api-gateway
+          npm ci
+          license-checker --json --out ../../licenses-api-gateway.json
+      
+      - name: Check Frontend licenses
+        run: |
+          cd frontend
+          npm ci
+          license-checker --json --out ../licenses-frontend.json
+      
+      - name: Upload license reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: license-reports
+          path: licenses-*.json
+
+  security-report:
+    name: Generate Security Report
+    needs: 
+      - dependency-check
+      - container-scan
+      - secrets-scan
+      - code-quality
+      - sast-scan
+      - license-check
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Generate summary report
+        run: |
+          echo "# Security Audit Summary" > security-report.md
+          echo "Date: $(date)" >> security-report.md
+          echo "" >> security-report.md
+          echo "## Scans Completed" >> security-report.md
+          echo "- Dependency vulnerability scan" >> security-report.md
+          echo "- Container image scanning" >> security-report.md
+          echo "- Secrets scanning" >> security-report.md
+          echo "- Code quality analysis" >> security-report.md
+          echo "- SAST scanning" >> security-report.md
+          echo "- License compliance check" >> security-report.md
+          echo "" >> security-report.md
+          echo "Review artifacts for detailed results." >> security-report.md
+      
+      - name: Upload security report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-audit-report
+          path: security-report.md
