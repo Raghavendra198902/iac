@@ -18,37 +18,46 @@
 
 ### Core Features
 - [Multi-Cloud Support](Multi-Cloud-Support) - AWS, Azure, GCP integration
-- [AI Recommendations](AI-Recommendations) - Intelligent cost optimization
+- [AI Recommendations](AI-Recommendations) - ML-powered cost optimization
+- [CMDB Integration](CMDB-Integration) - Infrastructure discovery and tracking
 - [Observability](Observability) - Prometheus, Grafana, Jaeger
 - [Feature Flags](Feature-Flags) - Gradual rollouts and A/B testing
-- [Admin Dashboard](Admin-Dashboard) - Monitoring and control
-- [SSO Integration](SSO-Integration) - SAML and OAuth2
-
-### API Documentation
-- [API Reference](API-Reference) - Complete API documentation
-- [REST API Endpoints](REST-API-Endpoints) - HTTP endpoints reference
-- [Authentication](Authentication) - JWT and SSO auth
-- [Rate Limiting](Rate-Limiting) - API throttling and quotas
+- [SSO Configuration](SSO-Configuration) - SAML 2.0, OAuth 2.0, LDAP
 
 ### Development
 - [Development Setup](Development-Setup) - Local development environment
 - [Contributing Guide](Contributing-Guide) - How to contribute
 - [Testing Guide](Testing-Guide) - Unit, integration, and E2E tests
-- [Deployment Guide](Deployment-Guide) - Production deployment
+- [Custom Blueprints](Custom-Blueprints) - Creating infrastructure templates
+- [Terraform Templates](Terraform-Templates) - Terraform modules and patterns
+- [Plugin Development](Plugin-Development) - Extending IAC Dharma
 
-### Operations
+### Operations & Deployment
+- [Deployment Guide](Deployment-Guide) - Production deployment strategies
 - [Docker Compose](Docker-Compose) - Running with Docker
 - [Kubernetes Deployment](Kubernetes-Deployment) - K8s deployment
-- [Monitoring Setup](Monitoring-Setup) - Setting up observability
+- [Workflow Automation](Workflow-Automation) - CI/CD integration
+- [Migration Guide](Migration-Guide) - Migrating from other platforms
 - [Troubleshooting](Troubleshooting) - Common issues and solutions
-- [Performance Tuning](Performance-Tuning) - Optimization tips
 
-### Advanced Topics
-- [Circuit Breakers](Circuit-Breakers) - Service resilience
-- [Caching Strategy](Caching-Strategy) - Multi-layer caching
-- [Database Optimization](Database-Optimization) - Query optimization
-- [Security Best Practices](Security-Best-Practices) - Securing your deployment
-- [CI/CD Pipeline](CI-CD-Pipeline) - Automated deployment
+### Monitoring & Security
+- [Observability](Observability) - Metrics, logs, and tracing
+- [Performance Tuning](Performance-Tuning) - Optimization strategies
+- [Security Best Practices](Security-Best-Practices) - Security hardening
+- [Backup and Recovery](Backup-and-Recovery) - Disaster recovery
+- [Database Management](Database-Management) - PostgreSQL administration
+
+### Enterprise Features
+- [Cost Optimization](Cost-Optimization) - AI-driven cost reduction
+- [Compliance and Governance](Compliance-and-Governance) - Regulatory compliance
+- [Advanced Networking](Advanced-Networking) - VPC, load balancers, service mesh
+- [Disaster Recovery](Disaster-Recovery) - Multi-region DR strategies
+- [Cloud Provider Guides](Cloud-Provider-Guides) - AWS, Azure, GCP specifics
+
+### Reference
+- [API Reference](API-Reference) - Complete API documentation
+- [CLI Reference](CLI-Reference) - Command-line interface guide
+- [FAQ](FAQ) - Frequently asked questions
 
 ---
 
@@ -809,4 +818,6 @@ Special thanks to the open-source community!
 
 ---
 
-Last Updated: November 21, 2025 | Version: 1.0.0 | [Release Notes](https://github.com/Raghavendra198902/iac/releases)
+**📚 Complete Wiki**: 35 comprehensive pages covering installation, development, operations, enterprise features, and more!
+
+Last Updated: November 22, 2025 | Version: 1.0.0 | [Release Notes](https://github.com/Raghavendra198902/iac/releases)
