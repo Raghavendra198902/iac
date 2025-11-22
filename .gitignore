@@ -1,4 +1,10 @@
-# Dependencies
+# ==========================================
+# IAC Dharma - Git Ignore Configuration
+# ==========================================
+
+# -----------------------------------------
+# Dependencies & Package Managers
+# -----------------------------------------
 node_modules/
 __pycache__/
 *.pyc
@@ -10,85 +16,211 @@ pip-delete-this-directory.txt
 venv/
 env/
 ENV/
+.venv/
 *.egg-info/
 dist/
 build/
+.yarn/
+.pnp.*
+yarn.lock
+package-lock.json
 
-# IDE
+# -----------------------------------------
+# IDE & Editor Files
+# -----------------------------------------
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.iml
 
-# Environment variables
+# -----------------------------------------
+# Environment Variables & Secrets
+# -----------------------------------------
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.staging
+.env.test
 *.env
+.envrc
 
-# Logs
+# -----------------------------------------
+# Application Logs
+# -----------------------------------------
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+combined.log
+error.log
+access.log
 
-# Testing
+# -----------------------------------------
+# Testing & Coverage
+# -----------------------------------------
 coverage/
 .nyc_output/
 *.cover
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+junit.xml
+test-results/
+.jest/
 
-# Build outputs
+# -----------------------------------------
+# Build Outputs
+# -----------------------------------------
 /dist
 /build
+/out
 *.js.map
 *.d.ts
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
 
-# Terraform
+# -----------------------------------------
+# Terraform State & Plans
+# -----------------------------------------
 .terraform/
 *.tfstate
+*.tfstate.*
 *.tfstate.backup
 *.tfplan
 .terraform.lock.hcl
+terraform.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
+# -----------------------------------------
 # Docker
-*.dockerfile
+# -----------------------------------------
+*.dockerfile.tmp
+docker-compose.override.yml
+.docker/
 
-# Kubernetes secrets
+# -----------------------------------------
+# Kubernetes Secrets
+# -----------------------------------------
 *secret*.yaml
 *-secret.yaml
+*-secrets.yaml
+kubeconfig
+kubeconfig.*
 
-# Temporary files
+# -----------------------------------------
+# Temporary & Backup Files
+# -----------------------------------------
 tmp/
 temp/
 *.tmp
 *.bak
 *.swp
+*.swo
+*.orig
+*~
 
-# Database
+# -----------------------------------------
+# Database Files
+# -----------------------------------------
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.db-shm
+*.db-wal
 
-# ML Models (large files)
+# -----------------------------------------
+# ML Models & Large Binary Files
+# -----------------------------------------
 *.h5
 *.pkl
 *.joblib
 *.model
+*.weights
+*.onnx
+*.pb
+models/*.pth
+models/*.pt
 
-# Cloud credentials
+# -----------------------------------------
+# Cloud Provider Credentials
+# -----------------------------------------
 *credentials*.json
 *serviceaccount*.json
 *.pem
 *.key
 *.crt
+*.cer
+*.p12
+*.pfx
+aws-credentials
+gcp-credentials.json
+azure-credentials.json
+.aws/
+.azure/
+.gcp/
 
-# OS
+# -----------------------------------------
+# Operating System Files
+# -----------------------------------------
 Thumbs.db
 .DS_Store
+desktop.ini
+$RECYCLE.BIN/
+.Trash-*
+.directory
+.Spotlight-V100
+.TemporaryItems
 
-# Snyk Security Extension - AI Rules (auto-generated)
+# -----------------------------------------
+# CI/CD Artifacts
+# -----------------------------------------
+.github/workflows/*.log
+.gitlab-ci-local/
+.circleci/local/
+
+# -----------------------------------------
+# Monitoring & Observability
+# -----------------------------------------
+*.trace
+*.prof
+*.hprof
+*.perf
+flamegraph*.svg
+
+# -----------------------------------------
+# Security Tools
+# -----------------------------------------
+.snyk
+snyk-*.json
+trivy-report.json
 .github/instructions/snyk_rules.instructions.md
+
+# -----------------------------------------
+# Local Development
+# -----------------------------------------
+.local/
+.cache/
+.tmp/
+scratch/
+sandbox/
+*.local

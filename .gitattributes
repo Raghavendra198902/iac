@@ -1,0 +1,209 @@
+# ==========================================
+# IAC Dharma - Git Attributes
+# ==========================================
+
+# -----------------------------------------
+# Auto-detect text files and normalize line endings
+# -----------------------------------------
+* text=auto
+
+# -----------------------------------------
+# Source Code
+# -----------------------------------------
+*.js text eol=lf
+*.ts text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
+*.py text eol=lf
+*.go text eol=lf
+*.java text eol=lf
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+
+# -----------------------------------------
+# Web Files
+# -----------------------------------------
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.less text eol=lf
+
+# -----------------------------------------
+# Configuration Files
+# -----------------------------------------
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.xml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.conf text eol=lf
+*.config text eol=lf
+
+# -----------------------------------------
+# Infrastructure as Code
+# -----------------------------------------
+*.tf text eol=lf
+*.tfvars text eol=lf
+*.hcl text eol=lf
+
+# -----------------------------------------
+# Scripts
+# -----------------------------------------
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+*.ps1 text eol=crlf
+
+# -----------------------------------------
+# Documentation
+# -----------------------------------------
+*.md text eol=lf
+*.txt text eol=lf
+*.adoc text eol=lf
+*.rst text eol=lf
+
+# -----------------------------------------
+# Docker
+# -----------------------------------------
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+.dockerignore text eol=lf
+
+# -----------------------------------------
+# Kubernetes
+# -----------------------------------------
+*.k8s.yaml text eol=lf
+*.k8s.yml text eol=lf
+
+# -----------------------------------------
+# Git Files
+# -----------------------------------------
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.gitmodules text eol=lf
+
+# -----------------------------------------
+# CI/CD
+# -----------------------------------------
+.github/**/*.yml text eol=lf
+.gitlab-ci.yml text eol=lf
+.travis.yml text eol=lf
+Jenkinsfile text eol=lf
+
+# -----------------------------------------
+# Binary Files
+# -----------------------------------------
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.webp binary
+*.avif binary
+
+# -----------------------------------------
+# Archives
+# -----------------------------------------
+*.zip binary
+*.tar binary
+*.gz binary
+*.bz2 binary
+*.7z binary
+*.rar binary
+
+# -----------------------------------------
+# Executable Files
+# -----------------------------------------
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# -----------------------------------------
+# Documents
+# -----------------------------------------
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+
+# -----------------------------------------
+# Fonts
+# -----------------------------------------
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+
+# -----------------------------------------
+# ML Models
+# -----------------------------------------
+*.h5 binary
+*.pkl binary
+*.joblib binary
+*.model binary
+*.weights binary
+*.pth binary
+*.pt binary
+*.onnx binary
+*.pb binary
+
+# -----------------------------------------
+# Database
+# -----------------------------------------
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# -----------------------------------------
+# Language-specific detection
+# -----------------------------------------
+*.js linguist-language=JavaScript
+*.ts linguist-language=TypeScript
+*.py linguist-language=Python
+*.go linguist-language=Go
+*.tf linguist-language=HCL
+
+# -----------------------------------------
+# Exclude from diff and merge
+# -----------------------------------------
+package-lock.json -diff -merge
+yarn.lock -diff -merge
+pnpm-lock.yaml -diff -merge
+poetry.lock -diff -merge
+
+# -----------------------------------------
+# Large files (use Git LFS if needed)
+# -----------------------------------------
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.ai filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.avi filter=lfs diff=lfs merge=lfs -text
+
+# -----------------------------------------
+# Generated files (mark as generated)
+# -----------------------------------------
+*.generated.* linguist-generated=true
+*-generated.* linguist-generated=true
+dist/** linguist-generated=true
+build/** linguist-generated=true
+coverage/** linguist-generated=true
+
+# -----------------------------------------
+# Vendored code (exclude from language stats)
+# -----------------------------------------
+vendor/** linguist-vendored=true
+node_modules/** linguist-vendored=true
+third_party/** linguist-vendored=true
