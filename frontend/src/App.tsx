@@ -1,51 +1,64 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import AppLayout from './components/layout/AppLayout';
-import PublicLayout from './components/layout/PublicLayout';
-import DashboardEnhanced from './pages/DashboardEnhanced';
-import AdvancedDashboard from './pages/AdvancedDashboard';
-import BlueprintList from './pages/BlueprintList';
-import BlueprintDetail from './pages/BlueprintDetail';
-import BlueprintEdit from './pages/BlueprintEdit';
-import NLPDesigner from './pages/NLPDesigner';
-import RiskDashboard from './pages/RiskDashboard';
-import CostDashboard from './pages/CostDashboard';
-import DeploymentMonitor from './pages/DeploymentMonitor';
-import IACGenerator from './pages/IACGenerator';
-import GuardrailsManagement from './pages/GuardrailsManagement';
-import AutomationEngine from './pages/AutomationEngine';
-import MonitoringDashboard from './pages/MonitoringDashboard';
-import AIInsights from './pages/AIInsights';
-import PerformanceAnalytics from './pages/PerformanceAnalytics';
-import UIShowcase from './pages/UIShowcase';
-import CMDB from './pages/CMDB';
-import DownloadsPage from './pages/DownloadsPage';
-import AgentsPage from './pages/AgentsPage';
-import SecurityDashboard from './pages/SecurityDashboard';
-import Security from './pages/Security';
-import ReportsBuilder from './pages/ReportsBuilder';
-import IntegrationsManagement from './pages/IntegrationsManagement';
-import APIManagement from './pages/APIManagement';
-import ProjectsList from './pages/ProjectsList';
-import NewProject from './pages/NewProject';
-import Login from './pages/Login';
-import NotFound from './pages/NotFound';
 import ToastProvider from './components/ToastProvider';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute, RoleBasedRoute } from './components/ProtectedRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+// Loading component for Suspense fallback
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+    </div>
+  </div>
+);
+
+// Lazy load pages for better performance
+const DashboardEnhanced = lazy(() => import('./pages/DashboardEnhanced'));
+const AdvancedDashboard = lazy(() => import('./pages/AdvancedDashboard'));
+const BlueprintList = lazy(() => import('./pages/BlueprintList'));
+const BlueprintDetail = lazy(() => import('./pages/BlueprintDetail'));
+const BlueprintEdit = lazy(() => import('./pages/BlueprintEdit'));
+const NLPDesigner = lazy(() => import('./pages/NLPDesigner'));
+const RiskDashboard = lazy(() => import('./pages/RiskDashboard'));
+const CostDashboard = lazy(() => import('./pages/CostDashboard'));
+const DeploymentMonitor = lazy(() => import('./pages/DeploymentMonitor'));
+const IACGenerator = lazy(() => import('./pages/IACGenerator'));
+const GuardrailsManagement = lazy(() => import('./pages/GuardrailsManagement'));
+const AutomationEngine = lazy(() => import('./pages/AutomationEngine'));
+const MonitoringDashboard = lazy(() => import('./pages/MonitoringDashboard'));
+const AIInsights = lazy(() => import('./pages/AIInsights'));
+const PerformanceAnalytics = lazy(() => import('./pages/PerformanceAnalytics'));
+const UIShowcase = lazy(() => import('./pages/UIShowcase'));
+const CMDB = lazy(() => import('./pages/CMDB'));
+const DownloadsPage = lazy(() => import('./pages/DownloadsPage'));
+const AgentsPage = lazy(() => import('./pages/AgentsPage'));
+const SecurityDashboard = lazy(() => import('./pages/SecurityDashboard'));
+const Security = lazy(() => import('./pages/Security'));
+const ReportsBuilder = lazy(() => import('./pages/ReportsBuilder'));
+const IntegrationsManagement = lazy(() => import('./pages/IntegrationsManagement'));
+const APIManagement = lazy(() => import('./pages/APIManagement'));
+const ProjectsList = lazy(() => import('./pages/ProjectsList'));
+const NewProject = lazy(() => import('./pages/NewProject'));
+const Login = lazy(() => import('./pages/Login'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Enterprise Features
-import { AnalyticsDashboard } from './pages/AnalyticsDashboard';
-import { SSOLoginPage } from './components/SSOLogin';
+const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
+const SSOLoginPage = lazy(() => import('./components/SSOLogin').then(m => ({ default: m.SSOLoginPage })));
 
 // Role-based Dashboards
-import SADashboard from './pages/dashboards/SADashboard';
-import EADashboard from './pages/dashboards/EADashboard';
-import PMDashboard from './pages/dashboards/PMDashboard';
-import TADashboard from './pages/dashboards/TADashboard';
-import SEDashboard from './pages/dashboards/SEDashboard';
+const SADashboard = lazy(() => import('./pages/dashboards/SADashboard'));
+const EADashboard = lazy(() => import('./pages/dashboards/EADashboard'));
+const PMDashboard = lazy(() => import('./pages/dashboards/PMDashboard'));
+const TADashboard = lazy(() => import('./pages/dashboards/TADashboard'));
+const SEDashboard = lazy(() => import('./pages/dashboards/SEDashboard'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +66,12 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnMount: false,
+      refetchOnReconnect: 'always',
+    },
+    mutations: {
+      retry: 1,
     },
   },
 });
@@ -64,15 +83,18 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <ToastProvider />
-            <Routes>
-              {/* All authenticated routes */}
-              <Route path="*" element={
-                <AuthProvider>
-                  <InnerRoutes />
-                </AuthProvider>
-              } />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* All authenticated routes */}
+                <Route path="*" element={
+                  <AuthProvider>
+                    <InnerRoutes />
+                  </AuthProvider>
+                } />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
       </ErrorBoundary>
     </ThemeProvider>
