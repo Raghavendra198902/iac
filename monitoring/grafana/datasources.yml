@@ -7,21 +7,82 @@
       "access": "proxy",
       "url": "http://prometheus:9090",
       "isDefault": true,
-      "editable": true
+      "editable": true,
+      "jsonData": {
+        "timeInterval": "5s",
+        "queryTimeout": "60s",
+        "httpMethod": "POST",
+        "exemplarTraceIdDestinations": [
+          {
+            "name": "traceID",
+            "datasourceUid": "jaeger"
+          }
+        ]
+      }
     },
     {
       "name": "Loki",
       "type": "loki",
       "access": "proxy",
       "url": "http://loki:3100",
-      "editable": true
+      "editable": true,
+      "jsonData": {
+        "maxLines": 1000,
+        "timeout": 60,
+        "derivedFields": [
+          {
+            "datasourceUid": "jaeger",
+            "matcherRegex": "traceID=(\\w+)",
+            "name": "TraceID",
+            "url": "$${__value.raw}"
+          }
+        ]
+      }
     },
     {
       "name": "Jaeger",
       "type": "jaeger",
       "access": "proxy",
-      "url": "http://jaeger-query:16686",
-      "editable": true
+      "url": "http://jaeger:16686",
+      "editable": true,
+      "jsonData": {
+        "tracesToLogs": {
+          "datasourceUid": "loki",
+          "tags": ["service.name", "http.method", "http.status_code"],
+          "mappedTags": [
+            {
+              "key": "service.name",
+              "value": "service"
+            }
+          ],
+          "mapTagNamesEnabled": true,
+          "spanStartTimeShift": "-1h",
+          "spanEndTimeShift": "1h"
+        },
+        "nodeGraph": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "postgres",
+      "access": "proxy",
+      "url": "postgres:5432",
+      "database": "iac_dharma",
+      "user": "dharma",
+      "editable": true,
+      "secureJsonData": {
+        "password": "dharma_password_2024"
+      },
+      "jsonData": {
+        "sslmode": "disable",
+        "maxOpenConns": 0,
+        "maxIdleConns": 2,
+        "connMaxLifetime": 14400,
+        "postgresVersion": 1400,
+        "timescaledb": false
+      }
     }
   ]
 }

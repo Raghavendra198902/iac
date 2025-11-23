@@ -1,0 +1,290 @@
+{
+  "dashboard": {
+    "title": "IAC Dharma - Infrastructure Cost Analytics",
+    "tags": ["iac-dharma", "cost", "finops"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "1m",
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "type": "stat",
+        "title": "Total Cost (30 days)",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [{
+          "expr": "sum(cost_total_usd{period=\"30d\"})",
+          "legendFormat": "Total USD"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "textMode": "value_and_name",
+          "unit": "currencyUSD"
+        }
+      },
+      {
+        "id": 2,
+        "type": "stat",
+        "title": "Today's Cost",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [{
+          "expr": "sum(cost_daily_usd)",
+          "legendFormat": "Today"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "unit": "currencyUSD"
+        }
+      },
+      {
+        "id": 3,
+        "type": "stat",
+        "title": "Cost Trend",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [{
+          "expr": "((sum(cost_daily_usd) - sum(cost_daily_usd offset 1d)) / sum(cost_daily_usd offset 1d)) * 100",
+          "legendFormat": "Change %"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": -999, "color": "green"},
+              {"value": 5, "color": "yellow"},
+              {"value": 15, "color": "red"}
+            ]
+          }
+        }
+      },
+      {
+        "id": 4,
+        "type": "stat",
+        "title": "Savings Opportunities",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [{
+          "expr": "sum(cost_savings_potential_usd)",
+          "legendFormat": "Potential Savings"
+        }],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "unit": "currencyUSD"
+        }
+      },
+      {
+        "id": 5,
+        "type": "timeseries",
+        "title": "Daily Cost Breakdown by Cloud Provider",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 4},
+        "targets": [{
+          "expr": "sum(cost_daily_usd) by (provider)",
+          "legendFormat": "{{provider}}"
+        }],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "calcs": ["mean", "max", "last", "sum"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "fillOpacity": 20,
+              "stacking": {"mode": "normal"}
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "type": "piechart",
+        "title": "Cost by Service (30 days)",
+        "gridPos": {"h": 10, "w": 12, "x": 0, "y": 14},
+        "targets": [{
+          "expr": "sum(cost_total_usd{period=\"30d\"}) by (service)",
+          "legendFormat": "{{service}}"
+        }],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "calcs": ["last", "percent"]},
+          "pieType": "donut",
+          "displayLabels": ["name", "percent"]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "type": "piechart",
+        "title": "Cost by Resource Type",
+        "gridPos": {"h": 10, "w": 12, "x": 12, "y": 14},
+        "targets": [{
+          "expr": "sum(cost_total_usd{period=\"30d\"}) by (resource_type)",
+          "legendFormat": "{{resource_type}}"
+        }],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "calcs": ["last", "percent"]},
+          "pieType": "donut",
+          "displayLabels": ["name", "percent"]
+        }
+      },
+      {
+        "id": 8,
+        "type": "table",
+        "title": "Top 20 Most Expensive Resources",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 24},
+        "targets": [{
+          "expr": "topk(20, cost_resource_usd)",
+          "format": "table",
+          "instant": true
+        }],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "resource_id": "Resource ID",
+                "resource_name": "Resource Name",
+                "resource_type": "Type",
+                "provider": "Provider",
+                "region": "Region",
+                "Value": "Cost (USD)"
+              }
+            }
+          }
+        ],
+        "options": {
+          "sortBy": [{"field": "Cost (USD)", "desc": true}]
+        }
+      },
+      {
+        "id": 9,
+        "type": "timeseries",
+        "title": "AI Cost Predictions (Next 30 Days)",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 34},
+        "targets": [
+          {
+            "expr": "cost_daily_usd",
+            "legendFormat": "Actual Cost"
+          },
+          {
+            "expr": "cost_predicted_usd",
+            "legendFormat": "Predicted Cost"
+          },
+          {
+            "expr": "cost_predicted_lower_bound_usd",
+            "legendFormat": "Lower Bound"
+          },
+          {
+            "expr": "cost_predicted_upper_bound_usd",
+            "legendFormat": "Upper Bound"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "color": {"mode": "palette-classic"}
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Lower Bound"},
+              "properties": [{"id": "custom.lineStyle", "value": {"dash": [10, 10], "fill": "dash"}}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Upper Bound"},
+              "properties": [{"id": "custom.lineStyle", "value": {"dash": [10, 10], "fill": "dash"}}]
+            }
+          ]
+        }
+      },
+      {
+        "id": 10,
+        "type": "table",
+        "title": "Cost Optimization Recommendations",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 42},
+        "targets": [{
+          "expr": "cost_optimization_recommendation",
+          "format": "table",
+          "instant": true
+        }],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "resource_id": "Resource",
+                "recommendation_type": "Type",
+                "current_cost": "Current Cost",
+                "optimized_cost": "Optimized Cost",
+                "savings": "Monthly Savings",
+                "confidence": "Confidence %",
+                "action": "Recommended Action"
+              }
+            }
+          }
+        ],
+        "options": {
+          "sortBy": [{"field": "Monthly Savings", "desc": true}]
+        }
+      },
+      {
+        "id": 11,
+        "type": "bargauge",
+        "title": "Savings by Optimization Type",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 52},
+        "targets": [{
+          "expr": "sum(cost_savings_potential_usd) by (optimization_type)",
+          "legendFormat": "{{optimization_type}}"
+        }],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 12,
+        "type": "stat",
+        "title": "Cost Efficiency Score",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 52},
+        "targets": [{
+          "expr": "(1 - (sum(cost_waste_usd) / sum(cost_total_usd))) * 100",
+          "legendFormat": "Efficiency"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "textMode": "value",
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "red"},
+              {"value": 70, "color": "yellow"},
+              {"value": 85, "color": "green"}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
