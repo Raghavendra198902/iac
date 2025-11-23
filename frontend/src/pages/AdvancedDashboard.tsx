@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import { Activity, Database, Server, AlertTriangle, TrendingUp, TrendingDown, Zap, Users, DollarSign, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { realtimeService, type RealTimeMetrics, type ServiceStatus, type SystemMetrics } from '../services/realtimeService';
 import { databaseService, type DatabaseStats } from '../services/databaseService';
-import { useToast } from '@/hooks/use-toast';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -17,7 +15,6 @@ export default function AdvancedDashboard() {
   const [databaseStats, setDatabaseStats] = useState<DatabaseStats | null>(null);
   const [metricsHistory, setMetricsHistory] = useState<RealTimeMetrics[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     // Fetch initial data
@@ -33,11 +30,11 @@ export default function AdvancedDashboard() {
 
     // Subscribe to alerts
     const unsubscribeAlerts = realtimeService.subscribeToAlerts((alert) => {
-      toast({
-        title: `${alert.severity.toUpperCase()}: ${alert.service}`,
-        description: alert.message,
-        variant: alert.severity === 'critical' || alert.severity === 'error' ? 'destructive' : 'default',
-      });
+      console.log('Alert received:', alert);
+      // Display alert notification
+      if (alert.severity === 'critical' || alert.severity === 'error') {
+        console.error(`${alert.severity.toUpperCase()}: ${alert.service} - ${alert.message}`);
+      }
     });
 
     // Periodic refresh for system metrics
@@ -208,37 +205,54 @@ export default function AdvancedDashboard() {
               <CardTitle>Real-Time Metrics (Last 60 seconds)</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={metricsHistory}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="timestamp"
-                    tickFormatter={(value) => new Date(value).toLocaleTimeString()}
-                  />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Area
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="requestsPerSecond"
-                    stroke="#3b82f6"
-                    fill="#3b82f6"
-                    fillOpacity={0.6}
-                    name="Requests/sec"
-                  />
-                  <Area
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="avgResponseTime"
-                    stroke="#10b981"
-                    fill="#10b981"
-                    fillOpacity={0.6}
-                    name="Response Time (ms)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Requests Per Second</p>
+                    <div className="h-24 flex items-end space-x-1">
+                      {metricsHistory.slice(-20).map((metric, idx) => (
+                        <div
+                          key={idx}
+                          className="flex-1 bg-blue-500 rounded-t"
+                          style={{
+                            height: `${Math.min((metric.requestsPerSecond / 10) * 100, 100)}%`,
+                            minHeight: '4px'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Response Time (ms)</p>
+                    <div className="h-24 flex items-end space-x-1">
+                      {metricsHistory.slice(-20).map((metric, idx) => (
+                        <div
+                          key={idx}
+                          className="flex-1 bg-green-500 rounded-t"
+                          style={{
+                            height: `${Math.min((metric.avgResponseTime / 500) * 100, 100)}%`,
+                            minHeight: '4px'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                  <div>
+                    <p className="text-sm text-gray-500">Current RPS</p>
+                    <p className="text-2xl font-bold">{realTimeMetrics?.requestsPerSecond.toFixed(1) || '0'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Avg Response</p>
+                    <p className="text-2xl font-bold">{realTimeMetrics?.avgResponseTime.toFixed(0) || '0'}ms</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Error Rate</p>
+                    <p className="text-2xl font-bold">{realTimeMetrics?.errorRate.toFixed(2) || '0'}%</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
