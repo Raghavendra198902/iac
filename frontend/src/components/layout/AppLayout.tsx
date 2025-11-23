@@ -41,6 +41,17 @@ import {
   Network,
   Boxes,
   Clock,
+  CheckCircle2,
+  AlertCircle,
+  TrendingDown,
+  Wifi,
+  WifiOff,
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  AlertTriangle,
+  Radio,
+  Flame,
 } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useAuth } from '../../contexts/AuthContext';
@@ -123,11 +134,70 @@ export default function AppLayout() {
     'Analytics & Insights': false,
     'Resources': false,
   });
+  const [systemStats, setSystemStats] = useState({
+    services: { total: 18, healthy: 17, warning: 1, critical: 0 },
+    cpu: 45,
+    memory: 68,
+    disk: 52,
+    network: 'online',
+    responseTime: 142,
+  });
+  const [isConnected, setIsConnected] = useState(true);
   const location = useLocation();
   const { logout, user } = useAuth();
 
+  // Simulate real-time stats updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSystemStats(prev => ({
+        ...prev,
+        cpu: Math.max(20, Math.min(95, prev.cpu + (Math.random() - 0.5) * 10)),
+        memory: Math.max(30, Math.min(90, prev.memory + (Math.random() - 0.5) * 5)),
+        responseTime: Math.max(50, Math.min(300, prev.responseTime + (Math.random() - 0.5) * 30)),
+      }));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const isActive = (href: string) => {
     return location.pathname === href || location.pathname.startsWith(href + '/');
+  };
+
+  const getBreadcrumbs = () => {
+    const paths = location.pathname.split('/').filter(Boolean);
+    const breadcrumbs = [{ name: 'Home', path: '/dashboard' }];
+    
+    let currentPath = '';
+    paths.forEach((path) => {
+      currentPath += `/${path}`;
+      const item = navigationGroups
+        .flatMap(g => g.items)
+        .find(item => item.href === currentPath);
+      if (item) {
+        breadcrumbs.push({ name: item.name, path: currentPath });
+      } else {
+        breadcrumbs.push({ 
+          name: path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' '), 
+          path: currentPath 
+        });
+      }
+    });
+    
+    return breadcrumbs;
+  };
+
+  const getHealthColor = () => {
+    const { healthy, warning, critical } = systemStats.services;
+    if (critical > 0) return 'text-red-600 dark:text-red-400';
+    if (warning > 0) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-green-600 dark:text-green-400';
+  };
+
+  const getHealthBg = () => {
+    const { healthy, warning, critical } = systemStats.services;
+    if (critical > 0) return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    if (warning > 0) return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800';
+    return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800';
   };
 
   const toggleGroup = (groupName: string) => {
@@ -163,29 +233,70 @@ export default function AppLayout() {
         } ${sidebarCollapsed ? 'w-20' : 'w-72'}`}
       >
         {/* Sidebar Header */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800">
+        <div className="border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800">
+          <div className="flex h-16 items-center justify-between px-4">
+            {!sidebarCollapsed && (
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                  <Layers className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-white">IAC DHARMA</h1>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+                    <p className="text-xs text-white/70">System {isConnected ? 'Online' : 'Offline'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <div className="mx-auto relative">
+                <Layers className="h-8 w-8 text-white" />
+                <div className={`absolute -top-1 -right-1 h-3 w-3 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} border-2 border-primary-700`} />
+              </div>
+            )}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          {/* System Health Bar */}
           {!sidebarCollapsed && (
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Layers className="h-6 w-6 text-white" />
+            <div className="px-4 pb-3 space-y-2">
+              <div className="flex items-center justify-between text-xs text-white/90">
+                <span className="font-medium">System Health</span>
+                <span className="flex items-center gap-1">
+                  {systemStats.services.healthy}/{systemStats.services.total} Services
+                  <CheckCircle2 className="h-3 w-3" />
+                </span>
               </div>
-              <div>
-                <h1 className="text-lg font-bold text-white">IAC DHARMA</h1>
-                <p className="text-xs text-white/70">Infrastructure Platform</p>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Cpu className="h-3 w-3 text-white/70" />
+                    <span className="text-xs text-white/70">CPU</span>
+                  </div>
+                  <div className="text-sm font-bold text-white">{Math.round(systemStats.cpu)}%</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                  <div className="flex items-center gap-1 mb-1">
+                    <HardDrive className="h-3 w-3 text-white/70" />
+                    <span className="text-xs text-white/70">RAM</span>
+                  </div>
+                  <div className="text-sm font-bold text-white">{Math.round(systemStats.memory)}%</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Activity className="h-3 w-3 text-white/70" />
+                    <span className="text-xs text-white/70">Ping</span>
+                  </div>
+                  <div className="text-sm font-bold text-white">{Math.round(systemStats.responseTime)}ms</div>
+                </div>
               </div>
             </div>
           )}
-          {sidebarCollapsed && (
-            <div className="mx-auto">
-              <Layers className="h-8 w-8 text-white" />
-            </div>
-          )}
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
 
         {/* Sidebar Navigation */}
@@ -216,24 +327,27 @@ export default function AppLayout() {
                       <Link
                         key={item.name}
                         to={item.href}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                        className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
                           active
-                            ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:shadow-md'
+                            ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30 scale-[1.02]'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:shadow-md hover:scale-[1.01]'
                         }`}
                         title={sidebarCollapsed ? item.name : undefined}
                       >
-                        <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'} transition-colors`} />
+                        <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'} transition-all ${active ? 'animate-pulse' : ''}`} />
                         {!sidebarCollapsed && (
                           <span className="flex-1">{item.name}</span>
                         )}
                         {!sidebarCollapsed && (item as any).badge && (
-                          <span className="px-2 py-0.5 text-xs font-semibold bg-green-500 text-white rounded-full">
+                          <span className="px-2 py-0.5 text-xs font-semibold bg-green-500 text-white rounded-full shadow-sm animate-pulse">
                             {(item as any).badge}
                           </span>
                         )}
                         {!sidebarCollapsed && active && (
-                          <div className="h-2 w-2 rounded-full bg-white shadow-lg" />
+                          <div className="h-2 w-2 rounded-full bg-white shadow-lg animate-pulse" />
+                        )}
+                        {sidebarCollapsed && active && (
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full" />
                         )}
                       </Link>
                     );
@@ -276,6 +390,26 @@ export default function AppLayout() {
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
         {/* Top navigation */}
         <header className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg">
+          {/* Breadcrumbs */}
+          <div className="border-b border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50 px-6 py-2">
+            <div className="flex items-center gap-2 text-sm">
+              {getBreadcrumbs().map((crumb, index) => (
+                <div key={crumb.path} className="flex items-center gap-2">
+                  {index > 0 && <ChevronRight className="h-3 w-3 text-gray-400" />}
+                  <Link
+                    to={crumb.path}
+                    className={`hover:text-primary-600 dark:hover:text-primary-400 transition-colors ${
+                      index === getBreadcrumbs().length - 1
+                        ? 'text-primary-600 dark:text-primary-400 font-semibold'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    {crumb.name}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="flex h-16 items-center justify-between px-6 gap-4">
             {/* Left section */}
             <div className="flex items-center gap-4">
@@ -302,23 +436,68 @@ export default function AppLayout() {
 
             {/* Right section */}
             <div className="flex items-center gap-3">
-              {/* Quick Stats */}
-              <div className="hidden xl:flex items-center gap-4 mr-4">
+              {/* Real-time Stats */}
+              <div className="hidden xl:flex items-center gap-3 mr-4">
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getHealthBg()} transition-all duration-300`}>
+                  <Radio className={`h-3.5 w-3.5 ${getHealthColor()} animate-pulse`} />
+                  <span className={`text-xs font-semibold ${getHealthColor()}`}>
+                    {systemStats.services.healthy}/{systemStats.services.total}
+                  </span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Services</span>
+                  {systemStats.services.warning > 0 && (
+                    <AlertTriangle className="h-3 w-3 text-yellow-600" />
+                  )}
+                </div>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+                  systemStats.cpu > 80 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                  systemStats.cpu > 60 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
+                  'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                }`}>
+                  <Cpu className={`h-3.5 w-3.5 ${
+                    systemStats.cpu > 80 ? 'text-red-600 dark:text-red-400' :
+                    systemStats.cpu > 60 ? 'text-yellow-600 dark:text-yellow-400' :
+                    'text-blue-600 dark:text-blue-400'
+                  }`} />
+                  <span className={`text-xs font-semibold ${
+                    systemStats.cpu > 80 ? 'text-red-600 dark:text-red-400' :
+                    systemStats.cpu > 60 ? 'text-yellow-600 dark:text-yellow-400' :
+                    'text-blue-600 dark:text-blue-400'
+                  }`}>{Math.round(systemStats.cpu)}%</span>
+                </div>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+                  systemStats.memory > 80 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                  systemStats.memory > 60 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
+                  'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800'
+                }`}>
+                  <HardDrive className={`h-3.5 w-3.5 ${
+                    systemStats.memory > 80 ? 'text-red-600 dark:text-red-400' :
+                    systemStats.memory > 60 ? 'text-yellow-600 dark:text-yellow-400' :
+                    'text-purple-600 dark:text-purple-400'
+                  }`} />
+                  <span className={`text-xs font-semibold ${
+                    systemStats.memory > 80 ? 'text-red-600 dark:text-red-400' :
+                    systemStats.memory > 60 ? 'text-yellow-600 dark:text-yellow-400' :
+                    'text-purple-600 dark:text-purple-400'
+                  }`}>{Math.round(systemStats.memory)}%</span>
+                </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <Activity className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                  <span className="text-xs font-medium text-green-700 dark:text-green-300">18 Services</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <Cpu className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                  <span className="text-xs font-medium text-blue-700 dark:text-blue-300">CPU: 45%</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                  <Database className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs font-medium text-purple-700 dark:text-purple-300">DB: Active</span>
+                  {isConnected ? (
+                    <Wifi className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <WifiOff className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                  )}
+                  <span className="text-xs font-semibold text-green-600 dark:text-green-400">{Math.round(systemStats.responseTime)}ms</span>
                 </div>
               </div>
 
               {/* Quick Actions */}
+              <button
+                onClick={() => window.location.reload()}
+                className="hidden lg:flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors group"
+                title="Refresh"
+              >
+                <RefreshCw className="h-4 w-4 text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:rotate-180 transition-all duration-500" />
+              </button>
               <Link
                 to="/designer"
                 className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200"
@@ -327,7 +506,7 @@ export default function AppLayout() {
                 New Blueprint
               </Link>
 
-              {/* Notifications */}
+              {/* Notifications */
               <div className="relative">
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
