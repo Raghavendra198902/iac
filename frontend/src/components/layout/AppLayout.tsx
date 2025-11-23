@@ -35,6 +35,12 @@ import {
   BarChart3,
   Cloud,
   TrendingUp,
+  LineChart,
+  Cpu,
+  HardDrive,
+  Network,
+  Boxes,
+  Clock,
 } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useAuth } from '../../contexts/AuthContext';
@@ -44,6 +50,7 @@ const navigationGroups = [
     name: 'Overview',
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Advanced Dashboard', href: '/advanced', icon: LineChart, badge: 'New' },
     ]
   },
   {
@@ -63,6 +70,7 @@ const navigationGroups = [
       { name: 'AI Designer', href: '/designer', icon: Sparkles },
       { name: 'IAC Generator', href: '/iac', icon: Code },
       { name: 'CMDB', href: '/cmdb', icon: Database },
+      { name: 'Cloud Providers', href: '/cloud', icon: Cloud },
     ]
   },
   {
@@ -83,17 +91,19 @@ const navigationGroups = [
     ]
   },
   {
-    name: 'Analytics',
+    name: 'Analytics & Insights',
     items: [
       { name: 'Advanced Analytics', href: '/analytics', icon: BarChart3 },
       { name: 'AI Insights', href: '/ai', icon: Brain },
       { name: 'Cost Management', href: '/cost', icon: DollarSign },
+      { name: 'Trends & Forecasting', href: '/trends', icon: TrendingUp },
     ]
   },
   {
     name: 'Resources',
     items: [
       { name: 'Downloads', href: '/downloads', icon: Download },
+      { name: 'Documentation', href: '/docs', icon: FileText },
     ]
   },
 ];
@@ -110,7 +120,7 @@ export default function AppLayout() {
     'Infrastructure': true,
     'Operations': true,
     'Security & Compliance': false,
-    'Analytics': false,
+    'Analytics & Insights': false,
     'Resources': false,
   });
   const location = useLocation();
@@ -217,6 +227,11 @@ export default function AppLayout() {
                         {!sidebarCollapsed && (
                           <span className="flex-1">{item.name}</span>
                         )}
+                        {!sidebarCollapsed && (item as any).badge && (
+                          <span className="px-2 py-0.5 text-xs font-semibold bg-green-500 text-white rounded-full">
+                            {(item as any).badge}
+                          </span>
+                        )}
                         {!sidebarCollapsed && active && (
                           <div className="h-2 w-2 rounded-full bg-white shadow-lg" />
                         )}
@@ -241,7 +256,7 @@ export default function AppLayout() {
                 Collapse Sidebar
               </button>
               <div className="text-xs text-gray-500 dark:text-gray-400 px-3">
-                <div className="font-semibold">Version 2.0.0</div>
+                <div className="font-semibold">Version 2.1.0</div>
                 <div>© 2025 IAC DHARMA</div>
               </div>
             </div>
@@ -260,7 +275,7 @@ export default function AppLayout() {
       {/* Main content */}
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
         {/* Top navigation */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+        <header className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg">
           <div className="flex h-16 items-center justify-between px-6 gap-4">
             {/* Left section */}
             <div className="flex items-center gap-4">
@@ -272,14 +287,14 @@ export default function AppLayout() {
               </button>
 
               {/* Search bar */}
-              <div className="hidden md:flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-2 min-w-[300px] focus-within:ring-2 focus-within:ring-primary-500 transition-all">
+              <div className="hidden md:flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-2.5 min-w-[350px] focus-within:ring-2 focus-within:ring-primary-500 focus-within:bg-white dark:focus-within:bg-gray-750 transition-all shadow-sm">
                 <Search className="h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search resources, blueprints..."
+                  placeholder="Search dashboards, services, metrics..."
                   className="bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 w-full"
                 />
-                <kbd className="hidden lg:inline-flex items-center px-2 py-0.5 text-xs font-semibold text-gray-500 bg-gray-200 dark:bg-gray-700 dark:text-gray-400 rounded">
+                <kbd className="hidden lg:inline-flex items-center px-2 py-0.5 text-xs font-semibold text-gray-500 bg-gray-200 dark:bg-gray-700 dark:text-gray-400 rounded border border-gray-300 dark:border-gray-600">
                   ⌘K
                 </kbd>
               </div>
@@ -287,6 +302,22 @@ export default function AppLayout() {
 
             {/* Right section */}
             <div className="flex items-center gap-3">
+              {/* Quick Stats */}
+              <div className="hidden xl:flex items-center gap-4 mr-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <Activity className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                  <span className="text-xs font-medium text-green-700 dark:text-green-300">18 Services</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Cpu className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-xs font-medium text-blue-700 dark:text-blue-300">CPU: 45%</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <Database className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                  <span className="text-xs font-medium text-purple-700 dark:text-purple-300">DB: Active</span>
+                </div>
+              </div>
+
               {/* Quick Actions */}
               <Link
                 to="/designer"
