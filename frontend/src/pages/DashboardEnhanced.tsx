@@ -537,8 +537,10 @@ export default function EnhancedDashboard() {
             </div>
           </Link>
         </div>
-
-        {/* Charts with Modern Design */}
+      </div>
+    </PageTransition>
+  );
+}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg border border-gray-100 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Deployment Activity</h3>
