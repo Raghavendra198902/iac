@@ -3,7 +3,7 @@ import {
   FileText, AlertTriangle, DollarSign, Activity, Sparkles, TrendingUp, TrendingDown, 
   Cloud, Zap, Shield, Brain, Server, Database, Cpu, HardDrive, Network, 
   CheckCircle2, AlertCircle, Clock, ArrowUpRight, ArrowDownRight, BarChart3,
-  Layers, Globe, Lock, Rocket
+  Layers, Globe, Lock, Rocket, Users, UserCheck, UserPlus, UserX
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageTransition from '../components/ui/PageTransition';
@@ -498,6 +498,139 @@ export default function EnhancedDashboard() {
                       <p className="text-2xl font-bold text-white">3.2x</p>
                       <p className="text-xs text-white/70">Faster Deploy</p>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* User Management Overview */}
+        <FadeIn delay={0.7}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* User Statistics */}
+            <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">User Management</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Team members and access control</p>
+                  </div>
+                </div>
+                <Link 
+                  to="/users" 
+                  className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 flex items-center gap-1"
+                >
+                  Manage Users
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <UserCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <span className="text-xs font-semibold text-green-700 dark:text-green-300">Active</span>
+                  </div>
+                  <p className="text-3xl font-bold text-green-900 dark:text-green-300">247</p>
+                  <p className="text-xs text-green-700 dark:text-green-400 mt-1">+12 this week</p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">New</span>
+                  </div>
+                  <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">18</p>
+                  <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">Last 30 days</p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border border-orange-200 dark:border-orange-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <UserX className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                    <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">Inactive</span>
+                  </div>
+                  <p className="text-3xl font-bold text-orange-900 dark:text-orange-300">12</p>
+                  <p className="text-xs text-orange-700 dark:text-orange-400 mt-1">Needs review</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Recent Activity</h4>
+                {[
+                  { name: 'Sarah Johnson', action: 'Created new blueprint', role: 'Solution Architect', time: '5 min ago', status: 'success' },
+                  { name: 'Michael Chen', action: 'Deployed to production', role: 'DevOps Engineer', time: '12 min ago', status: 'success' },
+                  { name: 'Emily Davis', action: 'Updated security policy', role: 'Security Admin', time: '28 min ago', status: 'warning' },
+                  { name: 'James Wilson', action: 'Accessed cost analytics', role: 'Finance Manager', time: '1 hour ago', status: 'info' },
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                        {activity.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.name}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{activity.action}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        activity.status === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        activity.status === 'warning' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                      }`}>
+                        {activity.role}
+                      </span>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Role Distribution & Access */}
+            <div className="space-y-6">
+              <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-indigo-600" />
+                  Role Distribution
+                </h4>
+                <div className="space-y-3">
+                  {[
+                    { role: 'Enterprise Admin', count: 8, color: 'bg-purple-500', percent: 3 },
+                    { role: 'Solution Architect', count: 45, color: 'bg-blue-500', percent: 18 },
+                    { role: 'DevOps Engineer', count: 89, color: 'bg-green-500', percent: 36 },
+                    { role: 'Security Admin', count: 23, color: 'bg-orange-500', percent: 9 },
+                    { role: 'Developer', count: 82, color: 'bg-indigo-500', percent: 33 },
+                  ].map((item, index) => (
+                    <div key={index}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{item.role}</span>
+                        <span className="text-xs font-semibold text-gray-900 dark:text-white">{item.count}</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className={`h-full ${item.color} transition-all duration-300`} style={{ width: `${item.percent}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 p-6 shadow-xl text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <Lock className="h-8 w-8 opacity-80" />
+                  <span className="text-xs bg-white/20 backdrop-blur-xl px-2 py-1 rounded-full">Secure</span>
+                </div>
+                <p className="text-sm opacity-90 mb-1">Multi-Factor Auth</p>
+                <p className="text-3xl font-bold mb-2">94.2%</p>
+                <p className="text-sm opacity-80">of users enabled MFA</p>
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="opacity-80">SSO Integration</span>
+                    <CheckCircle2 className="h-5 w-5 text-green-300" />
                   </div>
                 </div>
               </div>
