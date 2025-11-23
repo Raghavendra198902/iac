@@ -553,7 +553,6 @@ export default function AppLayout() {
                 )}
               </div>
 
-              {/* Theme toggle */}
               <div className="hidden md:block">
                 <ThemeToggle />
               </div>
