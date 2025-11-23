@@ -24,11 +24,23 @@ const ProjectsList = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // TODO: Replace with actual API endpoint when backend is ready
-        // const response = await fetch('/api/projects');
-        // const data = await response.json();
-        // setProjects(data);
-        setProjects([]); // No demo data - real API only
+        // Use real API or demo mode based on environment
+        const useDemoMode = import.meta.env.VITE_USE_DEMO_AUTH === 'true';
+        
+        if (!useDemoMode) {
+          try {
+            const { projectsApi } = await import('../services/api.service');
+            const data = await projectsApi.list();
+            setProjects(data as Project[]);
+            setLoading(false);
+            return;
+          } catch (apiError) {
+            console.error('API fetch failed, using empty list:', apiError);
+          }
+        }
+        
+        // Demo mode or API failure - show empty list
+        setProjects([]);
       } catch (error) {
         console.error('Failed to fetch projects:', error);
       } finally {

@@ -83,16 +83,29 @@ const NewProject = () => {
     }
 
     try {
-      // Show loading toast
       const loadingToast = toast.loading('Creating project...');
 
-      // TODO: Submit to API
-      console.log('Creating project:', formData);
+      // Use real API or demo mode
+      const useDemoMode = import.meta.env.VITE_USE_DEMO_AUTH === 'true';
       
-      // Simulate API call
+      if (!useDemoMode) {
+        try {
+          const { projectsApi } = await import('../services/api.service');
+          await projectsApi.create(formData);
+          toast.success('Project created successfully!', { id: loadingToast });
+          navigate('/projects');
+          return;
+        } catch (apiError) {
+          console.error('API creation failed:', apiError);
+          toast.error('Failed to create project via API', { id: loadingToast });
+          return;
+        }
+      }
+      
+      // Demo mode - simulate success
+      console.log('Creating project (demo mode):', formData);
       await new Promise(resolve => setTimeout(resolve, 1500));
-
-      toast.success('Project created successfully!', { id: loadingToast });
+      toast.success('Project created successfully! (Demo Mode)', { id: loadingToast });
       navigate('/projects');
     } catch (error) {
       toast.error('Failed to create project. Please try again.');

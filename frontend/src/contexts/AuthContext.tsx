@@ -146,10 +146,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Login function
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Replace with real API call when backend auth is implemented
-      // For now, use mock login for demo users
+      // Use real API in production, fall back to demo mode if API unavailable
+      const useDemoMode = import.meta.env.VITE_USE_DEMO_AUTH === 'true';
       
-      // Demo user credentials validation
+      if (!useDemoMode) {
+        // Real API authentication
+        try {
+          const { authApi } = await import('../services/api.service');
+          const response: any = await authApi.login(email, password);
+          
+          const { token, user: apiUser } = response;
+          
+          // Merge permissions from roles
+          const permissions: Permission[] = [];
+          apiUser.roles?.forEach((role: UserRole) => {
+            permissions.push(...(ROLE_PERMISSIONS[role] || []));
+          });
+
+          const enrichedUser: User = {
+            id: apiUser.id,
+            email: apiUser.email,
+            firstName: apiUser.firstName,
+            lastName: apiUser.lastName,
+            roles: apiUser.roles || [],
+            tenantId: apiUser.tenantId,
+            permissions,
+            preferences: apiUser.preferences || {},
+          };
+
+          // Save to localStorage
+          localStorage.setItem('auth_token', token);
+          localStorage.setItem('user', JSON.stringify(enrichedUser));
+
+          setAuthState({
+            user: enrichedUser,
+            token,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+
+          // Navigate to dashboard
+          navigate('/dashboard');
+          return;
+        } catch (apiError) {
+          console.error('API authentication failed, falling back to demo mode:', apiError);
+          // Continue to demo mode fallback
+        }
+      }
+      
+      // Demo mode fallback
       const demoUsers = [
         { email: 'ea@demo.com', firstName: 'Emma', lastName: 'Anderson', roles: ['EA' as UserRole] },
         { email: 'sa@demo.com', firstName: 'Sam', lastName: 'Taylor', roles: ['SA' as UserRole] },
@@ -166,10 +211,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Invalid email or password');
       }
 
-      // Mock user data
-      const mockToken = btoa(`${email}:${Date.now()}`); // Simple mock token
+      const mockToken = btoa(`${email}:${Date.now()}`);
       
-      // Merge permissions from roles
       const permissions: Permission[] = [];
       demoUser.roles.forEach((role: UserRole) => {
         permissions.push(...(ROLE_PERMISSIONS[role] || []));
@@ -186,7 +229,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         preferences: {},
       };
 
-      // Save to localStorage
       localStorage.setItem('auth_token', mockToken);
       localStorage.setItem('user', JSON.stringify(enrichedUser));
 
@@ -197,7 +239,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading: false,
       });
 
-      // Navigate to dashboard
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);

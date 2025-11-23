@@ -857,27 +857,65 @@ output "load_balancer_ip" {
     setGenerating(true);
     setGenerationProgress(0);
 
-    // Simulate generation progress
-    const interval = setInterval(() => {
-      setGenerationProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setGenerating(false);
-          setGeneratedCode(generateTerraformCode(template));
-          setSelectedTemplate(template);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 300);
-
     try {
-      // API call would go here
-      // await api.post('/iac/generate', { templateId });
+      // Use real API or demo mode
+      const useDemoMode = import.meta.env.VITE_USE_DEMO_AUTH === 'true';
+      
+      if (!useDemoMode) {
+        try {
+          const { iacGeneratorApi } = await import('../services/api.service');
+          
+          // Start generation job
+          const { jobId } = await iacGeneratorApi.generate(
+            templateId, 
+            codeFormat === 'terraform' ? 'terraform' : 'cloudformation'
+          );
+          
+          // Poll for job status
+          const pollInterval = setInterval(async () => {
+            const jobStatus: any = await iacGeneratorApi.getJobStatus(jobId);
+            
+            if (jobStatus.status === 'completed') {
+              clearInterval(pollInterval);
+              setGenerating(false);
+              setGenerationProgress(100);
+              setGeneratedCode(jobStatus.code || '');
+              setSelectedTemplate(template);
+              toast.success('Code generated successfully!');
+            } else if (jobStatus.status === 'failed') {
+              clearInterval(pollInterval);
+              setGenerating(false);
+              toast.error('Code generation failed');
+            } else {
+              // Update progress
+              setGenerationProgress(jobStatus.progress || 0);
+            }
+          }, 2000);
+          
+          return;
+        } catch (apiError) {
+          console.error('API generation failed, using demo mode:', apiError);
+        }
+      }
+      
+      // Demo mode fallback - simulate generation
+      const interval = setInterval(() => {
+        setGenerationProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setGenerating(false);
+            setGeneratedCode(generateTerraformCode(template));
+            setSelectedTemplate(template);
+            toast.success('Code generated successfully! (Demo Mode)');
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 300);
     } catch (error) {
       console.error('Generation failed:', error);
-      clearInterval(interval);
       setGenerating(false);
+      toast.error('Failed to generate code');
     }
   };
 
