@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { Button } from '../components/ui/Button';
+import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import { Activity, Database, Server, AlertTriangle, TrendingUp, TrendingDown, Zap, Users, DollarSign, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { realtimeService, type RealTimeMetrics, type ServiceStatus, type SystemMetrics } from '../services/realtimeService';
