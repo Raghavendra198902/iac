@@ -23,6 +23,7 @@ import DownloadsPage from './pages/DownloadsPage';
 import AgentsPage from './pages/AgentsPage';
 import SecurityDashboard from './pages/SecurityDashboard';
 import Security from './pages/Security';
+import ReportsBuilder from './pages/ReportsBuilder';
 import ProjectsList from './pages/ProjectsList';
 import NewProject from './pages/NewProject';
 import Login from './pages/Login';
@@ -137,6 +138,9 @@ function InnerRoutes() {
                 
                 {/* AI Insights - All authenticated users */}
                 <Route path="ai" element={<AIInsights />} />
+                
+                {/* Reports Builder - All authenticated users */}
+                <Route path="reports" element={<ReportsBuilder />} />
                 
                 {/* Performance Analytics - All authenticated users */}
                 <Route path="performance" element={<PerformanceAnalytics />} />
