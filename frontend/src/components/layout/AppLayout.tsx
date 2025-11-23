@@ -146,6 +146,33 @@ export default function AppLayout() {
   const location = useLocation();
   const { logout, user } = useAuth();
 
+  // Auto-collapse menus on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+    setUserMenuOpen(false);
+    setNotificationsOpen(false);
+  }, [location.pathname]);
+
+  // Auto-collapse menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Close user menu if clicking outside
+      if (userMenuOpen && !target.closest('[data-user-menu]')) {
+        setUserMenuOpen(false);
+      }
+      
+      // Close notifications if clicking outside
+      if (notificationsOpen && !target.closest('[data-notifications]')) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [userMenuOpen, notificationsOpen]);
+
   // Simulate real-time stats updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -505,7 +532,7 @@ export default function AppLayout() {
                 New Blueprint
               </Link>
 
-              <div className="relative">
+              <div className="relative" data-notifications>
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
                   className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
@@ -555,7 +582,7 @@ export default function AppLayout() {
                 <ThemeToggle />
               </div>
               
-              <div className="relative">
+              <div className="relative" data-user-menu>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
