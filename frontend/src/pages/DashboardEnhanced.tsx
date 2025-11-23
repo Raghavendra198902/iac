@@ -374,6 +374,137 @@ export default function EnhancedDashboard() {
           </div>
         </div>
 
+        {/* Enterprise Vision */}
+        <FadeIn delay={0.6}>
+          <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 shadow-2xl">
+            <div className="relative">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center">
+                    <Sparkles className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Enterprise Vision & Strategy</h2>
+                    <p className="text-white/90">Transforming infrastructure management with AI-powered automation</p>
+                  </div>
+                </div>
+                <Link
+                  to="/roadmap"
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl text-white font-semibold rounded-xl transition-all"
+                >
+                  View Roadmap
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <Brain className="h-5 w-5 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">AI-First Approach</h3>
+                  </div>
+                  <p className="text-white/80 text-sm mb-3">
+                    Leveraging machine learning for predictive scaling, cost optimization, and intelligent resource allocation
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-white rounded-full" style={{ width: '78%' }}></div>
+                    </div>
+                    <span className="text-white font-semibold text-sm">78%</span>
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <Globe className="h-5 w-5 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Multi-Cloud Excellence</h3>
+                  </div>
+                  <p className="text-white/80 text-sm mb-3">
+                    Unified management across AWS, Azure, GCP with seamless workload migration and hybrid cloud support
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-white rounded-full" style={{ width: '92%' }}></div>
+                    </div>
+                    <span className="text-white font-semibold text-sm">92%</span>
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Security & Compliance</h3>
+                  </div>
+                  <p className="text-white/80 text-sm mb-3">
+                    Enterprise-grade security with automated compliance checks, audit trails, and zero-trust architecture
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-white rounded-full" style={{ width: '94%' }}></div>
+                    </div>
+                    <span className="text-white font-semibold text-sm">94%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-white font-semibold flex items-center gap-2">
+                      <Rocket className="h-4 w-4" />
+                      2025 Q1 Goals
+                    </h4>
+                    <span className="text-xs px-2 py-1 bg-green-500/30 text-green-100 rounded-full">On Track</span>
+                  </div>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-white/80 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-300" />
+                      Launch AI Blueprint Generator
+                    </li>
+                    <li className="flex items-center gap-2 text-white/80 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-300" />
+                      Multi-region disaster recovery
+                    </li>
+                    <li className="flex items-center gap-2 text-white/80 text-sm">
+                      <Clock className="h-4 w-4 text-yellow-300" />
+                      Advanced cost analytics dashboard
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-white font-semibold flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Key Metrics
+                    </h4>
+                    <span className="text-xs px-2 py-1 bg-blue-500/30 text-blue-100 rounded-full">Growing</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <p className="text-2xl font-bold text-white">99.99%</p>
+                      <p className="text-xs text-white/70">Uptime SLA</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">45%</p>
+                      <p className="text-xs text-white/70">Cost Reduction</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">3.2x</p>
+                      <p className="text-xs text-white/70">Faster Deploy</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+
         {/* Advanced Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 shadow-xl text-white">
