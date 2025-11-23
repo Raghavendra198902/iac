@@ -1,7 +1,6 @@
-import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { lazy, Suspense } from 'react';
 import AppLayout from './components/layout/AppLayout';
 import ToastProvider from './components/ToastProvider';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -9,17 +8,17 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-// Loading component for Suspense fallback
+// Loading component for lazy-loaded routes
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+      <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
     </div>
   </div>
 );
 
-// Lazy load pages for better performance
+// Lazy load all page components for code splitting
 const DashboardEnhanced = lazy(() => import('./pages/DashboardEnhanced'));
 const AdvancedDashboard = lazy(() => import('./pages/AdvancedDashboard'));
 const BlueprintList = lazy(() => import('./pages/BlueprintList'));
@@ -50,7 +49,7 @@ const Login = lazy(() => import('./pages/Login'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Enterprise Features
-const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
+const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard })));
 const SSOLoginPage = lazy(() => import('./components/SSOLogin').then(m => ({ default: m.SSOLoginPage })));
 
 // Role-based Dashboards
@@ -66,12 +65,6 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnMount: false,
-      refetchOnReconnect: 'always',
-    },
-    mutations: {
-      retry: 1,
     },
   },
 });
@@ -94,7 +87,6 @@ function App() {
               </Routes>
             </Suspense>
           </BrowserRouter>
-          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
       </ErrorBoundary>
     </ThemeProvider>
