@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import { Brain, Lightbulb, TrendingUp, Target, Zap, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Brain, Lightbulb, TrendingUp, Target, Zap, AlertCircle, Play, BarChart3, Activity, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
 import Badge from '../components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import Alert from '../components/ui/Alert';
+import FadeIn from '../components/ui/FadeIn';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AIRecommendation {
   id: string;
@@ -23,8 +26,42 @@ interface Insight {
   severity: 'info' | 'warning' | 'critical';
 }
 
+interface Prediction {
+  id: string;
+  metric: string;
+  currentValue: number;
+  predictedValue: number;
+  timeframe: string;
+  confidence: number;
+  trend: 'up' | 'down' | 'stable';
+  data: Array<{ time: string; actual: number; predicted: number }>;
+}
+
+interface SimulationResult {
+  metric: string;
+  before: number;
+  after: number;
+  improvement: number;
+  cost: number;
+  timeToImplement: string;
+}
+
+interface AutoRemediation {
+  id: string;
+  issue: string;
+  action: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress: number;
+  startedAt?: string;
+  completedAt?: string;
+  result?: string;
+}
+
 const AIInsights = () => {
-  const [recommendations] = useState<AIRecommendation[]>([
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
+  const [recommendations, setRecommendations] = useState<AIRecommendation[]>([
     {
       id: '1',
       title: 'Optimize RDS Instance Sizing',
@@ -90,6 +127,62 @@ const AIInsights = () => {
       severity: 'info',
     },
   ]);
+
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [autoRemediations, setAutoRemediations] = useState<AutoRemediation[]>([]);
+  const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  useEffect(() => {
+    // Load real-time predictions and auto-remediation status
+    const loadData = async () => {
+      try {
+        const [recsRes, predsRes, remediationsRes] = await Promise.all([
+          fetch('/api/ai/recommendations'),
+          fetch('/api/ai/predictions'),
+          fetch('/api/ai/auto-remediations')
+        ]);
+        if (recsRes.ok) setRecommendations(await recsRes.json());
+        if (predsRes.ok) setPredictions(await predsRes.json());
+        if (remediationsRes.ok) setAutoRemediations(await remediationsRes.json());
+      } catch (error) {
+        console.error('Failed to load AI data:', error);
+      }
+    };
+    loadData();
+
+    // Refresh every 30 seconds
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const simulateImpact = async (recommendationId: string) => {
+    setIsSimulating(true);
+    try {
+      const response = await fetch(`/api/ai/simulate/${recommendationId}`, { method: 'POST' });
+      if (response.ok) {
+        const result = await response.json();
+        setSimulationResult(result);
+      }
+    } catch (error) {
+      console.error('Failed to simulate impact:', error);
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+
+  const startAutoRemediation = async (recommendationId: string) => {
+    try {
+      await fetch(`/api/ai/remediate/${recommendationId}`, { method: 'POST' });
+      // Reload auto-remediations to get updated status
+      const response = await fetch('/api/ai/auto-remediations');
+      if (response.ok) {
+        setAutoRemediations(await response.json());
+      }
+    } catch (error) {
+      console.error('Failed to start auto-remediation:', error);
+    }
+  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -223,6 +316,198 @@ const AIInsights = () => {
         </Alert>
       )}
 
+      {/* Real-Time Predictions */}
+      {predictions.length > 0 && (
+        <FadeIn delay={0.3}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                  <Activity className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">Real-Time Predictions</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">ML-powered forecasting and trend analysis</p>
+                </div>
+              </div>
+              <Badge variant="default">{predictions.length} Active Predictions</Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {predictions.map((prediction) => (
+                <div key={prediction.id} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{prediction.metric}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{prediction.timeframe}</p>
+                    </div>
+                    <Badge variant={prediction.trend === 'up' ? 'warning' : prediction.trend === 'down' ? 'success' : 'default'}>
+                      {prediction.trend === 'up' ? '↑' : prediction.trend === 'down' ? '↓' : '→'} {prediction.confidence}% confidence
+                    </Badge>
+                  </div>
+                  
+                  <ResponsiveContainer width="100%" height={150}>
+                    <LineChart data={prediction.data}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
+                      <XAxis dataKey="time" tick={{ fontSize: 10, fill: isDark ? '#9ca3af' : '#6b7280' }} />
+                      <YAxis tick={{ fontSize: 10, fill: isDark ? '#9ca3af' : '#6b7280' }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: isDark ? '#1f2937' : '#fff', 
+                          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                          borderRadius: '8px'
+                        }} 
+                      />
+                      <Line type="monotone" dataKey="actual" stroke="#3b82f6" strokeWidth={2} name="Actual" />
+                      <Line type="monotone" dataKey="predicted" stroke="#8b5cf6" strokeWidth={2} strokeDasharray="5 5" name="Predicted" />
+                    </LineChart>
+                  </ResponsiveContainer>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                    <div>
+                      <p className="text-gray-600 dark:text-gray-400">Current</p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-white">{prediction.currentValue}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 dark:text-gray-400">Predicted</p>
+                      <p className="text-lg font-bold text-purple-600 dark:text-purple-400">{prediction.predictedValue}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+      )}
+
+      {/* Auto-Remediation Status */}
+      {autoRemediations.length > 0 && (
+        <FadeIn delay={0.4}>
+          <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-6 border border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Auto-Remediation Status</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">AI-powered automated issue resolution</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {autoRemediations.map((remediation) => (
+                <div key={remediation.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">{remediation.issue}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{remediation.action}</p>
+                    </div>
+                    <Badge variant={
+                      remediation.status === 'completed' ? 'success' :
+                      remediation.status === 'running' ? 'warning' :
+                      remediation.status === 'failed' ? 'error' :
+                      'default'
+                    }>
+                      {remediation.status}
+                    </Badge>
+                  </div>
+
+                  {remediation.status === 'running' && (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{remediation.progress}%</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-green-500 transition-all duration-500"
+                          style={{ width: `${remediation.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {remediation.status === 'completed' && remediation.result && (
+                    <div className="mt-3 flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{remediation.result}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+                    {remediation.startedAt && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Started: {new Date(remediation.startedAt).toLocaleString()}
+                      </span>
+                    )}
+                    {remediation.completedAt && (
+                      <span>Completed: {new Date(remediation.completedAt).toLocaleString()}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+      )}
+
+      {/* Impact Simulation Modal */}
+      {simulationResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSimulationResult(null)}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Impact Simulation Results</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{simulationResult.metric}</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Current State</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{simulationResult.before}</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <p className="text-sm text-green-900 dark:text-green-300">After Implementation</p>
+                    <p className="text-2xl font-bold text-green-700 dark:text-green-400 mt-1">{simulationResult.after}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-blue-900 dark:text-blue-300">Expected Improvement</p>
+                      <p className="text-3xl font-bold text-blue-700 dark:text-blue-400 mt-1">+{simulationResult.improvement}%</p>
+                    </div>
+                    <TrendingUp className="w-12 h-12 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Implementation Cost</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">${simulationResult.cost}</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Time to Implement</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{simulationResult.timeToImplement}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button onClick={() => setSimulationResult(null)} className="btn btn-secondary">
+                  Close
+                </button>
+                <button className="btn btn-primary">
+                  Proceed with Implementation
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <Tabs defaultValue="recommendations">
@@ -281,7 +566,23 @@ const AIInsights = () => {
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
-                        <button className="btn btn-secondary btn-sm">Dismiss</button>
+                        <button 
+                          onClick={() => simulateImpact(rec.id)}
+                          disabled={isSimulating}
+                          className="btn btn-secondary btn-sm flex items-center gap-1 disabled:opacity-50"
+                        >
+                          <Play className="w-3 h-3" />
+                          {isSimulating ? 'Simulating...' : 'Simulate'}
+                        </button>
+                        {rec.autoRemediable && (
+                          <button 
+                            onClick={() => startAutoRemediation(rec.id)}
+                            className="btn btn-primary btn-sm flex items-center gap-1 bg-green-500 hover:bg-green-600"
+                          >
+                            <Sparkles className="w-3 h-3" />
+                            Auto-Fix
+                          </button>
+                        )}
                         <button className="btn btn-primary btn-sm">Apply</button>
                       </div>
                     </div>
