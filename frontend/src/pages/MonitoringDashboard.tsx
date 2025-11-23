@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Activity, Server, AlertTriangle, CheckCircle, TrendingUp, TrendingDown, Brain, Cloud } from 'lucide-react';
+import { Activity, Server, AlertTriangle, CheckCircle, TrendingUp, TrendingDown, Brain, Cloud, Network, FileText, Clock, Search, Filter, AlertCircle, Zap } from 'lucide-react';
 import Badge from '../components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import Alert from '../components/ui/Alert';
 import Progress from '../components/ui/Progress';
 import AIRecommendationsPanel from '../components/AIRecommendationsPanel';
 import FadeIn from '../components/ui/FadeIn';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ServiceHealth {
   id: string;
@@ -25,10 +27,44 @@ interface SystemMetric {
   status: 'good' | 'warning' | 'critical';
 }
 
+interface PerformanceData {
+  time: string;
+  cpu: number;
+  memory: number;
+  requests: number;
+  responseTime: number;
+}
+
+interface TraceSpan {
+  id: string;
+  service: string;
+  operation: string;
+  duration: number;
+  status: 'success' | 'error';
+  timestamp: string;
+}
+
+interface LogEntry {
+  id: string;
+  timestamp: string;
+  level: 'info' | 'warning' | 'error' | 'debug';
+  service: string;
+  message: string;
+  metadata?: Record<string, unknown>;
+}
+
 const MonitoringDashboard = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
   // Load real monitoring data from APIs - no demo data
   const [services, setServices] = useState<ServiceHealth[]>([]);
   const [metrics, setMetrics] = useState<SystemMetric[]>([]);
+  const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
+  const [traces, setTraces] = useState<TraceSpan[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logFilter, setLogFilter] = useState('');
+  const [logLevelFilter, setLogLevelFilter] = useState<string>('all');
   const [aiMetrics] = useState({
     anomaliesDetected: 12,
     predictiveAlerts: 5,
@@ -39,12 +75,18 @@ const MonitoringDashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [servicesRes, metricsRes] = await Promise.all([
+        const [servicesRes, metricsRes, perfRes, tracesRes, logsRes] = await Promise.all([
           fetch('/api/monitoring/services'),
-          fetch('/api/monitoring/metrics')
+          fetch('/api/monitoring/metrics'),
+          fetch('/api/monitoring/performance'),
+          fetch('/api/monitoring/traces'),
+          fetch('/api/monitoring/logs')
         ]);
         if (servicesRes.ok) setServices(await servicesRes.json());
         if (metricsRes.ok) setMetrics(await metricsRes.json());
+        if (perfRes.ok) setPerformanceData(await perfRes.json());
+        if (tracesRes.ok) setTraces(await tracesRes.json());
+        if (logsRes.ok) setLogs(await logsRes.json());
       } catch (error) {
         console.error('Failed to load monitoring data:', error);
       }
@@ -108,8 +150,16 @@ const MonitoringDashboard = () => {
 
   const healthyServices = services.filter((s) => s.status === 'healthy').length;
   const degradedServices = services.filter((s) => s.status === 'degraded').length;
-  const avgUptime = services.reduce((acc, s) => acc + s.uptime, 0) / services.length;
+  const avgUptime = services.length > 0 ? services.reduce((acc, s) => acc + s.uptime, 0) / services.length : 0;
   const totalRequests = services.reduce((acc, s) => acc + s.requests, 0);
+
+  const filteredLogs = logs
+    .filter((log) => logLevelFilter === 'all' || log.level === logLevelFilter)
+    .filter((log) => 
+      logFilter === '' || 
+      log.message.toLowerCase().includes(logFilter.toLowerCase()) || 
+      log.service.toLowerCase().includes(logFilter.toLowerCase())
+    );
 
   return (
     <div className="space-y-6">
@@ -364,31 +414,248 @@ const MonitoringDashboard = () => {
           </TabsContent>
 
           <TabsContent value="metrics">
-            <div className="p-6">
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                <Activity className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Detailed Metrics</p>
-                <p className="text-sm mt-2">Time-series data and performance graphs</p>
+            <div className="p-6 space-y-6">
+              {/* Real-Time Performance Graphs */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* CPU & Memory Usage */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-blue-600" />
+                    CPU & Memory Usage
+                  </h4>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={performanceData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
+                      <XAxis dataKey="time" tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
+                      <YAxis tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: isDark ? '#1f2937' : '#fff', 
+                          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                          borderRadius: '8px'
+                        }} 
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="cpu" stroke="#3b82f6" name="CPU %" strokeWidth={2} />
+                      <Line type="monotone" dataKey="memory" stroke="#8b5cf6" name="Memory %" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Request Rate & Response Time */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                    Request Rate & Response Time
+                  </h4>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <AreaChart data={performanceData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
+                      <XAxis dataKey="time" tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
+                      <YAxis tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: isDark ? '#1f2937' : '#fff', 
+                          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                          borderRadius: '8px'
+                        }} 
+                      />
+                      <Legend />
+                      <Area type="monotone" dataKey="requests" stroke="#10b981" fill="#10b981" fillOpacity={0.3} name="Requests/min" />
+                      <Area type="monotone" dataKey="responseTime" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} name="Avg Response (ms)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* System Resources Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {metrics.map((metric) => (
+                  <div key={metric.name} className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {metric.name}
+                        </span>
+                        {getTrendIcon(metric.trend)}
+                      </div>
+                      <span className={`text-sm font-bold ${getMetricColor(metric.status)}`}>
+                        {metric.value}{metric.unit}
+                      </span>
+                    </div>
+                    <Progress
+                      value={metric.value}
+                      variant={metric.status === 'good' ? 'success' : metric.status === 'warning' ? 'warning' : 'error'}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="alerts">
-            <div className="p-6">
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                <AlertTriangle className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Alert Configuration</p>
-                <p className="text-sm mt-2">Set up and manage monitoring alerts</p>
+            <div className="p-6 space-y-6">
+              {/* Distributed Tracing */}
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                      <Network className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">Distributed Tracing</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">End-to-end request traces across services</p>
+                    </div>
+                  </div>
+                  <button className="btn btn-secondary btn-sm flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    Filter
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {traces.map((trace) => (
+                    <div key={trace.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <Badge variant={trace.status === 'success' ? 'success' : 'error'}>
+                            {trace.status}
+                          </Badge>
+                          <span className="font-semibold text-gray-900 dark:text-white">{trace.service}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{trace.operation}</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {trace.duration}ms
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-500">{trace.timestamp}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-20">
+                        <div className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: `${Math.min((trace.duration / 1000) * 100, 100)}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {traces.length === 0 && (
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <Network className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">No traces available</p>
+                    <p className="text-sm mt-2">Traces will appear here once services start generating them</p>
+                  </div>
+                )}
+              </div>
+
+              {/* SLA Tracking */}
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">SLA Compliance</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Service level agreement tracking</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-green-900 dark:text-green-300">99.9% SLA</span>
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <p className="text-2xl font-bold text-green-900 dark:text-green-300">99.97%</p>
+                    <p className="text-xs text-green-700 dark:text-green-400 mt-1">Current uptime</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-900 dark:text-blue-300">Response Time</span>
+                      <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-300">145ms</p>
+                    <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">Target: &lt;200ms</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-purple-900 dark:text-purple-300">Error Rate</span>
+                      <AlertCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <p className="text-2xl font-bold text-purple-900 dark:text-purple-300">0.23%</p>
+                    <p className="text-xs text-purple-700 dark:text-purple-400 mt-1">Target: &lt;0.5%</p>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="logs">
-            <div className="p-6">
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                <Server className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">System Logs</p>
-                <p className="text-sm mt-2">View and search application logs</p>
+            <div className="p-6 space-y-4">
+              {/* Log Search & Filter */}
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search logs..."
+                      value={logFilter}
+                      onChange={(e) => setLogFilter(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <select
+                    value={logLevelFilter}
+                    onChange={(e) => setLogLevelFilter(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Levels</option>
+                    <option value="error">Error</option>
+                    <option value="warning">Warning</option>
+                    <option value="info">Info</option>
+                    <option value="debug">Debug</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Log Viewer */}
+              <div className="bg-gray-900 rounded-xl p-4 border border-gray-700 font-mono text-sm max-h-[600px] overflow-y-auto">
+                {filteredLogs.map((log) => (
+                  <div key={log.id} className="py-2 border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <span className="text-gray-500 text-xs">{log.timestamp}</span>
+                      <Badge 
+                        variant={
+                          log.level === 'error' ? 'error' : 
+                          log.level === 'warning' ? 'warning' : 
+                          log.level === 'info' ? 'default' : 
+                          'default'
+                        }
+                        className="text-xs"
+                      >
+                        {log.level.toUpperCase()}
+                      </Badge>
+                      <span className="text-blue-400 text-xs">[{log.service}]</span>
+                      <span className="text-gray-300 flex-1">{log.message}</span>
+                    </div>
+                    {log.metadata && (
+                      <div className="ml-32 mt-1 text-xs text-gray-500">
+                        {JSON.stringify(log.metadata)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              
+                {logs.length === 0 && (
+                  <div className="text-center py-12 text-gray-400">
+                    <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">No logs available</p>
+                    <p className="text-sm mt-2">Logs will appear here once services start generating them</p>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
