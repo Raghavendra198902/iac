@@ -490,7 +490,6 @@ export default function AppLayout() {
                 </div>
               </div>
 
-              {/* Quick Actions */}
               <button
                 onClick={() => window.location.reload()}
                 className="hidden lg:flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors group"
@@ -506,7 +505,6 @@ export default function AppLayout() {
                 New Blueprint
               </Link>
 
-              {/* Notifications */
               <div className="relative">
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
@@ -557,7 +555,6 @@ export default function AppLayout() {
                 <ThemeToggle />
               </div>
               
-              {/* User menu */}
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
