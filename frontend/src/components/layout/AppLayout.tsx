@@ -200,6 +200,30 @@ export default function AppLayout() {
     return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800';
   };
 
+  const getCpuColor = (cpu: number) => {
+    if (cpu > 80) return 'text-red-600 dark:text-red-400';
+    if (cpu > 60) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-blue-600 dark:text-blue-400';
+  };
+
+  const getCpuBg = (cpu: number) => {
+    if (cpu > 80) return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    if (cpu > 60) return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800';
+    return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
+  };
+
+  const getMemoryColor = (memory: number) => {
+    if (memory > 80) return 'text-red-600 dark:text-red-400';
+    if (memory > 60) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-purple-600 dark:text-purple-400';
+  };
+
+  const getMemoryBg = (memory: number) => {
+    if (memory > 80) return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    if (memory > 60) return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800';
+    return 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800';
+  };
+
   const toggleGroup = (groupName: string) => {
     setExpandedGroups(prev => ({
       ...prev,
@@ -448,37 +472,13 @@ export default function AppLayout() {
                     <AlertTriangle className="h-3 w-3 text-yellow-600" />
                   )}
                 </div>
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
-                  systemStats.cpu > 80 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
-                  systemStats.cpu > 60 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                  'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                }`}>
-                  <Cpu className={`h-3.5 w-3.5 ${
-                    systemStats.cpu > 80 ? 'text-red-600 dark:text-red-400' :
-                    systemStats.cpu > 60 ? 'text-yellow-600 dark:text-yellow-400' :
-                    'text-blue-600 dark:text-blue-400'
-                  }`} />
-                  <span className={`text-xs font-semibold ${
-                    systemStats.cpu > 80 ? 'text-red-600 dark:text-red-400' :
-                    systemStats.cpu > 60 ? 'text-yellow-600 dark:text-yellow-400' :
-                    'text-blue-600 dark:text-blue-400'
-                  }`}>{Math.round(systemStats.cpu)}%</span>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${getCpuBg(systemStats.cpu)}`}>
+                  <Cpu className={`h-3.5 w-3.5 ${getCpuColor(systemStats.cpu)}`} />
+                  <span className={`text-xs font-semibold ${getCpuColor(systemStats.cpu)}`}>{Math.round(systemStats.cpu)}%</span>
                 </div>
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
-                  systemStats.memory > 80 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
-                  systemStats.memory > 60 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                  'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800'
-                }`}>
-                  <HardDrive className={`h-3.5 w-3.5 ${
-                    systemStats.memory > 80 ? 'text-red-600 dark:text-red-400' :
-                    systemStats.memory > 60 ? 'text-yellow-600 dark:text-yellow-400' :
-                    'text-purple-600 dark:text-purple-400'
-                  }`} />
-                  <span className={`text-xs font-semibold ${
-                    systemStats.memory > 80 ? 'text-red-600 dark:text-red-400' :
-                    systemStats.memory > 60 ? 'text-yellow-600 dark:text-yellow-400' :
-                    'text-purple-600 dark:text-purple-400'
-                  }`}>{Math.round(systemStats.memory)}%</span>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${getMemoryBg(systemStats.memory)}`}>
+                  <HardDrive className={`h-3.5 w-3.5 ${getMemoryColor(systemStats.memory)}`} />
+                  <span className={`text-xs font-semibold ${getMemoryColor(systemStats.memory)}`}>{Math.round(systemStats.memory)}%</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   {isConnected ? (
