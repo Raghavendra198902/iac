@@ -25,6 +25,7 @@ import SecurityDashboard from './pages/SecurityDashboard';
 import Security from './pages/Security';
 import ReportsBuilder from './pages/ReportsBuilder';
 import IntegrationsManagement from './pages/IntegrationsManagement';
+import APIManagement from './pages/APIManagement';
 import ProjectsList from './pages/ProjectsList';
 import NewProject from './pages/NewProject';
 import Login from './pages/Login';
@@ -145,6 +146,9 @@ function InnerRoutes() {
                 
                 {/* Integrations Management - All authenticated users */}
                 <Route path="integrations" element={<IntegrationsManagement />} />
+                
+                {/* API Management - All authenticated users */}
+                <Route path="api-management" element={<APIManagement />} />
                 
                 {/* Performance Analytics - All authenticated users */}
                 <Route path="performance" element={<PerformanceAnalytics />} />
