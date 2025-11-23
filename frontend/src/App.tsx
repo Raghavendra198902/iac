@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppLayout from './components/layout/AppLayout';
 import PublicLayout from './components/layout/PublicLayout';
 import DashboardEnhanced from './pages/DashboardEnhanced';
+import AdvancedDashboard from './pages/AdvancedDashboard';
 import BlueprintList from './pages/BlueprintList';
 import BlueprintDetail from './pages/BlueprintDetail';
 import BlueprintEdit from './pages/BlueprintEdit';
@@ -97,6 +98,9 @@ function InnerRoutes() {
                 <Route path="dashboards/pm" element={<PMDashboard />} />
                 <Route path="dashboards/ta" element={<TADashboard />} />
                 <Route path="dashboards/se" element={<SEDashboard />} />
+                
+                {/* Advanced System Dashboard */}
+                <Route path="advanced" element={<AdvancedDashboard />} />
                 
                 {/* Enterprise Features */}
                 <Route path="analytics" element={<AnalyticsDashboard />} />
