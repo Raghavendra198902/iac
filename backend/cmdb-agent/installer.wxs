@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WiX Installer Configuration for CMDB Agent (Windows MSI) -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product 
+    Id="*" 
+    Name="IAC Dharma CMDB Agent" 
+    Language="1033" 
+    Version="1.0.0.0" 
+    Manufacturer="IAC Dharma" 
+    UpgradeCode="12345678-1234-1234-1234-123456789012">
+    
+    <Package 
+      InstallerVersion="200" 
+      Compressed="yes" 
+      InstallScope="perMachine" 
+      Description="IAC Dharma CMDB Agent - System Monitoring and Configuration Management"
+      Comments="Monitors system resources and reports to CMDB server"
+      Manufacturer="IAC Dharma"
+    />
+
+    <MajorUpgrade 
+      DowngradeErrorMessage="A newer version of [ProductName] is already installed." 
+      AllowSameVersionUpgrades="yes"
+    />
+    
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Custom Properties -->
+    <Property Id="CMDB_SERVER_URL">
+      <RegistrySearch Id="ServerUrlRegistry" Root="HKLM" Key="SOFTWARE\IAC Dharma\CMDB Agent" Name="ServerURL" Type="raw" />
+    </Property>
+    
+    <Property Id="CMDB_API_KEY">
+      <RegistrySearch Id="ApiKeyRegistry" Root="HKLM" Key="SOFTWARE\IAC Dharma\CMDB Agent" Name="ApiKey" Type="raw" />
+    </Property>
+
+    <Property Id="COLLECTION_INTERVAL" Value="300000">
+      <RegistrySearch Id="IntervalRegistry" Root="HKLM" Key="SOFTWARE\IAC Dharma\CMDB Agent" Name="CollectionInterval" Type="raw" />
+    </Property>
+
+    <Property Id="AUTO_UPDATE" Value="true">
+      <RegistrySearch Id="AutoUpdateRegistry" Root="HKLM" Key="SOFTWARE\IAC Dharma\CMDB Agent" Name="AutoUpdate" Type="raw" />
+    </Property>
+
+    <!-- Icons -->
+    <Icon Id="icon.ico" SourceFile="assets\icon.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="icon.ico" />
+    
+    <!-- UI -->
+    <UIRef Id="WixUI_InstallDir" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    
+    <!-- Custom dialogs for configuration -->
+    <UI>
+      <Dialog Id="ConfigDialog" Width="370" Height="270" Title="CMDB Agent Configuration">
+        <Control Id="ServerUrlLabel" Type="Text" X="20" Y="20" Width="120" Height="17" Text="CMDB Server URL:" />
+        <Control Id="ServerUrlEdit" Type="Edit" X="20" Y="40" Width="320" Height="18" Property="CMDB_SERVER_URL" />
+        
+        <Control Id="ApiKeyLabel" Type="Text" X="20" Y="70" Width="120" Height="17" Text="API Key:" />
+        <Control Id="ApiKeyEdit" Type="Edit" X="20" Y="90" Width="320" Height="18" Property="CMDB_API_KEY" Password="yes" />
+        
+        <Control Id="IntervalLabel" Type="Text" X="20" Y="120" Width="200" Height="17" Text="Collection Interval (ms):" />
+        <Control Id="IntervalEdit" Type="Edit" X="20" Y="140" Width="150" Height="18" Property="COLLECTION_INTERVAL" />
+        
+        <Control Id="AutoUpdateCheckbox" Type="CheckBox" X="20" Y="170" Width="200" Height="17" Property="AUTO_UPDATE" CheckBoxValue="true" Text="Enable Auto-Update" />
+        
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+        </Control>
+        
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+        </Control>
+        
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+      
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="ConfigDialog">LicenseAccepted = "1"</Publish>
+    </UI>
+
+    <!-- Feature Definition -->
+    <Feature Id="ProductFeature" Title="CMDB Agent" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="ServiceComponents" />
+      <ComponentRef Id="RegistryEntries" />
+      <ComponentRef Id="EnvironmentVariables" />
+    </Feature>
+
+    <!-- Directory Structure -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="IAC Dharma CMDB Agent">
+          <Directory Id="BinFolder" Name="bin" />
+          <Directory Id="ConfigFolder" Name="config" />
+          <Directory Id="LogsFolder" Name="logs" />
+        </Directory>
+      </Directory>
+      
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="IAC Dharma CMDB Agent"/>
+      </Directory>
+      
+      <Directory Id="StartupFolder" />
+    </Directory>
+
+    <!-- Components -->
+    <ComponentGroup Id="ProductComponents" Directory="BinFolder">
+      <Component Id="MainExecutable" Guid="*">
+        <File Id="CMDBAgentExe" Source="dist\cmdb-agent-win.exe" KeyPath="yes">
+          <Shortcut 
+            Id="StartMenuShortcut" 
+            Directory="ApplicationProgramsFolder" 
+            Name="CMDB Agent" 
+            WorkingDirectory="BinFolder" 
+            Icon="icon.ico" 
+            IconIndex="0" 
+            Advertise="yes" 
+          />
+        </File>
+      </Component>
+      
+      <Component Id="NodeRuntime" Guid="*">
+        <File Id="NodeExe" Source="dist\node.exe" KeyPath="yes" />
+      </Component>
+      
+      <Component Id="AgentScript" Guid="*">
+        <File Id="UniversalAgentJs" Source="dist\agents\universal-agent.js" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ServiceComponents" Directory="BinFolder">
+      <Component Id="ServiceInstaller" Guid="*">
+        <File Id="ServiceInstallerJs" Source="dist\service-installer.js" KeyPath="yes" />
+        
+        <!-- Install Windows Service -->
+        <ServiceInstall
+          Id="CMDBAgentService"
+          Name="IAC Dharma CMDB Agent"
+          DisplayName="IAC Dharma CMDB Agent"
+          Description="Monitors system resources and reports to CMDB server"
+          Type="ownProcess"
+          Start="auto"
+          ErrorControl="normal"
+          Account="LocalSystem"
+        />
+        
+        <ServiceControl
+          Id="StartCMDBAgentService"
+          Name="IAC Dharma CMDB Agent"
+          Start="install"
+          Stop="both"
+          Remove="uninstall"
+        />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Registry Entries -->
+    <Component Id="RegistryEntries" Directory="INSTALLFOLDER" Guid="*">
+      <RegistryKey Root="HKLM" Key="SOFTWARE\IAC Dharma\CMDB Agent">
+        <RegistryValue Type="string" Name="InstallPath" Value="[INSTALLFOLDER]" KeyPath="yes" />
+        <RegistryValue Type="string" Name="ServerURL" Value="[CMDB_SERVER_URL]" />
+        <RegistryValue Type="string" Name="ApiKey" Value="[CMDB_API_KEY]" />
+        <RegistryValue Type="string" Name="CollectionInterval" Value="[COLLECTION_INTERVAL]" />
+        <RegistryValue Type="string" Name="AutoUpdate" Value="[AUTO_UPDATE]" />
+        <RegistryValue Type="string" Name="Version" Value="1.0.0" />
+      </RegistryKey>
+      
+      <!-- Add to uninstall registry -->
+      <RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{$(var.ProductCode)}">
+        <RegistryValue Type="string" Name="DisplayName" Value="IAC Dharma CMDB Agent" />
+        <RegistryValue Type="string" Name="DisplayVersion" Value="1.0.0" />
+        <RegistryValue Type="string" Name="Publisher" Value="IAC Dharma" />
+        <RegistryValue Type="string" Name="InstallLocation" Value="[INSTALLFOLDER]" />
+        <RegistryValue Type="integer" Name="NoModify" Value="1" />
+        <RegistryValue Type="integer" Name="NoRepair" Value="1" />
+      </RegistryKey>
+    </Component>
+
+    <!-- Environment Variables -->
+    <Component Id="EnvironmentVariables" Directory="INSTALLFOLDER" Guid="*">
+      <Environment 
+        Id="PATH" 
+        Name="PATH" 
+        Value="[BinFolder]" 
+        Permanent="no" 
+        Part="last" 
+        Action="set" 
+        System="yes" 
+      />
+      
+      <Environment 
+        Id="CMDB_SERVER_URL_ENV" 
+        Name="CMDB_SERVER_URL" 
+        Value="[CMDB_SERVER_URL]" 
+        Permanent="no" 
+        Action="set" 
+        System="yes" 
+      />
+      
+      <Environment 
+        Id="CMDB_API_KEY_ENV" 
+        Name="CMDB_API_KEY" 
+        Value="[CMDB_API_KEY]" 
+        Permanent="no" 
+        Action="set" 
+        System="yes" 
+      />
+      
+      <Environment 
+        Id="COLLECTION_INTERVAL_ENV" 
+        Name="COLLECTION_INTERVAL" 
+        Value="[COLLECTION_INTERVAL]" 
+        Permanent="no" 
+        Action="set" 
+        System="yes" 
+      />
+    </Component>
+
+    <!-- Custom Actions -->
+    <CustomAction 
+      Id="InstallService" 
+      FileKey="ServiceInstallerJs" 
+      ExeCommand="install" 
+      Execute="deferred" 
+      Impersonate="no" 
+      Return="check" 
+    />
+    
+    <CustomAction 
+      Id="UninstallService" 
+      FileKey="ServiceInstallerJs" 
+      ExeCommand="uninstall" 
+      Execute="deferred" 
+      Impersonate="no" 
+      Return="ignore" 
+    />
+
+    <!-- Installation Sequence -->
+    <InstallExecuteSequence>
+      <Custom Action="InstallService" After="InstallFiles">NOT Installed</Custom>
+      <Custom Action="UninstallService" Before="RemoveFiles">Installed AND NOT UPGRADINGPRODUCTCODE</Custom>
+    </InstallExecuteSequence>
+
+  </Product>
+</Wix>

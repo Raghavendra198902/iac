@@ -1,0 +1,299 @@
+# Ansible Playbook for CMDB Agent Deployment
+# Deploys and configures CMDB agents across infrastructure
+
+---
+- name: Deploy CMDB Agent to Infrastructure
+  hosts: all
+  become: yes
+  
+  vars:
+    cmdb_server_url: "{{ lookup('env', 'CMDB_SERVER_URL') | default('https://cmdb.example.com') }}"
+    cmdb_api_key: "{{ lookup('env', 'CMDB_API_KEY') }}"
+    agent_version: "{{ agent_version | default('1.0.0') }}"
+    auto_update: "{{ auto_update | default(true) }}"
+    environment_name: "{{ environment | default('production') }}"
+    collection_interval: 300000
+    
+  tasks:
+    - name: Detect operating system
+      set_fact:
+        os_family: "{{ ansible_os_family }}"
+        os_distribution: "{{ ansible_distribution }}"
+        os_version: "{{ ansible_distribution_version }}"
+    
+    - name: Display deployment info
+      debug:
+        msg: |
+          Deploying CMDB Agent:
+          - Version: {{ agent_version }}
+          - Environment: {{ environment_name }}
+          - Auto-update: {{ auto_update }}
+          - Server: {{ cmdb_server_url }}
+          - OS: {{ os_distribution }} {{ os_version }}
+    
+    # Install dependencies
+    - name: Install dependencies (Debian/Ubuntu)
+      apt:
+        name:
+          - curl
+          - wget
+          - gnupg2
+          - ca-certificates
+          - python3
+          - python3-pip
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+    
+    - name: Install dependencies (RedHat/CentOS)
+      yum:
+        name:
+          - curl
+          - wget
+          - python3
+          - python3-pip
+        state: present
+      when: ansible_os_family == "RedHat"
+    
+    # Install Node.js
+    - name: Add Node.js 18.x repository (Debian/Ubuntu)
+      shell: curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+      when: ansible_os_family == "Debian"
+    
+    - name: Add Node.js 18.x repository (RedHat/CentOS)
+      shell: curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+      when: ansible_os_family == "RedHat"
+    
+    - name: Install Node.js (Debian/Ubuntu)
+      apt:
+        name: nodejs
+        state: present
+      when: ansible_os_family == "Debian"
+    
+    - name: Install Node.js (RedHat/CentOS)
+      yum:
+        name: nodejs
+        state: present
+      when: ansible_os_family == "RedHat"
+    
+    - name: Verify Node.js installation
+      command: node --version
+      register: node_version
+      changed_when: false
+    
+    - name: Display Node.js version
+      debug:
+        msg: "Node.js version: {{ node_version.stdout }}"
+    
+    # Download and install agent
+    - name: Create temp directory
+      file:
+        path: /tmp/cmdb-agent-install
+        state: directory
+        mode: '0755'
+    
+    - name: Download CMDB agent package (Debian/Ubuntu)
+      get_url:
+        url: "{{ cmdb_server_url }}/api/updates/download/linux-x64-{{ agent_version }}"
+        dest: "/tmp/cmdb-agent-install/cmdb-agent_{{ agent_version }}_amd64.deb"
+        headers:
+          Authorization: "Bearer {{ cmdb_api_key }}"
+        mode: '0644'
+      when: ansible_os_family == "Debian"
+    
+    - name: Download CMDB agent package (RedHat/CentOS)
+      get_url:
+        url: "{{ cmdb_server_url }}/api/updates/download/linux-x64-{{ agent_version }}"
+        dest: "/tmp/cmdb-agent-install/cmdb-agent-{{ agent_version }}-1.x86_64.rpm"
+        headers:
+          Authorization: "Bearer {{ cmdb_api_key }}"
+        mode: '0644'
+      when: ansible_os_family == "RedHat"
+    
+    - name: Install CMDB agent (Debian/Ubuntu)
+      apt:
+        deb: "/tmp/cmdb-agent-install/cmdb-agent_{{ agent_version }}_amd64.deb"
+        state: present
+      when: ansible_os_family == "Debian"
+    
+    - name: Install CMDB agent (RedHat/CentOS)
+      yum:
+        name: "/tmp/cmdb-agent-install/cmdb-agent-{{ agent_version }}-1.x86_64.rpm"
+        state: present
+      when: ansible_os_family == "RedHat"
+    
+    # Configure agent
+    - name: Create configuration directory
+      file:
+        path: /etc/cmdb-agent
+        state: directory
+        mode: '0755'
+    
+    - name: Generate agent ID
+      set_fact:
+        agent_id: "{{ ansible_hostname }}-{{ ansible_date_time.epoch }}"
+    
+    - name: Create agent configuration
+      copy:
+        content: |
+          {
+            "version": "{{ agent_version }}",
+            "agentId": "{{ agent_id }}",
+            "agentName": "{{ ansible_hostname }}",
+            "environment": "{{ environment_name }}",
+            "organizationId": "ansible-deployed",
+            "apiServerUrl": "{{ cmdb_server_url }}",
+            "autoUpdate": {{ auto_update | lower }},
+            "updateCheckIntervalHours": 1,
+            "monitoring": {
+              "processes": true,
+              "registry": false,
+              "usb": true,
+              "network": true,
+              "filesystem": true
+            },
+            "telemetry": {
+              "batchSize": 100,
+              "flushIntervalSeconds": 60
+            }
+          }
+        dest: /etc/cmdb-agent/config.json
+        mode: '0600'
+    
+    - name: Create environment file
+      copy:
+        content: |
+          CMDB_SERVER_URL={{ cmdb_server_url }}
+          CMDB_API_KEY={{ cmdb_api_key }}
+          AGENT_VERSION={{ agent_version }}
+          AUTO_UPDATE={{ auto_update }}
+          AGENT_ENVIRONMENT={{ environment_name }}
+          COLLECTION_INTERVAL={{ collection_interval }}
+          UPDATE_CHECK_INTERVAL_MS=3600000
+          NODE_ENV=production
+        dest: /etc/cmdb-agent/environment
+        mode: '0600'
+    
+    # Create systemd service
+    - name: Create systemd service file
+      copy:
+        content: |
+          [Unit]
+          Description=CMDB Agent - Infrastructure Monitoring and Configuration Management
+          After=network-online.target
+          Wants=network-online.target
+          
+          [Service]
+          Type=simple
+          User=root
+          EnvironmentFile=/etc/cmdb-agent/environment
+          WorkingDirectory=/usr/local/bin
+          ExecStart=/usr/local/bin/cmdb-agent
+          Restart=always
+          RestartSec=10
+          StandardOutput=journal
+          StandardError=journal
+          SyslogIdentifier=cmdb-agent
+          
+          # Resource limits
+          LimitNOFILE=65536
+          LimitNPROC=4096
+          
+          # Security
+          NoNewPrivileges=false
+          PrivateTmp=true
+          ProtectSystem=strict
+          ProtectHome=true
+          ReadWritePaths=/var/log /var/lib/cmdb-agent
+          
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/cmdb-agent.service
+        mode: '0644'
+    
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+    
+    - name: Enable CMDB agent service
+      systemd:
+        name: cmdb-agent
+        enabled: yes
+    
+    - name: Start CMDB agent service
+      systemd:
+        name: cmdb-agent
+        state: started
+    
+    - name: Wait for agent to be ready
+      wait_for:
+        host: localhost
+        port: 3000
+        delay: 5
+        timeout: 30
+    
+    - name: Check agent health
+      uri:
+        url: http://localhost:3000/health
+        return_content: yes
+      register: health_check
+      retries: 5
+      delay: 3
+    
+    - name: Display agent health status
+      debug:
+        msg: "{{ health_check.json }}"
+    
+    - name: Register agent with CMDB server
+      uri:
+        url: "{{ cmdb_server_url }}/api/agents/register"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ cmdb_api_key }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          agentId: "{{ agent_id }}"
+          hostname: "{{ ansible_hostname }}"
+          environment: "{{ environment_name }}"
+          os: "{{ os_distribution }}"
+          osVersion: "{{ os_version }}"
+          agentVersion: "{{ agent_version }}"
+          autoUpdate: "{{ auto_update }}"
+          deployedBy: "ansible"
+          ipAddress: "{{ ansible_default_ipv4.address }}"
+          tags:
+            environment: "{{ environment_name }}"
+            managed: "ansible"
+            auto_update: "{{ auto_update }}"
+        status_code: [200, 201]
+      register: registration
+      ignore_errors: yes
+    
+    - name: Display registration status
+      debug:
+        msg: |
+          Agent Registration: {{ 'Success' if registration.status == 200 or registration.status == 201 else 'Failed (will retry)' }}
+          Agent ID: {{ agent_id }}
+    
+    - name: Clean up temp files
+      file:
+        path: /tmp/cmdb-agent-install
+        state: absent
+    
+    - name: Display deployment summary
+      debug:
+        msg: |
+          ========================================
+          ✅ CMDB Agent Deployed Successfully!
+          ========================================
+          Agent ID: {{ agent_id }}
+          Hostname: {{ ansible_hostname }}
+          Version: {{ agent_version }}
+          Environment: {{ environment_name }}
+          Auto-update: {{ auto_update }}
+          
+          Service Status: systemctl status cmdb-agent
+          Logs: journalctl -u cmdb-agent -f
+          Health: curl http://localhost:3000/health
+          ========================================

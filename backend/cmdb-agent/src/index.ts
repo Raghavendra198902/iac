@@ -4,6 +4,7 @@ import cron from 'node-cron';
 import logger from './utils/logger';
 import { CMDBAgent } from './services/cmdbAgent';
 import { AgentConfig } from './types';
+import { AutoUpdater } from './services/auto-updater';
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +38,14 @@ if (!config.cmdbApiKey) {
 
 // Initialize agent
 const agent = new CMDBAgent(config);
+
+// Initialize auto-updater
+const autoUpdater = new AutoUpdater(
+  config.cmdbApiUrl.replace('/api/cmdb', ''),
+  process.env.AGENT_VERSION || '1.0.0',
+  parseInt(process.env.UPDATE_CHECK_INTERVAL_MS || '3600000'),
+  config.cmdbApiKey
+);
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
@@ -119,6 +128,62 @@ app.post('/discover', async (req: Request, res: Response) => {
   }
 });
 
+// Check for updates endpoint
+app.get('/updates/check', async (req: Request, res: Response) => {
+  try {
+    logger.info('Manual update check triggered');
+    const updateCheck = await autoUpdater.checkForUpdates();
+    
+    res.json({
+      ...updateCheck,
+      autoUpdateEnabled: process.env.AUTO_UPDATE === 'true',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    logger.error('Update check failed', { error });
+    res.status(500).json({
+      success: false,
+      message: 'Update check failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Get update status endpoint
+app.get('/updates/status', (req: Request, res: Response) => {
+  res.json({
+    currentVersion: autoUpdater.getCurrentVersion(),
+    autoUpdateEnabled: process.env.AUTO_UPDATE === 'true',
+    updateCheckInterval: parseInt(process.env.UPDATE_CHECK_INTERVAL_MS || '3600000'),
+    platform: process.platform,
+    architecture: process.arch,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Trigger manual update endpoint
+app.post('/updates/trigger', async (req: Request, res: Response) => {
+  try {
+    logger.info('Manual update triggered');
+    const updateCheck = await autoUpdater.triggerUpdate();
+    
+    res.json({
+      ...updateCheck,
+      message: updateCheck.updateAvailable 
+        ? 'Update will be installed automatically' 
+        : 'No updates available',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    logger.error('Manual update failed', { error });
+    res.status(500).json({
+      success: false,
+      message: 'Update trigger failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 // Start agent
 async function startAgent() {
   try {
@@ -130,6 +195,14 @@ async function startAgent() {
 
     // Initialize agent
     await agent.initialize();
+
+    // Start auto-updater if enabled
+    if (process.env.AUTO_UPDATE === 'true') {
+      logger.info('Auto-update enabled, starting updater...');
+      autoUpdater.start();
+    } else {
+      logger.info('Auto-update disabled');
+    }
 
     // Schedule health checks (every 30 seconds)
     const healthCheckInterval = parseInt(

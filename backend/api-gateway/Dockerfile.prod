@@ -1,0 +1,115 @@
+# Multi-stage production build for API Gateway
+# Optimized for security, performance, and minimal image size
+
+# ═══════════════════════════════════════════════════════════
+# STAGE 1: Dependencies
+# ═══════════════════════════════════════════════════════════
+FROM node:20-alpine AS deps
+LABEL stage=deps
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    libc6-compat
+
+# Copy package files
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production --ignore-scripts && \
+    npm cache clean --force
+
+# ═══════════════════════════════════════════════════════════
+# STAGE 2: Builder
+# ═══════════════════════════════════════════════════════════
+FROM node:20-alpine AS builder
+LABEL stage=builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++
+
+# Copy package files
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Install all dependencies (including dev for build)
+RUN npm ci
+
+# Copy source code
+COPY src ./src
+
+# Build TypeScript
+RUN npm run build && \
+    npm prune --production
+
+# ═══════════════════════════════════════════════════════════
+# STAGE 3: Production
+# ═══════════════════════════════════════════════════════════
+FROM node:20-alpine AS production
+
+# Add security updates and runtime dependencies
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
+    dumb-init \
+    curl \
+    wget \
+    ca-certificates && \
+    rm -rf /var/cache/apk/*
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# Set ownership
+RUN chown -R nodejs:nodejs /app
+
+# Copy production dependencies from deps stage
+COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# Copy built application from builder stage
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+
+# Create required directories with proper permissions
+RUN mkdir -p /app/logs /app/uploads /tmp && \
+    chown -R nodejs:nodejs /app/logs /app/uploads /tmp
+
+# Switch to non-root user
+USER nodejs
+
+# Environment variables
+ENV NODE_ENV=production \
+    PORT=3001 \
+    LOG_LEVEL=info \
+    NODE_OPTIONS="--max-old-space-size=2048 --enable-source-maps"
+
+# Expose ports
+EXPOSE 3001 9090
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:3001/api/health || exit 1
+
+# Add labels
+LABEL maintainer="IAC Dharma Team" \
+      version="1.0.0" \
+      description="IAC Dharma API Gateway - Production" \
+      org.opencontainers.image.source="https://github.com/yourusername/iac-dharma"
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Start application
+CMD ["node", "dist/index.js"]

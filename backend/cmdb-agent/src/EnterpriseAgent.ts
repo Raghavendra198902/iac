@@ -17,6 +17,7 @@ import { AutoUpgradeManager, UpdateConfig } from './services/AutoUpgradeManager'
 import { PolicyEngine, EnforcementEvent, EnforcementResult } from './enforcement/PolicyEngine';
 import { EnforcementActions } from './enforcement/EnforcementActions';
 import { getDefaultPolicies } from './enforcement/DefaultPolicies';
+import { AutoUpdater } from './services/auto-updater';
 import logger from './utils/logger';
 
 export interface EnterpriseAgentConfig {
@@ -51,6 +52,7 @@ export class EnterpriseAgent extends EventEmitter {
   private policyEngine?: PolicyEngine;
   private enforcementActions?: EnforcementActions;
   private upgradeManager?: AutoUpgradeManager;
+  private autoUpdater?: AutoUpdater;
   private telemetryQueue: any[] = [];
   private telemetryTimer?: NodeJS.Timeout;
   private heartbeatTimer?: NodeJS.Timeout;
@@ -110,9 +112,21 @@ export class EnterpriseAgent extends EventEmitter {
       // Start heartbeat
       this.startHeartbeat();
 
-      // Start auto-upgrade manager
+      // Start auto-upgrade manager (legacy)
       if (this.config.autoUpdate && this.upgradeManager) {
         this.upgradeManager.start();
+      }
+
+      // Start auto-updater (new system)
+      if (this.config.autoUpdate && this.autoUpdater) {
+        logger.info('Starting auto-updater with monitoring...');
+        this.autoUpdater.start();
+        
+        // Monitor update events
+        this.emit('monitoring:update-check', {
+          timestamp: new Date().toISOString(),
+          enabled: true,
+        });
       }
 
       // Send initial heartbeat
@@ -152,6 +166,12 @@ export class EnterpriseAgent extends EventEmitter {
       // Stop auto-upgrade manager
       if (this.upgradeManager) {
         this.upgradeManager.stop();
+      }
+
+      // Stop auto-updater
+      if (this.autoUpdater) {
+        logger.info('Stopping auto-updater...');
+        // Auto-updater will stop automatically on process exit
       }
 
       // Flush remaining telemetry
@@ -243,6 +263,14 @@ export class EnterpriseAgent extends EventEmitter {
     // Initialize enforcement components
     this.enforcementActions = new EnforcementActions();
     this.policyEngine = new PolicyEngine();
+
+    // Initialize auto-updater
+    this.autoUpdater = new AutoUpdater(
+      this.config.apiServerUrl,
+      this.config.version,
+      this.config.updateCheckIntervalHours * 3600000,
+      process.env.CMDB_API_KEY
+    );
 
     // Load default policies
     const defaultPolicies = getDefaultPolicies();
