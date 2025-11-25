@@ -6,6 +6,7 @@ import {
   Layers, Globe, Lock, Rocket, Users, UserCheck, UserPlus, UserX
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MainLayout } from '../components/layout';
 import PageTransition from '../components/ui/PageTransition';
 import FadeIn from '../components/ui/FadeIn';
 import { useRoleAccess } from '../contexts/AuthContext';
@@ -136,8 +137,9 @@ export default function EnhancedDashboard() {
   }, []);
 
   return (
-    <PageTransition>
-      <div className="space-y-6">
+    <MainLayout>
+      <PageTransition>
+        <div className="space-y-6">
         {/* Modern Hero Header */}
         <FadeIn>
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 p-8 shadow-2xl">
@@ -670,8 +672,9 @@ export default function EnhancedDashboard() {
             <p className="text-sm opacity-80">resources across AWS, Azure, GCP</p>
           </div>
         </div>
-      </div>
-    </PageTransition>
+        </div>
+      </PageTransition>
+    </MainLayout>
   );
 }
 

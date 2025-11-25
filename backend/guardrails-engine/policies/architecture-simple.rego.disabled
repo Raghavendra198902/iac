@@ -1,0 +1,77 @@
+package architecture
+
+# ============================================================================
+# Enterprise Architecture Guardrails Policy
+# Simplified version for OPA compatibility
+# ============================================================================
+
+# Default deny
+default allow := false
+
+# Deny rules for critical violations
+deny contains msg if {
+    input.environment == "production"
+    resource := input.resources[_]
+    not resource.config.encryption_enabled
+    msg := sprintf("Production resource '%s' must have encryption enabled", [resource.name])
+}
+
+deny contains msg if {
+    input.environment == "production"
+    not input.tags.environment
+    msg := "Production deployments must have 'environment' tag"
+}
+
+deny contains msg if {
+    input.environment == "production"
+    resource := input.resources[_]
+    resource.type == "database"
+    resource.config.publicly_accessible == true
+    msg := sprintf("Database '%s' cannot be publicly accessible in production", [resource.name])
+}
+
+# Warn rules for best practices
+warn contains msg if {
+    not input.tags.cost_center
+    msg := "Missing 'cost_center' tag - recommended for cost tracking"
+}
+
+warn contains msg if {
+    not input.tags.owner
+    msg := "Missing 'owner' tag - recommended for accountability"
+}
+
+warn contains msg if {
+    resource := input.resources[_]
+    resource.type == "storage"
+    not resource.config.versioning_enabled
+    msg := sprintf("Storage '%s' should have versioning enabled", [resource.name])
+}
+
+# Calculate compliance score
+compliance_score := 100 if {
+    count(deny) == 0
+    count(warn) == 0
+}
+
+compliance_score := score if {
+    violations := count(deny)
+    warnings := count(warn)
+    penalty := (violations * 10) + (warnings * 2)
+    calculated := 100 - penalty
+    calculated > 0
+    score := calculated
+}
+
+compliance_score := 0 if {
+    violations := count(deny)
+    warnings := count(warn)
+    penalty := (violations * 10) + (warnings * 2)
+    calculated := 100 - penalty
+    calculated <= 0
+}
+
+# Allow if no critical violations
+allow if {
+    count(deny) == 0
+}

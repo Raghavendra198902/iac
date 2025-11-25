@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Sparkles, Send, CheckCircle, AlertCircle, Code, Terminal, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { MainLayout } from '../components/layout';
 import { aiService } from '../services/aiService';  
 import Button from '../components/ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
@@ -336,7 +337,8 @@ output "infrastructure_summary" {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <MainLayout>
+      <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
@@ -668,6 +670,6 @@ output "infrastructure_summary" {
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

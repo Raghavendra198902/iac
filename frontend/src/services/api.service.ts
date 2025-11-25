@@ -319,3 +319,113 @@ export const costingApi = {
     });
   },
 };
+
+/**
+ * ML API Client
+ */
+const mlApiClient = createApiClient(API_CONFIG.mlApi || 'http://localhost:5000');
+
+/**
+ * ML API - Cost Forecasting, Anomaly Detection, AI Recommendations
+ */
+export const mlApi = {
+  /**
+   * Cost Forecasting
+   */
+  async forecastCost(historicalData: any[], forecastDays: number = 30) {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/forecast',
+      data: { historical_data: historicalData, forecast_days: forecastDays },
+    });
+  },
+
+  /**
+   * Anomaly Detection
+   */
+  async detectAnomalies(metrics: any[], method: 'isolation_forest' | 'z_score' | 'iqr' = 'isolation_forest') {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/detect-anomalies',
+      data: { metrics, method },
+    });
+  },
+
+  /**
+   * AI Recommendations
+   */
+  async getAllRecommendations(resourceData: {
+    resource_metrics?: any[];
+    security_audits?: any[];
+    performance_metrics?: any[];
+  }) {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/recommendations',
+      data: resourceData,
+    });
+  },
+
+  async getCostRecommendations(resourceMetrics: any[]) {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/recommendations/cost',
+      data: { resource_metrics: resourceMetrics },
+    });
+  },
+
+  async getSecurityRecommendations(securityAudits: any[]) {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/recommendations/security',
+      data: { security_audits: securityAudits },
+    });
+  },
+
+  async getPerformanceRecommendations(performanceMetrics: any[]) {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/recommendations/performance',
+      data: { performance_metrics: performanceMetrics },
+    });
+  },
+
+  /**
+   * Model Training
+   */
+  async trainCostModel(historicalData: any[]) {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/models/train/cost',
+      data: { historical_data: historicalData },
+    });
+  },
+
+  async trainAnomalyModel(baselineData: any[]) {
+    return apiRequest(mlApiClient, {
+      method: 'POST',
+      url: '/api/models/train/anomaly',
+      data: { baseline_data: baselineData },
+    });
+  },
+
+  /**
+   * Model Status
+   */
+  async getModelStatus() {
+    return apiRequest(mlApiClient, {
+      method: 'GET',
+      url: '/api/models/status',
+    });
+  },
+
+  /**
+   * Health Check
+   */
+  async healthCheck() {
+    return apiRequest(mlApiClient, {
+      method: 'GET',
+      url: '/health',
+    });
+  },
+};

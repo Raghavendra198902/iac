@@ -1,0 +1,207 @@
+{
+  "template_id": "enterprise-three-tier-web",
+  "template_version": "1.0.0",
+  "name": "Enterprise Three-Tier Web Application",
+  "description": "Standard three-tier architecture with web, app, and data tiers. Includes load balancing, auto-scaling, and high availability.",
+  "architecture_domain": "application",
+  "complexity": "moderate",
+  "estimated_cost": 2500,
+  
+  "architecture_decisions": [
+    "ADR-001: Use Application Gateway for L7 routing",
+    "ADR-015: PostgreSQL for relational data",
+    "ADR-023: Separate subnets per tier",
+    "ADR-042: Implement zero-trust network security"
+  ],
+  
+  "compliance_frameworks": ["SOC2", "ISO27001"],
+  
+  "components": {
+    "web_tier": {
+      "type": "vm_scale_set",
+      "description": "Frontend web servers with auto-scaling",
+      "min_instances": 2,
+      "max_instances": 10,
+      "instance_type": "Standard_D2s_v3",
+      "os": "ubuntu-20.04",
+      "load_balancer": {
+        "type": "application_gateway",
+        "sku": "WAF_v2",
+        "waf_enabled": true
+      },
+      "auto_scaling": {
+        "enabled": true,
+        "cpu_threshold": 75,
+        "scale_out_cooldown": 300,
+        "scale_in_cooldown": 600
+      }
+    },
+    "app_tier": {
+      "type": "kubernetes_cluster",
+      "description": "Application services running in Kubernetes",
+      "node_count": 3,
+      "node_type": "Standard_D4s_v3",
+      "kubernetes_version": "1.28",
+      "network_policy": "calico",
+      "ingress_controller": "nginx",
+      "service_mesh": {
+        "enabled": true,
+        "type": "istio"
+      }
+    },
+    "data_tier": {
+      "type": "postgresql_database",
+      "description": "PostgreSQL database with high availability",
+      "tier": "GeneralPurpose",
+      "version": "15",
+      "storage_gb": 100,
+      "backup_retention_days": 30,
+      "geo_redundant_backup": true,
+      "high_availability": {
+        "enabled": true,
+        "mode": "zone_redundant"
+      }
+    },
+    "cache_tier": {
+      "type": "redis_cache",
+      "description": "Redis cache for session and application data",
+      "sku": "Premium",
+      "capacity": 1,
+      "redis_version": "6.0",
+      "high_availability": {
+        "enabled": true,
+        "replication_count": 2
+      }
+    }
+  },
+  
+  "networking": {
+    "virtual_network": {
+      "address_space": "10.0.0.0/16",
+      "subnets": {
+        "web_subnet": {
+          "address_prefix": "10.0.1.0/24",
+          "network_security_group": "web-nsg"
+        },
+        "app_subnet": {
+          "address_prefix": "10.0.2.0/24",
+          "network_security_group": "app-nsg"
+        },
+        "data_subnet": {
+          "address_prefix": "10.0.3.0/24",
+          "network_security_group": "data-nsg"
+        }
+      }
+    },
+    "dns": {
+      "custom_domain": true,
+      "ssl_certificate": "required"
+    }
+  },
+  
+  "security_controls": {
+    "network_segmentation": true,
+    "waf_enabled": true,
+    "ddos_protection": true,
+    "encryption_at_rest": true,
+    "encryption_in_transit": true,
+    "mfa_required": true,
+    "audit_logging": true,
+    "vulnerability_scanning": true,
+    "intrusion_detection": true,
+    "key_vault_integration": true,
+    "managed_identities": true,
+    "private_endpoints": true
+  },
+  
+  "guardrails": {
+    "required": [
+      "no-public-database-access",
+      "enforce-https",
+      "require-tags",
+      "backup-enabled",
+      "encryption-at-rest",
+      "network-segmentation",
+      "audit-logging-enabled"
+    ],
+    "optional": [
+      "auto-scaling-enabled",
+      "multi-region-dr",
+      "geo-replication"
+    ]
+  },
+  
+  "monitoring": {
+    "application_insights": true,
+    "log_analytics": true,
+    "metrics_collection": true,
+    "alerts": [
+      {
+        "name": "High CPU Usage",
+        "metric": "cpu_percentage",
+        "threshold": 85,
+        "duration": 300
+      },
+      {
+        "name": "High Memory Usage",
+        "metric": "memory_percentage",
+        "threshold": 90,
+        "duration": 300
+      },
+      {
+        "name": "Database Connection Errors",
+        "metric": "connection_failed",
+        "threshold": 5,
+        "duration": 60
+      }
+    ]
+  },
+  
+  "disaster_recovery": {
+    "backup_strategy": "automated_daily",
+    "retention_days": 30,
+    "geo_redundancy": true,
+    "rto_hours": 4,
+    "rpo_hours": 1
+  },
+  
+  "estimated_monthly_cost": {
+    "minimum": 2500,
+    "typical": 4000,
+    "maximum": 8000,
+    "breakdown": {
+      "compute": 1500,
+      "database": 800,
+      "networking": 400,
+      "storage": 200,
+      "monitoring": 100
+    }
+  },
+  
+  "deployment_configuration": {
+    "deployment_slots": true,
+    "blue_green_deployment": true,
+    "canary_deployment": false,
+    "rollback_strategy": "automatic"
+  },
+  
+  "tags": {
+    "template": "enterprise-three-tier-web",
+    "architecture_pattern": "three-tier",
+    "compliance": "SOC2,ISO27001",
+    "cost_center": "required",
+    "owner": "required",
+    "environment": "required",
+    "project": "required"
+  },
+  
+  "approved_by": "enterprise-architecture-board",
+  "approval_date": "2025-01-15",
+  "review_date": "2025-07-15",
+  
+  "documentation": {
+    "architecture_diagram": "diagrams/three-tier-web.png",
+    "deployment_guide": "docs/deployment-guide.md",
+    "operations_runbook": "docs/operations-runbook.md"
+  }
+}

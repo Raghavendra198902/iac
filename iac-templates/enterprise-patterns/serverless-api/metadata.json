@@ -1,0 +1,122 @@
+{
+  "template_id": "serverless-api",
+  "template_version": "1.0.0",
+  "name": "Serverless API with Event-Driven Architecture",
+  "description": "Fully serverless API using Functions, API Gateway, and event-driven patterns for scalability and cost optimization",
+  "architecture_domain": "application",
+  "complexity": "moderate",
+  "estimated_cost": 800,
+  
+  "architecture_decisions": [
+    "ADR-018: Serverless-first for variable workloads",
+    "ADR-027: Event-driven architecture with message queues",
+    "ADR-035: NoSQL for flexible data models"
+  ],
+  
+  "compliance_frameworks": ["SOC2"],
+  
+  "components": {
+    "api_gateway": {
+      "type": "api_management",
+      "sku": "Consumption",
+      "features": {
+        "rate_limiting": true,
+        "caching": true,
+        "authentication": "oauth2",
+        "cors": true
+      }
+    },
+    "functions": {
+      "type": "function_app",
+      "runtime": "node",
+      "runtime_version": "18",
+      "hosting_plan": "consumption",
+      "functions": [
+        {
+          "name": "create-resource",
+          "trigger": "http",
+          "methods": ["POST"]
+        },
+        {
+          "name": "get-resource",
+          "trigger": "http",
+          "methods": ["GET"]
+        },
+        {
+          "name": "update-resource",
+          "trigger": "http",
+          "methods": ["PUT", "PATCH"]
+        },
+        {
+          "name": "delete-resource",
+          "trigger": "http",
+          "methods": ["DELETE"]
+        },
+        {
+          "name": "process-events",
+          "trigger": "queue",
+          "queue_name": "events"
+        }
+      ]
+    },
+    "database": {
+      "type": "cosmos_db",
+      "api": "nosql",
+      "consistency_level": "Session",
+      "automatic_failover": true,
+      "serverless": true
+    },
+    "storage": {
+      "type": "blob_storage",
+      "replication": "LRS",
+      "access_tier": "hot"
+    },
+    "message_queue": {
+      "type": "service_bus",
+      "sku": "Standard",
+      "queues": ["events", "notifications", "dead-letter"]
+    },
+    "cache": {
+      "type": "redis_cache",
+      "sku": "Basic",
+      "capacity": 0
+    }
+  },
+  
+  "security_controls": {
+    "api_authentication": "oauth2",
+    "managed_identity": true,
+    "key_vault_integration": true,
+    "encryption_at_rest": true,
+    "private_endpoints": true,
+    "ddos_protection": false,
+    "audit_logging": true
+  },
+  
+  "guardrails": {
+    "required": [
+      "function-timeout-limit",
+      "managed-identity-required",
+      "https-only",
+      "min-tls-version-1.2"
+    ]
+  },
+  
+  "estimated_monthly_cost": {
+    "minimum": 200,
+    "typical": 800,
+    "maximum": 2000,
+    "breakdown": {
+      "functions": 100,
+      "api_gateway": 100,
+      "database": 300,
+      "storage": 50,
+      "message_queue": 100,
+      "cache": 150
+    }
+  },
+  
+  "approved_by": "enterprise-architecture-board",
+  "approval_date": "2025-02-01",
+  "review_date": "2025-08-01"
+}

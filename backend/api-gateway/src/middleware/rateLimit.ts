@@ -18,13 +18,32 @@ import { logger } from '../utils/logger';
 import { RateLimitError } from './errorHandler';
 
 const redis = new Redis({
-  host: process.env.REDIS_HOST || 'redis',
+  host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
-  retryStrategy: (times: number) => Math.min(times * 50, 2000),
+  retryStrategy: (times: number) => {
+    // Stop retrying after 3 attempts
+    if (times > 3) {
+      logger.warn('Rate limiter Redis connection failed, rate limiting will use in-memory fallback');
+      return null; // Stop retrying
+    }
+    return Math.min(times * 50, 500);
+  },
+  maxRetriesPerRequest: 1, // Fail fast for rate limit checks
+  lazyConnect: true, // Don't connect immediately
 });
 
 redis.on('error', (err) => {
-  logger.error('Rate limit Redis error', { error: err.message });
+  // Only log once, don't spam
+  if (err.message.includes('ECONNREFUSED') || err.message.includes('EAI_AGAIN')) {
+    // Connection errors - already logged by retry strategy
+  } else {
+    logger.error('Rate limit Redis error', { error: err.message });
+  }
+});
+
+// Try to connect, but don't block if it fails
+redis.connect().catch(() => {
+  logger.warn('Redis not available for rate limiting, using in-memory fallback');
 });
 
 // Subscription tiers with rate limits (requests per hour)

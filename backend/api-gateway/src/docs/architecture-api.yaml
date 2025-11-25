@@ -1,0 +1,787 @@
+openapi: 3.0.3
+info:
+  title: IAC DHARMA - Enterprise Architecture API
+  description: |
+    API for managing Architecture Decision Records (ADRs), architecture metrics,
+    compliance tracking, and EA governance in the IAC DHARMA platform.
+  version: 1.0.0
+  contact:
+    name: Platform Team
+    email: platform@example.com
+
+servers:
+  - url: http://localhost:3001/api
+    description: Development server
+  - url: https://api.dharma.example.com/api
+    description: Production server
+
+tags:
+  - name: ADR
+    description: Architecture Decision Records management
+  - name: Metrics
+    description: Architecture metrics and analytics
+  - name: Compliance
+    description: Architecture compliance and violations
+
+paths:
+  /architecture/decisions:
+    get:
+      tags:
+        - ADR
+      summary: List architecture decision records
+      description: Retrieve paginated list of ADRs with optional filtering
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [proposed, accepted, deprecated, superseded]
+          description: Filter by ADR status
+        - in: query
+          name: domain
+          schema:
+            type: string
+            enum: [business, application, data, technology, security, integration]
+          description: Filter by architecture domain
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search in title and content
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Pagination offset
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Results per page
+      responses:
+        '200':
+          description: List of ADRs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  offset:
+                    type: integer
+                  limit:
+                    type: integer
+                  adrs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ADR'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - ADR
+      summary: Create new ADR
+      description: Create a new Architecture Decision Record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateADRRequest'
+      responses:
+        '201':
+          description: ADR created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ADR'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /architecture/decisions/{adrNumber}:
+    get:
+      tags:
+        - ADR
+      summary: Get ADR by number
+      description: Retrieve specific ADR details
+      parameters:
+        - in: path
+          name: adrNumber
+          required: true
+          schema:
+            type: integer
+          description: ADR number (e.g., 1 for ADR-0001)
+      responses:
+        '200':
+          description: ADR details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ADR'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags:
+        - ADR
+      summary: Update ADR
+      description: Update existing ADR (creates new version)
+      parameters:
+        - in: path
+          name: adrNumber
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateADRRequest'
+      responses:
+        '200':
+          description: ADR updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ADR'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /architecture/decisions/{adrNumber}/accept:
+    post:
+      tags:
+        - ADR
+      summary: Accept ADR
+      description: Mark ADR as accepted
+      parameters:
+        - in: path
+          name: adrNumber
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ADR accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ADR'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /architecture/decisions/{adrNumber}/deprecate:
+    post:
+      tags:
+        - ADR
+      summary: Deprecate ADR
+      description: Mark ADR as deprecated
+      parameters:
+        - in: path
+          name: adrNumber
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ADR deprecated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ADR'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /architecture/decisions/{adrNumber}/supersede:
+    post:
+      tags:
+        - ADR
+      summary: Supersede ADR
+      description: Replace ADR with new decision
+      parameters:
+        - in: path
+          name: adrNumber
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - newAdrNumber
+              properties:
+                newAdrNumber:
+                  type: integer
+                  description: The ADR that supersedes this one
+      responses:
+        '200':
+          description: ADR superseded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ADR'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /architecture/decisions/statistics:
+    get:
+      tags:
+        - ADR
+      summary: Get ADR statistics
+      description: Get statistics on ADRs by status and domain
+      responses:
+        '200':
+          description: ADR statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  by_status:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  by_domain:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  recent:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ADR'
+
+  /architecture/metrics/overview:
+    get:
+      tags:
+        - Metrics
+      summary: Get architecture metrics overview
+      description: Comprehensive architecture health metrics
+      responses:
+        '200':
+          description: Architecture metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsOverview'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /architecture/metrics/adrs:
+    get:
+      tags:
+        - Metrics
+      summary: Get ADR metrics
+      description: Metrics on ADR adoption and trends
+      parameters:
+        - in: query
+          name: days
+          schema:
+            type: integer
+            default: 90
+          description: Time period in days
+      responses:
+        '200':
+          description: ADR metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ADRMetrics'
+
+  /architecture/metrics/technology:
+    get:
+      tags:
+        - Metrics
+      summary: Get technology metrics
+      description: Technology stack compliance and adoption
+      responses:
+        '200':
+          description: Technology metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TechnologyMetrics'
+
+  /architecture/metrics/portfolio:
+    get:
+      tags:
+        - Metrics
+      summary: Get portfolio metrics
+      description: Overall portfolio health and composition
+      responses:
+        '200':
+          description: Portfolio metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioMetrics'
+
+  /architecture/metrics/violations:
+    get:
+      tags:
+        - Compliance
+      summary: Get compliance violations
+      description: List of architecture compliance violations
+      parameters:
+        - in: query
+          name: severity
+          schema:
+            type: string
+            enum: [critical, high, medium, low]
+          description: Filter by severity
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [open, resolved, accepted, false_positive]
+          description: Filter by status
+      responses:
+        '200':
+          description: List of violations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Violation'
+
+  /architecture/metrics/compliance-trend:
+    get:
+      tags:
+        - Compliance
+      summary: Get compliance trend
+      description: Historical compliance score trend
+      parameters:
+        - in: query
+          name: days
+          schema:
+            type: integer
+            default: 90
+          description: Time period in days
+      responses:
+        '200':
+          description: Compliance trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    score:
+                      type: number
+                      format: float
+                    violations:
+                      type: integer
+
+components:
+  schemas:
+    ADR:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        adr_number:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Use PostgreSQL as Standard Database"
+        status:
+          type: string
+          enum: [proposed, accepted, deprecated, superseded]
+        decision_date:
+          type: string
+          format: date-time
+        supersedes_adr_id:
+          type: string
+          format: uuid
+          nullable: true
+        context:
+          type: string
+        problem_statement:
+          type: string
+        decision_drivers:
+          type: array
+          items:
+            type: string
+        constraints:
+          type: array
+          items:
+            type: string
+        assumptions:
+          type: array
+          items:
+            type: string
+        considered_options:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              pros:
+                type: array
+                items:
+                  type: string
+              cons:
+                type: array
+                items:
+                  type: string
+        decision_outcome:
+          type: string
+        decision_rationale:
+          type: string
+        positive_consequences:
+          type: array
+          items:
+            type: string
+        negative_consequences:
+          type: array
+          items:
+            type: string
+        risks:
+          type: array
+          items:
+            type: object
+        deciders:
+          type: array
+          items:
+            type: string
+        stakeholders:
+          type: array
+          items:
+            type: string
+        related_adrs:
+          type: array
+          items:
+            type: integer
+        implementation_link:
+          type: string
+          format: uri
+        documentation_link:
+          type: string
+          format: uri
+        architecture_domain:
+          type: string
+          enum: [business, application, data, technology, security, integration]
+        technology_area:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        created_by:
+          type: string
+          format: uuid
+        updated_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateADRRequest:
+      type: object
+      required:
+        - title
+        - context
+        - problem_statement
+        - decision_drivers
+        - considered_options
+        - decision_outcome
+        - decision_rationale
+        - deciders
+        - architecture_domain
+      properties:
+        title:
+          type: string
+        context:
+          type: string
+        problem_statement:
+          type: string
+        decision_drivers:
+          type: array
+          items:
+            type: string
+        constraints:
+          type: array
+          items:
+            type: string
+        assumptions:
+          type: array
+          items:
+            type: string
+        considered_options:
+          type: array
+          items:
+            type: object
+        decision_outcome:
+          type: string
+        decision_rationale:
+          type: string
+        positive_consequences:
+          type: array
+          items:
+            type: string
+        negative_consequences:
+          type: array
+          items:
+            type: string
+        deciders:
+          type: array
+          items:
+            type: string
+        stakeholders:
+          type: array
+          items:
+            type: string
+        architecture_domain:
+          type: string
+        technology_area:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    UpdateADRRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        context:
+          type: string
+        decision_rationale:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    MetricsOverview:
+      type: object
+      properties:
+        governance:
+          type: object
+          properties:
+            compliance_score:
+              type: number
+              format: float
+            total_violations:
+              type: integer
+            critical_violations:
+              type: integer
+            pending_reviews:
+              type: integer
+            avg_review_turnaround_days:
+              type: number
+        portfolio:
+          type: object
+          properties:
+            total_projects:
+              type: integer
+            total_blueprints:
+              type: integer
+            total_templates:
+              type: integer
+            architecture_debt_ratio:
+              type: number
+        quality:
+          type: object
+          properties:
+            tech_debt_ratio:
+              type: number
+            deprecated_tech_count:
+              type: integer
+            standards_adoption_rate:
+              type: number
+            template_reuse_rate:
+              type: number
+        cost:
+          type: object
+          properties:
+            total_monthly_spend:
+              type: number
+            optimization_opportunities_count:
+              type: integer
+            budget_adherence_percentage:
+              type: number
+            avg_cost_per_project:
+              type: number
+        security:
+          type: object
+          properties:
+            security_score:
+              type: number
+            high_severity_vulns:
+              type: integer
+            encryption_coverage:
+              type: number
+            active_certifications:
+              type: array
+              items:
+                type: string
+
+    ADRMetrics:
+      type: object
+      properties:
+        total_adrs:
+          type: integer
+        adrs_by_status:
+          type: object
+        recent_decisions:
+          type: array
+        most_impactful:
+          type: array
+        trend:
+          type: array
+
+    TechnologyMetrics:
+      type: object
+      properties:
+        approved_technologies:
+          type: array
+          items:
+            type: object
+        unapproved_usage:
+          type: array
+        deprecation_timeline:
+          type: array
+
+    PortfolioMetrics:
+      type: object
+      properties:
+        total_assets:
+          type: integer
+        by_domain:
+          type: object
+        by_status:
+          type: object
+        health_score:
+          type: number
+
+    Violation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        blueprint_id:
+          type: string
+          format: uuid
+        violation_type:
+          type: string
+        severity:
+          type: string
+          enum: [critical, high, medium, low]
+        message:
+          type: string
+        resource_path:
+          type: string
+        policy_name:
+          type: string
+        detected_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [open, resolved, accepted, false_positive]
+        resolution_notes:
+          type: string
+        resolved_at:
+          type: string
+          format: date-time
+        resolved_by:
+          type: string
+          format: uuid
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Unauthorized
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Not found
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

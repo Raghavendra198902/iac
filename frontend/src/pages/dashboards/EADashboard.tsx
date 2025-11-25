@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Shield, FileText, Users, TrendingUp, TrendingDown, AlertCircle, CheckCircle2, Clock, ArrowRight, Brain, Cloud, Lock } from 'lucide-react';
+import { Shield, FileText, Users, TrendingUp, TrendingDown, AlertCircle, CheckCircle2, Clock, ArrowRight, Brain, Cloud, Lock, GitBranch } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MainLayout } from '../../components/layout';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
 import ChartCard from '../../components/ui/ChartCard';
@@ -161,8 +162,9 @@ export default function EADashboard() {
   }, []);
 
   return (
-    <PageTransition>
-      <div className="space-y-6">
+    <MainLayout>
+      <PageTransition>
+        <div className="space-y-6">
         {/* Hero Section */}
         <FadeIn>
           <div className="rounded-3xl bg-gradient-to-br from-green-600 via-green-700 to-teal-800 text-white p-8 relative overflow-hidden">
@@ -190,6 +192,73 @@ export default function EADashboard() {
             </div>
           </div>
         </FadeIn>
+
+        {/* Quick Access Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Link
+            to="/governance/policies"
+            className="card p-6 hover:shadow-xl transition-all group border-2 border-transparent hover:border-blue-500"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900 group-hover:scale-110 transition-transform">
+                <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Governance & Policies</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Manage policies & compliance</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+          
+          <Link
+            to="/ea/functions"
+            className="card p-6 hover:shadow-xl transition-all group border-2 border-transparent hover:border-purple-500"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900 group-hover:scale-110 transition-transform">
+                <FileText className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white">EA Functions & Roles</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">View responsibilities & metrics</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+          
+          <Link
+            to="/architecture/framework"
+            className="card p-6 hover:shadow-xl transition-all group border-2 border-transparent hover:border-indigo-500"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-indigo-100 dark:bg-indigo-900 group-hover:scale-110 transition-transform">
+                <GitBranch className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white">EA/SA/TA Framework</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Architecture methodology</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+          
+          <Link
+            to="/guardrails"
+            className="card p-6 hover:shadow-xl transition-all group border-2 border-transparent hover:border-green-500"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900 group-hover:scale-110 transition-transform">
+                <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Guardrails Management</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Configure security rules</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+        </div>
 
         {/* Governance Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -511,7 +580,8 @@ export default function EADashboard() {
             </div>
           </div>
         </FadeIn>
-      </div>
-    </PageTransition>
+        </div>
+      </PageTransition>
+    </MainLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { Activity, CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { MainLayout } from '../components/layout';
 
 export default function DeploymentMonitor() {
   // Load real deployments from API - no demo data
@@ -47,7 +48,8 @@ export default function DeploymentMonitor() {
   };
 
   return (
-    <div className="space-y-6">
+    <MainLayout>
+      <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Activity className="h-8 w-8 text-primary-600 dark:text-primary-400" />
         <div>
@@ -107,6 +109,6 @@ export default function DeploymentMonitor() {
           ))}
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

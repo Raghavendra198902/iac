@@ -1,0 +1,137 @@
+{
+  "template_id": "data-lake-analytics",
+  "template_version": "1.0.0",
+  "name": "Enterprise Data Lake and Analytics Platform",
+  "description": "Scalable data lake architecture with data ingestion, processing, and analytics capabilities",
+  "architecture_domain": "data",
+  "complexity": "complex",
+  "estimated_cost": 6000,
+  
+  "architecture_decisions": [
+    "ADR-040: Data lake architecture with zones (raw, curated, analytics)",
+    "ADR-044: Delta Lake for ACID transactions",
+    "ADR-048: Spark for big data processing"
+  ],
+  
+  "compliance_frameworks": ["SOC2", "GDPR", "HIPAA"],
+  
+  "components": {
+    "data_storage": {
+      "type": "data_lake_storage",
+      "redundancy": "GRS",
+      "hierarchical_namespace": true,
+      "zones": {
+        "raw": {
+          "path": "/raw",
+          "retention_days": 90,
+          "access_tier": "cool"
+        },
+        "curated": {
+          "path": "/curated",
+          "retention_days": 365,
+          "access_tier": "hot"
+        },
+        "analytics": {
+          "path": "/analytics",
+          "retention_days": 730,
+          "access_tier": "hot"
+        }
+      }
+    },
+    "data_ingestion": {
+      "data_factory": {
+        "enabled": true,
+        "pipelines": ["batch-ingestion", "streaming-ingestion", "cdc-ingestion"]
+      },
+      "event_hubs": {
+        "enabled": true,
+        "throughput_units": 5,
+        "partitions": 32
+      }
+    },
+    "data_processing": {
+      "spark_cluster": {
+        "type": "databricks",
+        "tier": "Premium",
+        "autoscaling": true,
+        "min_workers": 2,
+        "max_workers": 10,
+        "worker_type": "Standard_D4s_v3"
+      },
+      "delta_lake": {
+        "enabled": true,
+        "vacuum_retention_hours": 168
+      }
+    },
+    "analytics": {
+      "synapse_analytics": {
+        "enabled": true,
+        "dedicated_sql_pool": {
+          "dw_units": "DW500c",
+          "pause_when_inactive": true
+        },
+        "serverless_sql_pool": {
+          "enabled": true
+        }
+      }
+    },
+    "metadata_management": {
+      "data_catalog": {
+        "enabled": true,
+        "auto_discovery": true,
+        "data_classification": true
+      }
+    },
+    "governance": {
+      "purview": {
+        "enabled": true,
+        "data_lineage": true,
+        "sensitivity_labels": true,
+        "access_policies": true
+      }
+    }
+  },
+  
+  "security_controls": {
+    "encryption_at_rest": true,
+    "encryption_in_transit": true,
+    "network_isolation": true,
+    "private_endpoints": true,
+    "managed_identity": true,
+    "rbac": true,
+    "data_masking": true,
+    "column_level_security": true,
+    "row_level_security": true,
+    "audit_logging": true,
+    "threat_detection": true
+  },
+  
+  "guardrails": {
+    "required": [
+      "data-classification-required",
+      "encryption-at-rest",
+      "private-endpoints-only",
+      "audit-logging-enabled",
+      "rbac-configured",
+      "pii-detection-enabled"
+    ]
+  },
+  
+  "estimated_monthly_cost": {
+    "minimum": 3000,
+    "typical": 6000,
+    "maximum": 12000,
+    "breakdown": {
+      "storage": 1000,
+      "data_factory": 500,
+      "event_hubs": 400,
+      "databricks": 2000,
+      "synapse": 1500,
+      "purview": 600
+    }
+  },
+  
+  "approved_by": "enterprise-architecture-board",
+  "approval_date": "2025-01-20",
+  "review_date": "2025-07-20"
+}

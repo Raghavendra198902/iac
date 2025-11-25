@@ -12,6 +12,7 @@ export const API_CONFIG = {
   costingService: import.meta.env.VITE_COSTING_SERVICE_URL || 'http://localhost:3004',
   monitoringService: import.meta.env.VITE_MONITORING_SERVICE_URL || 'http://localhost:3005',
   orchestrator: import.meta.env.VITE_ORCHESTRATOR_URL || 'http://localhost:3006',
+  mlApi: import.meta.env.VITE_ML_API_URL || 'http://localhost:5000',
   
   // API endpoints
   endpoints: {

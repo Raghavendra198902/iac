@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Lightbulb, FileText, Sparkles, TrendingUp, TrendingDown, DollarSign, Zap, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MainLayout } from '../../components/layout';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
 import ChartCard from '../../components/ui/ChartCard';
@@ -367,5 +368,6 @@ export default function SADashboard() {
         </FadeIn>
       </div>
     </PageTransition>
+    </MainLayout>
   );
 }

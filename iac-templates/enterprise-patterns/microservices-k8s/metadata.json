@@ -1,0 +1,157 @@
+{
+  "template_id": "microservices-kubernetes",
+  "template_version": "1.0.0",
+  "name": "Enterprise Microservices on Kubernetes",
+  "description": "Cloud-native microservices architecture using Kubernetes with service mesh, observability, and GitOps",
+  "architecture_domain": "application",
+  "complexity": "complex",
+  "estimated_cost": 5000,
+  
+  "architecture_decisions": [
+    "ADR-008: Kubernetes as container orchestration platform",
+    "ADR-012: Istio service mesh for traffic management",
+    "ADR-025: GitOps with ArgoCD",
+    "ADR-031: API Gateway pattern for external access"
+  ],
+  
+  "compliance_frameworks": ["SOC2", "ISO27001", "PCI-DSS"],
+  
+  "components": {
+    "kubernetes_cluster": {
+      "type": "managed_kubernetes",
+      "node_pools": [
+        {
+          "name": "system",
+          "node_count": 3,
+          "node_type": "Standard_D4s_v3",
+          "auto_scaling": false,
+          "taints": ["CriticalAddonsOnly=true:NoSchedule"]
+        },
+        {
+          "name": "application",
+          "min_nodes": 3,
+          "max_nodes": 20,
+          "node_type": "Standard_D8s_v3",
+          "auto_scaling": true
+        }
+      ],
+      "kubernetes_version": "1.28",
+      "network_plugin": "azure-cni",
+      "dns_service_ip": "10.2.0.10",
+      "service_cidr": "10.2.0.0/16"
+    },
+    "service_mesh": {
+      "type": "istio",
+      "version": "1.20",
+      "features": {
+        "mutual_tls": true,
+        "traffic_management": true,
+        "observability": true,
+        "security_policies": true
+      }
+    },
+    "api_gateway": {
+      "type": "kong",
+      "plugins": ["rate-limiting", "authentication", "cors", "logging"],
+      "high_availability": true
+    },
+    "message_queue": {
+      "type": "kafka",
+      "brokers": 3,
+      "replication_factor": 3,
+      "partitions": 12
+    },
+    "databases": {
+      "postgres": {
+        "type": "postgresql_flexible_server",
+        "tier": "GeneralPurpose",
+        "storage_gb": 256,
+        "high_availability": true
+      },
+      "mongodb": {
+        "type": "cosmos_db",
+        "api": "mongodb",
+        "consistency_level": "Session",
+        "multi_region": true
+      },
+      "redis": {
+        "type": "redis_enterprise",
+        "cluster_size": 3,
+        "data_persistence": true
+      }
+    },
+    "observability": {
+      "prometheus": {
+        "enabled": true,
+        "retention_days": 15
+      },
+      "grafana": {
+        "enabled": true,
+        "dashboards": "preloaded"
+      },
+      "jaeger": {
+        "enabled": true,
+        "sampling_rate": 0.1
+      },
+      "elasticsearch": {
+        "enabled": true,
+        "node_count": 3,
+        "storage_gb": 500
+      }
+    },
+    "gitops": {
+      "argocd": {
+        "enabled": true,
+        "sync_policy": "automated",
+        "self_heal": true
+      }
+    }
+  },
+  
+  "security_controls": {
+    "network_policies": true,
+    "pod_security_policies": true,
+    "rbac": true,
+    "admission_controllers": ["PodSecurityPolicy", "ResourceQuota", "LimitRanger"],
+    "image_scanning": true,
+    "runtime_security": true,
+    "secrets_management": "external_secrets_operator",
+    "service_mesh_mtls": true,
+    "api_authentication": "oauth2",
+    "audit_logging": true
+  },
+  
+  "guardrails": {
+    "required": [
+      "pod-security-standards",
+      "network-policies-required",
+      "resource-limits-required",
+      "no-privileged-containers",
+      "image-pull-policy-always",
+      "liveness-readiness-probes",
+      "service-mesh-sidecar-injection"
+    ],
+    "optional": [
+      "horizontal-pod-autoscaler",
+      "pod-disruption-budgets"
+    ]
+  },
+  
+  "estimated_monthly_cost": {
+    "minimum": 5000,
+    "typical": 8000,
+    "maximum": 15000,
+    "breakdown": {
+      "kubernetes_cluster": 3000,
+      "databases": 2000,
+      "message_queue": 800,
+      "observability": 1000,
+      "networking": 600,
+      "storage": 600
+    }
+  },
+  
+  "approved_by": "enterprise-architecture-board",
+  "approval_date": "2025-01-10",
+  "review_date": "2025-07-10"
+}

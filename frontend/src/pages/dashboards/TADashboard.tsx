@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Code2, Server, Shield, AlertTriangle, CheckCircle2, XCircle, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MainLayout } from '../../components/layout';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
 import ChartCard from '../../components/ui/ChartCard';
@@ -181,8 +182,9 @@ export default function TADashboard() {
   }, []);
 
   return (
-    <PageTransition>
-      <div className="space-y-6">
+    <MainLayout>
+      <PageTransition>
+        <div className="space-y-6">
         {/* Hero Section */}
         <FadeIn>
           <div className="rounded-3xl bg-gradient-to-br from-purple-600 via-purple-700 to-pink-800 text-white p-8 relative overflow-hidden">
@@ -494,7 +496,8 @@ export default function TADashboard() {
             </div>
           </div>
         </FadeIn>
-      </div>
-    </PageTransition>
+        </div>
+      </PageTransition>
+    </MainLayout>
   );
 }

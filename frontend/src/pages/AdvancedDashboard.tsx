@@ -9,6 +9,107 @@ import { databaseService, type DatabaseStats } from '../services/databaseService
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
+// ECG Monitor Component for sine wave visualization
+const ECGMonitor = ({ data, color = 'blue', height = 60, width = 100, showGrid = true }: { 
+  data: number[], 
+  color?: string, 
+  height?: number, 
+  width?: number,
+  showGrid?: boolean 
+}) => {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  
+  // Generate ECG-style sine wave with sharp peaks
+  const ecgPoints: number[] = [];
+  const samplesPerBeat = 20;
+  const totalBeats = 8;
+  
+  for (let beat = 0; beat < totalBeats; beat++) {
+    for (let i = 0; i < samplesPerBeat; i++) {
+      const t = i / samplesPerBeat;
+      const dataIndex = Math.floor((beat / totalBeats) * data.length);
+      const baseValue = data[Math.min(dataIndex, data.length - 1)];
+      
+      let ecgValue;
+      if (t < 0.15) {
+        ecgValue = baseValue + range * 0.15 * Math.sin(t * Math.PI / 0.15);
+      } else if (t >= 0.15 && t < 0.2) {
+        ecgValue = baseValue;
+      } else if (t >= 0.2 && t < 0.35) {
+        const qrsT = (t - 0.2) / 0.15;
+        if (qrsT < 0.3) {
+          ecgValue = baseValue - range * 0.2 * Math.sin(qrsT * Math.PI / 0.3);
+        } else if (qrsT < 0.6) {
+          ecgValue = baseValue + range * 0.8 * Math.sin((qrsT - 0.3) * Math.PI / 0.3);
+        } else {
+          ecgValue = baseValue - range * 0.15 * Math.sin((qrsT - 0.6) * Math.PI / 0.4);
+        }
+      } else if (t >= 0.35 && t < 0.45) {
+        ecgValue = baseValue;
+      } else if (t >= 0.45 && t < 0.65) {
+        ecgValue = baseValue + range * 0.25 * Math.sin((t - 0.45) * Math.PI / 0.2);
+      } else {
+        ecgValue = baseValue;
+      }
+      
+      ecgPoints.push(ecgValue);
+    }
+  }
+  
+  const step = width / (ecgPoints.length - 1);
+  const points = ecgPoints.map((value, i) => {
+    const x = i * step;
+    const y = height - ((value - min) / range) * height * 0.9 - height * 0.05;
+    return `${x},${y}`;
+  }).join(' ');
+  
+  const colorMap: Record<string, string> = {
+    blue: '#3b82f6',
+    green: '#10b981',
+    orange: '#f59e0b',
+    purple: '#8b5cf6',
+    red: '#ef4444',
+  };
+  
+  const strokeColor = colorMap[color] || colorMap.blue;
+  
+  return (
+    <svg width={width} height={height} className="inline-block">
+      {showGrid && (
+        <>
+          <defs>
+            <pattern id={`grid-${color}-adv`} width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 5" fill="none" stroke={strokeColor} strokeWidth="0.3" opacity="0.2"/>
+            </pattern>
+          </defs>
+          <rect width={width} height={height} fill={`url(#grid-${color}-adv)`} />
+        </>
+      )}
+      <polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="animate-pulse"
+      />
+      <polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.3"
+        className="blur-sm"
+      />
+    </svg>
+  );
+};
+
 export default function AdvancedDashboard() {
   const [realTimeMetrics, setRealTimeMetrics] = useState<RealTimeMetrics | null>(null);
   const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null);
@@ -266,14 +367,13 @@ export default function AdvancedDashboard() {
                 <div className="text-2xl font-bold">
                   {realTimeMetrics?.cpuUsage.toFixed(1) || '0'}%
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                  <div
-                    className={`h-2.5 rounded-full ${
-                      (realTimeMetrics?.cpuUsage || 0) > 80 ? 'bg-red-500' :
-                      (realTimeMetrics?.cpuUsage || 0) > 60 ? 'bg-yellow-500' :
-                      'bg-green-500'
-                    }`}
-                    style={{ width: `${realTimeMetrics?.cpuUsage || 0}%` }}
+                <div className="mt-2">
+                  <ECGMonitor 
+                    data={metricsHistory.length > 0 ? metricsHistory.map(m => m.cpuUsage) : [40, 42, 45, 43, 44, 46]} 
+                    color="blue" 
+                    height={50} 
+                    width={100} 
+                    showGrid={true} 
                   />
                 </div>
               </CardContent>
@@ -287,14 +387,13 @@ export default function AdvancedDashboard() {
                 <div className="text-2xl font-bold">
                   {realTimeMetrics?.memoryUsage.toFixed(1) || '0'}%
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                  <div
-                    className={`h-2.5 rounded-full ${
-                      (realTimeMetrics?.memoryUsage || 0) > 80 ? 'bg-red-500' :
-                      (realTimeMetrics?.memoryUsage || 0) > 60 ? 'bg-yellow-500' :
-                      'bg-green-500'
-                    }`}
-                    style={{ width: `${realTimeMetrics?.memoryUsage || 0}%` }}
+                <div className="mt-2">
+                  <ECGMonitor 
+                    data={metricsHistory.length > 0 ? metricsHistory.map(m => m.memoryUsage) : [60, 62, 65, 63, 64, 66]} 
+                    color="green" 
+                    height={50} 
+                    width={100} 
+                    showGrid={true} 
                   />
                 </div>
               </CardContent>
@@ -308,14 +407,13 @@ export default function AdvancedDashboard() {
                 <div className="text-2xl font-bold">
                   {realTimeMetrics?.diskUsage.toFixed(1) || '0'}%
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                  <div
-                    className={`h-2.5 rounded-full ${
-                      (realTimeMetrics?.diskUsage || 0) > 80 ? 'bg-red-500' :
-                      (realTimeMetrics?.diskUsage || 0) > 60 ? 'bg-yellow-500' :
-                      'bg-green-500'
-                    }`}
-                    style={{ width: `${realTimeMetrics?.diskUsage || 0}%` }}
+                <div className="mt-2">
+                  <ECGMonitor 
+                    data={metricsHistory.length > 0 ? metricsHistory.map(m => m.diskUsage) : [70, 72, 74, 73, 75, 76]} 
+                    color="orange" 
+                    height={50} 
+                    width={100} 
+                    showGrid={true} 
                   />
                 </div>
               </CardContent>
@@ -386,12 +484,13 @@ export default function AdvancedDashboard() {
                     <span className="text-sm text-muted-foreground">Max</span>
                     <span className="font-medium">{databaseStats?.maxConnections || 0}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div
-                      className="h-2.5 rounded-full bg-blue-500"
-                      style={{
-                        width: `${((databaseStats?.totalConnections || 0) / (databaseStats?.maxConnections || 1)) * 100}%`
-                      }}
+                  <div className="mt-2">
+                    <ECGMonitor 
+                      data={[40, 45, 50, 48, 52, 55]} 
+                      color="blue" 
+                      height={40} 
+                      width={100} 
+                      showGrid={true} 
                     />
                   </div>
                 </div>

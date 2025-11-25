@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bell, CheckCircle, AlertTriangle, Info, AlertCircle, X, Check, Filter, Search, Clock, Settings } from 'lucide-react';
+import { MainLayout } from '../components/layout';
 import Badge from '../components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import FadeIn from '../components/ui/FadeIn';
@@ -116,7 +117,8 @@ export default function NotificationsCenter() {
   };
 
   return (
-    <div className="space-y-6">
+    <MainLayout>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -315,6 +317,6 @@ export default function NotificationsCenter() {
           ))
         )}
       </div>
-    </div>
+    </MainLayout>
   );
 }

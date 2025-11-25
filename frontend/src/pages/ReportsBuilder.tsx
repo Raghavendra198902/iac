@@ -5,6 +5,7 @@ import {
   DollarSign, Shield, Activity, Trash2, Copy, Edit2, Play
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import FadeIn from '../components/FadeIn';
 import Badge from '../components/Badge';
 import Tabs from '../components/Tabs';
@@ -53,6 +54,8 @@ interface GeneratedReport {
 
 const ReportsBuilder: React.FC = () => {
   const { theme } = useTheme();
+  const { user } = useAuth();
+  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Unknown User';
   
   const [templates, setTemplates] = useState<ReportTemplate[]>([
     {
@@ -141,8 +144,6 @@ const ReportsBuilder: React.FC = () => {
       status: 'generating'
     }
   ]);
-
-  const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([
 
   const widgetTypes = [
     { type: 'metric', icon: TrendingUp, label: 'Metric Card', color: 'blue' },

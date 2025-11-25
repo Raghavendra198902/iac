@@ -6,7 +6,7 @@ import authRoutes from './auth';
 import aiRoutes from './ai';
 import pmRoutes from './pm';
 import seRoutes from './se';
-import eaRoutes from './ea';
+import eaStrategyRoutes from './ea-strategy';
 import taRoutes from './ta';
 import saRoutes from './sa';
 import performanceRoutes from './performance';
@@ -17,6 +17,12 @@ import circuitBreakerRoutes from './circuitBreaker';
 import rateLimitRoutes from './rateLimit';
 import featureFlagsRoutes from './featureFlags';
 import adminRoutes from './admin';
+import adrRoutes from './architecture-decisions';
+import metricsRoutes from './architecture-metrics';
+import solutionArchitectRoutes from './solution-architect';
+import technicalArchitectRoutes from './technical-architect';
+import projectManagerRoutes from './project-manager';
+import softwareEngineerRoutes from './software-engineer';
 
 const router = Router();
 
@@ -44,6 +50,14 @@ router.get('/', (req, res) => {
       rateLimits: '/api/rate-limits',
       featureFlags: '/api/feature-flags',
       admin: '/api/admin',
+      adr: '/api/adr',
+      architecture: '/api/architecture',
+      roles: {
+        solutionArchitect: '/api/sa',
+        technicalArchitect: '/api/ta', 
+        projectManager: '/api/pm',
+        softwareEngineer: '/api/se'
+      }
     },
   });
 });
@@ -56,7 +70,7 @@ router.use('/costing', costingRoutes);
 router.use('/ai', aiRoutes);
 router.use('/pm', pmRoutes);
 router.use('/se', seRoutes);
-router.use('/ea', eaRoutes);
+router.use('/ea', eaStrategyRoutes);
 router.use('/ta', taRoutes);
 router.use('/sa', saRoutes);
 router.use('/performance', performanceRoutes);
@@ -65,6 +79,12 @@ router.use('/circuit-breakers', circuitBreakerRoutes);
 router.use('/rate-limits', rateLimitRoutes);
 router.use('/feature-flags', featureFlagsRoutes);
 router.use('/admin', adminRoutes);
+router.use('/adr', adrRoutes);
+router.use('/architecture', metricsRoutes);
+router.use('/sa', solutionArchitectRoutes);
+router.use('/ta', technicalArchitectRoutes);
+router.use('/pm', projectManagerRoutes);
+router.use('/se', softwareEngineerRoutes);
 // cmdb moved to public routes in index.ts
 router.use('/downloads', downloadsRoutes);
 

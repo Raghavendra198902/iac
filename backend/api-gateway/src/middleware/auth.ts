@@ -112,3 +112,7 @@ export const requireRole = (...allowedRoles: string[]) => {
     next();
   };
 };
+
+// Export aliases for backward compatibility
+export const authenticate = authMiddleware;
+export const authorize = requireRole;

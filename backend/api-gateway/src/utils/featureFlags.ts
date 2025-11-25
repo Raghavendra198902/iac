@@ -49,6 +49,13 @@ const REDIS_FLAG_LIST_KEY = 'feature_flags:all';
 export async function initializeFeatureFlags(): Promise<void> {
   try {
     const redis = getRedisClient();
+    
+    // Check if Redis is connected before attempting to fetch
+    if (redis.status !== 'ready' && redis.status !== 'connect') {
+      logger.warn('Redis not ready, skipping feature flags initialization from Redis');
+      return;
+    }
+    
     const flagNames = await redis.smembers(REDIS_FLAG_LIST_KEY);
 
     for (const flagName of flagNames) {
@@ -61,10 +68,10 @@ export async function initializeFeatureFlags(): Promise<void> {
       }
     }
 
-    logger.info('Feature flags initialized', { count: flagCache.size });
+    logger.info('Feature flags initialized from Redis', { count: flagCache.size });
   } catch (error) {
-    logger.error('Failed to initialize feature flags', { error });
-    // Continue with empty cache
+    logger.warn('Failed to initialize feature flags from Redis, using defaults only', { error: (error as Error).message });
+    // Continue with empty cache - feature flags will work with in-memory defaults
   }
 }
 
@@ -76,49 +83,58 @@ export async function setFeatureFlag(
   flag: Partial<FeatureFlag>,
   updatedBy: string
 ): Promise<FeatureFlag> {
+  const existing = flagCache.get(name);
+
+  const featureFlag: FeatureFlag = {
+    name,
+    enabled: flag.enabled ?? existing?.enabled ?? false,
+    description: flag.description ?? existing?.description ?? '',
+    rolloutPercentage: flag.rolloutPercentage ?? existing?.rolloutPercentage,
+    targetUsers: flag.targetUsers ?? existing?.targetUsers,
+    targetSubscriptions: flag.targetSubscriptions ?? existing?.targetSubscriptions,
+    environment: flag.environment ?? existing?.environment,
+    createdAt: existing?.createdAt ?? new Date(),
+    updatedAt: new Date(),
+    createdBy: existing?.createdBy ?? updatedBy,
+  };
+
+  // Always update in-memory cache first
+  flagCache.set(name, featureFlag);
+
   try {
     const redis = getRedisClient();
-    const existing = flagCache.get(name);
+    
+    // Only persist to Redis if connected
+    if (redis.status === 'ready' || redis.status === 'connect') {
+      await redis.set(
+        `${REDIS_FLAG_PREFIX}${name}`,
+        JSON.stringify(featureFlag),
+        'EX',
+        86400 * 30 // 30 days TTL
+      );
+      await redis.sadd(REDIS_FLAG_LIST_KEY, name);
 
-    const featureFlag: FeatureFlag = {
-      name,
-      enabled: flag.enabled ?? existing?.enabled ?? false,
-      description: flag.description ?? existing?.description ?? '',
-      rolloutPercentage: flag.rolloutPercentage ?? existing?.rolloutPercentage,
-      targetUsers: flag.targetUsers ?? existing?.targetUsers,
-      targetSubscriptions: flag.targetSubscriptions ?? existing?.targetSubscriptions,
-      environment: flag.environment ?? existing?.environment,
-      createdAt: existing?.createdAt ?? new Date(),
-      updatedAt: new Date(),
-      createdBy: existing?.createdBy ?? updatedBy,
-    };
+      logger.info('Feature flag updated and persisted to Redis', {
+        name,
+        enabled: featureFlag.enabled,
+        updatedBy,
+      });
 
-    // Save to Redis
-    await redis.set(
-      `${REDIS_FLAG_PREFIX}${name}`,
-      JSON.stringify(featureFlag),
-      'EX',
-      86400 * 30 // 30 days TTL
-    );
-    await redis.sadd(REDIS_FLAG_LIST_KEY, name);
-
-    // Update cache
-    flagCache.set(name, featureFlag);
-
-    logger.info('Feature flag updated', {
-      name,
-      enabled: featureFlag.enabled,
-      updatedBy,
-    });
-
-    // Record audit log
-    await recordFlagChange(name, featureFlag, updatedBy);
-
-    return featureFlag;
+      // Record audit log
+      await recordFlagChange(name, featureFlag, updatedBy);
+    } else {
+      logger.warn('Feature flag updated in memory only (Redis not available)', {
+        name,
+        enabled: featureFlag.enabled,
+        updatedBy,
+      });
+    }
   } catch (error) {
-    logger.error('Failed to set feature flag', { name, error });
-    throw error;
+    logger.warn('Failed to persist feature flag to Redis, using in-memory only', { name, error: (error as Error).message });
+    // Don't throw - flag is still set in memory
   }
+
+  return featureFlag;
 }
 
 /**

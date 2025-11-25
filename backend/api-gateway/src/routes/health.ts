@@ -19,13 +19,20 @@ const pool = new Pool({
 
 // Redis client
 const redis = new Redis({
-  host: process.env.REDIS_HOST || 'redis',
+  host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: 1,
   retryStrategy(times) {
-    return Math.min(times * 50, 2000);
+    if (times > 2) return null; // Stop retrying
+    return Math.min(times * 50, 200);
   },
+  lazyConnect: true,
+});
+
+// Try to connect but don't block
+redis.connect().catch(() => {
+  logger.warn('Redis not available for health checks');
 });
 
 // Dependency services to check

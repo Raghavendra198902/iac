@@ -18,6 +18,7 @@ import { featureFlagMiddleware, initializeFeatureFlags, initializeDefaultFlags }
 import routes from './routes';
 import { setupSwaggerDocs } from './docs/swagger-setup';
 import healthRouter, { markAppAsInitialized } from './routes/health';
+import systemRouter from './routes/system';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -141,6 +142,62 @@ app.use('/api/enforcement', enforcementRoutes);
 app.use('/api/cmdb', cmdbRoutes); // CMDB needs to be public for agent registration
 app.use('/api/security', securityRoutes); // Security events - public for agent reporting
 
+// System metrics route (no auth required for monitoring)
+app.use('/api/system', systemRouter);
+
+// Users and roles management route (no auth for development)
+import usersRouter from './routes/users';
+app.use('/api/users', usersRouter);
+
+// EA Strategy routes (no auth for development)
+import eaStrategyRouter from './routes/ea-strategy';
+app.use('/api/ea', eaStrategyRouter);
+
+// EA Business Architecture routes (no auth for development)
+import eaBusinessRouter from './routes/ea-business';
+app.use('/api/business', eaBusinessRouter);
+
+// EA Application Architecture routes (no auth for development)
+import eaApplicationRouter from './routes/ea-application';
+app.use('/api/application', eaApplicationRouter);
+
+// EA Data Architecture routes (no auth for development)
+import eaDataRouter from './routes/ea-data';
+app.use('/api/data', eaDataRouter);
+
+// EA Technology Architecture routes (no auth for development)
+import eaTechnologyRouter from './routes/ea-technology';
+app.use('/api/technology', eaTechnologyRouter);
+
+// EA Security Architecture routes (no auth for development)
+import eaSecurityRouter from './routes/ea-security';
+app.use('/api/security', eaSecurityRouter);
+
+// EA Roadmap routes (no auth for development)
+import eaRoadmapRouter from './routes/ea-roadmap';
+app.use('/api/roadmap', eaRoadmapRouter);
+
+// EA Repository routes (no auth for development)
+import eaRepositoryRouter from './routes/ea-repository';
+app.use('/api/repository', eaRepositoryRouter);
+
+// EA Stakeholders routes (no auth for development)
+import eaStakeholdersRouter from './routes/ea-stakeholders';
+app.use('/api/stakeholders', eaStakeholdersRouter);
+
+// EA Analytics routes (no auth for development)
+import eaAnalyticsRouter from './routes/ea-analytics';
+app.use('/api/analytics', eaAnalyticsRouter);
+
+// Project Workflow routes (no auth for development)
+import { createProjectRoutes } from './routes/project-routes';
+import { pool } from './utils/database';
+app.use('/api', createProjectRoutes(pool));
+
+// Project Assets routes (no auth for development)
+import { createAssetRoutes } from './routes/asset-routes';
+app.use('/api', createAssetRoutes(pool));
+
 // Authentication middleware for protected routes
 app.use('/api', authMiddleware);
 
@@ -175,10 +232,122 @@ app.use(errorHandler);
 // Swagger documentation
 setupSwaggerDocs(app);
 
-// Socket.IO connection handling
+// Socket.IO connection handling for real-time workflow collaboration
 io.on('connection', (socket) => {
   logger.info(`Client connected: ${socket.id}`);
   
+  // Join global activity feed
+  socket.on('join-activity-feed', () => {
+    socket.join('activity-feed');
+    logger.info(`Socket ${socket.id} joined global activity feed`);
+  });
+
+  // Leave global activity feed
+  socket.on('leave-activity-feed', () => {
+    socket.leave('activity-feed');
+    logger.info(`Socket ${socket.id} left global activity feed`);
+  });
+  
+  // Join project room for receiving updates
+  socket.on('join-project', (projectId: string) => {
+    socket.join(`project:${projectId}`);
+    logger.info(`Socket ${socket.id} joined project room: ${projectId}`);
+  });
+
+  // Leave project room
+  socket.on('leave-project', (projectId: string) => {
+    socket.leave(`project:${projectId}`);
+    logger.info(`Socket ${socket.id} left project room: ${projectId}`);
+  });
+
+  // Broadcast activity to activity feed and project room
+  socket.on('new-activity', (activity: any) => {
+    // Broadcast to global activity feed
+    socket.to('activity-feed').emit('activity-created', activity);
+    
+    // Also broadcast to specific project room if projectId exists
+    if (activity.projectId) {
+      socket.to(`project:${activity.projectId}`).emit('activity-created', activity);
+    }
+    
+    logger.info(`Activity broadcasted: ${activity.type} by ${activity.userName}`);
+  });
+
+  // Broadcast step update to other users
+  socket.on('step-updated', (data: { projectId: string; stepId: string; userId: string; userName: string }) => {
+    socket.to(`project:${data.projectId}`).emit('step-update-notification', {
+      projectId: data.projectId,
+      stepId: data.stepId,
+      userId: data.userId,
+      userName: data.userName,
+      timestamp: new Date().toISOString(),
+      message: `${data.userName} updated a workflow step`,
+    });
+    
+    // Also send as activity
+    const activity = {
+      type: 'step_started',
+      projectId: data.projectId,
+      userId: data.userId,
+      userName: data.userName,
+      timestamp: new Date().toISOString(),
+      priority: 'medium',
+    };
+    socket.to('activity-feed').emit('activity-created', activity);
+    
+    logger.info(`Step update broadcasted for project ${data.projectId}`);
+  });
+
+  // Broadcast step completion
+  socket.on('step-completed', (data: { projectId: string; stepId: string; stepTitle: string; userId: string; userName: string }) => {
+    socket.to(`project:${data.projectId}`).emit('step-completed-notification', {
+      projectId: data.projectId,
+      stepId: data.stepId,
+      stepTitle: data.stepTitle,
+      userId: data.userId,
+      userName: data.userName,
+      timestamp: new Date().toISOString(),
+      message: `${data.userName} completed "${data.stepTitle}"`,
+    });
+    
+    // Also send as activity
+    const activity = {
+      type: 'step_completed',
+      projectId: data.projectId,
+      userId: data.userId,
+      userName: data.userName,
+      timestamp: new Date().toISOString(),
+      priority: 'high',
+      metadata: { stepTitle: data.stepTitle },
+    };
+    socket.to('activity-feed').emit('activity-created', activity);
+    
+    logger.info(`Step completion broadcasted for project ${data.projectId}`);
+  });
+
+  // Broadcast project progress update
+  socket.on('project-progress-changed', (data: { projectId: string; progress: number; userId: string; userName: string }) => {
+    socket.to(`project:${data.projectId}`).emit('progress-update-notification', {
+      projectId: data.projectId,
+      progress: data.progress,
+      userId: data.userId,
+      userName: data.userName,
+      timestamp: new Date().toISOString(),
+    });
+    logger.info(`Progress update broadcasted for project ${data.projectId}: ${data.progress}%`);
+  });
+
+  // User is viewing a step (presence)
+  socket.on('viewing-step', (data: { projectId: string; stepId: string; userId: string; userName: string }) => {
+    socket.to(`project:${data.projectId}`).emit('user-viewing-step', {
+      projectId: data.projectId,
+      stepId: data.stepId,
+      userId: data.userId,
+      userName: data.userName,
+      socketId: socket.id,
+    });
+  });
+
   socket.on('disconnect', () => {
     logger.info(`Client disconnected: ${socket.id}`);
   });
@@ -202,9 +371,13 @@ async function startServer() {
 
     // Initialize feature flags
     logger.info('🔄 Initializing feature flags...');
-    await initializeFeatureFlags();
-    await initializeDefaultFlags();
-    logger.info('✅ Feature flags initialized');
+    try {
+      await initializeFeatureFlags();
+      await initializeDefaultFlags();
+      logger.info('✅ Feature flags initialized');
+    } catch (error) {
+      logger.warn('⚠️  Feature flags initialization failed, continuing without feature flags', { error });
+    }
 
     // Mark app as initialized for startup probe
     markAppAsInitialized();

@@ -8,18 +8,26 @@ let redisClient: Redis | null = null;
 export function getRedisClient(): Redis {
   if (!redisClient) {
     redisClient = new Redis({
-      host: process.env.REDIS_HOST || 'redis',
+      host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 1, // Fail fast
       retryStrategy(times) {
-        const delay = Math.min(times * 50, 2000);
-        logger.warn('Redis connection retry', { attempt: times, delay });
+        // Stop after 3 retries
+        if (times > 3) {
+          logger.warn('Redis unavailable for caching, operations will continue without cache');
+          return null;
+        }
+        const delay = Math.min(times * 50, 500);
         return delay;
       },
+      lazyConnect: true, // Don't connect immediately
       reconnectOnError(err) {
-        logger.error('Redis connection error', { error: err.message });
-        return true;
+        // Don't spam logs for connection errors
+        if (!err.message.includes('ECONNREFUSED') && !err.message.includes('EAI_AGAIN')) {
+          logger.error('Redis connection error', { error: err.message });
+        }
+        return false; // Don't reconnect on error
       },
     });
 
@@ -28,11 +36,19 @@ export function getRedisClient(): Redis {
     });
 
     redisClient.on('error', (err) => {
-      logger.error('Redis client error', { error: err.message });
+      // Only log non-connection errors
+      if (!err.message.includes('ECONNREFUSED') && !err.message.includes('EAI_AGAIN')) {
+        logger.error('Redis client error', { error: err.message });
+      }
     });
 
     redisClient.on('close', () => {
-      logger.warn('Redis connection closed');
+      // Don't log, too noisy
+    });
+    
+    // Try to connect but don't block if it fails
+    redisClient.connect().catch(() => {
+      logger.warn('Redis not available for caching');
     });
   }
 

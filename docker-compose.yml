@@ -357,6 +357,32 @@ services:
     networks:
       - dharma-network
 
+  # Open Policy Agent (OPA) - Enterprise Architecture Guardrails
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: dharma-opa
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./backend/guardrails-engine/policies:/policies:ro
+    command:
+      - "run"
+      - "--server"
+      - "--addr"
+      - ":8181"
+      - "--log-level"
+      - "info"
+      - "/policies"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8181/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - dharma-network
+    restart: unless-stopped
+
 volumes:
   postgres-data:
   redis-data:

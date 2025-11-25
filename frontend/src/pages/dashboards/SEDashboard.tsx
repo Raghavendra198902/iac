@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Rocket, Activity, AlertTriangle, CheckCircle2, Clock, Server, Terminal, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MainLayout } from '../../components/layout';
 import PageTransition from '../../components/ui/PageTransition';
 import FadeIn from '../../components/ui/FadeIn';
 import ChartCard from '../../components/ui/ChartCard';
@@ -221,8 +222,9 @@ export default function SEDashboard() {
   }, []);
 
   return (
-    <PageTransition>
-      <div className="space-y-6">
+    <MainLayout>
+      <PageTransition>
+        <div className="space-y-6">
         {/* Hero Section */}
         <FadeIn>
           <div className="rounded-3xl bg-gradient-to-br from-cyan-600 via-cyan-700 to-blue-800 text-white p-8 relative overflow-hidden">

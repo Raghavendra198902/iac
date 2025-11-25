@@ -10,7 +10,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://dharma-api-gateway:3000',
+        target: process.env.VITE_API_URL || 'http://localhost:3001',
         changeOrigin: true,
         rewrite: (path) => path,
       },

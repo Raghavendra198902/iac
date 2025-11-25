@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { MainLayout } from '../components/layout';
 import { 
   FileText, 
   Cloud, 
@@ -555,7 +556,8 @@ export default function BlueprintDetail() {
   }
 
   return (
-    <div className="space-y-6">
+    <MainLayout>
+      <div className="space-y-6">
       {/* Back Navigation */}
       <FadeIn>
         <button 
@@ -1007,6 +1009,6 @@ export default function BlueprintDetail() {
           </Button>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

@@ -52,6 +52,7 @@ import {
   AlertTriangle,
   Radio,
   Flame,
+  BookOpen,
 } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useAuth } from '../../contexts/AuthContext';
@@ -98,7 +99,17 @@ const navigationGroups = [
     items: [
       { name: 'Security Dashboard', href: '/security', icon: ShieldAlert },
       { name: 'Guardrails', href: '/guardrails', icon: ShieldCheck },
+      { name: 'Governance & Policies', href: '/governance/policies', icon: Shield },
       { name: 'Risk Assessment', href: '/risk', icon: Shield },
+    ]
+  },
+  {
+    name: 'Enterprise Architecture',
+    items: [
+      { name: 'EA Functions & Roles', href: '/ea/functions', icon: Briefcase },
+      { name: 'EA/SA/TA Framework', href: '/architecture/framework', icon: GitBranch },
+      { name: 'Architecture Patterns', href: '/patterns', icon: Layers },
+      { name: 'Tech Standards', href: '/standards', icon: BookOpen },
     ]
   },
   {

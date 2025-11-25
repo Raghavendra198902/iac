@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAC Dharma - Database Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .role-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .role-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .role-item:last-child {
+            margin-bottom: 0;
+        }
+        .role-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+        .role-badge-ea { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .role-badge-sa { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .role-badge-ta { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+        .role-badge-pm { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .role-badge-se { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .role-badge-admin { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); }
+        .role-info {
+            flex: 1;
+        }
+        .role-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .role-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.show {
+            display: block;
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .loading.show {
+            display: block;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 IAC Dharma Database Setup</h1>
+        <p class="subtitle">Create default system roles</p>
+        
+        <div class="role-list">
+            <div class="role-item">
+                <div class="role-badge role-badge-ea">EA</div>
+                <div class="role-info">
+                    <div class="role-name">Enterprise Architect</div>
+                    <div class="role-desc">Defines overall enterprise architecture strategy</div>
+                </div>
+            </div>
+            <div class="role-item">
+                <div class="role-badge role-badge-sa">SA</div>
+                <div class="role-info">
+                    <div class="role-name">Solution Architect</div>
+                    <div class="role-desc">Designs technical solutions aligned with business</div>
+                </div>
+            </div>
+            <div class="role-item">
+                <div class="role-badge role-badge-ta">TA</div>
+                <div class="role-info">
+                    <div class="role-name">Technical Architect</div>
+                    <div class="role-desc">Focuses on technology stack and infrastructure</div>
+                </div>
+            </div>
+            <div class="role-item">
+                <div class="role-badge role-badge-pm">PM</div>
+                <div class="role-info">
+                    <div class="role-name">Project Manager</div>
+                    <div class="role-desc">Manages architecture projects and resources</div>
+                </div>
+            </div>
+            <div class="role-item">
+                <div class="role-badge role-badge-se">SE</div>
+                <div class="role-info">
+                    <div class="role-name">Software Engineer</div>
+                    <div class="role-desc">Implements architecture designs and develops code</div>
+                </div>
+            </div>
+            <div class="role-item">
+                <div class="role-badge role-badge-admin">ADM</div>
+                <div class="role-info">
+                    <div class="role-name">Administrator</div>
+                    <div class="role-desc">Full system access and complete control</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="seedRoles()">Create Default Roles</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Creating roles...</div>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        async function seedRoles() {
+            const btn = document.querySelector('.btn');
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            btn.disabled = true;
+            loading.classList.add('show');
+            message.classList.remove('show');
+
+            try {
+                const response = await fetch('/api/users/roles/seed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    message.className = 'message success show';
+                    message.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        ${data.roles.length} default roles have been created in the database.
+                        <br><br>
+                        <a href="/users" style="color: #155724; text-decoration: underline;">Go to User Management →</a>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Failed to create roles');
+                }
+            } catch (error) {
+                message.className = 'message error show';
+                message.innerHTML = `
+                    <strong>❌ Error:</strong><br>
+                    ${error.message}
+                    <br><br>
+                    Please check your database connection and try again.
+                `;
+            } finally {
+                loading.classList.remove('show');
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

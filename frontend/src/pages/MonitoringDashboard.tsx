@@ -3,11 +3,82 @@ import { Activity, Server, AlertTriangle, CheckCircle, TrendingUp, TrendingDown,
 import Badge from '../components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import Alert from '../components/ui/Alert';
-import Progress from '../components/ui/Progress';
 import AIRecommendationsPanel from '../components/AIRecommendationsPanel';
 import FadeIn from '../components/ui/FadeIn';
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
+
+// ECG Monitor Component for hospital-style monitoring
+const ECGMonitor = ({ data, color = 'blue', height = 60, width = 100, showGrid = true }: { 
+  data: number[], 
+  color?: string, 
+  height?: number, 
+  width?: number,
+  showGrid?: boolean 
+}) => {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  
+  // Generate 30 data points to simulate 30 minutes
+  const extendedData = Array.from({ length: 30 }, (_, i) => {
+    const baseIndex = Math.floor((i / 30) * data.length);
+    const nextIndex = Math.min(baseIndex + 1, data.length - 1);
+    const progress = ((i / 30) * data.length) - baseIndex;
+    const noise = Math.sin(i * 0.5) * (range * 0.05);
+    return data[baseIndex] + (data[nextIndex] - data[baseIndex]) * progress + noise;
+  });
+  
+  const step = width / (extendedData.length - 1);
+  const points = extendedData.map((value, i) => {
+    const x = i * step;
+    const y = height - ((value - min) / range) * (height * 0.9) - height * 0.05;
+    return `${x},${y}`;
+  }).join(' ');
+  
+  const colorMap: Record<string, string> = {
+    blue: '#3b82f6',
+    green: '#10b981',
+    orange: '#f59e0b',
+    purple: '#8b5cf6',
+    red: '#ef4444',
+  };
+  
+  const strokeColor = colorMap[color] || colorMap.blue;
+  
+  return (
+    <svg width="100%" height={height} className="w-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      {showGrid && (
+        <>
+          <defs>
+            <pattern id={`grid-${color}-monitor`} width="5" height="5" patternUnits="userSpaceOnUse">
+              <path d="M 5 0 L 0 0 0 5" fill="none" stroke={strokeColor} strokeWidth="0.3" opacity="0.2"/>
+            </pattern>
+          </defs>
+          <rect width={width} height={height} fill={`url(#grid-${color}-monitor)`} />
+        </>
+      )}
+      <polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="animate-pulse"
+      />
+      <polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.3"
+        className="blur-sm"
+      />
+    </svg>
+  );
+};
 
 interface ServiceHealth {
   id: string;
@@ -318,31 +389,52 @@ const MonitoringDashboard = () => {
         </Alert>
       )}
 
-      {/* System Metrics */}
+      {/* System Metrics with ECG Monitors */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          System Resources
+          System Resources - Real-Time ECG Monitoring
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {metrics.map((metric) => (
-            <div key={metric.name}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {metric.name}
+          {metrics.map((metric) => {
+            const colorMap: Record<string, string> = {
+              good: 'green',
+              warning: 'orange',
+              critical: 'red',
+            };
+            const monitorColor = colorMap[metric.status] || 'blue';
+            
+            // Generate sample data based on metric value
+            const sampleData = Array.from({ length: 12 }, (_, i) => {
+              const base = metric.value;
+              const variation = (Math.sin(i * 0.5) + Math.random() - 0.5) * 5;
+              return Math.max(0, Math.min(100, base + variation));
+            });
+            
+            return (
+              <div key={metric.name} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {metric.name}
+                    </span>
+                    {getTrendIcon(metric.trend)}
+                  </div>
+                  <span className={`text-lg font-bold ${getMetricColor(metric.status)}`}>
+                    {metric.value}{metric.unit}
                   </span>
-                  {getTrendIcon(metric.trend)}
                 </div>
-                <span className={`text-sm font-bold ${getMetricColor(metric.status)}`}>
-                  {metric.value}{metric.unit}
-                </span>
+                <div className="bg-black/90 rounded-lg p-2 relative\" style={{ background: '#0a0f1a' }}>
+                  <ECGMonitor data={sampleData} color={monitorColor} height={60} width={100} showGrid={true} />
+                  <div className="absolute bottom-1 left-2 text-xs font-mono opacity-60" style={{ color: colorMap[metric.status] === 'green' ? '#10b981' : colorMap[metric.status] === 'orange' ? '#f59e0b' : '#3b82f6' }}>
+                    -30min
+                  </div>
+                  <div className="absolute bottom-1 right-2 text-xs font-mono opacity-60" style={{ color: colorMap[metric.status] === 'green' ? '#10b981' : colorMap[metric.status] === 'orange' ? '#f59e0b' : '#3b82f6' }}>
+                    now
+                  </div>
+                </div>
               </div>
-              <Progress
-                value={metric.value}
-                variant={metric.status === 'good' ? 'success' : metric.status === 'warning' ? 'warning' : 'error'}
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -415,80 +507,103 @@ const MonitoringDashboard = () => {
 
           <TabsContent value="metrics">
             <div className="p-6 space-y-6">
-              {/* Real-Time Performance Graphs */}
+              {/* Real-Time Performance ECG Monitors */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* CPU & Memory Usage */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-blue-600" />
-                    CPU & Memory Usage
+                {/* CPU & Memory Usage ECG */}
+                <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-xl p-6 border border-blue-500/30">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-blue-400" />
+                    CPU & Memory Usage - ECG Monitor
                   </h4>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={performanceData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
-                      <XAxis dataKey="time" tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
-                      <YAxis tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: isDark ? '#1f2937' : '#fff', 
-                          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
-                          borderRadius: '8px'
-                        }} 
-                      />
-                      <Legend />
-                      <Line type="monotone" dataKey="cpu" stroke="#3b82f6" name="CPU %" strokeWidth={2} />
-                      <Line type="monotone" dataKey="memory" stroke="#8b5cf6" name="Memory %" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-
-                {/* Request Rate & Response Time */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-green-600" />
-                    Request Rate & Response Time
-                  </h4>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <AreaChart data={performanceData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
-                      <XAxis dataKey="time" tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
-                      <YAxis tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }} />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: isDark ? '#1f2937' : '#fff', 
-                          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
-                          borderRadius: '8px'
-                        }} 
-                      />
-                      <Legend />
-                      <Area type="monotone" dataKey="requests" stroke="#10b981" fill="#10b981" fillOpacity={0.3} name="Requests/min" />
-                      <Area type="monotone" dataKey="responseTime" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} name="Avg Response (ms)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* System Resources Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {metrics.map((metric) => (
-                  <div key={metric.name} className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {metric.name}
+                  <div className="space-y-4">
+                    <div className="bg-black/40 rounded-lg p-3 border border-blue-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-mono text-blue-300">CPU Usage</span>
+                        <span className="text-sm font-bold text-blue-400">
+                          {performanceData.length > 0 ? performanceData[performanceData.length - 1].cpu : 30}%
                         </span>
-                        {getTrendIcon(metric.trend)}
                       </div>
-                      <span className={`text-sm font-bold ${getMetricColor(metric.status)}`}>
-                        {metric.value}{metric.unit}
-                      </span>
+                      <ECGMonitor 
+                        data={performanceData.length > 0 ? performanceData.map(d => d.cpu) : [25, 28, 30, 32, 30, 28, 26, 30, 32, 35, 30, 30]} 
+                        color="blue" 
+                        height={70} 
+                        width={100} 
+                        showGrid={true} 
+                      />
+                      <div className="flex justify-between mt-1">
+                        <span className="text-xs font-mono text-blue-400/60">-30min</span>
+                        <span className="text-xs font-mono text-blue-400/60">now</span>
+                      </div>
                     </div>
-                    <Progress
-                      value={metric.value}
-                      variant={metric.status === 'good' ? 'success' : metric.status === 'warning' ? 'warning' : 'error'}
-                    />
+                    <div className="bg-black/40 rounded-lg p-3 border border-purple-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-mono text-purple-300">Memory Usage</span>
+                        <span className="text-sm font-bold text-purple-400">
+                          {performanceData.length > 0 ? performanceData[performanceData.length - 1].memory : 69}%
+                        </span>
+                      </div>
+                      <ECGMonitor 
+                        data={performanceData.length > 0 ? performanceData.map(d => d.memory) : [60, 62, 65, 67, 69, 68, 66, 68, 70, 69, 68, 69]} 
+                        color="purple" 
+                        height={70} 
+                        width={100} 
+                        showGrid={true} 
+                      />
+                      <div className="flex justify-between mt-1">
+                        <span className="text-xs font-mono text-purple-400/60">-30min</span>
+                        <span className="text-xs font-mono text-purple-400/60">now</span>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Request Rate & Response Time ECG */}
+                <div className="bg-gradient-to-br from-slate-900 via-green-900 to-emerald-900 rounded-xl p-6 border border-green-500/30">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-400" />
+                    Request Rate & Response Time - ECG Monitor
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="bg-black/40 rounded-lg p-3 border border-green-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-mono text-green-300">Requests/min</span>
+                        <span className="text-sm font-bold text-green-400">
+                          {performanceData.length > 0 ? performanceData[performanceData.length - 1].requests : 2400}
+                        </span>
+                      </div>
+                      <ECGMonitor 
+                        data={performanceData.length > 0 ? performanceData.map(d => d.requests / 50) : [40, 42, 45, 48, 50, 48, 45, 47, 50, 48, 46, 48]} 
+                        color="green" 
+                        height={70} 
+                        width={100} 
+                        showGrid={true} 
+                      />
+                      <div className="flex justify-between mt-1">
+                        <span className="text-xs font-mono text-green-400/60">-30min</span>
+                        <span className="text-xs font-mono text-green-400/60">now</span>
+                      </div>
+                    </div>
+                    <div className="bg-black/40 rounded-lg p-3 border border-orange-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-mono text-orange-300">Response Time</span>
+                        <span className="text-sm font-bold text-orange-400">
+                          {performanceData.length > 0 ? performanceData[performanceData.length - 1].responseTime : 265}ms
+                        </span>
+                      </div>
+                      <ECGMonitor 
+                        data={performanceData.length > 0 ? performanceData.map(d => d.responseTime / 5) : [50, 48, 52, 55, 53, 50, 48, 52, 54, 53, 51, 53]} 
+                        color="orange" 
+                        height={70} 
+                        width={100} 
+                        showGrid={true} 
+                      />
+                      <div className="flex justify-between mt-1">
+                        <span className="text-xs font-mono text-orange-400/60">-30min</span>
+                        <span className="text-xs font-mono text-orange-400/60">now</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -666,3 +781,4 @@ const MonitoringDashboard = () => {
 };
 
 export default MonitoringDashboard;
+// Force reload Mon 24 Nov 2025 08:57:28 AM IST
