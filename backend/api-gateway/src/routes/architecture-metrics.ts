@@ -5,6 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
+import { pool } from '../utils/database';
 
 const router = Router();
 
@@ -16,45 +17,45 @@ router.get('/api/architecture/metrics/overview', authenticate, async (req: Reque
   try {
     const metrics = {
       governance: {
-        compliance_score: await getComplianceScore(req.db),
-        active_violations: await getActiveViolationsCount(req.db),
-        pending_reviews: await getPendingReviewsCount(req.db),
-        review_turnaround_days: await getAvgReviewTurnaroundDays(req.db)
+        compliance_score: await getComplianceScore(pool),
+        active_violations: await getActiveViolationsCount(pool),
+        pending_reviews: await getPendingReviewsCount(pool),
+        review_turnaround_days: await getAvgReviewTurnaroundDays(pool)
       },
       
       portfolio: {
-        total_projects: await getTotalProjects(req.db),
-        total_blueprints: await getTotalBlueprints(req.db),
-        approved_templates: await getApprovedTemplatesCount(req.db),
-        technology_stack_compliance: await getTechStackCompliance(req.db)
+        total_projects: await getTotalProjects(pool),
+        total_blueprints: await getTotalBlueprints(pool),
+        approved_templates: await getApprovedTemplatesCount(pool),
+        technology_stack_compliance: await getTechStackCompliance(pool)
       },
       
       quality: {
-        architecture_debt_ratio: await getArchitectureDebtRatio(req.db),
-        deprecated_assets_count: await getDeprecatedAssetsCount(req.db),
-        avg_reuse_rate: await getAvgReuseRate(req.db),
-        standards_adoption_rate: await getStandardsAdoptionRate(req.db)
+        architecture_debt_ratio: await getArchitectureDebtRatio(pool),
+        deprecated_assets_count: await getDeprecatedAssetsCount(pool),
+        avg_reuse_rate: await getAvgReuseRate(pool),
+        standards_adoption_rate: await getStandardsAdoptionRate(pool)
       },
       
       cost: {
-        total_monthly_spend: await getTotalMonthlySpend(req.db),
-        cost_optimization_opportunities: await getCostOptimizationOpportunities(req.db),
-        budget_adherence: await getBudgetAdherence(req.db),
-        cost_per_project_avg: await getAvgCostPerProject(req.db)
+        total_monthly_spend: await getTotalMonthlySpend(pool),
+        cost_optimization_opportunities: await getCostOptimizationOpportunities(pool),
+        budget_adherence: await getBudgetAdherence(pool),
+        cost_per_project_avg: await getAvgCostPerProject(pool)
       },
       
       security: {
-        security_score: await getSecurityScore(req.db),
-        critical_vulnerabilities: await getCriticalVulnerabilitiesCount(req.db),
-        encryption_coverage: await getEncryptionCoverage(req.db),
-        compliance_certifications: await getComplianceCertifications(req.db)
+        security_score: await getSecurityScore(pool),
+        critical_vulnerabilities: await getCriticalVulnerabilitiesCount(pool),
+        encryption_coverage: await getEncryptionCoverage(pool),
+        compliance_certifications: await getComplianceCertifications(pool)
       },
       
       efficiency: {
-        time_to_deploy_avg_days: await getAvgTimeToDeployDays(req.db),
-        approval_auto_rate: await getAutoApprovalRate(req.db),
-        template_usage_rate: await getTemplateUsageRate(req.db),
-        developer_satisfaction_score: await getDeveloperSatisfactionScore(req.db)
+        time_to_deploy_avg_days: await getAvgTimeToDeployDays(pool),
+        approval_auto_rate: await getAutoApprovalRate(pool),
+        template_usage_rate: await getTemplateUsageRate(pool),
+        developer_satisfaction_score: await getDeveloperSatisfactionScore(pool)
       }
     };
     
@@ -78,11 +79,11 @@ router.get('/api/architecture/metrics/overview', authenticate, async (req: Reque
 router.get('/api/architecture/metrics/adrs', authenticate, async (req: Request, res: Response) => {
   try {
     const adrs = {
-      total_decisions: await getTotalADRs(req.db),
-      by_status: await getADRsByStatus(req.db),
-      by_domain: await getADRsByDomain(req.db),
-      recent_decisions: await getRecentADRs(req.db, 10),
-      most_referenced: await getMostReferencedADRs(req.db, 5)
+      total_decisions: await getTotalADRs(pool),
+      by_status: await getADRsByStatus(pool),
+      by_domain: await getADRsByDomain(pool),
+      recent_decisions: await getRecentADRs(pool, 10),
+      most_referenced: await getMostReferencedADRs(pool, 5)
     };
     
     res.json({
@@ -105,11 +106,11 @@ router.get('/api/architecture/metrics/adrs', authenticate, async (req: Request, 
 router.get('/api/architecture/metrics/technology', authenticate, async (req: Request, res: Response) => {
   try {
     const tech = {
-      approved_technologies: await getApprovedTechnologies(req.db),
-      technology_usage: await getTechnologyUsageStats(req.db),
-      emerging_technologies: await getEmergingTechnologies(req.db),
-      deprecated_technologies: await getDeprecatedTechnologies(req.db),
-      technology_debt: await getTechnologyDebt(req.db)
+      approved_technologies: await getApprovedTechnologies(pool),
+      technology_usage: await getTechnologyUsageStats(pool),
+      emerging_technologies: await getEmergingTechnologies(pool),
+      deprecated_technologies: await getDeprecatedTechnologies(pool),
+      technology_debt: await getTechnologyDebt(pool)
     };
     
     res.json({
@@ -131,7 +132,7 @@ router.get('/api/architecture/metrics/technology', authenticate, async (req: Req
  */
 router.get('/api/architecture/metrics/portfolio', authenticate, async (req: Request, res: Response) => {
   try {
-    const portfolio = await req.db.query(`
+    const portfolio = await pool.query(`
       SELECT 
         COUNT(*) as total_assets,
         COUNT(*) FILTER (WHERE asset_type = 'template' AND status = 'approved') as approved_templates,
@@ -168,7 +169,7 @@ router.get('/api/architecture/metrics/portfolio', authenticate, async (req: Requ
  */
 router.get('/api/architecture/violations/active', authenticate, async (req: Request, res: Response) => {
   try {
-    const violations = await req.db.query(`
+    const violations = await pool.query(`
       SELECT 
         v.id,
         v.rule,
@@ -225,7 +226,7 @@ router.get('/api/architecture/metrics/compliance-trend', authenticate, async (re
   try {
     const { days = 30 } = req.query;
     
-    const trend = await req.db.query(`
+    const trend = await pool.query(`
       SELECT 
         DATE(created_at) as date,
         AVG(score) as avg_score,

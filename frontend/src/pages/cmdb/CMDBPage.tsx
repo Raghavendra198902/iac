@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '../../components/layout';
 import {
   Server,
@@ -46,13 +46,87 @@ interface Asset {
   uptime: string;
 }
 
+interface AgentData {
+  agentName: string;
+  lastSeen: string;
+  status: string;
+  totalEvents: number;
+  eventCounts: {
+    process_start: number;
+    process_stop: number;
+    suspicious_process: number;
+    heartbeat: number;
+  };
+  platform?: string;
+  version?: string;
+  ipAddress?: string;
+  hostname?: string;
+  cpu?: string;
+  memory?: string;
+  disk?: string;
+  macAddress?: string;
+  domain?: string;
+  uptime?: string;
+}
+
 export default function CMDBPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Empty CMDB Data - Connect to backend API
-  const assets: Asset[] = [];
+  // Fetch agents from backend API
+  const fetchAgents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('http://192.168.1.9:3000/api/agents');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch agents: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform agent data to Asset format with REAL data from database
+      const transformedAssets: Asset[] = data.agents.map((agent: AgentData) => ({
+        id: agent.agentName,
+        name: agent.agentName,
+        type: agent.platform?.includes('Windows') ? 'Workstation' : 
+              agent.platform?.includes('Linux') || agent.platform?.includes('Ubuntu') ? 'Server' : 'Server',
+        category: 'Production',
+        status: agent.status === 'online' ? 'active' as const : 'inactive' as const,
+        os: agent.platform || 'Unknown',
+        ip: agent.ipAddress || 'Unknown',  // REAL IP from database
+        location: 'Data Center',
+        owner: 'IT Operations',
+        lastScan: agent.lastSeen,
+        cpu: agent.cpu || 'Unknown',       // REAL CPU from database
+        ram: agent.memory || 'Unknown',    // REAL RAM from database  
+        disk: agent.disk || 'Unknown',     // REAL or Unknown
+        services: agent.totalEvents || 0,
+        vulnerabilities: 0,
+        uptime: agent.uptime || '0s',
+      }));
+      
+      setAssets(transformedAssets);
+    } catch (err) {
+      console.error('Error fetching agents:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch agents');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAgents();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchAgents, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const categories = [
     'all',
@@ -138,12 +212,23 @@ export default function CMDBPage() {
             <div>
               <h1 className="text-4xl font-bold mb-2">Configuration Management Database</h1>
               <p className="text-blue-100 text-lg">
-                Real-time IT asset inventory and configuration tracking
+                {loading ? 'Loading real-time data...' : error ? '❌ Connection Error' : `✅ ${stats.total} assets monitored • Live data from agents`}
               </p>
             </div>
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors flex items-center gap-2">
-                <RefreshCw className="w-4 h-4" />
+              <a
+                href="/agents/downloads"
+                className="px-4 py-2 bg-green-500/90 hover:bg-green-600 rounded-lg backdrop-blur-sm transition-colors flex items-center gap-2 font-semibold"
+              >
+                <Download className="w-4 h-4" />
+                Get Agents
+              </a>
+              <button 
+                onClick={fetchAgents}
+                disabled={loading}
+                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
               <button className="px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-2 font-semibold">
@@ -193,6 +278,30 @@ export default function CMDBPage() {
         </div>
 
         {/* Filters */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-red-900 mb-1">Connection Error</h3>
+              <p className="text-sm text-red-700 mb-2">{error}</p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={fetchAgents}
+                  className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                >
+                  Retry Connection
+                </button>
+                <a
+                  href="/agents/downloads"
+                  className="px-3 py-1.5 bg-white border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
+                >
+                  Download Agents
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
