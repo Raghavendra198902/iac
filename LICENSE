@@ -1,40 +1,93 @@
-MIT License
+# MIT License
 
-Copyright (c) 2025 IAC Dharma - Raghavendra198902
+**Copyright (c) 2025 IAC Dharma — Raghavendra (IAC Dharma Technologies)**
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+* use,
+* copy,
+* modify,
+* merge,
+* publish,
+* distribute,
+* sublicense, and/or
+* sell copies of the Software,
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## Additional Terms
+# Enterprise Supplemental Terms (Non‑Conflicting)
 
-### Commercial Use
-This software may be used for commercial purposes under the MIT License terms.
+These supplemental terms enhance enterprise clarity while remaining fully compliant with the permissive nature of the MIT License. They do **not** introduce additional restrictions but provide guidance for professional, commercial, and enterprise environments.
 
-### Attribution
-While not required by the MIT License, attribution is appreciated when using
-this software in production environments or derivative works.
+## 1. Commercial Use
 
-### Support
-This software is provided as-is. Commercial support options may be available
-separately. Contact: raghavendra198902@github.com
+The Software is approved for unrestricted commercial deployment, including integration into proprietary products, managed services, SaaS offerings, and enterprise environments.
 
-### Trademark
-"IAC Dharma" is a trademark of the copyright holder. Use of the trademark
-requires explicit permission beyond what is granted by this license.
+No additional licensing fees or royalties are required. Organizations may operationalize, automate, or embed the Software in internal or customer-facing platforms.
+
+## 2. Attribution (Recommended for Enterprise Compliance)
+
+Attribution is not legally required but is strongly encouraged in professional and enterprise environments to maintain transparency and provenance.
+
+Recommended format:
+**"Powered by IAC Dharma — [https://github.com/Raghavendra198902](https://github.com/Raghavendra198902)"**
+
+Attribution may be placed in:
+
+* product documentation,
+* about/configuration screens,
+* compliance or OSS notice bundles,
+* internal architecture documentation.
+
+## 3. Support & Service-Level Options
+
+The Software is provided as-is and without guaranteed support under the MIT License.
+
+However, organizations may request:
+
+* dedicated enterprise support,
+* custom feature development,
+* security hardening,
+* long-term maintenance,
+* professional consulting or onboarding.
+
+All enterprise support inquiries may be directed to:
+**[deshpande.raghavendra@gmail.com](mailto:deshpande.raghavendra@gmail.com)**
+
+## 4. Security & Compliance
+
+While the MIT License includes no warranty, enterprises deploying the Software at scale should implement:
+
+* independent security testing,
+* code audit procedures,
+* risk assessment and mitigation frameworks,
+* deployment hardening and monitoring controls.
+
+This ensures the Software is used responsibly within regulated or mission-critical environments.
+
+## 5. Trademark & Brand Usage
+
+"IAC Dharma" is a trademark of the copyright holder.
+
+The MIT License does **not** include trademark rights. This means the following actions **require explicit written permission**:
+
+* Using the "IAC Dharma" name in product or service branding,
+* Representing your product as officially endorsed by IAC Dharma,
+* Using the name in marketing, press releases, or certification programs,
+* Registering domains containing the trademark.
+
+Fair use (such as describing the software accurately in documentation) is permitted.
+
+Unauthorized or misleading use of the trademark is strictly prohibited.
+
+## 6. Enterprise Distribution Notice (Optional)
+
+Organizations distributing derivative or bundled works internally or externally should include this notice:
+
+"This product includes components licensed under the MIT License from IAC Dharma — Raghavendra."
