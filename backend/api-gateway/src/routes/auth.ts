@@ -5,12 +5,13 @@ import { AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Strict rate limiting for auth endpoints
+// Rate limiting for auth endpoints (relaxed for development)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5, // Only 5 login attempts per 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 5 : 500,
   skipSuccessfulRequests: true,
-  message: 'Too many login attempts, please try again later.'
+  message: 'Too many login attempts, please try again later.',
+  skip: (req) => process.env.NODE_ENV === 'test'
 });
 
 // Login endpoint with rate limiting

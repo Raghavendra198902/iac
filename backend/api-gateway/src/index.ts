@@ -90,13 +90,13 @@ app.use(cors(corsOptions));
 // Rate limiting - Global rate limiter for all API endpoints
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute  
-  max: process.env.NODE_ENV === 'production' ? 60 : 1000,
+  max: process.env.NODE_ENV === 'production' ? 60 : 5000,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    // Skip rate limiting for health check
-    return req.path === '/api/health';
+    // Skip rate limiting for health check and in test environment
+    return req.path === '/api/health' || process.env.NODE_ENV === 'test';
   }
 });
 
@@ -106,10 +106,11 @@ app.use('/api', globalLimiter);
 // Auth-specific stricter rate limiter
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  max: process.env.NODE_ENV === 'production' ? 5 : 500,
   message: 'Too many authentication attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'test'
 });
 
 // Apply auth limiter to login endpoints
