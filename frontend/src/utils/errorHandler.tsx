@@ -176,11 +176,11 @@ export const handleApiError = (error: any, customMessage?: string): AppError => 
 /**
  * Retry failed request with exponential backoff
  */
-export const retryRequest = async <T>(
+export async function retryRequest<T>(
   requestFn: () => Promise<T>,
   maxRetries = 3,
   initialDelay = 1000
-): Promise<T> => {
+): Promise<T> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await requestFn();
@@ -199,7 +199,7 @@ export const retryRequest = async <T>(
   }
   
   throw new Error('Max retries exceeded');
-};
+}
 
 /**
  * Global error handler for uncaught errors
@@ -235,10 +235,12 @@ export const setupGlobalErrorHandler = () => {
 /**
  * Error boundary fallback component
  */
-export const ErrorFallback: React.FC<{
+interface ErrorFallbackProps {
   error: Error;
   resetErrorBoundary: () => void;
-}> = ({ error, resetErrorBoundary }) => {
+}
+
+export const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
