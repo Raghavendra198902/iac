@@ -1,6 +1,47 @@
-# API Reference
+---
+**Document Type:** API Reference & Integration Guide  
+**Audience:** API Developers, Integration Engineers, Backend Developers  
+**Classification:** Technical - API Documentation  
+**Version:** 1.0.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
 
-Complete API documentation for IAC Dharma platform.
+# 🔌 API Reference - IAC Dharma Platform
+
+> **RESTful API Excellence**: Complete API documentation with authentication, endpoints, examples, and integration patterns
+
+---
+
+## 🎯 API Request Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant G as API Gateway
+    participant A as Auth Service
+    participant S as Microservice
+    participant D as Database
+    
+    C->>G: POST /api/auth/login
+    G->>A: Validate credentials
+    A->>D: Check user
+    D-->>A: User data
+    A-->>G: JWT token
+    G-->>C: Access token
+    
+    Note over C: Store token
+    
+    C->>G: GET /api/blueprints
+    Note right of G: Authorization: Bearer {token}
+    G->>A: Verify token
+    A-->>G: Token valid + roles
+    G->>S: Forward request
+    S->>D: Query data
+    D-->>S: Results
+    S-->>G: Response
+    G-->>C: JSON data
+```
 
 ---
 

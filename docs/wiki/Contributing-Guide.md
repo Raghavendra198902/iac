@@ -1,6 +1,59 @@
-# Contributing Guide
+---
+**Document Type:** Contributor Guide  
+**Audience:** Open Source Contributors, Developers, Community Members  
+**Classification:** Public - Community  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🤝 Contributing Guide - IAC Dharma Platform
+
+> **Community Excellence**: Join our mission to build the world's best infrastructure automation platform
 
 Thank you for considering contributing to IAC Dharma! This guide will help you get started.
+
+---
+
+## 🎯 Contribution Workflow
+
+```mermaid
+flowchart TD
+    A[Fork Repository] --> B[Clone Locally]
+    B --> C[Create Branch]
+    C --> D[Make Changes]
+    
+    D --> E[Write Tests]
+    E --> F[Run Tests Locally]
+    F --> G{Tests Pass?}
+    
+    G -->|No| H[Fix Issues]
+    H --> D
+    G -->|Yes| I[Commit Changes]
+    
+    I --> J[Push to Fork]
+    J --> K[Create Pull Request]
+    
+    K --> L[CI/CD Checks]
+    L --> M{Checks Pass?}
+    
+    M -->|No| N[Fix CI Issues]
+    N --> D
+    M -->|Yes| O[Code Review]
+    
+    O --> P{Approved?}
+    P -->|Changes Requested| Q[Address Feedback]
+    Q --> D
+    P -->|Approved| R[Merge to Main]
+    
+    R --> S[✅ Contribution Complete]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style S fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style G fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style M fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style P fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+```
 
 ---
 

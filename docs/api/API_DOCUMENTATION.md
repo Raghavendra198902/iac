@@ -1,9 +1,55 @@
-# API Documentation - IAC Dharma
+---
+**Document Type:** API Reference & Integration Guide  
+**Audience:** Developers, Integration Engineers, API Consumers  
+**Classification:** Technical - API Documentation  
+**Version:** 1.0.0  
+**Last Updated:** December 1, 2025  
+**API Base URL:** http://localhost:3000  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🔌 API Documentation - IAC Dharma Platform
+
+> **RESTful API Excellence**: Comprehensive reference for integrating with IAC DHARMA's powerful infrastructure automation capabilities
 
 **Version:** 1.0.0  
-**Last Updated:** November 16, 2025  
 **Documentation URL:** http://localhost:3000/api-docs  
 **OpenAPI Spec:** http://localhost:3000/api-docs.json
+
+---
+
+## 🎯 API Architecture Flow
+
+```mermaid
+flowchart LR
+    A[Client Application] --> B[API Gateway :3000]
+    B --> C{Authentication}
+    
+    C -->|JWT Valid| D[Authorization RBAC]
+    C -->|Invalid| E[401 Unauthorized]
+    
+    D --> F{Route to Service}
+    
+    F -->|Projects| G[Blueprint Service :3003]
+    F -->|IAC Generation| H[IAC Generator :3002]
+    F -->|Cost Analysis| I[Costing Service :3004]
+    F -->|Monitoring| J[Monitoring Service :3005]
+    F -->|Orchestration| K[Orchestrator :3006]
+    
+    G --> L[Response]
+    H --> L
+    I --> L
+    J --> L
+    K --> L
+    
+    style A fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style D fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style L fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style E fill:#ffebee,stroke:#c62828,stroke-width:2px
+```
+
+---
 
 ## Overview
 
@@ -14,6 +60,8 @@ IAC Dharma provides a comprehensive RESTful API for Infrastructure as Code platf
 - **EA** (Enterprise Architect) - Policies, patterns, compliance, cost optimization
 - **TA** (Technical Architect) - IaC templates, guardrails, validation
 - **SA** (Solutions Architect) - Blueprint design, AI recommendations
+
+---
 
 ## Quick Start
 

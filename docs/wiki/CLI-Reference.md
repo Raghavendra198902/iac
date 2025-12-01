@@ -1,6 +1,72 @@
+---
+**Document Type:** CLI Command Reference  
+**Audience:** Developers, DevOps Engineers, Power Users  
+**Classification:** Technical - Command Line Interface  
+**Version:** 1.0.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 💻 CLI Reference - IAC Dharma Platform
+
+> **Command Line Power**: Complete CLI reference for managing IAC Dharma from terminal
+
+---
+
+## 🎯 CLI Command Structure
+
+```mermaid
+flowchart TD
+    A[iac-dharma] --> B[init]
+    A --> C[start]
+    A --> D[stop]
+    A --> E[status]
+    A --> F[logs]
+    A --> G[config]
+    A --> H[db]
+    A --> I[deploy]
+    
+    B --> B1[Initialize project]
+    
+    C --> C1[Start all services]
+    C --> C2[Start specific service]
+    
+    D --> D1[Stop all services]
+    D --> D2[Stop specific service]
+    
+    E --> E1[Show service status]
+    E --> E2[Health checks]
+    
+    F --> F1[View logs]
+    F --> F2[Follow logs]
+    F --> F3[Filter logs]
+    
+    G --> G1[Show config]
+    G --> G2[Set config]
+    G --> G3[Validate config]
+    
+    H --> H1[Migrate]
+    H --> H2[Backup]
+    H --> H3[Restore]
+    H --> H4[Seed data]
+    
+    I --> I1[Deploy to K8s]
+    I --> I2[Deploy to Cloud]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:4px
+    style B fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style H fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style I fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+```
+
+---
+
 # CLI Reference
 
 Complete command-line interface reference for IAC Dharma CLI (`@raghavendra198902/iac-dharma`).
+
+---
 
 ## Table of Contents
 

@@ -1,4 +1,55 @@
-# Data Leakage Control Framework - Implementation Guide
+---
+**Document Type:** Security Implementation Guide  
+**Audience:** Security Engineers, Compliance Officers, System Administrators  
+**Classification:** Technical - Security & Compliance  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Security Level:** Internal Use  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🔒 Data Leakage Control Framework - Enterprise Implementation Guide
+
+> **Zero Trust Security**: Real-time detection, prevention, and forensic tracking of unauthorized data exfiltration
+
+---
+
+## 🛡️ DLP Architecture Flow
+
+```mermaid
+flowchart TD
+    A[Windows Endpoints] --> B[CMDB Agent DLP Module]
+    
+    B --> C[Clipboard Monitor]
+    B --> D[USB Write Detection]
+    B --> E[File Access Watchdog]
+    B --> F[Network Exfiltration Guard]
+    
+    C --> G{Sensitive Data?}
+    D --> G
+    E --> G
+    F --> G
+    
+    G -->|Yes| H[Block & Alert]
+    G -->|No| I[Allow]
+    
+    H --> J[AES-256-GCM Encryption]
+    J --> K[API Gateway]
+    K --> L[TimescaleDB]
+    L --> M[Security Dashboard]
+    L --> N[SIEM Integration]
+    
+    M --> O[Real-time Alerts]
+    N --> O
+    
+    style A fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style G fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style H fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style M fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+---
 
 ## Overview
 

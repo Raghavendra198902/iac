@@ -1,4 +1,46 @@
-# 🚀 IAC Dharma - Quick Start Guide
+---
+**Document Type:** Quick Start Guide  
+**Audience:** Developers, DevOps Engineers, System Administrators  
+**Classification:** Public - Getting Started  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Estimated Time:** 5-10 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🚀 IAC Dharma - Enterprise Quick Start Guide
+
+> **From Zero to Production in Minutes**: Your fast-track journey to infrastructure excellence
+
+## 💡 What You'll Learn
+
+In the next 5-10 minutes, you'll:
+- ✅ Launch a fully operational IAC DHARMA platform
+- ✅ Access monitoring dashboards and observability tools
+- ✅ Understand the service architecture
+- ✅ Execute your first infrastructure deployment
+
+---
+
+## 🎯 Platform Startup Flow
+
+```mermaid
+flowchart LR
+    A[Prerequisites Check] --> B[Clone Repository]
+    B --> C[Configure Environment]
+    C --> D[Start Services]
+    D --> E[Verify Health]
+    E --> F[Access UI]
+    F --> G[Deploy Infrastructure]
+    
+    style A fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style D fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    style E fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style F fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px
+    style G fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+```
+
+---
 
 ## Current Status: ✅ FULLY OPERATIONAL
 

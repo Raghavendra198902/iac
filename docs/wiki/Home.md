@@ -1,3 +1,12 @@
+---
+**Document Type:** Wiki Home - Enterprise Documentation Portal  
+**Classification:** Public - Knowledge Base  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Total Pages:** 35+ comprehensive guides  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
 # Welcome to IAC Dharma Wiki 🌸
 
 > **Balance in Automation** - Enterprise-grade Infrastructure as Code automation platform with AI-powered optimization
@@ -7,6 +16,44 @@
 [![GitHub Release](https://img.shields.io/github/v/release/Raghavendra198902/iac)](https://github.com/Raghavendra198902/iac/releases)
 [![Docker Pulls](https://img.shields.io/docker/pulls/raghavendra198902/iac-dharma)](https://hub.docker.com/r/raghavendra198902/iac-dharma)
 [![GitHub Stars](https://img.shields.io/github/stars/Raghavendra198902/iac?style=social)](https://github.com/Raghavendra198902/iac)
+
+---
+
+## 🗺️ Platform Navigation Map
+
+```mermaid
+flowchart TD
+    A[🌸 IAC DHARMA Wiki] --> B[🚀 Get Started]
+    A --> C[📖 Learn]
+    A --> D[🔧 Develop]
+    A --> E[🚢 Deploy]
+    
+    B --> B1[Installation Guide]
+    B --> B2[Quick Start 5 min]
+    B --> B3[Configuration]
+    B --> B4[Troubleshooting]
+    
+    C --> C1[Architecture Overview]
+    C --> C2[API Reference]
+    C --> C3[CLI Reference]
+    C --> C4[FAQ]
+    
+    D --> D1[Development Setup]
+    D --> D2[Contributing Guide]
+    D --> D3[Testing Guide]
+    D --> D4[Plugin Development]
+    
+    E --> E1[Deployment Guide]
+    E --> E2[Kubernetes]
+    E --> E3[Docker Compose]
+    E --> E4[Migration Guide]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style B fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style E fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+```
 
 ---
 

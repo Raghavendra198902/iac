@@ -1,6 +1,49 @@
-# Deployment Guide
+---
+**Document Type:** Enterprise Deployment Guide  
+**Audience:** DevOps Engineers, Platform Engineers, SREs  
+**Classification:** Technical - Operations  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🚀 Deployment Guide - IAC Dharma Platform
 
 > **Enterprise Deployment Excellence** - Production-grade deployment strategies, patterns, and best practices for IAC Dharma across all environments and cloud platforms
+
+---
+
+## 🎯 Multi-Environment Deployment Flow
+
+```mermaid
+flowchart LR
+    A[Source Code] --> B[CI/CD Pipeline]
+    
+    B --> C{Environment}
+    
+    C -->|Dev| D[Docker Compose]
+    C -->|Staging| E[K8s Staging]
+    C -->|Production| F[K8s Production]
+    
+    D --> D1[Local Testing]
+    D1 --> D2[Feature Validation]
+    
+    E --> E1[Integration Tests]
+    E1 --> E2[Performance Tests]
+    E2 --> E3[Security Scan]
+    
+    F --> F1[Blue-Green Deploy]
+    F1 --> F2[Canary Release]
+    F2 --> F3[Full Rollout]
+    F3 --> F4[Monitor & Observe]
+    
+    style A fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style C fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style F4 fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+```
+
+---
 
 [![Deployment](https://img.shields.io/badge/Deployment-Production--Ready-brightgreen.svg)](Deployment-Guide)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](Docker-Compose)

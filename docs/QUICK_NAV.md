@@ -1,4 +1,66 @@
-# Quick Navigation Guide
+---
+**Document Type:** Enterprise Navigation Hub  
+**Classification:** Public - User Reference  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🗺️ IAC DHARMA - Enterprise Quick Navigation Guide
+
+> **Your Strategic Command Center**: Fast access to documentation, scripts, and enterprise features
+
+---
+
+## 🎯 Platform Architecture Navigator
+
+```mermaid
+flowchart LR
+    A[👤 User] --> B{Role?}
+    
+    B -->|Developer| C[API Docs]
+    B -->|DevOps| D[Deployment]
+    B -->|Security| E[Security]
+    B -->|QA/Testing| F[Testing]
+    
+    C --> C1[API Documentation]
+    C --> C2[Quick Reference]
+    C --> C3[Integration Guide]
+    
+    D --> D1[Deployment Scripts]
+    D --> D2[Kubernetes Guide]
+    D --> D3[Monitoring]
+    
+    E --> E1[DLP Implementation]
+    E --> E2[Security Audit]
+    E --> E3[Compliance]
+    
+    F --> F1[Test Scripts]
+    F --> F2[Load Testing]
+    F --> F3[Validation]
+    
+    C1 --> G[IAC DHARMA Platform]
+    C2 --> G
+    C3 --> G
+    D1 --> G
+    D2 --> G
+    D3 --> G
+    E1 --> G
+    E2 --> G
+    E3 --> G
+    F1 --> G
+    F2 --> G
+    F3 --> G
+    
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style G fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px
+    style C fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style E fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style F fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+```
+
+---
 
 > Fast access to commonly needed documentation and scripts
 

@@ -1,6 +1,62 @@
-# Testing Guide
+---
+**Document Type:** Quality Assurance & Testing Guide  
+**Audience:** QA Engineers, Developers, Test Automation Engineers  
+**Classification:** Technical - Quality Assurance  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
 
-> **Quality Through Testing** - Enterprise testing strategies for IAC Dharma covering unit, integration, E2E, performance, and security testing
+# 🧪 Testing Guide - IAC Dharma Platform
+
+> **Quality Through Testing** - Enterprise testing strategies covering unit, integration, E2E, performance, and security testing
+
+---
+
+## 🎯 Testing Pyramid Flow
+
+```mermaid
+flowchart TD
+    A[Testing Strategy] --> B[Test Pyramid]
+    
+    B --> C[E2E Tests]
+    B --> D[Integration Tests]
+    B --> E[Unit Tests]
+    
+    C --> C1[Playwright]
+    C --> C2[User Flows]
+    C --> C3[Visual Tests]
+    
+    D --> D1[API Tests]
+    D --> D2[Service Integration]
+    D --> D3[Database Tests]
+    
+    E --> E1[Jest]
+    E --> E2[Component Tests]
+    E --> E3[Function Tests]
+    
+    C1 --> F[CI/CD Pipeline]
+    C2 --> F
+    C3 --> F
+    D1 --> F
+    D2 --> F
+    D3 --> F
+    E1 --> F
+    E2 --> F
+    E3 --> F
+    
+    F --> G{Quality Gates}
+    G -->|Pass| H[✅ Deploy]
+    G -->|Fail| I[❌ Block]
+    
+    style B fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style C fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style D fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style E fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style H fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+```
+
+---
 
 [![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](Testing-Guide)
 [![Coverage](https://img.shields.io/badge/Coverage-85%25-green.svg)](Testing-Guide)

@@ -1,6 +1,55 @@
-# Configuration
+---
+**Document Type:** Configuration Reference Guide  
+**Audience:** System Administrators, DevOps Engineers, Configuration Managers  
+**Classification:** Technical - System Configuration  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
 
-> **Complete Configuration Reference** - Enterprise-grade configuration management for IAC Dharma platform
+# ⚙️ Configuration - IAC Dharma Platform
+
+> **Complete Configuration Reference** - Enterprise-grade configuration management for all environments and services
+
+---
+
+## 🎯 Configuration Architecture
+
+```mermaid
+flowchart TD
+    A[Configuration Sources] --> B[Environment Variables]
+    A --> C[Config Files]
+    A --> D[Secrets Manager]
+    A --> E[Command Line]
+    
+    B --> F[Configuration Loader]
+    C --> F
+    D --> F
+    E --> F
+    
+    F --> G[Validation Layer]
+    G --> H{Valid?}
+    
+    H -->|No| I[Error & Exit]
+    H -->|Yes| J[Configuration Store]
+    
+    J --> K[Application Services]
+    K --> L[API Gateway]
+    K --> M[Microservices]
+    K --> N[Databases]
+    K --> O[Monitoring]
+    
+    J --> P[Runtime Updates]
+    P --> Q[Feature Flags]
+    P --> R[Hot Reload]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style F fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style J fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style H fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+```
+
+---
 
 [![Configuration](https://img.shields.io/badge/Config-Enterprise-blue.svg)](Configuration)
 [![Security](https://img.shields.io/badge/Security-Hardened-green.svg)](Security-Best-Practices)

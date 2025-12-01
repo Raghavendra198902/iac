@@ -1,6 +1,62 @@
-# Architecture Overview
+---
+**Document Type:** Technical Architecture Documentation  
+**Audience:** Solution Architects, Technical Architects, Engineering Leadership  
+**Classification:** Technical - System Design  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Reading Time:** ~2 hours  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
 
-Comprehensive deep-dive into IAC Dharma's enterprise architecture, microservices design, data flows, and technical implementation details.
+# 🏛️ Architecture Overview - IAC Dharma Platform
+
+> **Enterprise Architecture Excellence**: Comprehensive deep-dive into IAC Dharma's microservices design, data flows, security layers, and scalability patterns
+
+---
+
+## 🎯 Architecture Layers Overview
+
+```mermaid
+flowchart TD
+    A[IAC DHARMA Platform] --> B[Presentation Layer]
+    A --> C[API Gateway Layer]
+    A --> D[Service Layer]
+    A --> E[Data Layer]
+    A --> F[Infrastructure Layer]
+    
+    B --> B1[Web Frontend React]
+    B --> B2[Mobile App RN]
+    B --> B3[CLI Tool Node.js]
+    
+    C --> C1[API Gateway :3000]
+    C1 --> C2[Auth & RBAC]
+    C1 --> C3[Rate Limiting]
+    C1 --> C4[Request Routing]
+    
+    D --> D1[18 Microservices]
+    D1 --> D2[Blueprint Service]
+    D1 --> D3[IAC Generator]
+    D1 --> D4[AI Engine]
+    D1 --> D5[Cost Service]
+    D1 --> D6[Monitoring]
+    
+    E --> E1[PostgreSQL]
+    E --> E2[Redis Cache]
+    E --> E3[RabbitMQ]
+    E --> E4[TimescaleDB]
+    
+    F --> F1[Docker Containers]
+    F --> F2[Kubernetes Pods]
+    F --> F3[Cloud Infrastructure]
+    F --> F4[Observability Stack]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:4px
+    style B fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style E fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style F fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+```
 
 ---
 

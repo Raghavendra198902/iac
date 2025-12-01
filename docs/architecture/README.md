@@ -1,8 +1,62 @@
-# IAC Dharma - Architecture Documentation
+---
+**Document Type:** Architecture Documentation Hub  
+**Audience:** Solution Architects, Technical Architects, Engineering Teams  
+**Classification:** Technical - System Design  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🏛️ IAC Dharma - Enterprise Architecture Documentation
+
+> **System Design Excellence**: Comprehensive architectural blueprints for scalable, secure, and intelligent infrastructure automation
+
+---
+
+## 🎯 Architecture Overview Map
+
+```mermaid
+flowchart TD
+    A[IAC DHARMA Architecture] --> B[Core Architecture]
+    A --> C[Functional Components]
+    A --> D[Integration Layer]
+    A --> E[Deployment Models]
+    
+    B --> B1[System Overview]
+    B --> B2[Microservices 18+]
+    B --> B3[Data Architecture]
+    B --> B4[Security Architecture]
+    
+    C --> C1[Blueprint Designer]
+    C --> C2[IAC Generator]
+    C --> C3[AI Engine ML/NLP]
+    C --> C4[Guardrails Engine]
+    C --> C5[Cost Optimization]
+    
+    D --> D1[Multi-Cloud AWS/Azure/GCP]
+    D --> D2[Identity Systems]
+    D --> D3[ITSM Integration]
+    D --> D4[DevOps Tools]
+    
+    E --> E1[Cloud Native]
+    E --> E2[On-Premises]
+    E --> E3[Hybrid Architecture]
+    E --> E4[HA & DR]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style B fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style E fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+```
+
+---
 
 ## System Architecture
 
 This directory contains comprehensive architecture documentation for the IAC Dharma platform.
+
+---
 
 ## Documents
 

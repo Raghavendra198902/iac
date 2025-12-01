@@ -1,6 +1,51 @@
-# Development Setup
+---
+**Document Type:** Developer Environment Setup Guide  
+**Audience:** Software Engineers, Full-Stack Developers, Contributors  
+**Classification:** Technical - Development  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Estimated Time:** 30-60 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
 
-Complete guide to setting up your local development environment for IAC Dharma.
+# 💻 Development Setup - IAC Dharma Platform
+
+> **Developer Experience Excellence**: Complete guide to setting up your local development environment with hot-reload, debugging, and testing capabilities
+
+---
+
+## 🎯 Development Workflow Flow
+
+```mermaid
+flowchart TD
+    A[Setup Environment] --> B[Install Dependencies]
+    B --> C[Configure Services]
+    C --> D[Start Development]
+    
+    D --> E[Code Changes]
+    E --> F[Hot Reload]
+    F --> G{Tests Pass?}
+    
+    G -->|Yes| H[Git Commit]
+    G -->|No| I[Debug & Fix]
+    I --> E
+    
+    H --> J[Push to Branch]
+    J --> K[CI Pipeline]
+    K --> L{CI Pass?}
+    
+    L -->|Yes| M[Create PR]
+    L -->|No| N[Fix Issues]
+    N --> E
+    
+    M --> O[Code Review]
+    O --> P[Merge to Main]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style D fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style F fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style P fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+```
 
 ---
 

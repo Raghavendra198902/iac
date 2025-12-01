@@ -1,3 +1,66 @@
+---
+**Document Type:** Frequently Asked Questions  
+**Audience:** All Users - General Reference  
+**Classification:** Public - Knowledge Base  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# ❓ Frequently Asked Questions - IAC Dharma Platform
+
+> **Quick Answers**: Common questions and solutions for IAC Dharma users
+
+---
+
+## 🗺️ FAQ Navigation Map
+
+```mermaid
+flowchart TD
+    A[FAQ Categories] --> B[General Questions]
+    A --> C[Getting Started]
+    A --> D[Technical Questions]
+    A --> E[Cloud & Deployment]
+    A --> F[Troubleshooting]
+    A --> G[Security & Compliance]
+    A --> H[Pricing & Licensing]
+    
+    B --> B1[What is IAC DHARMA?]
+    B --> B2[Is it open source?]
+    B --> B3[Production ready?]
+    
+    C --> C1[How to install?]
+    C --> C2[Quick start guide]
+    C --> C3[First deployment]
+    
+    D --> D1[Architecture]
+    D --> D2[APIs]
+    D --> D3[Integrations]
+    
+    E --> E1[AWS/Azure/GCP]
+    E --> E2[Kubernetes]
+    E --> E3[Docker]
+    
+    F --> F1[Common errors]
+    F --> F2[Performance]
+    F --> F3[Debugging]
+    
+    G --> G1[Authentication]
+    G --> G2[Encryption]
+    G --> G3[Compliance]
+    
+    H --> H1[Licensing]
+    H --> H2[Support plans]
+    H --> H3[Enterprise]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style B fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+```
+
+---
+
 # Frequently Asked Questions (FAQ)
 
 Common questions and answers about IAC Dharma.

@@ -1,3 +1,72 @@
+---
+**Document Type:** Multi-Cloud Integration Guide  
+**Audience:** Cloud Architects, DevOps Engineers, Platform Engineers  
+**Classification:** Technical - Cloud Infrastructure  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Reading Time:** ~90 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# ☁️ Multi-Cloud Support - IAC Dharma Platform
+
+> **Cloud Agnostic Excellence**: Enterprise multi-cloud infrastructure management across AWS, Azure, and GCP with unified control plane
+
+---
+
+## 🎯 Multi-Cloud Architecture Flow
+
+```mermaid
+flowchart TD
+    A[IAC DHARMA] --> B[Unified Control Plane]
+    
+    B --> C[Cloud Abstraction Layer]
+    
+    C --> D[AWS Provider]
+    C --> E[Azure Provider]
+    C --> F[GCP Provider]
+    
+    D --> D1[EC2/ECS/EKS]
+    D --> D2[RDS/DynamoDB]
+    D --> D3[S3/CloudFront]
+    D --> D4[VPC/Route53]
+    
+    E --> E1[VM/AKS/ACI]
+    E --> E2[SQL/CosmosDB]
+    E --> E3[Blob/CDN]
+    E --> E4[VNet/DNS]
+    
+    F --> F1[GCE/GKE]
+    F --> F2[CloudSQL/Spanner]
+    F --> F3[GCS/CDN]
+    F --> F4[VPC/CloudDNS]
+    
+    D1 --> G[Unified Resources]
+    D2 --> G
+    D3 --> G
+    D4 --> G
+    E1 --> G
+    E2 --> G
+    E3 --> G
+    E4 --> G
+    F1 --> G
+    F2 --> G
+    F3 --> G
+    F4 --> G
+    
+    G --> H[Cost Optimization]
+    G --> I[Governance]
+    G --> J[Monitoring]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style D fill:#ff9800,stroke:#e65100,stroke-width:2px
+    style E fill:#0078d4,stroke:#004578,stroke-width:2px
+    style F fill:#4285f4,stroke:#1967d2,stroke-width:2px
+```
+
+---
+
 # Multi-Cloud Support
 
 **Enterprise multi-cloud infrastructure management across AWS, Azure, and Google Cloud Platform with unified control plane, cross-cloud networking, and intelligent workload placement.**

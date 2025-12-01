@@ -1,4 +1,55 @@
-# IAC Dharma Platform - Deployment Guide
+---
+**Document Type:** Deployment & Operations Guide  
+**Audience:** DevOps Engineers, System Administrators, Platform Engineers  
+**Classification:** Technical - Operations  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Estimated Time:** 30-45 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🚀 IAC Dharma Platform - Enterprise Deployment Guide
+
+> **Production-Ready Infrastructure**: Complete guide to deploying, configuring, and operating IAC DHARMA at enterprise scale
+
+---
+
+## 📊 Deployment Architecture Flow
+
+```mermaid
+flowchart TD
+    A[Start Deployment] --> B{Environment?}
+    
+    B -->|Development| C[Local Docker]
+    B -->|Staging| D[Kubernetes Cluster]
+    B -->|Production| E[Multi-Zone K8s]
+    
+    C --> C1[docker-compose up]
+    C1 --> C2[Verify Health]
+    C2 --> C3[Access UI]
+    
+    D --> D1[Apply K8s Manifests]
+    D1 --> D2[Configure Ingress]
+    D2 --> D3[Setup Monitoring]
+    D3 --> D4[Run Smoke Tests]
+    
+    E --> E1[Multi-AZ Setup]
+    E1 --> E2[Load Balancers]
+    E2 --> E3[HA Database]
+    E3 --> E4[Disaster Recovery]
+    E4 --> E5[Production Ready]
+    
+    C3 --> F[Platform Running]
+    D4 --> F
+    E5 --> F
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style F fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style E5 fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+```
+
+---
 
 ## Current Status ✅
 

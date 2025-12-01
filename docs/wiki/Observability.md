@@ -1,3 +1,56 @@
+---
+**Document Type:** Observability & Monitoring Guide  
+**Audience:** SREs, DevOps Engineers, Operations Teams  
+**Classification:** Technical - Operations  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🔍 Observability - IAC Dharma Platform
+
+> **Complete Visibility**: Comprehensive monitoring, logging, tracing, and alerting for production-grade operations
+
+---
+
+## 🎯 Observability Stack Architecture
+
+```mermaid
+flowchart TD
+    A[Application Services] --> B{Telemetry}
+    
+    B -->|Metrics| C[Prometheus]
+    B -->|Logs| D[Loki]
+    B -->|Traces| E[Jaeger]
+    
+    C --> F[Grafana]
+    D --> F
+    E --> F
+    
+    C --> G[Alertmanager]
+    G --> H{Alert Routing}
+    
+    H -->|Critical| I[PagerDuty]
+    H -->|Warning| J[Slack]
+    H -->|Info| K[Email]
+    
+    F --> L[Dashboards]
+    L --> M[Service Health]
+    L --> N[Performance]
+    L --> O[Business Metrics]
+    
+    E --> P[Trace Analysis]
+    P --> Q[Latency Detection]
+    P --> R[Error Tracking]
+    
+    style A fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    style F fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style B fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style H fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+```
+
+---
+
 # Observability
 
 Comprehensive monitoring, logging, tracing, and alerting for IAC Dharma platform.

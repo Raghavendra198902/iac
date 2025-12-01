@@ -1,93 +1,445 @@
-# MIT License
+# Enterprise License & Compliance Pack
 
-**Copyright (c) 2025 IAC Dharma — Raghavendra (IAC Dharma Technologies)**
+**Copyright © 2024-2025 Raghavendra Deshpande. All Rights Reserved.**
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to:
-
-* use,
-* copy,
-* modify,
-* merge,
-* publish,
-* distribute,
-* sublicense, and/or
-* sell copies of the Software,
-
-and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+This document consolidates the essential legal, compliance, and branding components for enterprise distribution of the **IAC Dharma Platform**.
 
 ---
 
-# Enterprise Supplemental Terms (Non‑Conflicting)
+## Copyright Notice
 
-These supplemental terms enhance enterprise clarity while remaining fully compliant with the permissive nature of the MIT License. They do **not** introduce additional restrictions but provide guidance for professional, commercial, and enterprise environments.
+```
+Copyright © 2024-2025 Raghavendra Deshpande
+Email: deshpande.raghavendra@gmail.com
+Project: IAC Dharma Platform - Enterprise Infrastructure as Code Solution
 
-## 1. Commercial Use
+All rights reserved under applicable copyright law and international treaties.
+```
 
-The Software is approved for unrestricted commercial deployment, including integration into proprietary products, managed services, SaaS offerings, and enterprise environments.
+---
 
-No additional licensing fees or royalties are required. Organizations may operationalize, automate, or embed the Software in internal or customer-facing platforms.
+## 1. License Information
 
-## 2. Attribution (Recommended for Enterprise Compliance)
+### MIT License
 
-Attribution is not legally required but is strongly encouraged in professional and enterprise environments to maintain transparency and provenance.
+This software is released under the MIT License, allowing unrestricted use, modification, distribution, and commercial deployment subject to the copyright notice and permission notice being included in all copies or substantial portions of the Software.
 
-Recommended format:
-**"Powered by IAC Dharma — [https://github.com/Raghavendra198902](https://github.com/Raghavendra198902)"**
+**Full MIT License Text:**
 
-Attribution may be placed in:
+```
+MIT License
 
-* product documentation,
-* about/configuration screens,
-* compliance or OSS notice bundles,
-* internal architecture documentation.
+Copyright (c) 2024-2025 Raghavendra Deshpande
 
-## 3. Support & Service-Level Options
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The Software is provided as-is and without guaranteed support under the MIT License.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-However, organizations may request:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
-* dedicated enterprise support,
-* custom feature development,
-* security hardening,
-* long-term maintenance,
-* professional consulting or onboarding.
+### Key Permissions
 
-All enterprise support inquiries may be directed to:
-**[deshpande.raghavendra@gmail.com](mailto:deshpande.raghavendra@gmail.com)**
+* Open-source and commercial use
+* Modification and redistribution
+* Private or internal use
+* Integration into proprietary products
 
-## 4. Security & Compliance
+### Key Limitations
 
-While the MIT License includes no warranty, enterprises deploying the Software at scale should implement:
+* No warranty of any kind
+* No liability for damages
+* No trademark rights granted
 
-* independent security testing,
-* code audit procedures,
-* risk assessment and mitigation frameworks,
-* deployment hardening and monitoring controls.
+---
 
-This ensures the Software is used responsibly within regulated or mission-critical environments.
+## 2. Trademark Policy
 
-## 5. Trademark & Brand Usage
+**"IAC Dharma"** is a registered trademark owned by Raghavendra Deshpande. While the MIT License allows free use of the software, **it does not grant permission to use the trademark in any form** without explicit written consent.
 
-"IAC Dharma" is a trademark of the copyright holder.
+### Trademark Ownership
 
-The MIT License does **not** include trademark rights. This means the following actions **require explicit written permission**:
+```
+Trademark: IAC Dharma™
+Owner: Raghavendra Deshpande
+Registration: Pending/Common Law Trademark Rights
+Protection: All jurisdictions where applicable
+```
 
-* Using the "IAC Dharma" name in product or service branding,
-* Representing your product as officially endorsed by IAC Dharma,
-* Using the name in marketing, press releases, or certification programs,
-* Registering domains containing the trademark.
+### Requires Written Permission
 
-Fair use (such as describing the software accurately in documentation) is permitted.
+* Product naming or branding (e.g., "IAC Dharma Certified", "Powered by IAC Dharma")
+* Marketing materials, advertisements, or sales documents
+* Official-looking domain names containing the trademark
+* Any implication of affiliation, endorsement, or partnership
+* Commercial derivative products using the trademark
+* Training materials or certification programs
 
-Unauthorized or misleading use of the trademark is strictly prohibited.
+### Permitted Without Permission
 
-## 6. Enterprise Distribution Notice (Optional)
+* Fair-use references (e.g., "This product uses IAC Dharma components", "Compatible with IAC Dharma")
+* Internal architecture documents and technical specifications
+* OSS compliance disclosures and attribution notices
+* Academic research and educational materials
+* Bug reports and technical support discussions
 
-Organizations distributing derivative or bundled works internally or externally should include this notice:
+**Notice:** Unauthorized or misleading use of the trademark is prohibited and may result in legal action.
 
-"This product includes components licensed under the MIT License from IAC Dharma — Raghavendra."
+---
+
+## 3. Copyright Attribution Requirements
+
+All distributions, modifications, or derivative works must include:
+
+### Required Attribution
+
+```
+Based on IAC Dharma Platform
+Copyright © 2024-2025 Raghavendra Deshpande
+Licensed under MIT License
+Original source: https://github.com/Raghavendra198902/iac
+```
+
+### Distribution Requirements
+
+* Include this LICENSE file in its entirety
+* Preserve all copyright notices in source code headers
+* Include NOTICE file if provided
+* Clearly mark any modifications made to the original software
+* Do not remove or alter existing copyright notices
+
+---
+
+## 4. Enterprise Compliance Guidelines
+
+Organizations deploying this software at scale must follow industry-standard OSS governance and corporate compliance requirements:
+
+### Mandatory Controls
+
+* Include the LICENSE and NOTICE files in all internal or external distributions
+* Conduct internal code review and security audit before production deployment
+* Maintain comprehensive change logs for all modified components
+* Ensure all third-party dependencies meet compliance requirements
+* Implement proper version control and source code management
+* Document all customizations and configuration changes
+
+### Legal & Compliance Requirements
+
+* Review and approve open-source licenses with legal counsel
+* Maintain Software Bill of Materials (SBOM)
+* Track license obligations and restrictions
+* Implement IP compliance policies
+* Conduct regular compliance audits
+* Ensure GDPR, HIPAA, SOC2, or other regulatory compliance as applicable
+
+### Recommended Disclosures
+
+Include the following in your compliance bundle or product documentation:
+
+**Standard Attribution:**
+```
+This product includes open-source components from the IAC Dharma Platform.
+Copyright © 2024-2025 Raghavendra Deshpande
+Licensed under the MIT License
+```
+
+---
+
+## 5. Enterprise Security Guidance
+
+While the software is provided "AS-IS" without warranty, enterprise deployments must implement comprehensive security controls:
+
+### Mandatory Security Practices
+
+* **Vulnerability Management:** Continuous vulnerability scanning (SAST/DAST/SCA)
+* **Dependency Security:** Regular dependency updates and SBOM management
+* **Infrastructure Hardening:** Secure deployment environments and access controls
+* **Risk Assessment:** Regular security risk assessments in regulated industries
+* **Incident Response:** Monitoring for suspicious or unauthorized modifications
+* **Penetration Testing:** Regular security testing and validation
+* **Encryption:** End-to-end encryption for data in transit and at rest
+
+### Critical Infrastructure Considerations
+
+Enhanced security is **mandatory** when the software is used for:
+
+* Critical infrastructure and production systems
+* Financial services and payment processing
+* Healthcare and protected health information (PHI)
+* Government and defense applications
+* Monitoring, security, or compliance automation
+* Multi-cloud or distributed systems
+* Customer-facing applications handling PII
+
+### Security Incident Reporting
+
+Security vulnerabilities should be reported to:
+**Email:** deshpande.raghavendra@gmail.com
+**Subject:** [SECURITY] IAC Dharma Vulnerability Report
+
+**Response Time:** Best-effort basis (24-72 hours for critical issues)
+
+---
+
+## 6. Enterprise Support & Services
+
+The open-source release includes **no guaranteed support or warranty**, but comprehensive enterprise services are available:
+
+### Available Enterprise Services
+
+#### Commercial Support Packages
+
+* **Standard Support:** Email support, bug fixes, security patches
+* **Premium Support:** 24/7 phone/email support, SLA guarantees, priority bug fixes
+* **Enterprise Support:** Dedicated support team, custom development, on-site consulting
+
+#### Professional Services
+
+* **Implementation Services:** Architecture design, deployment consulting
+* **Custom Development:** Feature engineering, integration development
+* **Training & Enablement:** Technical training, certification programs
+* **Security Services:** Code hardening, security reviews, penetration testing
+* **Managed Services:** Long-term maintenance, monitoring, optimization
+
+#### Service Level Agreements (SLAs)
+
+* **Critical Issues:** 1-4 hour response time
+* **High Priority:** 8-24 hour response time
+* **Medium Priority:** 2-5 business day response time
+* **Low Priority:** Best effort
+
+### Contact Information
+
+**Enterprise Sales & Support:**
+* Email: deshpande.raghavendra@gmail.com
+* Subject: [ENTERPRISE] Your Company Name - Service Inquiry
+
+**Licensing Inquiries:**
+* Commercial licensing options available
+* Custom license agreements for specific use cases
+* Volume licensing for large deployments
+
+---
+
+## 7. Third-Party Components & Dependencies
+
+This software may include or depend on third-party open-source components, each with its own license:
+
+### Dependency Management
+
+* All third-party dependencies are listed in package manifests (package.json, requirements.txt, etc.)
+* Users must comply with all applicable third-party licenses
+* See individual component licenses for specific terms and conditions
+* SBOM (Software Bill of Materials) available upon request
+
+### Common Third-Party Licenses
+
+This project may include components under:
+* MIT License
+* Apache License 2.0
+* BSD Licenses
+* ISC License
+* Other OSI-approved licenses
+
+**Important:** The MIT License for this project does not extend to third-party components. Users must comply with each component's license independently.
+
+---
+
+## 8. Distribution Notice & Requirements
+
+For all redistributions (internal or external), the following must be included:
+
+### NOTICE File Requirements
+
+**Mandatory Inclusions:**
+
+```
+NOTICE: Third-Party Software Components
+
+This software includes components from the IAC Dharma Platform.
+
+Copyright © 2024-2025 Raghavendra Deshpande
+Licensed under the MIT License
+
+Original Source: https://github.com/Raghavendra198902/iac
+Documentation: [Project Documentation URL]
+
+For licensing questions: deshpande.raghavendra@gmail.com
+```
+
+### Binary Distribution Requirements
+
+When distributing compiled binaries:
+* Include LICENSE file in distribution package
+* Include NOTICE file with copyright information
+* Provide link to source code repository
+* Document any modifications or customizations
+* Include trademark usage disclaimer
+
+### Cloud/SaaS Distribution
+
+When offering as a cloud service:
+* Comply with all license terms
+* Provide attribution in application footer or about page
+* Maintain audit trail of modifications
+* Ensure end-users can access license information
+
+---
+
+## 9. Warranty Disclaimer & Limitation of Liability
+
+### NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:
+
+* **Warranties of merchantability**
+* **Fitness for a particular purpose**
+* **Non-infringement**
+* **Title**
+* **Accuracy or completeness**
+* **Results or outcomes**
+* **Uninterrupted or error-free operation**
+
+THE COPYRIGHT HOLDER MAKES NO WARRANTIES OR REPRESENTATIONS REGARDING THE USE, RELIABILITY, OR PERFORMANCE OF THE SOFTWARE.
+
+### LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL THE AUTHORS, COPYRIGHT HOLDERS, OR CONTRIBUTORS BE LIABLE FOR ANY:
+
+* **Direct, indirect, incidental, special, exemplary, or consequential damages**
+* **Loss of profits, revenue, data, or business opportunities**
+* **Costs of procurement of substitute goods or services**
+* **Business interruption or system failures**
+* **Any damages arising from use, misuse, or inability to use the software**
+
+This limitation applies regardless of the theory of liability (contract, tort, negligence, strict liability, or otherwise), even if advised of the possibility of such damages.
+
+### INDEMNIFICATION
+
+Users agree to indemnify, defend, and hold harmless the copyright holder from any claims, damages, losses, liabilities, and expenses (including attorney fees) arising from:
+
+* Use or misuse of the software
+* Violation of this license
+* Violation of third-party rights
+* Unauthorized use of trademarks
+
+---
+
+## 10. Governing Law & Dispute Resolution
+
+### Jurisdiction
+
+This license shall be governed by and construed in accordance with the laws of:
+* **Primary Jurisdiction:** [India / State of Incorporation]
+* **International Transactions:** Governed by applicable international treaties and conventions
+
+### Dispute Resolution
+
+* **Negotiation:** Parties agree to attempt good-faith negotiation for 30 days
+* **Mediation:** If negotiation fails, non-binding mediation before arbitration
+* **Arbitration:** Binding arbitration under applicable arbitration rules
+* **Venue:** [Specify city/state for legal proceedings]
+
+### Severability
+
+If any provision of this license is found invalid or unenforceable, the remaining provisions shall remain in full force and effect.
+
+---
+
+## 11. License Updates & Amendments
+
+### Version Control
+
+* **Current Version:** 1.0 (Effective Date: January 1, 2024)
+* **Last Updated:** December 1, 2025
+* **Review Cycle:** Annual review and updates as needed
+
+### Amendment Process
+
+* Copyright holder reserves the right to update this license
+* Updates will be published on the official repository
+* Existing deployments remain under the license version at time of distribution
+* Users are encouraged to review license updates periodically
+
+### Contact for Clarifications
+
+For questions about license terms, interpretation, or compliance:
+
+**Email:** deshpande.raghavendra@gmail.com  
+**Subject:** [LICENSE] Your Company Name - License Inquiry  
+**Response Time:** 5-10 business days
+
+---
+
+## 12. Final Disclaimer & Acceptance
+
+### Legal Effect
+
+This document does **not** alter or replace the MIT License. It provides:
+* Supplemental enterprise guidance and best practices
+* Copyright and trademark clarifications
+* Compliance recommendations
+* Support and service information
+
+The MIT License terms remain the binding legal agreement.
+
+### Acceptance of Terms
+
+Use, copying, modification, or distribution of the software constitutes:
+* Acceptance of the MIT License terms
+* Acknowledgment of all warranty disclaimers
+* Agreement to limitation of liability provisions
+* Compliance with copyright and trademark policies
+
+### Export Control
+
+Users are responsible for compliance with all applicable export control laws and regulations, including but not limited to:
+* U.S. Export Administration Regulations (EAR)
+* International Traffic in Arms Regulations (ITAR)
+* EU dual-use export controls
+* Local jurisdiction export restrictions
+
+---
+
+## 13. Contact Information
+
+### Copyright Holder
+
+**Name:** Raghavendra Deshpande  
+**Email:** deshpande.raghavendra@gmail.com  
+**Project:** IAC Dharma Platform  
+**Repository:** https://github.com/Raghavendra198902/iac
+
+### Inquiry Types
+
+* **General Questions:** Include [GENERAL] in subject line
+* **License Compliance:** Include [COMPLIANCE] in subject line
+* **Security Issues:** Include [SECURITY] in subject line
+* **Enterprise Services:** Include [ENTERPRISE] in subject line
+* **Trademark Usage:** Include [TRADEMARK] in subject line
+
+### Response Expectations
+
+* General inquiries: 5-10 business days
+* Security issues: 24-72 hours (critical issues prioritized)
+* Enterprise services: 2-5 business days
+* License questions: 3-7 business days
+
+---
+
+**END OF LICENSE DOCUMENT**
+
+*This license document was last updated on December 1, 2025.*  
+*Copyright © 2024-2025 Raghavendra Deshpande. All Rights Reserved.*

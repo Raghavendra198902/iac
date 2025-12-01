@@ -1,3 +1,63 @@
+---
+**Document Type:** Kubernetes Deployment Guide  
+**Audience:** DevOps Engineers, Platform Engineers, SREs, Kubernetes Administrators  
+**Classification:** Technical - Container Orchestration  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Estimated Time:** 4-5 hours  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# ☸️ Kubernetes Deployment Guide - IAC Dharma Platform
+
+> **Cloud-Native Excellence**: Production-grade Kubernetes deployment with HA, security, observability, and auto-scaling
+
+---
+
+## 🎯 Kubernetes Architecture Flow
+
+```mermaid
+flowchart TD
+    A[Kubernetes Cluster] --> B[Ingress Layer]
+    B --> C[NGINX/Traefik]
+    
+    C --> D[Service Mesh]
+    D --> E[API Gateway]
+    
+    E --> F[Microservices]
+    F --> F1[Blueprint Service]
+    F --> F2[IAC Generator]
+    F --> F3[AI Engine]
+    F --> F4[Cost Service]
+    F --> F5[Monitoring]
+    
+    F1 --> G[StatefulSets]
+    F2 --> G
+    F3 --> G
+    F4 --> G
+    F5 --> G
+    
+    G --> H[PostgreSQL]
+    G --> I[Redis]
+    G --> J[RabbitMQ]
+    
+    H --> K[Persistent Volumes]
+    I --> K
+    J --> K
+    
+    A --> L[Observability]
+    L --> M[Prometheus]
+    L --> N[Grafana]
+    L --> O[Jaeger]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style E fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style G fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style L fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+```
+
+---
+
 # Kubernetes Deployment Guide
 
 Complete guide for deploying IAC Dharma on Kubernetes with production-grade configuration, high availability, security, and observability.

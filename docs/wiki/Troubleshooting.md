@@ -1,3 +1,60 @@
+---
+**Document Type:** Troubleshooting & Diagnostics Guide  
+**Audience:** Support Engineers, DevOps Teams, System Administrators  
+**Classification:** Technical - Operations Support  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
+
+# 🔧 Troubleshooting - IAC Dharma Platform
+
+> **Problem Resolution Excellence**: Common issues, diagnostics, and solutions for rapid incident resolution
+
+---
+
+## 🎯 Troubleshooting Workflow
+
+```mermaid
+flowchart TD
+    A[Issue Reported] --> B[Quick Diagnosis]
+    
+    B --> C[Run Health Check]
+    C --> D{Service Status}
+    
+    D -->|All Running| E[Check Logs]
+    D -->|Service Down| F[Restart Service]
+    
+    E --> G{Error Found?}
+    G -->|Yes| H[Analyze Error]
+    G -->|No| I[Check Resources]
+    
+    H --> J{Known Issue?}
+    J -->|Yes| K[Apply Solution]
+    J -->|No| L[Debug Deep]
+    
+    I --> M{Resource Issue?}
+    M -->|CPU/Memory| N[Scale Up]
+    M -->|Disk| O[Free Space]
+    M -->|Network| P[Check Connectivity]
+    
+    F --> Q{Fixed?}
+    K --> Q
+    L --> Q
+    N --> Q
+    O --> Q
+    P --> Q
+    
+    Q -->|Yes| R[✅ Resolved]
+    Q -->|No| S[🎟️ Escalate]
+    
+    style A fill:#ffebee,stroke:#c62828,stroke-width:3px
+    style R fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style Q fill:#fff3e0,stroke:#e65100,stroke-width:2px
+```
+
+---
+
 # Troubleshooting
 
 Common issues and solutions for IAC Dharma platform.

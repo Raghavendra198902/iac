@@ -1,6 +1,59 @@
-# Installation Guide
+---
+**Document Type:** Installation & Setup Guide  
+**Audience:** Developers, DevOps Engineers, System Administrators  
+**Classification:** Public - Getting Started  
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Estimated Time:** 30-45 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande  
+---
 
-Complete step-by-step guide to installing, configuring, and verifying IAC Dharma on all platforms.
+# 🚀 Installation Guide - IAC Dharma Platform
+
+> **Enterprise Installation Excellence**: Complete step-by-step guide to installing, configuring, and verifying IAC Dharma across all platforms and environments
+
+---
+
+## 📊 Installation Journey Flow
+
+```mermaid
+flowchart TD
+    A[Start Installation] --> B{Choose Method}
+    
+    B -->|Quick Start| C[npm Install]
+    B -->|Full Control| D[Git Clone]
+    B -->|Container| E[Docker]
+    B -->|Production| F[Kubernetes]
+    
+    C --> C1[npm install -g]
+    C1 --> C2[iac-dharma init]
+    
+    D --> D1[git clone]
+    D1 --> D2[npm install]
+    D2 --> D3[Configure .env]
+    
+    E --> E1[docker-compose up]
+    E1 --> E2[Verify containers]
+    
+    F --> F1[kubectl apply]
+    F1 --> F2[Ingress setup]
+    F2 --> F3[Monitoring]
+    
+    C2 --> G[Health Check]
+    D3 --> G
+    E2 --> G
+    F3 --> G
+    
+    G --> H{All Services OK?}
+    H -->|Yes| I[✅ Ready to Use]
+    H -->|No| J[Troubleshoot]
+    J --> G
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style I fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style H fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+```
 
 ---
 
