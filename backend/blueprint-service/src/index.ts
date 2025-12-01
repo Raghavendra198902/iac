@@ -2,9 +2,11 @@ import express, { Request, Response } from 'express';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from './utils/logger';
 import { authMiddleware } from './middleware/auth';
 import { validateBlueprint, validateBlueprintUpdate } from './validators';
+import { dbPool } from '../../shared/database/pool.config';
+import { logger } from '../../shared/logger';
+import { corsMiddleware } from '../../shared/cors.config';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,19 +14,11 @@ const PORT = process.env.PORT || 3001;
 // Security: Disable X-Powered-By header
 app.disable('x-powered-by');
 
+app.use(corsMiddleware);
 app.use(express.json({ limit: '10mb' }));
 
-// Database connection
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'iac_dharma',
-  user: process.env.DB_USER || 'dharma_admin',
-  password: process.env.DB_PASSWORD || 'dharma_pass_dev',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// Use shared database pool
+const pool = dbPool;
 
 // Redis connection
 const redis = new Redis({

@@ -1,14 +1,15 @@
 import express from 'express';
-import cors from 'cors';
 import { awsRouter } from './routes/aws';
 import { azureRouter } from './routes/azure';
 import { gcpRouter } from './routes/gcp';
 import { multiCloudRouter } from './routes/multi-cloud';
+import { corsMiddleware } from '../../shared/cors.config';
+import { logger } from '../../shared/logger';
 
 const app = express();
 const PORT = process.env.PORT || 3010;
 
-app.use(cors());
+app.use(corsMiddleware);
 app.use(express.json());
 
 // Health check

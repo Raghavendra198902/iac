@@ -1,6 +1,7 @@
 import express from 'express';
 import { AutomationOrchestrator } from './orchestrator';
-import { logger } from './utils/logger';
+import { logger } from '../../shared/logger';
+import { corsMiddleware } from '../../shared/cors.config';
 
 const app = express();
 const PORT = process.env.PORT || 3010;
@@ -8,6 +9,7 @@ const PORT = process.env.PORT || 3010;
 // Security: Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
 
+app.use(corsMiddleware);
 app.use(express.json());
 
 const orchestrator = new AutomationOrchestrator();

@@ -4,13 +4,15 @@ import { DriftDetector } from './drift-detector';
 import { HealthMonitor } from './health-monitor';
 import { CostMonitor } from './cost-monitor';
 import { RemediationEngine } from './remediation-engine';
-import { logger } from './utils/logger';
+import { logger } from '../../shared/logger';
+import { corsMiddleware } from '../../shared/cors.config';
 
 const app = express();
 
 // Security: Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
 
+app.use(corsMiddleware);
 app.use(express.json());
 
 const driftDetector = new DriftDetector();

@@ -1,0 +1,107 @@
+========================================================================
+CMDB AGENT - WINDOWS INSTALLATION COMMANDS
+========================================================================
+
+Copy and paste these commands into PowerShell (Run as Administrator)
+
+========================================================================
+STEP 1: Navigate to Downloads folder
+========================================================================
+
+cd $env:USERPROFILE\Downloads
+
+
+========================================================================
+STEP 2: Download the agent files
+========================================================================
+
+Invoke-WebRequest -Uri "http://192.168.1.9:5173/downloads/CMDBAgentService.exe" -OutFile "CMDBAgentService.exe"
+
+Invoke-WebRequest -Uri "http://192.168.1.9:5173/downloads/install-simple.ps1" -OutFile "install-simple.ps1"
+
+
+========================================================================
+STEP 3: Allow script execution (this session only)
+========================================================================
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+
+========================================================================
+STEP 4: Run the installer
+========================================================================
+
+.\install-simple.ps1
+
+
+========================================================================
+STEP 5: Verify the service is running
+========================================================================
+
+Get-Service CMDBAgent
+
+
+========================================================================
+EXPECTED OUTPUT:
+========================================================================
+
+Status   Name         DisplayName
+------   ----         -----------
+Running  CMDBAgent    CMDB Agent Service
+
+
+========================================================================
+VERIFY IN BROWSER:
+========================================================================
+
+After installation, open in browser:
+http://192.168.1.9:5173/cmdb
+
+You should see your Windows machine listed with:
+- Real IP address
+- Correct OS version (Windows 11 Pro)
+- Actual CPU and RAM information
+- Status: ONLINE (green)
+
+
+========================================================================
+TROUBLESHOOTING:
+========================================================================
+
+If service doesn't start:
+-------------------------
+Restart-Service CMDBAgent
+
+
+If agent doesn't show in CMDB:
+-------------------------------
+Test-NetConnection 192.168.1.9 -Port 3001
+
+
+View configuration:
+-------------------
+Get-Content "C:\Program Files\CMDB Agent\config.json"
+
+
+Check service logs:
+-------------------
+Get-EventLog -LogName Application -Source "CMDBAgent" -Newest 10
+
+
+Complete reinstall:
+-------------------
+Stop-Service CMDBAgent -Force
+sc.exe delete CMDBAgent
+Start-Sleep -Seconds 3
+.\install-simple.ps1
+
+
+========================================================================
+SUPPORT:
+========================================================================
+
+Full documentation: WINDOWS_AGENT_INSTALL.md
+CMDB Dashboard: http://192.168.1.9:5173/cmdb
+Backend API: http://192.168.1.9:3001
+
+========================================================================

@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from './utils/logger';
 import { TerraformGenerator } from './generators/terraform';
 import { BicepGenerator } from './generators/bicep';
 import { CloudFormationGenerator } from './generators/cloudformation';
 import { GenerationRequest, GenerationJob } from './types';
+import { logger } from '../../shared/logger';
+import { corsMiddleware } from '../../shared/cors.config';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3002;
 // Security: Disable X-Powered-By header
 app.disable('x-powered-by');
 
+app.use(corsMiddleware);
 app.use(express.json({ limit: '10mb' }));
 
 // In-memory job storage (in production, use Redis or database)

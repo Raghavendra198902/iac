@@ -1,0 +1,2 @@
+/src/bin/output/CMDBAgentService.pdb
+/src/bin/output/CMDBAgentService.exe

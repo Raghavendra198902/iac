@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+  JWT_EXPIRATION: "15m"
+  JWT_REFRESH_EXPIRATION: "7d"
+  RATE_LIMIT_WINDOW: "15"
+  RATE_LIMIT_MAX: "100"
+  BLUEPRINT_SERVICE_URL: "http://blueprint-service:3001"
+  IAC_GENERATOR_URL: "http://iac-generator:3002"
+  GUARDRAILS_ENGINE_URL: "http://guardrails-engine:3003"
+  ORCHESTRATOR_SERVICE_URL: "http://orchestrator-service:3004"
+  COSTING_SERVICE_URL: "http://costing-service:3005"
+  MONITORING_SERVICE_URL: "http://monitoring-service:3006"
+  AI_RECOMMENDATIONS_URL: "http://ai-recommendations-service:3011"
+  CLOUD_PROVIDER_SERVICE_URL: "http://cloud-provider-service:3010"
+  SSO_SERVICE_URL: "http://sso-service:3012"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blueprint-service-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3001"
+  LOG_LEVEL: "info"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  CACHE_TTL: "3600"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iac-generator-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3002"
+  LOG_LEVEL: "info"
+  TERRAFORM_VERSION: "1.6.0"
+  JOB_TIMEOUT: "300000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guardrails-engine-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3003"
+  LOG_LEVEL: "info"
+  OPA_URL: "http://opa:8181"
+  POLICY_PATH: "/policies"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestrator-service-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3004"
+  LOG_LEVEL: "info"
+  TERRAFORM_WORKSPACE_PATH: "/var/terraform"
+  STATE_BACKEND: "s3"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: costing-service-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3005"
+  LOG_LEVEL: "info"
+  PRICING_API_CACHE_TTL: "86400"
+  AWS_PRICING_REGION: "us-east-1"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-service-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3006"
+  LOG_LEVEL: "info"
+  DRIFT_CHECK_INTERVAL: "3600000"
+  HEALTH_CHECK_INTERVAL: "300000"
+  COST_CHECK_INTERVAL: "86400000"
+  PROMETHEUS_URL: "http://prometheus:9090"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: automation-engine-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3010"
+  LOG_LEVEL: "info"
+  MAX_CONCURRENT_WORKFLOWS: "10"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloud-provider-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3010"
+  LOG_LEVEL: "info"
+  AWS_REGION: "us-east-1"
+  AZURE_LOCATION: "eastus"
+  GCP_REGION: "us-central1"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-recommendations-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3011"
+  LOG_LEVEL: "info"
+  MODEL_PATH: "/models"
+  RECOMMENDATION_CONFIDENCE_THRESHOLD: "0.75"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sso-service-config
+  namespace: iac-dharma
+data:
+  NODE_ENV: "production"
+  PORT: "3012"
+  LOG_LEVEL: "info"
+  SAML_ENABLED: "false"
+  OAUTH2_ENABLED: "false"
+  SESSION_MAX_AGE: "86400000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: iac-dharma
+data:
+  VITE_API_URL: "https://api.iac-dharma.com"
+  VITE_WS_URL: "wss://api.iac-dharma.com"
+  VITE_ENVIRONMENT: "production"
+  VITE_ENABLE_ANALYTICS: "true"

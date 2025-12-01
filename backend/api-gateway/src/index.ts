@@ -24,7 +24,12 @@ const app: Application = express();
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+      'http://localhost:5173', 
+      'http://localhost:3000',
+      'http://192.168.1.9:5173',
+      'http://192.168.1.9:3000'
+    ],
     credentials: true,
     methods: ['GET', 'POST']
   }
@@ -67,18 +72,10 @@ app.use(performanceMiddleware);
 // Prometheus metrics middleware
 app.use(metricsMiddleware);
 
-// CORS configuration  
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'];
-logger.warn(process.env.ALLOWED_ORIGINS ? `CORS enabled for: ${allowedOrigins.join(', ')}` : 'ALLOWED_ORIGINS not set - allowing all origins (development only)');
-
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS ? allowedOrigins : true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Content-Length', 'Content-Type'],
-  maxAge: 86400
-}));
+// CORS configuration - Use shared configuration
+import { corsMiddleware } from '../../shared/cors.config';
+logger.info('CORS middleware configured with shared settings');
+app.use(corsMiddleware);
 
 // Rate limiting - Global rate limiter for all API endpoints
 const globalLimiter = rateLimit({

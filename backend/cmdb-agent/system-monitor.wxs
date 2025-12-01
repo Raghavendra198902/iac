@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" 
+           Name="CMDB System Monitor" 
+           Language="1033" 
+           Version="1.0.0.0" 
+           Manufacturer="CMDB Project" 
+           UpgradeCode="A1B2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D">
+    
+    <Package InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perMachine" 
+             Description="CMDB System Monitor - Monitor CPU, Memory, Disk, and Network usage"
+             Comments="Cross-platform system monitoring tool" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Feature Id="ProductFeature" Title="CMDB System Monitor" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <!-- UI Configuration -->
+    <UIRef Id="WixUI_InstallDir" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    
+    <!-- License -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    
+    <!-- Icons -->
+    <Icon Id="icon.ico" SourceFile="icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="icon.ico" />
+    
+    <!-- Add/Remove Programs -->
+    <Property Id="ARPHELPLINK" Value="https://github.com/Raghavendra198902/iac" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Raghavendra198902/iac" />
+    <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <!-- Program Files -->
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="CMDB System Monitor">
+          <Directory Id="BinFolder" Name="bin" />
+          <Directory Id="DocsFolder" Name="docs" />
+        </Directory>
+      </Directory>
+      
+      <!-- Start Menu -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="CMDB System Monitor"/>
+      </Directory>
+      
+      <!-- Desktop -->
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- Main PowerShell Script -->
+      <Component Id="SystemMonitorScript" Guid="B1C2D3E4-F5A6-4B5C-8D9E-0F1A2B3C4D5E">
+        <File Id="SystemMonitorPS1" 
+              Name="system-monitor.ps1" 
+              Source="system-monitor.ps1" 
+              KeyPath="yes" />
+      </Component>
+      
+      <!-- Documentation -->
+      <Component Id="ReadmeFile" Guid="C1D2E3F4-A5B6-4C5D-8E9F-0A1B2C3D4E5F">
+        <File Id="ReadmeMD" 
+              Name="README_SYSTEM_MONITOR.md" 
+              Source="README_SYSTEM_MONITOR.md" 
+              KeyPath="yes" />
+      </Component>
+      
+      <Component Id="InstallFile" Guid="D1E2F3A4-B5C6-4D5E-8F9A-0B1C2D3E4F5A">
+        <File Id="InstallTXT" 
+              Name="INSTALL.txt" 
+              Source="dist\system-monitor\INSTALL.txt" 
+              KeyPath="yes" />
+      </Component>
+      
+      <Component Id="VersionFile" Guid="E1F2A3B4-C5D6-4E5F-8A9B-0C1D2E3F4A5B">
+        <File Id="VersionTXT" 
+              Name="VERSION.txt" 
+              Source="dist\system-monitor\VERSION.txt" 
+              KeyPath="yes" />
+      </Component>
+      
+      <!-- Launch Script -->
+      <Component Id="LaunchScript" Guid="F1A2B3C4-D5E6-4F5A-8B9C-0D1E2F3A4B5C">
+        <File Id="LaunchBAT" 
+              Name="launch-monitor.bat" 
+              Source="launch-monitor.bat" 
+              KeyPath="yes" />
+      </Component>
+      
+      <!-- Environment Variable -->
+      <Component Id="PathEnvVar" Guid="A2B3C4D5-E6F7-4A5B-8C9D-0E1F2A3B4C5D">
+        <Environment Id="PATH" 
+                     Name="PATH" 
+                     Value="[INSTALLFOLDER]" 
+                     Permanent="no" 
+                     Part="last" 
+                     Action="set" 
+                     System="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Start Menu Shortcut -->
+    <Component Id="StartMenuShortcut" 
+               Directory="ApplicationProgramsFolder" 
+               Guid="B2C3D4E5-F6A7-4B5C-8D9E-0F1A2B3C4D5E">
+      <Shortcut Id="StartMenuShortcut1"
+                Name="System Monitor"
+                Description="Monitor system resources"
+                Target="[System64Folder]WindowsPowerShell\v1.0\powershell.exe"
+                Arguments="-ExecutionPolicy Bypass -NoExit -File &quot;[INSTALLFOLDER]system-monitor.ps1&quot;"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="icon.ico" />
+      <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+      <RegistryValue Root="HKCU" 
+                     Key="Software\CMDB\SystemMonitor" 
+                     Name="installed" 
+                     Type="integer" 
+                     Value="1" 
+                     KeyPath="yes"/>
+    </Component>
+
+    <!-- Desktop Shortcut -->
+    <Component Id="DesktopShortcut" 
+               Directory="DesktopFolder" 
+               Guid="C2D3E4F5-A6B7-4C5D-8E9F-0A1B2C3D4E5F">
+      <Shortcut Id="DesktopShortcut1"
+                Name="System Monitor"
+                Description="Monitor system resources"
+                Target="[System64Folder]WindowsPowerShell\v1.0\powershell.exe"
+                Arguments="-ExecutionPolicy Bypass -NoExit -File &quot;[INSTALLFOLDER]system-monitor.ps1&quot;"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="icon.ico" />
+      <RemoveFolder Id="DesktopFolder" On="uninstall"/>
+      <RegistryValue Root="HKCU" 
+                     Key="Software\CMDB\SystemMonitor" 
+                     Name="desktop_shortcut" 
+                     Type="integer" 
+                     Value="1" 
+                     KeyPath="yes"/>
+    </Component>
+  </Fragment>
+</Wix>

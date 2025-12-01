@@ -1,13 +1,14 @@
 import express from 'express';
-import cors from 'cors';
 import { recommendationsRouter } from './routes/recommendations';
 import { analyticsRouter } from './routes/analytics';
 import { optimizationRouter } from './routes/optimization';
+import { corsMiddleware } from '../../shared/cors.config';
+import { logger } from '../../shared/logger';
 
 const app = express();
 const PORT = process.env.PORT || 3011;
 
-app.use(cors());
+app.use(corsMiddleware);
 app.use(express.json());
 
 app.get('/health', (req, res) => {

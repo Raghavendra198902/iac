@@ -1,0 +1,2 @@
+/dist/windows-service/CMDBAgentService.pdb
+/dist/windows-service/CMDBAgentService.exe

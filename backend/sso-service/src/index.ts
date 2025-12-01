@@ -1,20 +1,17 @@
 import express from 'express';
-import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import { authRouter } from './routes/auth';
 import { samlRouter } from './routes/saml';
 import { oauth2Router } from './routes/oauth2';
 import { adminRouter } from './routes/admin';
+import { corsMiddleware } from '../../shared/cors.config';
+import { logger } from '../../shared/logger';
 
 const app = express();
 const PORT = process.env.PORT || 3012;
 
-app.use(cors({ 
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true 
-}));
-
+app.use(corsMiddleware);
 app.use(express.json());
 
 app.use(session({

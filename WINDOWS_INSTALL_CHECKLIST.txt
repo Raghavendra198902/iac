@@ -1,0 +1,85 @@
+═══════════════════════════════════════════════════════════════════════
+WINDOWS AGENT INSTALLATION - QUICK CHECKLIST
+═══════════════════════════════════════════════════════════════════════
+
+✅ PREREQUISITES (COMPLETED):
+────────────────────────────────────────────────────────────────────────
+✅ Backend API running (http://192.168.1.9:3001)
+✅ Frontend running (http://192.168.1.9:5173)
+✅ Linux agent online (rrd @ 192.168.1.9)
+✅ Windows Service EXE ready (64 MB)
+✅ Installation script ready
+✅ Database configured
+
+═══════════════════════════════════════════════════════════════════════
+📋 INSTALLATION STEPS (ON WINDOWS):
+═══════════════════════════════════════════════════════════════════════
+
+□ Step 1: Open PowerShell as Administrator
+   • Press Windows Key
+   • Type "PowerShell"
+   • Right-click → "Run as administrator"
+
+□ Step 2: Navigate to Downloads
+   cd $env:USERPROFILE\Downloads
+
+□ Step 3: Download Agent EXE
+   Invoke-WebRequest -Uri "http://192.168.1.9:5173/downloads/CMDBAgentService.exe" -OutFile "CMDBAgentService.exe"
+
+□ Step 4: Download Install Script
+   Invoke-WebRequest -Uri "http://192.168.1.9:5173/downloads/install-simple.ps1" -OutFile "install-simple.ps1"
+
+□ Step 5: Allow Script Execution
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+□ Step 6: Run Installer
+   .\install-simple.ps1
+
+□ Step 7: Verify Service
+   Get-Service CMDBAgent
+
+□ Step 8: Check CMDB Dashboard
+   Open browser: http://192.168.1.9:5173/cmdb
+
+═══════════════════════════════════════════════════════════════════════
+✅ SUCCESS INDICATORS:
+═══════════════════════════════════════════════════════════════════════
+
+PowerShell shows:
+   Status   Name         DisplayName
+   ------   ----         -----------
+   Running  CMDBAgent    CMDB Agent Service
+
+CMDB Dashboard shows:
+   🟢 rrd (Linux Server) - 192.168.1.9
+   🟢 rrd_laptopnew (Windows) - 192.168.0.100
+
+═══════════════════════════════════════════════════════════════════════
+🔧 IF ISSUES OCCUR:
+═══════════════════════════════════════════════════════════════════════
+
+Service won't start:
+   Restart-Service CMDBAgent
+
+Not showing in CMDB:
+   Test-NetConnection 192.168.1.9 -Port 3001
+
+Check config:
+   Get-Content "C:\Program Files\CMDB Agent\config.json"
+
+Reinstall:
+   Stop-Service CMDBAgent -Force
+   sc.exe delete CMDBAgent
+   Start-Sleep -Seconds 3
+   .\install-simple.ps1
+
+═══════════════════════════════════════════════════════════════════════
+📚 DOCUMENTATION:
+═══════════════════════════════════════════════════════════════════════
+• WINDOWS_AGENT_INSTALL.md - Complete guide
+• windows-install-commands.txt - Copy-paste commands
+• monitor-agents.py - Real-time monitoring
+
+═══════════════════════════════════════════════════════════════════════
+                    🚀 READY TO INSTALL! 🚀
+═══════════════════════════════════════════════════════════════════════

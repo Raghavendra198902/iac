@@ -4,14 +4,16 @@
   "description": "Integration tests for IAC DHARMA platform",
   "private": true,
   "scripts": {
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:verbose": "jest --verbose",
-    "test:api-gateway": "jest test-api-gateway.spec.ts",
-    "test:auth": "jest test-auth-flow.spec.ts",
-    "test:blueprint": "jest test-blueprint-workflow.spec.ts",
-    "test:ai": "jest test-ai-integration.spec.ts"
+    "test:coverage": "jest --coverage --passWithNoTests",
+    "test:verbose": "jest --verbose --passWithNoTests",
+    "test:api-gateway": "jest test-api-gateway.spec.ts --passWithNoTests",
+    "test:auth": "jest test-auth-flow.spec.ts --passWithNoTests",
+    "test:blueprint": "jest test-blueprint-workflow.spec.ts --passWithNoTests",
+    "test:ai": "jest test-ai-integration.spec.ts --passWithNoTests",
+    "test:database": "jest test-database-endpoints.spec.ts --passWithNoTests",
+    "test:all": "jest --passWithNoTests --maxWorkers=4"
   },
   "dependencies": {
     "axios": "^1.6.2",

@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import { config } from 'dotenv';
-import logger from './utils/logger';
 import { CostingService } from './costing-service';
 import { PricingEngine } from './pricing-engine';
 import { BudgetManager } from './budget-manager';
@@ -12,14 +11,18 @@ import {
   Budget,
   BudgetAlert
 } from './types';
+import { logger } from '../../shared/logger';
+import { corsMiddleware } from '../../shared/cors.config';
 
 config();
 
 const app = express();
-app.use(express.json({ limit: '10mb' }));
 
 // Security: Disable X-Powered-By header
 app.disable('x-powered-by');
+
+app.use(corsMiddleware);
+app.use(express.json({ limit: '10mb' }));
 
 const PORT = process.env.PORT || 3005;
 
