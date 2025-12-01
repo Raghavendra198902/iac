@@ -72,10 +72,20 @@ app.use(performanceMiddleware);
 // Prometheus metrics middleware
 app.use(metricsMiddleware);
 
-// CORS configuration - Use shared configuration
-import { corsMiddleware } from '../../shared/cors.config';
-logger.info('CORS middleware configured with shared settings');
-app.use(corsMiddleware);
+// CORS configuration - Inline configuration
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://192.168.1.9:5173',
+    'http://192.168.1.9:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-ID', 'X-Request-ID']
+};
+logger.info('CORS middleware configured');
+app.use(cors(corsOptions));
 
 // Rate limiting - Global rate limiter for all API endpoints
 const globalLimiter = rateLimit({

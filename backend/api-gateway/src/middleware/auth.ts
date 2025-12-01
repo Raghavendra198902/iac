@@ -113,6 +113,11 @@ export const requireRole = (...allowedRoles: string[]) => {
   };
 };
 
+// Flexible authorization that accepts both array and spread args
+export const authorize = (roles: string | string[]) => {
+  const rolesArray = Array.isArray(roles) ? roles : [roles];
+  return requireRole(...rolesArray);
+};
+
 // Export aliases for backward compatibility
 export const authenticate = authMiddleware;
-export const authorize = requireRole;

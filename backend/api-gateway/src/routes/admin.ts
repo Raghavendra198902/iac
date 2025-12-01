@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { prometheusRegistry } from '../utils/metrics';
+import { register as prometheusRegistry } from '../utils/metrics';
 import { getCircuitBreakerStats } from '../utils/circuitBreaker';
 import { redisClient } from '../config/redis';
 import { logger } from '../utils/logger';
@@ -66,7 +66,7 @@ router.get('/metrics/summary', async (req: Request, res: Response) => {
  */
 router.get('/circuit-breakers/stats', async (req: Request, res: Response) => {
   try {
-    const stats = getCircuitBreakerStats();
+    const stats = getCircuitBreakerStats(req.query.name as string || 'api-gateway');
     
     const breakers = Object.entries(stats).map(([name, stat]: [string, any]) => ({
       name,

@@ -9,7 +9,7 @@ const BLUEPRINT_SERVICE_URL = process.env.BLUEPRINT_SERVICE_URL || 'http://bluep
 // Get all blueprints
 router.get('/', async (req: AuthRequest, res) => {
   try {
-    const response = await axios.get(`${BLUEPRINT_SERVICE_URL}/blueprints`, {
+    const response = await axios.get(`${BLUEPRINT_SERVICE_URL}/api/blueprints`, {
       headers: { 'X-User-Id': req.user?.id, 'X-Tenant-Id': req.user?.tenantId }
     });
     res.json(response.data);
@@ -24,7 +24,7 @@ router.get('/', async (req: AuthRequest, res) => {
 // Get blueprint by ID
 router.get('/:id', async (req: AuthRequest, res) => {
   try {
-    const response = await axios.get(`${BLUEPRINT_SERVICE_URL}/blueprints/${req.params.id}`, {
+    const response = await axios.get(`${BLUEPRINT_SERVICE_URL}/api/blueprints/${req.params.id}`, {
       headers: { 'X-User-Id': req.user?.id, 'X-Tenant-Id': req.user?.tenantId }
     });
     res.json(response.data);
@@ -39,7 +39,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // Create blueprint (EA, SA, TA only)
 router.post('/', requireRole('EA', 'SA', 'TA'), operationRateLimit('blueprint_create'), async (req: AuthRequest, res) => {
   try {
-    const response = await axios.post(`${BLUEPRINT_SERVICE_URL}/blueprints`, req.body, {
+    const response = await axios.post(`${BLUEPRINT_SERVICE_URL}/api/blueprints`, req.body, {
       headers: { 'X-User-Id': req.user?.id, 'X-Tenant-Id': req.user?.tenantId }
     });
     res.status(201).json(response.data);
@@ -54,7 +54,7 @@ router.post('/', requireRole('EA', 'SA', 'TA'), operationRateLimit('blueprint_cr
 // Update blueprint
 router.put('/:id', requireRole('EA', 'SA', 'TA'), async (req: AuthRequest, res) => {
   try {
-    const response = await axios.put(`${BLUEPRINT_SERVICE_URL}/blueprints/${req.params.id}`, req.body, {
+    const response = await axios.put(`${BLUEPRINT_SERVICE_URL}/api/blueprints/${req.params.id}`, req.body, {
       headers: { 'X-User-Id': req.user?.id, 'X-Tenant-Id': req.user?.tenantId }
     });
     res.json(response.data);
@@ -69,7 +69,7 @@ router.put('/:id', requireRole('EA', 'SA', 'TA'), async (req: AuthRequest, res) 
 // Delete blueprint
 router.delete('/:id', requireRole('EA', 'SA'), async (req: AuthRequest, res) => {
   try {
-    await axios.delete(`${BLUEPRINT_SERVICE_URL}/blueprints/${req.params.id}`, {
+    await axios.delete(`${BLUEPRINT_SERVICE_URL}/api/blueprints/${req.params.id}`, {
       headers: { 'X-User-Id': req.user?.id, 'X-Tenant-Id': req.user?.tenantId }
     });
     res.status(204).send();

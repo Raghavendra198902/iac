@@ -292,7 +292,7 @@ async function getAvgReviewTurnaroundDays(db: any): Promise<number> {
     WHERE review_stage IN ('approved', 'rejected')
     AND updated_at >= NOW() - INTERVAL '90 days'
   `);
-  return parseFloat(result.rows[0].avg_days || 0).toFixed(1);
+  return parseFloat(result.rows[0].avg_days || 0);
 }
 
 async function getTotalProjects(db: any): Promise<number> {
@@ -323,7 +323,7 @@ async function getArchitectureDebtRatio(db: any): Promise<number> {
       NULLIF(COUNT(*), 0) * 100 as ratio
     FROM architecture_assets
   `);
-  return parseFloat(result.rows[0].ratio || 0).toFixed(1);
+  return parseFloat(result.rows[0].ratio || 0);
 }
 
 async function getDeprecatedAssetsCount(db: any): Promise<number> {
@@ -339,7 +339,7 @@ async function getAvgReuseRate(db: any): Promise<number> {
     FROM architecture_assets
     WHERE status = 'approved' AND asset_type = 'template'
   `);
-  return parseFloat(result.rows[0].avg_reuse || 0).toFixed(1);
+  return parseFloat(result.rows[0].avg_reuse || 0);
 }
 
 async function getStandardsAdoptionRate(db: any): Promise<number> {
@@ -404,7 +404,7 @@ async function getAutoApprovalRate(db: any): Promise<number> {
     FROM architecture_review_requests
     WHERE submission_date >= NOW() - INTERVAL '30 days'
   `);
-  return parseFloat(result.rows[0].rate || 0).toFixed(1);
+  return parseFloat(result.rows[0].rate || 0);
 }
 
 async function getTemplateUsageRate(db: any): Promise<number> {
@@ -415,7 +415,7 @@ async function getTemplateUsageRate(db: any): Promise<number> {
     FROM blueprints
     WHERE created_at >= NOW() - INTERVAL '30 days'
   `);
-  return parseFloat(result.rows[0].rate || 0).toFixed(1);
+  return parseFloat(result.rows[0].rate || 0);
 }
 
 async function getDeveloperSatisfactionScore(db: any): Promise<number> {
