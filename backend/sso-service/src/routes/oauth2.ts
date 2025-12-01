@@ -28,7 +28,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 }
 
 // Azure AD OAuth2
-if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET) {
+if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET && process.env.AZURE_TENANT_ID) {
   passport.use('azuread', new OIDCStrategy(
     {
       identityMetadata: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/v2.0/.well-known/openid-configuration`,
@@ -36,7 +36,7 @@ if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET) {
       clientSecret: process.env.AZURE_CLIENT_SECRET,
       responseType: 'code id_token',
       responseMode: 'form_post',
-      redirectUrl: '/api/auth/oauth2/azuread/callback',
+      redirectUrl: process.env.AZURE_REDIRECT_URL || 'http://localhost:3012/api/auth/oauth2/azuread/callback',
       allowHttpForRedirectUrl: true,
       passReqToCallback: false,
       scope: ['profile', 'email']
