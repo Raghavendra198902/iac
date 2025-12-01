@@ -23,6 +23,9 @@ import solutionArchitectRoutes from './solution-architect';
 import technicalArchitectRoutes from './technical-architect';
 import projectManagerRoutes from './project-manager';
 import softwareEngineerRoutes from './software-engineer';
+import monitoringRoutes from './monitoring';
+import orchestratorRoutes from './orchestrator';
+import cloudProvidersRoutes from './cloud-providers';
 
 const router = Router();
 
@@ -52,6 +55,9 @@ router.get('/', (req, res) => {
       admin: '/api/admin',
       adr: '/api/adr',
       architecture: '/api/architecture',
+      monitoring: '/api/monitoring',
+      orchestrator: '/api/orchestrator',
+      cloudProviders: '/api/cloud-providers',
       roles: {
         solutionArchitect: '/api/sa',
         technicalArchitect: '/api/ta', 
@@ -85,6 +91,9 @@ router.use('/sa', solutionArchitectRoutes);
 router.use('/ta', technicalArchitectRoutes);
 router.use('/pm', projectManagerRoutes);
 router.use('/se', softwareEngineerRoutes);
+router.use('/monitoring', monitoringRoutes);
+router.use('/orchestrator', orchestratorRoutes);
+router.use('/cloud-providers', cloudProvidersRoutes);
 // cmdb moved to public routes in index.ts
 router.use('/downloads', downloadsRoutes);
 

@@ -312,4 +312,41 @@ function generateMockResources(userInput: string, targetCloud?: string): any[] {
   return resources;
 }
 
+/**
+ * Get AI cost optimization recommendations
+ * GET /api/ai/recommendations
+ */
+router.get('/recommendations', async (req: Request, res: Response) => {
+  try {
+    // Mock recommendations for testing
+    const recommendations = [
+      {
+        id: 'rec-1',
+        type: 'cost-optimization',
+        title: 'Switch to Reserved Instances',
+        description: 'Your EC2 instances could save 40% with Reserved Instances',
+        potentialSavings: 450.00,
+        effort: 'low',
+        priority: 'high'
+      },
+      {
+        id: 'rec-2',
+        type: 'performance',
+        title: 'Enable Auto-scaling',
+        description: 'Configure auto-scaling to handle traffic spikes',
+        potentialSavings: 200.00,
+        effort: 'medium',
+        priority: 'medium'
+      }
+    ];
+    
+    res.json(recommendations);
+  } catch (error: any) {
+    res.status(500).json({
+      error: 'Failed to retrieve recommendations',
+      message: error.message
+    });
+  }
+});
+
 export default router;

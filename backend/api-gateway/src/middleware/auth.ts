@@ -21,7 +21,7 @@ export const authMiddleware = async (
 ): Promise<void> => {
   try {
     // Skip auth for public endpoints
-    const publicPaths = ['/health', '/auth/login', '/auth/sso', '/ai/generate', '/ai/optimize', '/ai/validate', '/downloads', '/telemetry', '/agents/heartbeat'];
+    const publicPaths = ['/health', '/auth/login', '/auth/refresh', '/auth/sso', '/ai/generate', '/ai/optimize', '/ai/validate', '/downloads', '/telemetry', '/agents/heartbeat'];
     if (publicPaths.some(path => req.path.startsWith(path))) {
       return next();
     }
