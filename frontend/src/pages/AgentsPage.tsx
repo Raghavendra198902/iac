@@ -1,32 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Container,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Box,
-  Chip,
-  CircularProgress,
-  Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  Computer as ComputerIcon,
-  CheckCircle as OnlineIcon,
-  Warning as WarningIcon,
-  Cancel as OfflineIcon,
-  Refresh as RefreshIcon,
-  Timeline as TimelineIcon,
-} from '@mui/icons-material';
+import { Computer, CheckCircle, AlertTriangle, XCircle, RefreshCw, Activity, TrendingUp, Server } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { MainLayout } from '../components/layout';
+import { API_URL } from '../config/api';
+import Badge from '../components/ui/Badge';
 
 interface AgentData {
   agentName: string;
@@ -72,13 +49,11 @@ const AgentsPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const apiBaseUrl = `http://${window.location.hostname}:3000/api`;
-      
-      const agentsRes = await fetch(`${apiBaseUrl}/agents`);
+      const agentsRes = await fetch(`${API_URL}/agents`);
       if (!agentsRes.ok) throw new Error('Failed to fetch agents');
       const agentsData = await agentsRes.json();
 
-      const summaryRes = await fetch(`${apiBaseUrl}/agents/stats/summary`);
+      const summaryRes = await fetch(`${API_URL}/agents/stats/summary`);
       if (!summaryRes.ok) throw new Error('Failed to fetch summary');
       const summaryData = await summaryRes.json();
 
@@ -96,203 +71,310 @@ const AgentsPage: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'online':
-        return <OnlineIcon sx={{ color: 'success.main' }} />;
+        return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
       case 'warning':
-        return <WarningIcon sx={{ color: 'warning.main' }} />;
+        return <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
       case 'offline':
-        return <OfflineIcon sx={{ color: 'error.main' }} />;
+        return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
       default:
-        return <ComputerIcon />;
+        return <Computer className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
     }
   };
 
-  const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'default' => {
+  const getStatusBadge = (status: string): 'success' | 'warning' | 'error' | 'gray' => {
     switch (status) {
       case 'online': return 'success';
       case 'warning': return 'warning';
       case 'offline': return 'error';
-      default: return 'default';
+      default: return 'gray';
     }
   };
 
   if (loading && agents.length === 0) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4, textAlign: 'center' }}>
-        <CircularProgress />
-        <Typography sx={{ mt: 2 }}>Loading agent data...</Typography>
-      </Container>
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="inline-block"
+            >
+              <RefreshCw className="h-12 w-12 text-blue-600 dark:text-blue-400" />
+            </motion.div>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">Loading agent data...</p>
+          </div>
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography variant="h3" gutterBottom>
-            Agent Management
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Monitor and manage CMDB agents in real-time
-          </Typography>
-        </Box>
-        <Tooltip title={autoRefresh ? 'Auto-refresh enabled' : 'Click to refresh'}>
-          <IconButton onClick={fetchData} color="primary">
-            <RefreshIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
+    <MainLayout>
+      {/* Animated Background Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [90, 0, 90],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+      </div>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative">
+        <div className="space-y-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Server className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </motion.div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Agent Management</h1>
+                <p className="text-gray-600 dark:text-gray-300">Monitor and manage CMDB agents in real-time</p>
+              </div>
+            </div>
 
-      {summary && (
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box>
-                    <Typography color="text.secondary" gutterBottom variant="overline">
-                      Total Agents
-                    </Typography>
-                    <Typography variant="h4">{summary.totalAgents}</Typography>
-                  </Box>
-                  <ComputerIcon sx={{ fontSize: 48, color: 'primary.main', opacity: 0.3 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+            <div className="flex items-center gap-3">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring" }}
+                className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full border border-green-300 dark:border-green-700"
+              >
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium">Auto-Refresh: {autoRefresh ? 'ON' : 'OFF'}</span>
+              </motion.div>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={fetchData}
+                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <RefreshCw className="h-5 w-5" />
+              </motion.button>
+            </div>
+          </motion.div>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box>
-                    <Typography color="text.secondary" gutterBottom variant="overline">
-                      Online
-                    </Typography>
-                    <Typography variant="h4" color="success.main">
-                      {summary.onlineAgents}
-                    </Typography>
-                  </Box>
-                  <OnlineIcon sx={{ fontSize: 48, color: 'success.main', opacity: 0.3 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box>
-                    <Typography color="text.secondary" gutterBottom variant="overline">
-                      Total Events
-                    </Typography>
-                    <Typography variant="h4">{summary.totalEvents.toLocaleString()}</Typography>
-                  </Box>
-                  <TimelineIcon sx={{ fontSize: 48, color: 'info.main', opacity: 0.3 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box>
-                    <Typography color="text.secondary" gutterBottom variant="overline">
-                      Suspicious
-                    </Typography>
-                    <Typography variant="h4" color={summary.totalSuspicious > 0 ? 'error.main' : 'text.primary'}>
-                      {summary.totalSuspicious}
-                    </Typography>
-                  </Box>
-                  <WarningIcon sx={{ fontSize: 48, color: 'error.main', opacity: 0.3 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
-
-      <Card>
-        <CardContent>
-          <Typography variant="h5" gutterBottom>
-            Registered Agents
-          </Typography>
-          {agents.length === 0 ? (
-            <Alert severity="info">No agents registered yet. Deploy an agent to see it here.</Alert>
-          ) : (
-            <TableContainer component={Paper} elevation={0}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Agent Name</TableCell>
-                    <TableCell>Last Seen</TableCell>
-                    <TableCell align="right">Total Events</TableCell>
-                    <TableCell align="right">Process Starts</TableCell>
-                    <TableCell align="right">Process Stops</TableCell>
-                    <TableCell align="right">Suspicious</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {agents.map((agent) => (
-                    <TableRow key={agent.agentName} hover>
-                      <TableCell>
-                        <Chip
-                          icon={getStatusIcon(agent.status)}
-                          label={agent.status.toUpperCase()}
-                          color={getStatusColor(agent.status)}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight="medium">
-                          {agent.agentName}
-                        </Typography>
-                        {agent.organizationId && (
-                          <Typography variant="caption" color="text.secondary">
-                            Org: {agent.organizationId}
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{agent.uptime}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(agent.lastSeen).toLocaleString()}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" fontWeight="medium">
-                          {agent.totalEvents.toLocaleString()}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">{agent.eventCounts.process_start}</TableCell>
-                      <TableCell align="right">{agent.eventCounts.process_stop}</TableCell>
-                      <TableCell align="right">
-                        <Typography
-                          variant="body2"
-                          color={agent.eventCounts.suspicious_process > 0 ? 'error.main' : 'text.primary'}
-                          fontWeight={agent.eventCounts.suspicious_process > 0 ? 'bold' : 'normal'}
-                        >
-                          {agent.eventCounts.suspicious_process}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+            >
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                <p className="text-red-800 dark:text-red-200">{error}</p>
+              </div>
+            </motion.div>
           )}
-        </CardContent>
-      </Card>
-    </Container>
+
+          {/* Summary Stats */}
+          {summary && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="card bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Agents</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{summary.totalAgents}</p>
+                  </div>
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Computer className="h-12 w-12 text-blue-600 dark:text-blue-400 opacity-30" />
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="card bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Online</p>
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{summary.onlineAgents}</p>
+                  </div>
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400 opacity-30" />
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="card bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Events</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{summary.totalEvents.toLocaleString()}</p>
+                  </div>
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Activity className="h-12 w-12 text-cyan-600 dark:text-cyan-400 opacity-30" />
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="card bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Suspicious</p>
+                    <p className={`text-3xl font-bold ${summary.totalSuspicious > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                      {summary.totalSuspicious}
+                    </p>
+                  </div>
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <AlertTriangle className="h-12 w-12 text-red-600 dark:text-red-400 opacity-30" />
+                  </motion.div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Agents Table */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="card bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-lg"
+          >
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Registered Agents</h2>
+              
+              {agents.length === 0 ? (
+                <div className="p-8 text-center bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Server className="h-16 w-16 text-blue-400 mx-auto mb-4" />
+                  <p className="text-blue-800 dark:text-blue-200">No agents registered yet. Deploy an agent to see it here.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b border-gray-200 dark:border-gray-700">
+                      <tr>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Status</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Agent Name</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Last Seen</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Total Events</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Process Starts</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Process Stops</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Suspicious</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {agents.map((agent, index) => (
+                        <motion.tr
+                          key={agent.agentName}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.6 + index * 0.05 }}
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.02)' }}
+                          className="border-b border-gray-100 dark:border-gray-800"
+                        >
+                          <td className="py-4 px-4">
+                            <Badge variant={getStatusBadge(agent.status)}>
+                              <span className="flex items-center gap-1">
+                                {getStatusIcon(agent.status)}
+                                {agent.status.toUpperCase()}
+                              </span>
+                            </Badge>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{agent.agentName}</p>
+                              {agent.organizationId && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Org: {agent.organizationId}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div>
+                              <p className="text-sm text-gray-900 dark:text-white">{agent.uptime}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(agent.lastSeen).toLocaleString()}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-right font-medium text-gray-900 dark:text-white">
+                            {agent.totalEvents.toLocaleString()}
+                          </td>
+                          <td className="py-4 px-4 text-right text-gray-900 dark:text-white">
+                            {agent.eventCounts.process_start}
+                          </td>
+                          <td className="py-4 px-4 text-right text-gray-900 dark:text-white">
+                            {agent.eventCounts.process_stop}
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            <span className={`font-${agent.eventCounts.suspicious_process > 0 ? 'bold' : 'normal'} ${agent.eventCounts.suspicious_process > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                              {agent.eventCounts.suspicious_process}
+                            </span>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </MainLayout>
   );
 };
 
