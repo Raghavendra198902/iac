@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { MainLayout } from '../../components/layout';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Download,
   Monitor,
@@ -17,6 +18,8 @@ import {
   Lock,
   Zap,
   Cloud,
+  Activity,
+  TrendingUp,
 } from 'lucide-react';
 
 interface Agent {
@@ -241,15 +244,65 @@ export default function AgentDownloads() {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute top-0 -left-4 w-96 h-96 bg-blue-400 dark:bg-blue-600 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20 dark:opacity-10"
+            animate={{
+              x: [0, 100, 0],
+              y: [0, 50, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          <motion.div
+            className="absolute top-0 right-4 w-96 h-96 bg-indigo-400 dark:bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20 dark:opacity-10"
+            animate={{
+              x: [0, -100, 0],
+              y: [0, 100, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto p-6 space-y-6 relative z-10">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 rounded-xl p-8 text-white shadow-2xl"
+          >
           <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+            <motion.div
+              className="p-3 bg-white/20 rounded-lg backdrop-blur-sm"
+              whileHover={{ rotate: 360, scale: 1.1 }}
+              transition={{ duration: 0.6 }}
+            >
               <Download className="w-8 h-8" />
-            </div>
+            </motion.div>
             <div>
-              <h1 className="text-4xl font-bold mb-2">CMDB Agent Downloads</h1>
+              <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+                CMDB Agent Downloads
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="text-xs px-3 py-1 bg-white/20 rounded-full font-normal flex items-center gap-1.5"
+                >
+                  <Activity className="w-3 h-3" />
+                  Live
+                </motion.span>
+              </h1>
               <p className="text-blue-100 text-lg">
                 Cross-platform agents for comprehensive IT asset discovery and monitoring
               </p>
@@ -262,16 +315,30 @@ export default function AgentDownloads() {
               { label: 'Uptime', value: '99.9%', icon: CheckCircle },
               { label: 'Latest Release', value: 'Today', icon: Package },
             ].map((stat, idx) => (
-              <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + idx * 0.1 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300"
+              >
                 <div className="flex items-center gap-2 mb-1">
                   <stat.icon className="w-4 h-4" />
                   <span className="text-sm text-blue-100">{stat.label}</span>
                 </div>
-                <div className="text-2xl font-bold">{stat.value}</div>
-              </div>
+                <motion.div
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2 + idx * 0.1 }}
+                  className="text-2xl font-bold"
+                >
+                  {stat.value}
+                </motion.div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Agent Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -280,17 +347,25 @@ export default function AgentDownloads() {
             const colors = getColorClasses(agent.color);
 
             return (
-              <div
+              <motion.div
                 key={agent.id}
-                className={`bg-white rounded-xl border-2 ${colors.border} overflow-hidden hover:shadow-xl transition-all`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * agents.indexOf(agent) }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl border-2 ${colors.border} overflow-hidden hover:shadow-2xl transition-all duration-300`}
               >
                 {/* Card Header */}
-                <div className={`${colors.bg} p-6 border-b ${colors.border}`}>
+                <div className={`${colors.bg} dark:${colors.bg}/50 p-6 border-b ${colors.border}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className={`p-3 bg-white rounded-lg border ${colors.border}`}>
+                      <motion.div
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                        className={`p-3 bg-white dark:bg-gray-900 rounded-lg border ${colors.border} shadow-sm`}
+                      >
                         <Icon className={`w-6 h-6 ${colors.text}`} />
-                      </div>
+                      </motion.div>
                       <div>
                         <h3 className="text-xl font-bold text-gray-900">{agent.name}</h3>
                         <p className="text-sm text-gray-600">{agent.platform}</p>
@@ -391,13 +466,18 @@ export default function AgentDownloads() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
         {/* Installation Guide */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg"
+        >
           <div className="flex items-center gap-3 mb-4">
             <FileCode className="w-6 h-6 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900">Quick Installation Guide</h2>
@@ -428,10 +508,15 @@ export default function AgentDownloads() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Security Notice */}
-        <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="bg-amber-50/80 dark:bg-amber-900/20 backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg"
+        >
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
             <div>
@@ -443,13 +528,27 @@ export default function AgentDownloads() {
               </p>
             </div>
           </div>
+        </motion.div>
         </div>
       </div>
 
       {/* Agent Details Modal */}
+      <AnimatePresence>
       {selectedAgent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedAgent(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          >
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <selectedAgent.icon className={`w-6 h-6 ${getColorClasses(selectedAgent.color).text}`} />
@@ -505,9 +604,10 @@ export default function AgentDownloads() {
                 Download {selectedAgent.name} v{selectedAgent.version}
               </a>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </MainLayout>
   );
 }
