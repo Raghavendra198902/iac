@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Brain, Lightbulb, TrendingUp, Target, Zap, AlertCircle, Play, BarChart3, Activity, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { MainLayout } from '../components/layout';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Brain, Lightbulb, TrendingUp, Target, Zap, AlertCircle, Play, BarChart3, 
+  Activity, Clock, Sparkles, CheckCircle2, RefreshCw, Eye, Shield, 
+  DollarSign, Cpu, Lock, Layers, TrendingDown, ArrowRight
+} from 'lucide-react';
 import Badge from '../components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
-import Alert from '../components/ui/Alert';
-import FadeIn from '../components/ui/FadeIn';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
+import { API_URL } from '../config/api';
 
 interface AIRecommendation {
   id: string;
@@ -132,34 +137,40 @@ const AIInsights = () => {
   const [autoRemediations, setAutoRemediations] = useState<AutoRemediation[]>([]);
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    // Load real-time predictions and auto-remediation status
-    const loadData = async () => {
-      try {
-        const [recsRes, predsRes, remediationsRes] = await Promise.all([
-          fetch('/api/ai/recommendations'),
-          fetch('/api/ai/predictions'),
-          fetch('/api/ai/auto-remediations')
-        ]);
-        if (recsRes.ok) setRecommendations(await recsRes.json());
-        if (predsRes.ok) setPredictions(await predsRes.json());
-        if (remediationsRes.ok) setAutoRemediations(await remediationsRes.json());
-      } catch (error) {
-        console.error('Failed to load AI data:', error);
-      }
-    };
     loadData();
-
-    // Refresh every 30 seconds
+    
+    if (!autoRefresh) return;
+    
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [autoRefresh]);
+
+  const loadData = async () => {
+    setIsRefreshing(true);
+    try {
+      const [recsRes, predsRes, remediationsRes] = await Promise.all([
+        fetch(`${API_URL}/ai/recommendations`),
+        fetch(`${API_URL}/ai/predictions`),
+        fetch(`${API_URL}/ai/auto-remediations`)
+      ]);
+      if (recsRes.ok) setRecommendations(await recsRes.json());
+      if (predsRes.ok) setPredictions(await predsRes.json());
+      if (remediationsRes.ok) setAutoRemediations(await remediationsRes.json());
+    } catch (error) {
+      console.error('Failed to load AI data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const simulateImpact = async (recommendationId: string) => {
     setIsSimulating(true);
     try {
-      const response = await fetch(`/api/ai/simulate/${recommendationId}`, { method: 'POST' });
+      const response = await fetch(`${API_URL}/ai/simulate/${recommendationId}`, { method: 'POST' });
       if (response.ok) {
         const result = await response.json();
         setSimulationResult(result);
@@ -173,9 +184,8 @@ const AIInsights = () => {
 
   const startAutoRemediation = async (recommendationId: string) => {
     try {
-      await fetch(`/api/ai/remediate/${recommendationId}`, { method: 'POST' });
-      // Reload auto-remediations to get updated status
-      const response = await fetch('/api/ai/auto-remediations');
+      await fetch(`${API_URL}/ai/remediate/${recommendationId}`, { method: 'POST' });
+      const response = await fetch(`${API_URL}/ai/auto-remediations`);
       if (response.ok) {
         setAutoRemediations(await response.json());
       }
@@ -241,68 +251,234 @@ const AIInsights = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            AI Insights & Recommendations
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Intelligent analysis and optimization suggestions
-          </p>
+    <MainLayout>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute top-0 -left-4 w-96 h-96 bg-purple-400 dark:bg-purple-600 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20 dark:opacity-10"
+            animate={{
+              x: [0, 100, 0],
+              y: [0, 50, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          <motion.div
+            className="absolute top-0 right-4 w-96 h-96 bg-blue-400 dark:bg-blue-600 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20 dark:opacity-10"
+            animate={{
+              x: [0, -100, 0],
+              y: [0, 100, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
         </div>
-        <button className="btn btn-primary flex items-center gap-2">
-          <Brain className="w-4 h-4" />
-          Generate Report
-        </button>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Recommendations</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {recommendations.length}
-              </p>
+        <div className="max-w-7xl mx-auto p-6 space-y-6 relative z-10">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                  <motion.div
+                    className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl shadow-lg"
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Brain className="w-8 h-8 text-white" />
+                  </motion.div>
+                  AI Insights & Recommendations
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="text-xs sm:text-sm px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full font-normal flex items-center gap-1.5"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    AI-Powered
+                  </motion.span>
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Intelligent analysis and optimization suggestions powered by machine learning
+                </p>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Auto Refresh Toggle */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow-sm ${
+                    autoRefresh
+                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-300 dark:border-gray-700'
+                  }`}
+                >
+                  <Activity className={`w-4 h-4 ${autoRefresh ? 'animate-pulse' : ''}`} />
+                  <span className="hidden sm:inline">{autoRefresh ? 'Auto' : 'Manual'}</span>
+                </motion.button>
+
+                {/* Refresh Button */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95, rotate: 180 }}
+                  onClick={loadData}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">Refresh</span>
+                </motion.button>
+
+                {/* Generate Report */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-all duration-300 shadow-sm"
+                >
+                  <Brain className="w-4 h-4" />
+                  <span className="hidden sm:inline">Generate Report</span>
+                </motion.button>
+              </div>
             </div>
-            <Lightbulb className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-          </div>
-        </div>
+          </motion.div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">High Priority</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {recommendations.filter((r) => r.priority === 'high').length}
-              </p>
-            </div>
-            <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
-          </div>
-        </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-full blur-2xl transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-700"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className="p-3 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-lg"
+                  >
+                    <Lightbulb className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <Badge variant="warning">Active</Badge>
+                </div>
+                <motion.h3
+                  key={`recs-${recommendations.length}`}
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent"
+                >
+                  {recommendations.length}
+                </motion.h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Recommendations</p>
+              </div>
+            </motion.div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Potential Savings</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                $5.4K
-              </p>
-            </div>
-            <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-        </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-500/10 to-transparent rounded-full blur-2xl transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-700"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg"
+                  >
+                    <AlertCircle className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <Badge variant="error">Urgent</Badge>
+                </div>
+                <motion.h3
+                  key={`high-${recommendations.filter((r) => r.priority === 'high').length}`}
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent"
+                >
+                  {recommendations.filter((r) => r.priority === 'high').length}
+                </motion.h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">High Priority</p>
+              </div>
+            </motion.div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Avg Confidence</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                93%
-              </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full blur-2xl transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-700"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg"
+                  >
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <Badge variant="success">Savings</Badge>
+                </div>
+                <motion.h3
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"
+                >
+                  $5.4K
+                </motion.h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Potential Savings</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-700"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg"
+                  >
+                    <Target className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <Badge variant="info">AI</Badge>
+                </div>
+                <motion.h3
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"
+                >
+                  93%
+                </motion.h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Avg Confidence</p>
+              </div>
+            </motion.div>
+          </div>
             </div>
             <Brain className="w-8 h-8 text-purple-600 dark:text-purple-400" />
           </div>
@@ -670,7 +846,9 @@ const AIInsights = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+        </div>
+      </div>
+    </MainLayout>
   );
 };
 
