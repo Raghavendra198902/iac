@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '../components/layout';
 import { API_URL } from '../config/api';
 import { motion, AnimatePresence } from 'framer-motion';
