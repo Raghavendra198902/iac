@@ -1,12 +1,19 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { TerraformGenerator } from './generators/terraform';
 import { BicepGenerator } from './generators/bicep';
 import { CloudFormationGenerator } from './generators/cloudformation';
 import { GenerationRequest, GenerationJob } from './types';
-import { logger } from '../../shared/logger';
-import { corsMiddleware } from '../../shared/cors.config';
+
+// Simple logger
+const logger = {
+  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
+  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
+  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
+  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
+};
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -14,7 +21,7 @@ const PORT = process.env.PORT || 3002;
 // Security: Disable X-Powered-By header
 app.disable('x-powered-by');
 
-app.use(corsMiddleware);
+app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // In-memory job storage (in production, use Redis or database)

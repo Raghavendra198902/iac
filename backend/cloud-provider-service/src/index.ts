@@ -1,15 +1,21 @@
 import express from 'express';
+import cors from 'cors';
 import { awsRouter } from './routes/aws';
 import { azureRouter } from './routes/azure';
 import { gcpRouter } from './routes/gcp';
 import { multiCloudRouter } from './routes/multi-cloud';
-import { corsMiddleware } from '../../shared/cors.config';
-import { logger } from '../../shared/logger';
+
+const logger = {
+  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
+  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
+  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
+  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
+};
 
 const app = express();
 const PORT = process.env.PORT || 3010;
 
-app.use(corsMiddleware);
+app.use(cors());
 app.use(express.json());
 
 // Health check

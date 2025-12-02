@@ -4,7 +4,7 @@
  */
 
 import { ArchitectureReviewRequest, ReviewerRole } from '../workflows/architecture-approval';
-import { GuardrailsEnforcementService } from '../../guardrails-engine/src/enforcement-service';
+// import { GuardrailsEnforcementService } from '../../guardrails-engine/src/enforcement-service';
 
 export interface ApprovalDecision {
   decision: 'auto_approved' | 'pending_review' | 'conditional_approval' | 'rejected';
@@ -19,12 +19,13 @@ export interface ApprovalDecision {
 
 export class ApprovalAutomation {
   private db: any;
-  private guardrailsService: GuardrailsEnforcementService;
+  // private guardrailsService: GuardrailsEnforcementService;
+  private guardrailsService: any;
   private notificationService: any;
   
   constructor(dependencies: {
     db: any;
-    guardrailsService: GuardrailsEnforcementService;
+    guardrailsService: any; // GuardrailsEnforcementService;
     notificationService: any;
   }) {
     this.db = dependencies.db;

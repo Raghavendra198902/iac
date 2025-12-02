@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MainLayout } from '../components/layout';
+import { motion, AnimatePresence } from 'framer-motion';
+import { API_URL } from '../config/api';
 import {
   Users,
   Shield,
@@ -24,7 +26,18 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Settings
+  Settings,
+  Filter,
+  RefreshCw,
+  BarChart3,
+  TrendingUp,
+  Eye,
+  UserPlus,
+  Zap,
+  Award,
+  Target,
+  Sparkles,
+  Globe
 } from 'lucide-react';
 
 interface User {
@@ -61,6 +74,10 @@ export default function UserManagement() {
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const [userForm, setUserForm] = useState({
     name: '',
@@ -95,7 +112,7 @@ export default function UserManagement() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/users');
+      const response = await fetch(`${API_URL}/users`);
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
       setUsers(data.users || []);
@@ -110,7 +127,7 @@ export default function UserManagement() {
   // Fetch roles from API
   const fetchRoles = async () => {
     try {
-      const response = await fetch('/api/users/roles/all');
+      const response = await fetch(`${API_URL}/users/roles/all`);
       if (!response.ok) throw new Error('Failed to fetch roles');
       const data = await response.json();
       setRoles(data.roles || []);
@@ -141,7 +158,7 @@ export default function UserManagement() {
 
       if (editingUser) {
         // Update existing user
-        const response = await fetch(`/api/users/${editingUser.id}`, {
+        const response = await fetch(`${API_URL}/users/${editingUser.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -156,7 +173,7 @@ export default function UserManagement() {
         if (!response.ok) throw new Error('Failed to update user');
       } else {
         // Create new user
-        const response = await fetch('/api/users', {
+        const response = await fetch(`${API_URL}/users`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -196,7 +213,7 @@ export default function UserManagement() {
   const handleDeleteUser = async (userId: string) => {
     if (confirm('Are you sure you want to delete this user?')) {
       try {
-        const response = await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`${API_URL}/users/${userId}`, {
           method: 'DELETE'
         });
         if (!response.ok) throw new Error('Failed to delete user');
@@ -212,7 +229,7 @@ export default function UserManagement() {
     try {
       if (editingRole) {
         // Update existing role
-        const response = await fetch(`/api/users/roles/${editingRole.id}`, {
+        const response = await fetch(`${API_URL}/users/roles/${editingRole.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -224,7 +241,7 @@ export default function UserManagement() {
         if (!response.ok) throw new Error('Failed to update role');
       } else {
         // Create new role
-        const response = await fetch('/api/users/roles/create', {
+        const response = await fetch(`${API_URL}/users/roles/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -261,7 +278,7 @@ export default function UserManagement() {
   const handleDeleteRole = async (roleId: string) => {
     if (confirm('Are you sure you want to delete this role?')) {
       try {
-        const response = await fetch(`/api/users/roles/${roleId}`, {
+        const response = await fetch(`${API_URL}/users/roles/${roleId}`, {
           method: 'DELETE'
         });
         if (!response.ok) {
@@ -306,113 +323,207 @@ export default function UserManagement() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-20 right-20 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            rotate: [0, -90, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"
+        />
+
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-              <Users className="w-8 h-8 text-white" />
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 relative"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">\n            <div className="flex items-center gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg"
+              >
+                <Users className="w-8 h-8 text-white" />
+              </motion.div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  User & Role Management
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Manage users, roles, and permissions with enterprise controls
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                User & Role Management
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage users, roles, and permissions
-              </p>
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => fetchUsers()}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Export
+              </motion.button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{users.length}</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">\n          {[
+            { 
+              label: 'Total Users', 
+              value: users.length, 
+              icon: Users, 
+              color: 'blue',
+              gradient: 'from-blue-500 to-cyan-500',
+              bgColor: 'bg-blue-100 dark:bg-blue-900',
+              change: '+12%'
+            },
+            { 
+              label: 'Active Users', 
+              value: users.filter(u => u.status === 'active').length, 
+              icon: UserCheck, 
+              color: 'green',
+              gradient: 'from-green-500 to-emerald-500',
+              bgColor: 'bg-green-100 dark:bg-green-900',
+              change: '+8%'
+            },
+            { 
+              label: 'Total Roles', 
+              value: roles.length, 
+              icon: Shield, 
+              color: 'purple',
+              gradient: 'from-purple-500 to-pink-500',
+              bgColor: 'bg-purple-100 dark:bg-purple-900',
+              change: '+2'
+            },
+            { 
+              label: 'Inactive', 
+              value: users.filter(u => u.status === 'inactive').length, 
+              icon: UserX, 
+              color: 'orange',
+              gradient: 'from-orange-500 to-red-500',
+              bgColor: 'bg-orange-100 dark:bg-orange-900',
+              change: '-3%'
+            }
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -5, scale: 1.02 }}
+              className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity" style={{ backgroundImage: `linear-gradient(to bottom right, var(--tw-gradient-stops))` }} />
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{stat.label}</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${stat.color === 'orange' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'}`}>
+                      {stat.change}
+                    </span>
+                  </div>
+                </div>
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 10 }}
+                  className={`p-3 ${stat.bgColor} rounded-xl`}
+                >
+                  <stat.icon className={`w-6 h-6 text-${stat.color}-600 dark:text-${stat.color}-300`} />
+                </motion.div>
               </div>
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6 text-blue-600 dark:text-blue-300" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {users.filter(u => u.status === 'active').length}
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg group-hover:scale-110 transition-transform">
-                <UserCheck className="w-6 h-6 text-green-600 dark:text-green-300" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Roles</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{roles.length}</p>
-              </div>
-              <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg group-hover:scale-110 transition-transform">
-                <Shield className="w-6 h-6 text-purple-600 dark:text-purple-300" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Inactive Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {users.filter(u => u.status === 'inactive').length}
-                </p>
-              </div>
-              <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg group-hover:scale-110 transition-transform">
-                <UserX className="w-6 h-6 text-orange-600 dark:text-orange-300" />
-              </div>
-            </div>
-          </div>
+            </motion.div>
+          ))}
         </div>
 
         {/* Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`flex-1 px-6 py-4 font-medium transition-all duration-300 ${
-                activeTab === 'users'
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Users className="w-5 h-5" />
-                Users ({users.length})
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('roles')}
-              className={`flex-1 px-6 py-4 font-medium transition-all duration-300 ${
-                activeTab === 'roles'
-                  ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-b-2 border-purple-600'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Shield className="w-5 h-5" />
-                Roles ({roles.length})
-              </div>
-            </button>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-xl"
+        >
+          <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+            {[
+              { id: 'users', label: 'Users', icon: Users, count: users.length, color: 'blue' },
+              { id: 'roles', label: 'Roles', icon: Shield, count: roles.length, color: 'purple' }
+            ].map((tab) => (
+              <motion.button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as 'users' | 'roles')}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`relative flex-1 px-6 py-4 font-medium transition-all duration-300 ${
+                  activeTab === tab.id
+                    ? `bg-white dark:bg-gray-800 text-${tab.color}-600 dark:text-${tab.color}-400 shadow-lg`
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800/50'
+                }`}
+              >
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-${tab.color}-500 to-${tab.color}-600`}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+                <div className="flex items-center justify-center gap-2">
+                  <tab.icon className="w-5 h-5" />
+                  <span>{tab.label}</span>
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className={`ml-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                      activeTab === tab.id
+                        ? `bg-${tab.color}-100 dark:bg-${tab.color}-900/30 text-${tab.color}-700 dark:text-${tab.color}-300`
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    {tab.count}
+                  </motion.span>
+                </div>
+              </motion.button>
+            ))}
           </div>
 
           {/* Users Tab */}
+          <AnimatePresence mode="wait">
           {activeTab === 'users' && (
-            <div className="p-6">
+            <motion.div
+              key="users-tab"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className="p-6"
+            >
               {loading && (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -583,12 +694,19 @@ export default function UserManagement() {
               )}
               </>
               )}
-            </div>
+            </motion.div>
           )}
 
           {/* Roles Tab */}
           {activeTab === 'roles' && (
-            <div className="p-6">
+            <motion.div
+              key="roles-tab"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="p-6"
+            >
               {loading && (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -700,14 +818,28 @@ export default function UserManagement() {
               )}
               </>
               )}
-            </div>
+            </motion.div>
           )}
-        </div>
+          </AnimatePresence>
+        </motion.div>
 
         {/* User Modal */}
+        <AnimatePresence>
         {showUserModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowUserModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-700"
+            >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {editingUser ? 'Edit User' : 'Add New User'}
@@ -789,14 +921,28 @@ export default function UserManagement() {
                   {editingUser ? 'Update' : 'Add'} User
                 </button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Role Modal */}
+        <AnimatePresence>
         {showRoleModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl max-w-2xl w-full p-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowRoleModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
+            >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {editingRole ? 'Edit Role' : 'Add New Role'}
@@ -883,9 +1029,10 @@ export default function UserManagement() {
                   {editingRole ? 'Update' : 'Add'} Role
                 </button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </MainLayout>
   );

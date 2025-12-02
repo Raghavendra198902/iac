@@ -18,12 +18,12 @@ const getApiBaseUrl = (): string => {
     // If accessing via IP address or non-localhost hostname, use that for API
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
       const protocol = window.location.protocol;
-      return `${protocol}//${hostname}:3001`;
+      return `${protocol}//${hostname}:3000`;
     }
   }
 
   // Default to localhost for local development
-  return 'http://localhost:3001';
+  return 'http://localhost:3000';
 };
 
 export const API_BASE_URL = getApiBaseUrl();

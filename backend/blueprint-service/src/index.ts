@@ -1,12 +1,18 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from './middleware/auth';
 import { validateBlueprint, validateBlueprintUpdate } from './validators';
-import { dbPool } from '../../shared/database/pool.config';
-import { logger } from '../../shared/logger';
-import { corsMiddleware } from '../../shared/cors.config';
+
+// Simple logger
+const logger = {
+  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
+  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
+  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
+  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
+};
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,11 +20,18 @@ const PORT = process.env.PORT || 3001;
 // Security: Disable X-Powered-By header
 app.disable('x-powered-by');
 
-app.use(corsMiddleware);
+app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Use shared database pool
-const pool = dbPool;
+// Database pool
+const pool = new Pool({
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  database: process.env.DB_NAME || 'iac_dharma',
+  user: process.env.DB_USER || 'dharma_admin',
+  password: process.env.DB_PASSWORD || 'dharma_pass_dev',
+  max: 20
+});
 
 // Redis connection
 const redis = new Redis({

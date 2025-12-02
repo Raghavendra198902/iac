@@ -5,9 +5,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy shared modules
-COPY ../shared ./shared
-
 COPY tsconfig.json ./
 COPY src ./src
 

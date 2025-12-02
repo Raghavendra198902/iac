@@ -9,6 +9,7 @@ import { logger, stream } from './utils/logger';
 import { runMigrations } from './utils/migrations';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
+import { dbMiddleware } from './middleware/database';
 import { userRateLimit, ipRateLimit } from './middleware/rateLimit';
 import { performanceMiddleware } from './utils/performance';
 import { correlationIdMiddleware, userContextMiddleware } from './middleware/correlationId';
@@ -119,6 +120,9 @@ app.use('/api/auth/login', authLimiter);
 // Body parsing middleware
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+
+// Database middleware (attach pool to all requests)
+app.use(dbMiddleware);
 
 // Serve static files from public directory
 app.use('/public', express.static('public'));

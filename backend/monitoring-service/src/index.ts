@@ -1,18 +1,25 @@
 import express from 'express';
+import cors from 'cors';
 import cron from 'node-cron';
 import { DriftDetector } from './drift-detector';
 import { HealthMonitor } from './health-monitor';
 import { CostMonitor } from './cost-monitor';
 import { RemediationEngine } from './remediation-engine';
-import { logger } from '../../shared/logger';
-import { corsMiddleware } from '../../shared/cors.config';
+
+// Simple logger
+const logger = {
+  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
+  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
+  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
+  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
+};
 
 const app = express();
 
 // Security: Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
 
-app.use(corsMiddleware);
+app.use(cors());
 app.use(express.json());
 
 const driftDetector = new DriftDetector();
