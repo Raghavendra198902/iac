@@ -916,8 +916,7 @@ export default function CostManagement() {
                 })}
               </div>
             </motion.div>
-          </motion.div>
-        </div>
+          </div>
 
         {/* Optimization Recommendations */}
         <motion.div
