@@ -43,9 +43,6 @@ export default function CostManagement() {
   const [currency, setCurrency] = useState<Currency>('USD');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(30000);
-  const [currency, setCurrency] = useState<Currency>('USD');
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(30000);
   const [summary, setSummary] = useState<CostSummary>({
     currentMonth: 24567,
     lastMonth: 26789,
