@@ -251,8 +251,7 @@ export default function AgentDownloads() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden">
-          <div className={`min-h-screen relative overflow-hidden ${highContrast ? 'bg-white dark:bg-black' : 'bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950'}` }>
+      <div className={`min-h-screen relative overflow-hidden ${highContrast ? 'bg-white dark:bg-black' : 'bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950'}` }>
         {/* Animated Background Orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -292,17 +291,16 @@ export default function AgentDownloads() {
             className="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 rounded-xl p-8 text-white shadow-2xl"
           >
           <div className="flex items-center gap-4 mb-4">
-                        <div className="ml-auto">
-                          <label className="flex items-center gap-2 text-white">
-                            <input
-                              type="checkbox"
-                              checked={highContrast}
-                              onChange={() => setHighContrast(!highContrast)}
-                            />
-                            <span className="text-sm">High contrast</span>
-                          </label>
-                        </div>
-                            className={`${highContrast ? 'bg-blue-700 text-white border-blue-600 hover:bg-blue-800' : 'bg-white/10 text-white border-white/25 hover:bg-white/25'} backdrop-blur-sm rounded-lg p-4 border transition-all duration-300`}
+            <div className="ml-auto">
+              <label className="flex items-center gap-2 text-white">
+                <input
+                  type="checkbox"
+                  checked={highContrast}
+                  onChange={() => setHighContrast(!highContrast)}
+                />
+                <span className="text-sm">High contrast</span>
+              </label>
+            </div>
             <motion.div
               className="p-3 bg-white/20 rounded-lg backdrop-blur-sm"
               whileHover={{ rotate: 360, scale: 1.1 }}
@@ -340,7 +338,7 @@ export default function AgentDownloads() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + idx * 0.1 }}
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-white/15 dark:bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/25 hover:bg-white/25 transition-all duration-300 text-white"
+                className={`${highContrast ? 'bg-blue-700 text-white border-blue-600 hover:bg-blue-800' : 'bg-white/15 dark:bg-white/10 text-white border-white/25 hover:bg-white/25'} backdrop-blur-sm rounded-lg p-4 border transition-all duration-300`}
               >
                 <div className="flex items-center gap-2 mb-1">
                   <stat.icon className="w-4 h-4" />
@@ -458,7 +456,6 @@ export default function AgentDownloads() {
                   {/* Architecture */}
                   <div className="flex items-center gap-2">
                     <Cpu className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-800 dark:text-gray-200">Architecture:</span>
                     <span className="text-sm text-gray-900 dark:text-gray-100">Architecture:</span>
                     <div className="flex gap-2">
                       {agent.architecture.map((arch) => (
@@ -477,7 +474,6 @@ export default function AgentDownloads() {
                     <div className="flex items-center gap-2">
                       <HardDrive className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-900 dark:text-gray-100">
-                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         <strong>OS:</strong> {agent.requirements.os}
                       </span>
                     </div>
@@ -495,7 +491,6 @@ export default function AgentDownloads() {
                     </div>
                     <ul className="space-y-1">
                       {agent.features.slice(0, 4).map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-xs text-gray-900 dark:text-gray-100">
                         <li key={idx} className="flex items-start gap-2 text-xs text-gray-900 dark:text-gray-100">
                           <CheckCircle className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
                           <span>{feature}</span>
@@ -533,7 +528,6 @@ export default function AgentDownloads() {
 
                   {/* Release Info */}
                   <div className="pt-4 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-                    <span className="text-gray-800 dark:text-gray-200">Released: {agent.releaseDate}</span>
                     <span className="text-gray-900 dark:text-gray-100">Released: {agent.releaseDate}</span>
                     <button
                       className="flex items-center gap-1 text-gray-900 dark:text-gray-100 hover:text-gray-950 dark:hover:text-white"
@@ -554,11 +548,11 @@ export default function AgentDownloads() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg"
+          className={`${highContrast ? 'bg-white dark:bg-gray-900' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl'} rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg"
         >
           <div className="flex items-center gap-3 mb-4">
             <FileCode className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Quick Installation Guide"
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Quick Installation Guide
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -594,100 +588,98 @@ export default function AgentDownloads() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="bg-amber-50 dark:bg-amber-900/30 backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg"
-          className={`${highContrast ? 'bg-white dark:bg-gray-900' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl'} rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg`}
+          className={`${highContrast ? 'bg-amber-100 dark:bg-amber-900' : 'bg-amber-50 dark:bg-amber-900/30'} backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg`}
         >
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-700 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Quick Installation Guide</h2>
-              <h4 className="font-semibold text-amber-900 dark:text-amber-200 mb-1">Security Verification</h4>
+            <AlertCircle className="w-5 h-5 text-amber-800 dark:text-amber-300 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">Security Verification</h4>
               <p className="text-sm text-amber-900 dark:text-amber-100">
                 Always verify the SHA-256 checksum after download. All agents are signed with our
                 code-signing certificate. For enterprise deployments, contact your IT administrator
                 for internal distribution channels.
               </p>
             </div>
-              <div className={`${highContrast ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} rounded-lg p-4 font-mono text-sm text-gray-900 dark:text-gray-100`}>
+          </div>
         </motion.div>
         </div>
       </div>
 
       {/* Agent Details Modal */}
       <AnimatePresence>
-      {selectedAgent && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-              <div className={`${highContrast ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} rounded-lg p-4 font-mono text-sm text-gray-900 dark:text-gray-100`}>
-          onClick={() => setSelectedAgent(null)}
-        >
+        {selectedAgent && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setSelectedAgent(null)}
           >
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <selectedAgent.icon className={`w-6 h-6 ${getColorClasses(selectedAgent.color).text}`} />
-                <h2 className="text-2xl font-bold text-gray-900">{selectedAgent.name}</h2>
-              </div>
-              <button
-                onClick={() => setSelectedAgent(null)}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* Full Feature List */}
-                className={`${highContrast ? 'bg-amber-100 dark:bg-amber-900' : 'bg-amber-50 dark:bg-amber-900/30'} backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg`}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-amber-800 dark:text-amber-300 mt-0.5 flex-shrink-0" />
-                  Complete Feature Set
-                    <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">Security Verification</h4>
-                    <p className="text-sm text-amber-900 dark:text-amber-100">
-                  {selectedAgent.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* System Requirements */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Server className="w-5 h-5 text-blue-500" />
-                  System Requirements
-                </h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
-                  <div><strong>OS:</strong> {selectedAgent.requirements.os}</div>
-                  <div><strong>RAM:</strong> {selectedAgent.requirements.ram}</div>
-                  <div><strong>Disk:</strong> {selectedAgent.requirements.disk}</div>
-                  <div><strong>CPU:</strong> {selectedAgent.requirements.cpu}</div>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            >
+              <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <selectedAgent.icon className={`w-6 h-6 ${getColorClasses(selectedAgent.color).text}`} />
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{selectedAgent.name}</h2>
                 </div>
+                <button
+                  onClick={() => setSelectedAgent(null)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
               </div>
 
-              {/* Download Action */}
-              <a
-                href={selectedAgent.downloadUrl}
-                download
-                onClick={() => setSelectedAgent(null)}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-semibold no-underline"
-              >
-                <Download className="w-5 h-5" />
-                Download {selectedAgent.name} v{selectedAgent.version}
-              </a>
-            </div>
+              <div className="p-6 space-y-6">
+                {/* Full Feature List */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    Complete Feature Set
+                  </h3>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {selectedAgent.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-200">
+                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* System Requirements */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <Server className="w-5 h-5 text-blue-500" />
+                    System Requirements
+                  </h3>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2 text-sm">
+                    <div><strong>OS:</strong> {selectedAgent.requirements.os}</div>
+                    <div><strong>RAM:</strong> {selectedAgent.requirements.ram}</div>
+                    <div><strong>Disk:</strong> {selectedAgent.requirements.disk}</div>
+                    <div><strong>CPU:</strong> {selectedAgent.requirements.cpu}</div>
+                  </div>
+                </div>
+
+                {/* Download Action */}
+                <a
+                  href={selectedAgent.downloadUrl}
+                  download
+                  onClick={() => setSelectedAgent(null)}
+                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-semibold no-underline"
+                >
+                  <Download className="w-5 h-5" />
+                  Download {selectedAgent.name} v{selectedAgent.version}
+                </a>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
       </AnimatePresence>
     </MainLayout>
   );
