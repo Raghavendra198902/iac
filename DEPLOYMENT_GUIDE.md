@@ -1,8 +1,46 @@
-# 🚀 CMDB Agent Deployment Guide
+---
+**Document Type:** Enterprise Deployment Guide  
+**Audience:** DevOps Engineers, System Administrators, Operations Teams  
+**Classification:** Operations Manual - Critical  
+**Version:** 2.0  
+**Last Updated:** December 3, 2025  
+**Reading Time:** ~30 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
 
-**Copyright © 2024-2025 Raghavendra Deshpande. All Rights Reserved.**
+# 🚀 IAC Dharma CMDB Agent - Enterprise Deployment Guide
 
-## 📋 Table of Contents
+> **Mission-Critical Infrastructure**: Comprehensive deployment procedures for enterprise-scale CMDB agent infrastructure across multi-cloud and hybrid environments
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#01579b','primaryBorderColor':'#1976d2','lineColor':'#1976d2','secondaryColor':'#e8f5e9','tertiaryColor':'#fff3e0'}}}%%
+flowchart TD
+    A[Deployment Planning] --> B{Environment Type}
+    B -->|Development| C[Dev Deployment]
+    B -->|Staging| D[Staging Deployment]
+    B -->|Production| E[Production Deployment]
+    
+    C --> F[Single Node Setup]
+    D --> G[Multi-Node Cluster]
+    E --> H[HA Cluster with DR]
+    
+    F --> I[Validation & Testing]
+    G --> I
+    H --> I
+    
+    I --> J{Tests Pass?}
+    J -->|No| K[Troubleshooting]
+    K --> I
+    J -->|Yes| L[Monitoring Setup]
+    L --> M[✅ Deployment Complete]
+    
+    style A fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style B fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style E fill:#ffebee,stroke:#c62828,stroke-width:3px
+    style M fill:#e8f5e9,stroke:#388e3c,stroke-width:4px
+```
+
+--- 📋 Table of Contents
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)

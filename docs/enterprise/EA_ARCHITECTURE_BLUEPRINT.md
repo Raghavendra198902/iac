@@ -1,96 +1,118 @@
+---
+**Document Type:** Enterprise Architecture Blueprint  
+**Audience:** Enterprise Architects, System Designers, C-Level Executives  
+**Classification:** Strategic Architecture - Mission Critical  
+**Version:** 1.0  
+**Date:** November 24, 2025  
+**Status:** Active  
+**Reading Time:** ~45 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
+
 # EA - Enterprise Architecture Blueprint
 ## IAC Dharma Platform
 
-**Version:** 1.0  
-**Date:** November 24, 2025  
-**Status:** Active
+## Executive Summary
 
----
+A comprehensive enterprise architecture blueprint defining the logical, physical, and integration architecture for IAC Dharma—a mission-critical, multi-cloud Infrastructure as Code platform designed for scale, resilience, and enterprise-grade security.
 
-## E) Enterprise Architecture Blueprint
-
-### Overview
-This document presents the high-level logical architecture for IAC Dharma, including component federation, enterprise interoperability, and integration strategies.
+### Strategic Objectives
+- **Multi-Cloud Native:** Seamless AWS, Azure, and GCP integration
+- **AI-Powered Intelligence:** Automated optimization and predictive analytics
+- **Zero-Trust Security:** Policy enforcement and compliance automation
+- **Federated Architecture:** Loosely coupled, independently scalable services
+- **Enterprise Integration:** Active Directory, SIEM, ITSM, and monitoring platforms
 
 ---
 
 ## 🏛️ High-Level Logical Architecture
 
-### Architecture Layers
+### Multi-Layer Enterprise Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     PRESENTATION LAYER                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │   Web UI     │  │  Mobile App  │  │   CLI Tool   │         │
-│  │  (React)     │  │ (React Native)│  │  (Node.js)   │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      API GATEWAY LAYER                          │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  API Gateway (Node.js + Express)                          │ │
-│  │  • Authentication & Authorization                         │ │
-│  │  • Rate Limiting & Throttling                            │ │
-│  │  • Request Routing                                        │ │
-│  │  • API Documentation (Swagger/OpenAPI)                    │ │
-│  │  • WebSocket Support                                      │ │
-│  └───────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     BUSINESS LOGIC LAYER                        │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │  Blueprint   │  │     IaC      │  │  Guardrails  │         │
-│  │   Service    │  │  Generator   │  │    Engine    │         │
-│  │              │  │   Service    │  │    (OPA)     │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │     AI       │  │ Orchestrator │  │  Monitoring  │         │
-│  │   Engine     │  │   Service    │  │   Service    │         │
-│  │  (Python)    │  │              │  │              │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │   Costing    │  │     SSO      │  │     CMDB     │         │
-│  │   Service    │  │   Service    │  │    Agent     │         │
-│  │              │  │              │  │              │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-│  ┌──────────────┐  ┌──────────────┐                           │
-│  │Cloud Provider│  │  Automation  │                           │
-│  │   Service    │  │    Engine    │                           │
-│  │              │  │              │                           │
-│  └──────────────┘  └──────────────┘                           │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       DATA LAYER                                │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │  PostgreSQL  │  │     Redis    │  │  S3/Blob/GCS │         │
-│  │  (Primary)   │  │    (Cache)   │  │   (Storage)  │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-│  ┌──────────────┐  ┌──────────────┐                           │
-│  │ Prometheus   │  │ Elasticsearch│                           │
-│  │  (Metrics)   │  │    (Logs)    │                           │
-│  └──────────────┘  └──────────────┘                           │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  INTEGRATION LAYER                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │   AWS API    │  │  Azure API   │  │   GCP API    │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │  Active Dir  │  │     SIEM     │  │  Firewalls   │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │    Slack     │  │  PagerDuty   │  │     Jira     │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#01579b','primaryBorderColor':'#1976d2','lineColor':'#1976d2','secondaryColor':'#e8f5e9','tertiaryColor':'#fff3e0'}}}%%
+flowchart TD
+    subgraph Presentation["<b>PRESENTATION LAYER</b>"]
+        WebUI["Web UI<br/>(React)"]
+        Mobile["Mobile App<br/>(React Native)"]
+        CLI["CLI Tool<br/>(Node.js)"]
+    end
+    
+    subgraph Gateway["<b>API GATEWAY LAYER</b>"]
+        APIGW["API Gateway<br/>(Node.js + Express)"]
+        Auth["Authentication & Authorization"]
+        RateLimit["Rate Limiting & Throttling"]
+        Router["Request Routing"]
+        Swagger["API Documentation<br/>(Swagger/OpenAPI)"]
+        WS["WebSocket Support"]
+    end
+    
+    subgraph Business["<b>BUSINESS LOGIC LAYER</b>"]
+        Blueprint["Blueprint<br/>Service"]
+        IaCGen["IaC Generator<br/>Service"]
+        Guard["Guardrails<br/>Engine (OPA)"]
+        AIEngine["AI Engine<br/>(Python)"]
+        Orchestrator["Orchestrator<br/>Service"]
+        Monitor["Monitoring<br/>Service"]
+        Costing["Costing<br/>Service"]
+        SSO["SSO<br/>Service"]
+        CMDB["CMDB<br/>Agent"]
+        Cloud["Cloud Provider<br/>Service"]
+        Automation["Automation<br/>Engine"]
+    end
+    
+    subgraph Data["<b>DATA LAYER</b>"]
+        Postgres["PostgreSQL<br/>(Primary)"]
+        Redis["Redis<br/>(Cache)"]
+        Storage["S3/Blob/GCS<br/>(Storage)"]
+        Prometheus["Prometheus<br/>(Metrics)"]
+        Elastic["Elasticsearch<br/>(Logs)"]
+    end
+    
+    subgraph Integration["<b>INTEGRATION LAYER</b>"]
+        AWS["AWS API"]
+        Azure["Azure API"]
+        GCP["GCP API"]
+        AD["Active Directory"]
+        SIEM["SIEM"]
+        Firewall["Firewalls"]
+        Slack["Slack"]
+        PagerDuty["PagerDuty"]
+        Jira["Jira"]
+    end
+    
+    WebUI --> APIGW
+    Mobile --> APIGW
+    CLI --> APIGW
+    
+    APIGW --> Blueprint
+    APIGW --> IaCGen
+    APIGW --> Guard
+    APIGW --> AIEngine
+    APIGW --> Orchestrator
+    APIGW --> Monitor
+    
+    Blueprint --> Postgres
+    IaCGen --> Postgres
+    Guard --> Postgres
+    AIEngine --> Redis
+    
+    Orchestrator --> AWS
+    Orchestrator --> Azure
+    Orchestrator --> GCP
+    
+    Monitor --> Prometheus
+    Monitor --> Elastic
+    
+    SSO --> AD
+    Monitor --> Slack
+    Monitor --> PagerDuty
+    
+    style Presentation fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    style Gateway fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    style Business fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+    style Data fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    style Integration fill:#fce4ec,stroke:#c2185b,stroke-width:3px
 ```
 
 ---
