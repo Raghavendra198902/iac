@@ -49,6 +49,7 @@ const SoftwareEngineering = lazy(() => import('./pages/se/SoftwareEngineering'))
 
 // Agent Downloads
 const AgentDownloads = lazy(() => import('./pages/agents/AgentDownloads'));
+const UploadAgent = lazy(() => import('./pages/agents/UploadAgent'));
 const DownloadsPage = lazy(() => import('./pages/DownloadsPage'));
 
 // CMDB
@@ -133,6 +134,7 @@ function App() {
                   
                   {/* Agent Downloads */}
                   <Route path="/agents/downloads" element={<AgentDownloads />} />
+                  <Route path="/agents/upload" element={<UploadAgent />} />
                   <Route path="/downloads" element={<DownloadsPage />} />
                   
                   {/* CMDB */}

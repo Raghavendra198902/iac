@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MainLayout } from '../../components/layout';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import {
   Download,
   Monitor,
@@ -24,6 +25,7 @@ import {
   Check,
   Laptop,
   MonitorDown,
+  Upload,
 } from 'lucide-react';
 
 interface Agent {
@@ -273,7 +275,14 @@ export default function AgentDownloads() {
             className="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 rounded-xl p-8 text-white shadow-2xl"
           >
           <div className="flex items-center gap-4 mb-4">
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-4">
+              <Link
+                to="/agents/upload"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium transition-colors backdrop-blur-sm"
+              >
+                <Upload className="w-4 h-4" />
+                Upload Agent
+              </Link>
               <label className="flex items-center gap-2 text-white">
                 <input
                   type="checkbox"
