@@ -20,6 +20,10 @@ import {
   Cloud,
   Activity,
   TrendingUp,
+  Copy,
+  Check,
+  Laptop,
+  MonitorDown,
 } from 'lucide-react';
 
 interface Agent {
@@ -46,6 +50,8 @@ interface Agent {
 
 export default function AgentDownloads() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [platform, setPlatform] = useState<'linux' | 'windows' | 'macos'>('linux');
+  const [copied, setCopied] = useState(false);
 
   const agents: Agent[] = [
     {
@@ -337,6 +343,61 @@ export default function AgentDownloads() {
                 </motion.div>
               </motion.div>
             ))}
+          </div>
+        </motion.div>
+
+        {/* Platform Tabs & Copy Command */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-700 p-0 shadow-lg"
+        >
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+            <button
+              onClick={() => setPlatform('linux')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${platform==='linux' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+            >
+              <Terminal className="h-4 w-4 inline mr-2" /> Linux
+            </button>
+            <button
+              onClick={() => setPlatform('windows')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${platform==='windows' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+            >
+              <MonitorDown className="h-4 w-4 inline mr-2" /> Windows
+            </button>
+            <button
+              onClick={() => setPlatform('macos')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${platform==='macos' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+            >
+              <Laptop className="h-4 w-4 inline mr-2" /> macOS
+            </button>
+          </div>
+          <div className="p-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Install command</p>
+            <div className="flex items-center gap-3">
+              <code className="flex-1 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm overflow-x-auto">
+                {platform === 'linux' && 'curl -fsSL https://download.iac.example/agent/install.sh | bash'}
+                {platform === 'windows' && 'powershell -Command "iwr https://download.iac.example/agent/install.ps1 -UseBasicParsing | iex"'}
+                {platform === 'macos' && 'curl -fsSL https://download.iac.example/agent/install-macos.sh | bash'}
+              </code>
+              <button
+                onClick={() => {
+                  const text = platform === 'linux'
+                    ? 'curl -fsSL https://download.iac.example/agent/install.sh | bash'
+                    : platform === 'windows'
+                    ? 'powershell -Command "iwr https://download.iac.example/agent/install.ps1 -UseBasicParsing | iex"'
+                    : 'curl -fsSL https://download.iac.example/agent/install-macos.sh | bash';
+                  navigator.clipboard.writeText(text);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                }}
+                className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm flex items-center gap-2"
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
           </div>
         </motion.div>
 
