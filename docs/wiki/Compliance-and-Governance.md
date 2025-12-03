@@ -1,3 +1,14 @@
+---
+**Document Type**: Compliance & Governance Guide  
+**Audience**: Compliance Officers, Security Engineers, Auditors  
+**Classification**: Critical - Compliance  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 35 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Compliance and Governance
 
 Comprehensive guide to maintaining regulatory compliance and implementing governance policies in IAC Dharma.

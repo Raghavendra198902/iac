@@ -1,3 +1,14 @@
+---
+**Document Type**: Infrastructure-as-Code Templates Guide  
+**Audience**: Platform Engineers, DevOps Engineers, Infrastructure Developers  
+**Classification**: Technical - IaC  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 40 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Terraform Templates
 
 Comprehensive guide to Terraform modules, patterns, and best practices in IAC Dharma.

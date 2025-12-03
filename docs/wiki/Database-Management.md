@@ -1,3 +1,14 @@
+---
+**Document Type**: Database Administration Guide  
+**Audience**: Database Administrators, DevOps Engineers, SREs  
+**Classification**: Technical - Database Operations  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 35 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Database Management
 
 Comprehensive guide to PostgreSQL database administration, optimization, and management in IAC Dharma.

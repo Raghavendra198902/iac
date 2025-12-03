@@ -1,3 +1,14 @@
+---
+**Document Type**: Technical Integration Guide  
+**Audience**: DevOps Engineers, System Administrators, Infrastructure Architects  
+**Classification**: Technical  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 25 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # CMDB Integration
 
 Comprehensive guide to Configuration Management Database (CMDB) integration for infrastructure discovery and tracking in IAC Dharma.
@@ -18,42 +29,44 @@ IAC Dharma's CMDB Agent provides automated infrastructure discovery and configur
 
 ## 🏗️ CMDB Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      CMDB Agent Service                      │
-│                      http://localhost:3008                   │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Discovery Engine                                     │  │
-│  │  • Cloud Provider APIs                               │  │
-│  │  • Resource Scanner                                  │  │
-│  │  • Metadata Collector                                │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                            │                                 │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Data Processor                                       │  │
-│  │  • Normalization                                     │  │
-│  │  • Relationship Detection                            │  │
-│  │  • Change Detection                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                            │                                 │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Storage Layer                                        │  │
-│  │  • PostgreSQL (CI Database)                          │  │
-│  │  • Redis (Cache)                                     │  │
-│  │  • Elasticsearch (Search)                            │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-                         │
-        ┌────────────────┼────────────────┐
-        │                │                │
-        ▼                ▼                ▼
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│   AWS API    │  │  Azure API   │  │   GCP API    │
-│              │  │              │  │              │
-└──────────────┘  └──────────────┘  └──────────────┘
+```mermaid
+flowchart TD
+    Start([CMDB Agent Service<br/>:3008]) --> Discovery[Discovery Engine]
+    
+    Discovery --> |Scan Resources| CloudAPIs{Cloud Provider<br/>APIs}
+    Discovery --> ResourceScanner[Resource Scanner]
+    Discovery --> MetadataCollect[Metadata Collector]
+    
+    CloudAPIs --> |Connect| AWS[AWS API<br/>EC2, RDS, S3]
+    CloudAPIs --> |Connect| Azure[Azure API<br/>VM, SQL, Storage]
+    CloudAPIs --> |Connect| GCP[GCP API<br/>Compute, Cloud SQL]
+    
+    ResourceScanner --> DataProcessor[Data Processor]
+    MetadataCollect --> DataProcessor
+    
+    DataProcessor --> Normalize[Normalization<br/>Standardize Format]
+    DataProcessor --> RelDetect[Relationship Detection<br/>Map Dependencies]
+    DataProcessor --> ChangeDetect[Change Detection<br/>Track Drift]
+    
+    Normalize --> Storage{Storage Layer}
+    RelDetect --> Storage
+    ChangeDetect --> Storage
+    
+    Storage --> PostgreSQL[(PostgreSQL<br/>CI Database)]
+    Storage --> Redis[(Redis<br/>Cache Layer)]
+    Storage --> Elastic[(Elasticsearch<br/>Search Index)]
+    
+    PostgreSQL --> Results([Configuration Items<br/>Stored & Indexed])
+    
+    style Start fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    style Discovery fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style CloudAPIs fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style DataProcessor fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Storage fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style PostgreSQL fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style Redis fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style Elastic fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style Results fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
 ```
 
 ---

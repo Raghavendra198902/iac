@@ -1,3 +1,14 @@
+---
+**Document Type**: Authentication Configuration Guide  
+**Audience**: Security Engineers, Identity Administrators, DevOps Engineers  
+**Classification**: Technical - Security  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 25 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # SSO Configuration
 
 Comprehensive guide to Single Sign-On (SSO) configuration with SAML 2.0 and OAuth 2.0 in IAC Dharma.

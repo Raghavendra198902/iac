@@ -1,3 +1,14 @@
+---
+**Document Type**: Feature Management Guide  
+**Audience**: DevOps Engineers, Product Managers, Release Engineers  
+**Classification**: Technical - Feature Management  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 25 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Feature Flags
 
 Advanced feature flag management for gradual rollouts, A/B testing, and canary deployments.

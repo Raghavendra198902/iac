@@ -1,3 +1,14 @@
+---
+**Document Type**: Plugin Development Guide  
+**Audience**: Plugin Developers, Platform Engineers, Extension Developers  
+**Classification**: Technical - Development  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 30 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Plugin Development
 
 Complete guide to developing custom plugins and extensions for IAC Dharma.

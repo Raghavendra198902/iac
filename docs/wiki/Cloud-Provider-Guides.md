@@ -1,3 +1,14 @@
+---
+**Document Type**: Multi-Cloud Implementation Guide  
+**Audience**: Cloud Engineers, DevOps Engineers, Platform Architects  
+**Classification**: Technical - Cloud Platforms  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 40 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Cloud Provider Guides
 
 Provider-specific implementation guides for AWS, Azure, and GCP in IAC Dharma.
@@ -11,6 +22,72 @@ This guide covers cloud-specific configurations, best practices, and examples fo
 - **AWS** - Amazon Web Services
 - **Azure** - Microsoft Azure
 - **GCP** - Google Cloud Platform
+
+---
+
+## ☁️ Multi-Cloud Architecture
+
+```mermaid
+flowchart TD
+    Start([IAC Dharma<br/>Platform]) --> Abstraction[Cloud Abstraction Layer<br/>Unified API]
+    
+    Abstraction --> Auth{Authentication<br/>Layer}
+    
+    Auth --> |AWS| AWSAuth[AWS Authentication]
+    Auth --> |Azure| AzureAuth[Azure Authentication]
+    Auth --> |GCP| GCPAuth[GCP Authentication]
+    
+    AWSAuth --> |IAM/STS| AWSCreds[AWS Credentials<br/>Access Key + Secret]
+    AzureAuth --> |Service Principal| AzureCreds[Azure Credentials<br/>Client ID + Secret]
+    GCPAuth --> |Service Account| GCPCreds[GCP Credentials<br/>JSON Key File]
+    
+    AWSCreds --> AWSProviders{AWS Services}
+    AzureCreds --> AzureProviders{Azure Services}
+    GCPCreds --> GCPProviders{GCP Services}
+    
+    AWSProviders --> AWSEC2[EC2<br/>Compute]
+    AWSProviders --> AWSRDS[RDS<br/>Database]
+    AWSProviders --> AWSS3[S3<br/>Storage]
+    AWSProviders --> AWSEKS[EKS<br/>Kubernetes]
+    
+    AzureProviders --> AzureVM[Virtual Machines<br/>Compute]
+    AzureProviders --> AzureSQL[SQL Database<br/>Database]
+    AzureProviders --> AzureStorage[Storage Account<br/>Storage]
+    AzureProviders --> AzureAKS[AKS<br/>Kubernetes]
+    
+    GCPProviders --> GCPCompute[Compute Engine<br/>Compute]
+    GCPProviders --> GCPCloud SQL[Cloud SQL<br/>Database]
+    GCPProviders --> GCPStorage[Cloud Storage<br/>Storage]
+    GCPProviders --> GCPGKE[GKE<br/>Kubernetes]
+    
+    AWSEC2 --> Deployment[Resource Deployment]
+    AWSRDS --> Deployment
+    AWSS3 --> Deployment
+    AWSEKS --> Deployment
+    
+    AzureVM --> Deployment
+    AzureSQL --> Deployment
+    AzureStorage --> Deployment
+    AzureAKS --> Deployment
+    
+    GCPCompute --> Deployment
+    GCPCloud SQL --> Deployment
+    GCPStorage --> Deployment
+    GCPGKE --> Deployment
+    
+    Deployment --> Monitor[Unified Monitoring<br/>Prometheus + Grafana]
+    Monitor --> Cost[Cost Optimization<br/>AI Recommendations]
+    Cost --> Success([Multi-Cloud<br/>Infrastructure Live])
+    
+    style Start fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    style Abstraction fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Auth fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style AWSProviders fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style AzureProviders fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style GCPProviders fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    style Deployment fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style Success fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
+```
 
 ---
 

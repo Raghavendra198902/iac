@@ -1,3 +1,14 @@
+---
+**Document Type**: Platform Migration Guide  
+**Audience**: DevOps Engineers, Platform Engineers, Migration Teams  
+**Classification**: Technical - Migration  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 30 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Migration Guide
 
 Complete guide to migrating to IAC Dharma from existing infrastructure management platforms.

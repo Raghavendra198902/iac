@@ -1,3 +1,14 @@
+---
+**Document Type**: Development Guide - Blueprint Creation  
+**Audience**: Platform Engineers, DevOps Engineers, Infrastructure Developers  
+**Classification**: Technical - Development  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 35 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Custom Blueprints
 
 Complete guide to creating, managing, and validating custom infrastructure blueprints in IAC Dharma.
@@ -15,6 +26,66 @@ IAC Dharma blueprints are reusable infrastructure templates with:
 - **Parameterization**: Dynamic values with defaults
 - **Composition**: Nested and referenced blueprints
 - **CI/CD integration**: Automated testing and deployment
+
+---
+
+## 🔄 Blueprint Lifecycle
+
+```mermaid
+flowchart TD
+    Start([Create Blueprint<br/>Definition]) --> Define[Define Metadata<br/>Name, Version, Author]
+    
+    Define --> Parameters[Configure Parameters<br/>User Inputs & Defaults]
+    Parameters --> Resources[Declare Resources<br/>AWS/Azure/GCP]
+    
+    Resources --> Validation{Validation<br/>Engine}
+    
+    Validation --> |Syntax| SyntaxCheck[Schema Validation<br/>YAML Structure]
+    Validation --> |Security| SecurityCheck[Security Scan<br/>No Hardcoded Secrets]
+    Validation --> |Policy| PolicyCheck[Policy Validation<br/>Compliance Rules]
+    
+    SyntaxCheck --> ValidationResult{All Checks<br/>Passed?}
+    SecurityCheck --> ValidationResult
+    PolicyCheck --> ValidationResult
+    
+    ValidationResult --> |No| Errors[Validation Errors<br/>Fix Issues]
+    Errors --> Define
+    
+    ValidationResult --> |Yes| Testing{Testing Phase}
+    
+    Testing --> UnitTest[Unit Tests<br/>Parameter Validation]
+    Testing --> IntegrationTest[Integration Tests<br/>Resource Creation]
+    
+    UnitTest --> TestResults{Tests<br/>Passed?}
+    IntegrationTest --> TestResults
+    
+    TestResults --> |No| Debug[Debug & Fix<br/>Review Logs]
+    Debug --> Testing
+    
+    TestResults --> |Yes| Publish[Publish Blueprint<br/>Version 1.0.0]
+    
+    Publish --> Registry[(Blueprint Registry<br/>Searchable Catalog)]
+    
+    Registry --> Deploy{Deployment}
+    
+    Deploy --> DryRun[Dry Run<br/>Plan Preview]
+    DryRun --> Review[Review Changes<br/>Cost Estimate]
+    Review --> Execute[Execute Deployment<br/>Provision Resources]
+    
+    Execute --> Monitor[Monitor Deployment<br/>Health Checks]
+    Monitor --> Success([Deployment Success<br/>Resources Live])
+    
+    style Start fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    style Validation fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style ValidationResult fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style Testing fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style TestResults fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style Registry fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style Deploy fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Success fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
+    style Errors fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style Debug fill:#ffebee,stroke:#c62828,stroke-width:2px
+```
 
 ---
 

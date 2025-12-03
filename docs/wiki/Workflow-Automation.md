@@ -1,3 +1,14 @@
+---
+**Document Type**: CI/CD Automation Guide  
+**Audience**: DevOps Engineers, Platform Engineers, Release Managers  
+**Classification**: Technical - Automation  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 30 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Workflow Automation
 
 Complete guide to automating infrastructure workflows with CI/CD integration in IAC Dharma.

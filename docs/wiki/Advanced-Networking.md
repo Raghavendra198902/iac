@@ -1,3 +1,14 @@
+---
+**Document Type**: Network Architecture Guide  
+**Audience**: Network Engineers, Cloud Architects, DevOps Engineers  
+**Classification**: Technical - Networking  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 35 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # Advanced Networking
 
 Comprehensive guide to network architecture, security, and optimization in IAC Dharma.

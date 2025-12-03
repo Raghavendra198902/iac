@@ -1,3 +1,14 @@
+---
+**Document Type**: AI/ML Technical Guide  
+**Audience**: ML Engineers, Data Scientists, DevOps Engineers, FinOps Teams  
+**Classification**: Technical - AI/ML  
+**Version**: 2.0.0  
+**Date**: December 3, 2025  
+**Reading Time**: 30 minutes  
+**Copyright**: © 2025 IAC Dharma. All rights reserved.
+
+---
+
 # AI Recommendations
 
 Comprehensive guide to AI-powered infrastructure recommendations and cost optimization in IAC Dharma.
@@ -13,6 +24,56 @@ IAC Dharma's AI Engine provides intelligent recommendations using machine learni
 - **Right-Sizing**: Resource optimization recommendations
 - **Pattern Recognition**: CNN for architecture analysis
 - **Confidence Scoring**: 0-100% confidence levels for all recommendations
+
+---
+
+## 🤖 AI Recommendation Pipeline
+
+```mermaid
+flowchart TD
+    Start([Infrastructure Data<br/>Collection]) --> Collection{Data Sources}
+    
+    Collection --> |Metrics| CloudWatch[CloudWatch Metrics<br/>CPU, Memory, Network]
+    Collection --> |Cost| CostExplorer[Cost Explorer<br/>Daily/Monthly Spend]
+    Collection --> |Resources| CMDB[CMDB Agent<br/>Resource Inventory]
+    
+    CloudWatch --> DataProc[Data Processing<br/>& Normalization]
+    CostExplorer --> DataProc
+    CMDB --> DataProc
+    
+    DataProc --> MLEngine{ML Engine<br/>:3005}
+    
+    MLEngine --> |Time Series| LSTM[LSTM Model<br/>Cost Forecasting]
+    MLEngine --> |Anomaly| IsolationForest[Isolation Forest<br/>Anomaly Detection]
+    MLEngine --> |Optimization| RightSizing[Right-Sizing Engine<br/>Resource Analysis]
+    MLEngine --> |Purchase| RIOptimizer[RI Optimizer<br/>Reserved Instance Analysis]
+    
+    LSTM --> Forecast[30-Day Cost Forecast<br/>Confidence: 90-95%]
+    IsolationForest --> Anomalies[Cost Anomalies<br/>Severity: Low/Med/High]
+    RightSizing --> Recommendations[Right-Sizing Recs<br/>Downsize/Upsize]
+    RIOptimizer --> Savings[RI/Savings Plan Recs<br/>ROI Analysis]
+    
+    Forecast --> Dashboard{Grafana Dashboard}
+    Anomalies --> Dashboard
+    Recommendations --> Dashboard
+    Savings --> Dashboard
+    
+    Dashboard --> Alerts{Alert Manager}
+    Alerts --> |Critical| PagerDuty[PagerDuty<br/>Immediate Action]
+    Alerts --> |Warning| Slack[Slack<br/>Team Notification]
+    Alerts --> |Info| Email[Email<br/>Daily Summary]
+    
+    Recommendations --> Implementation[Implementation<br/>Auto/Manual]
+    Implementation --> Validation[Validation<br/>Monitor 24h]
+    Validation --> Success([Cost Savings<br/>30-40% Reduction])
+    
+    style Start fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    style Collection fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style MLEngine fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    style Dashboard fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style Alerts fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style Success fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
+```
 
 ---
 
