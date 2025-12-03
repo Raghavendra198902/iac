@@ -141,16 +141,18 @@ services:
       dockerfile: Dockerfile
     container_name: iac-api-gateway
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
       
-      # Database - Using PgBouncer
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
-      DB_HOST: pgbouncer
-      DB_PORT: 6432
+      # Database - Direct connection to Postgres (API Gateway needs statement_timeout support)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/iac_dharma?sslmode=disable
+      DB_HOST: postgres
+      DB_PORT: 5432
       DB_NAME: iac_dharma
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_SSL: "false"
+      DB_STATEMENT_TIMEOUT: "0"
       DB_POOL_MIN: 5
       DB_POOL_MAX: 20
       
