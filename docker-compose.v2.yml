@@ -155,8 +155,8 @@ services:
       REDIS_CACHE_ENABLED: ${REDIS_CACHE_ENABLED:-true}
       
       # JWT
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-change-in-production}
       JWT_EXPIRY: ${JWT_EXPIRY:-15m}
       JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
       
@@ -164,6 +164,13 @@ services:
       BLUEPRINT_SERVICE_URL: http://blueprint-service:3001
       IAC_GENERATOR_URL: http://iac-generator:3002
       AUTOMATION_ENGINE_URL: http://automation-engine:3003
+      GUARDRAILS_ENGINE_URL: http://guardrails-engine:3004
+      COSTING_SERVICE_URL: http://costing-service:3005
+      ORCHESTRATOR_SERVICE_URL: http://orchestrator-service:3006
+      MONITORING_SERVICE_URL: http://monitoring-service:3007
+      CLOUD_PROVIDER_SERVICE_URL: http://cloud-provider-service:3008
+      AI_RECOMMENDATIONS_URL: http://ai-recommendations-service:3009
+      SSO_SERVICE_URL: http://sso-service:3010
       
       # Feature Flags
       ENABLE_CACHING: ${ENABLE_CACHING:-true}
@@ -181,10 +188,293 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health/ready"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Blueprint Service
+  blueprint-service:
+    build:
+      context: ./backend/blueprint-service
+      dockerfile: Dockerfile
+    container_name: iac-blueprint-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # IAC Generator Service
+  iac-generator:
+    build:
+      context: ./backend/iac-generator
+      dockerfile: Dockerfile
+    container_name: iac-generator
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Automation Engine
+  automation-engine:
+    build:
+      context: ./backend/automation-engine
+      dockerfile: Dockerfile
+    container_name: iac-automation-engine
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3003
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Guardrails Engine
+  guardrails-engine:
+    build:
+      context: ./backend/guardrails-engine
+      dockerfile: Dockerfile
+    container_name: iac-guardrails-engine
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3004
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Costing Service
+  costing-service:
+    build:
+      context: ./backend/costing-service
+      dockerfile: Dockerfile
+    container_name: iac-costing-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3005
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Orchestrator Service
+  orchestrator-service:
+    build:
+      context: ./backend/orchestrator-service
+      dockerfile: Dockerfile
+    container_name: iac-orchestrator-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3006
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3006/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Monitoring Service
+  monitoring-service:
+    build:
+      context: ./backend/monitoring-service
+      dockerfile: Dockerfile
+    container_name: iac-monitoring-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3007
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3007/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Cloud Provider Service
+  cloud-provider-service:
+    build:
+      context: ./backend/cloud-provider-service
+      dockerfile: Dockerfile
+    container_name: iac-cloud-provider-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3008
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3008/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # AI Recommendations Service
+  ai-recommendations-service:
+    build:
+      context: ./backend/ai-recommendations-service
+      dockerfile: Dockerfile
+    container_name: iac-ai-recommendations
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3009
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3009/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # SSO Service
+  sso-service:
+    build:
+      context: ./backend/sso-service
+      dockerfile: Dockerfile
+    container_name: iac-sso-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3010
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: 300
+      REDIS_CACHE_ENABLED: true
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-change-in-production}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3010/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - iac-network
     restart: unless-stopped
