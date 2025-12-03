@@ -13,7 +13,6 @@ import (
 	"github.com/iac/cmdb-agent/internal/enforcement"
 	"github.com/iac/cmdb-agent/internal/logger"
 	"github.com/iac/cmdb-agent/internal/queue"
-	"github.com/iac/cmdb-agent/internal/scheduler"
 	"github.com/iac/cmdb-agent/internal/transport"
 	"github.com/robfig/cron/v3"
 )

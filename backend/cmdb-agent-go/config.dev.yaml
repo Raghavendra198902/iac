@@ -1,0 +1,49 @@
+server:
+  primary: https://cmdb.example.com:8443
+  secondary: ""
+  ca_bundle: ""
+
+agent:
+  version: 1.0.0
+  hostname: "dev-test-host"
+  data_dir: /tmp/cmdb-agent-data
+  socket_path: /tmp/cmdb-agent.sock
+  tags:
+    env: development
+    owner: test
+  collectors:
+    - name: system
+      schedule: "@every 30s"
+      enabled: true
+      mode: full
+    - name: hardware
+      schedule: "@every 1m"
+      enabled: true
+      mode: full
+    - name: network
+      schedule: "@every 1m"
+      enabled: true
+      mode: full
+
+auth:
+  method: oauth2
+  cert_file: ""
+  key_file: ""
+  token_url: https://auth.example.com/oauth2/token
+  client_id: cmdb-agent-dev
+  client_secret: dev-secret
+
+logging:
+  level: info
+  output: stdout
+  file_path: /tmp/cmdb-agent.log
+  max_size_mb: 10
+  max_backups: 3
+
+transport:
+  batch_max_size_kb: 512
+  batch_max_items: 50
+  compression: true
+  retry_attempts: 3
+  retry_backoff_ms: 1000
+  timeout: 30
