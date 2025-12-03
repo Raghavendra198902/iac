@@ -15,6 +15,16 @@ build-all:
 	@echo "Building for all platforms..."
 	@./build.sh $(VERSION)
 
+build-windows:
+	@echo "Building for Windows x64..."
+	@GOOS=windows GOARCH=amd64 go build -ldflags="$(LDFLAGS)" -o dist/cmdb-agent-windows-amd64.exe ./cmd/cmdb-agent
+	@GOOS=windows GOARCH=amd64 go build -ldflags="$(LDFLAGS)" -o dist/cmdb-agent-cli-windows-amd64.exe ./cmd/cmdb-agent-cli
+	@echo "Windows build complete!"
+
+build-windows-msi: build-windows
+	@echo "Building Windows MSI installer..."
+	@./build-windows-msi.sh $(VERSION) x64
+
 test:
 	@echo "Running tests..."
 	@go test -v ./...

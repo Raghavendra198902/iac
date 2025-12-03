@@ -32,6 +32,40 @@ cmdb-agent (main daemon)
 
 ## Quick Start
 
+### Download Pre-built Binaries
+
+**Windows:**
+```powershell
+# Download from releases
+Invoke-WebRequest -Uri "https://github.com/Raghavendra198902/iac/releases/download/v1.0.0/cmdb-agent-windows-1.0.0.zip" -OutFile "cmdb-agent.zip"
+
+# Extract
+Expand-Archive -Path "cmdb-agent.zip" -DestinationPath "C:\Temp\cmdb-agent"
+
+# Install (as Administrator)
+cd C:\Temp\cmdb-agent\cmdb-agent-windows-1.0.0
+.\install-windows.ps1
+```
+
+**Linux:**
+```bash
+# Download
+wget https://github.com/Raghavendra198902/iac/releases/download/v1.0.0/cmdb-agent-linux-amd64.tar.gz
+
+# Extract
+tar -xzf cmdb-agent-linux-amd64.tar.gz
+
+# Install
+sudo ./install.sh
+```
+
+**macOS:**
+```bash
+# Download and install
+curl -O https://github.com/Raghavendra198902/iac/releases/download/v1.0.0/cmdb-agent-darwin-universal.pkg
+sudo installer -pkg cmdb-agent-darwin-universal.pkg -target /
+```
+
 ### Build from source
 
 ```bash
@@ -60,6 +94,46 @@ sudo vim /etc/cmdb-agent/config.yaml
 
 # Restart agent
 sudo systemctl restart cmdb-agent
+```
+
+### Install on Windows
+
+```powershell
+# Extract the downloaded ZIP file
+Expand-Archive -Path "cmdb-agent-windows-1.0.0.zip" -DestinationPath "C:\Temp\cmdb-agent"
+
+# Edit configuration (before installation)
+notepad C:\Temp\cmdb-agent\cmdb-agent-windows-1.0.0\config.yaml
+
+# Install service (run as Administrator)
+cd C:\Temp\cmdb-agent\cmdb-agent-windows-1.0.0
+.\install-windows.ps1
+
+# Service management
+Start-Service CMDBAgent
+Stop-Service CMDBAgent
+Restart-Service CMDBAgent
+Get-Service CMDBAgent
+
+# Access Web UI
+Start-Process "http://localhost:8080"
+# Default: admin/changeme
+```
+
+See [WINDOWS_BUILD_GUIDE.md](WINDOWS_BUILD_GUIDE.md) for detailed Windows instructions.
+
+### Install on macOS
+
+```bash
+# Install PKG
+sudo installer -pkg cmdb-agent-darwin-universal.pkg -target /
+
+# Edit configuration
+sudo vim /etc/cmdb-agent/config.yaml
+
+# Manage service
+sudo launchctl load /Library/LaunchDaemons/com.iac.cmdb-agent.plist
+sudo launchctl unload /Library/LaunchDaemons/com.iac.cmdb-agent.plist
 ```
 
 ### Configuration
@@ -138,6 +212,14 @@ go test ./...
 ### Build packages
 
 ```bash
+# Windows package (ZIP with installer)
+./package-windows.sh 1.0.0
+# Output: dist/release/cmdb-agent-windows-1.0.0.zip
+
+# Windows MSI installer (requires msitools)
+./build-windows-msi.sh 1.0.0 x64
+# Output: dist/cmdb-agent-1.0.0-x64.msi
+
 # DEB package
 ./build-deb.sh 1.0.0 amd64
 
@@ -181,6 +263,10 @@ go test ./...
 
 ## Documentation
 
+- [Features Documentation](FEATURES.md) - Complete feature list with license tracking
+- [Web UI Guide](WEBUI_GUIDE.md) - REST API and Web UI documentation
+- [Flow Charts](FLOWCHART.md) - System architecture diagrams
+- [Windows Build Guide](WINDOWS_BUILD_GUIDE.md) - Detailed Windows installation and configuration
 - [Low-Level Design](../../docs/CMDB_AGENT_LLD.md)
 - [Agent Overview](../../docs/AGENTS_OVERVIEW.md)
 
