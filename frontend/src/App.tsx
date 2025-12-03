@@ -82,6 +82,11 @@ const SecurityCenter = lazy(() => import('./pages/SecurityCenter'));
 // Cost Management
 const CostManagement = lazy(() => import('./pages/CostManagement'));
 
+// AI Architecture Pages
+const AIArchitectureLanding = lazy(() => import('./pages/ai/AIArchitectureLanding'));
+const OneClickMode = lazy(() => import('./pages/ai/OneClickMode'));
+const AdvancedMode = lazy(() => import('./pages/ai/AdvancedMode'));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -169,6 +174,11 @@ function App() {
                   
                   {/* Cost Management */}
                   <Route path="/cost" element={<CostManagement />} />
+                  
+                  {/* AI Architecture Routes */}
+                  <Route path="/ai" element={<AIArchitectureLanding />} />
+                  <Route path="/ai/oneclick" element={<OneClickMode />} />
+                  <Route path="/ai/advanced" element={<AdvancedMode />} />
                   
                   {/* Fallback */}
                   <Route path="*" element={<Navigate to="/" replace />} />
