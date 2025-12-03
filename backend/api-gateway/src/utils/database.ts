@@ -24,9 +24,10 @@ const poolConfig = {
   min: parseInt(process.env.DB_POOL_MIN || '5'), // Minimum number of clients
   idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'), // Close idle clients after 30 seconds
   connectionTimeoutMillis: parseInt(process.env.DB_CONNECT_TIMEOUT || '10000'), // Return error after 10 seconds
-  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT || '30000'), // Query timeout 30s
+  // statement_timeout removed - not supported by PgBouncer in transaction mode
+  // statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT || '30000'), // Query timeout 30s
   ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: true
+    rejectUnauthorized: false // Disable SSL cert validation for internal services
   } : false
 };
 
