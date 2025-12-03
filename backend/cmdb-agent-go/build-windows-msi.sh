@@ -2,7 +2,7 @@
 set -e
 
 # Build Windows MSI installer for CMDB Agent
-# Requires: wixl (from msitools package)
+# Uses msibuild (from msitools package) or WiX on Windows
 # Install: sudo apt-get install msitools
 
 VERSION=${1:-1.0.0}
@@ -10,10 +10,37 @@ ARCH=${2:-x64}
 
 echo "Building Windows MSI installer v${VERSION} for ${ARCH}..."
 
-# Check if wixl is installed
-if ! command -v wixl &> /dev/null; then
-    echo "Error: wixl not found. Install msitools:"
-    echo "  sudo apt-get install msitools"
+# Check for MSI build tools
+USE_MSIBUILD=false
+if command -v msibuild &> /dev/null; then
+    USE_MSIBUILD=true
+    echo "Using msibuild for MSI creation"
+elif command -v wixl &> /dev/null; then
+    echo "Using wixl for MSI creation"
+else
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⚠️  MSI Build Tools Not Available"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "MSI creation requires one of the following:"
+    echo "  • On Linux: Install msitools"
+    echo "    $ sudo apt-get install msitools"
+    echo ""
+    echo "  • On Windows: Install WiX Toolset"
+    echo "    $ choco install wixtoolset"
+    echo "    or download from: https://wixtoolset.org/"
+    echo ""
+    echo "ALTERNATIVE: Use the ZIP package instead"
+    echo "  $ ./package-windows.sh ${VERSION}"
+    echo "  Output: dist/release/cmdb-agent-windows-${VERSION}.zip"
+    echo ""
+    echo "The ZIP package includes:"
+    echo "  ✓ All binaries and documentation"
+    echo "  ✓ PowerShell installer script (install-windows.ps1)"
+    echo "  ✓ Works on all Windows systems"
+    echo "  ✓ No MSI required for deployment"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     exit 1
 fi
 
