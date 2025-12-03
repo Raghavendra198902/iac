@@ -36,52 +36,49 @@ services:
       DATABASES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       
       # Pool Configuration
-      PGBOUNCER_POOL_MODE: ${PGBOUNCER_POOL_MODE:-transaction}
-      PGBOUNCER_MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-1000}
-      PGBOUNCER_DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-25}
-      PGBOUNCER_MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-10}
-      PGBOUNCER_RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-5}
-      PGBOUNCER_RESERVE_POOL_TIMEOUT: 5
+      POOL_MODE: ${PGBOUNCER_POOL_MODE:-transaction}
+      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-1000}
+      DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-25}
+      MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-10}
+      RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-5}
+      RESERVE_POOL_TIMEOUT: 5
       
       # Timeouts
-      PGBOUNCER_SERVER_IDLE_TIMEOUT: 600
-      PGBOUNCER_SERVER_CONNECT_TIMEOUT: 15
-      PGBOUNCER_QUERY_TIMEOUT: 0
-      PGBOUNCER_QUERY_WAIT_TIMEOUT: 120
+      SERVER_IDLE_TIMEOUT: 600
+      SERVER_CONNECT_TIMEOUT: 15
+      QUERY_TIMEOUT: 0
+      QUERY_WAIT_TIMEOUT: 120
       
       # Logging
-      PGBOUNCER_LOG_CONNECTIONS: 1
-      PGBOUNCER_LOG_DISCONNECTIONS: 1
-      PGBOUNCER_LOG_POOLER_ERRORS: 1
-      PGBOUNCER_STATS_PERIOD: 60
+      LOG_CONNECTIONS: 1
+      LOG_DISCONNECTIONS: 1
+      LOG_POOLER_ERRORS: 1
+      STATS_PERIOD: 60
       
       # Authentication
-      PGBOUNCER_AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-scram-sha-256}
-      PGBOUNCER_AUTH_FILE: /etc/pgbouncer/userlist.txt
+      AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-md5}
       
       # Performance
-      PGBOUNCER_MAX_DB_CONNECTIONS: 100
-      PGBOUNCER_MAX_USER_CONNECTIONS: 100
-      PGBOUNCER_SERVER_RESET_QUERY: DISCARD ALL
-      PGBOUNCER_SERVER_CHECK_DELAY: 30
-      PGBOUNCER_SERVER_CHECK_QUERY: SELECT 1
+      MAX_DB_CONNECTIONS: 100
+      MAX_USER_CONNECTIONS: 100
+      SERVER_RESET_QUERY: DISCARD ALL
+      SERVER_CHECK_DELAY: 30
+      SERVER_CHECK_QUERY: select 1
       
       # Admin
-      PGBOUNCER_ADMIN_USERS: ${POSTGRES_USER:-postgres}
-      PGBOUNCER_STATS_USERS: ${POSTGRES_USER:-postgres}
+      ADMIN_USERS: ${POSTGRES_USER:-postgres}
+      STATS_USERS: ${POSTGRES_USER:-postgres}
     ports:
       - "${PGBOUNCER_PORT:-6432}:6432"
-    volumes:
-      - ./config/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
-      - ./config/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "psql -h localhost -p 6432 -U ${POSTGRES_USER:-postgres} -d pgbouncer -c 'SHOW POOLS;' || exit 1"]
+      test: ["CMD", "nc", "-z", "localhost", "6432"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     networks:
       - iac-network
     restart: unless-stopped
