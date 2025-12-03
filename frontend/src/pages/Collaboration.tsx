@@ -9,6 +9,8 @@ import { MainLayout } from '../components/layout';
 import { useAuth } from '../contexts/AuthContext';
 import FadeIn from '../components/ui/FadeIn';
 import Badge from '../components/ui/Badge';
+import { API_URL } from '../config/api';
+import toast from 'react-hot-toast';
 import type { Channel, Message, OnlineUser, CollaborationStats, ChannelType, UserStatus } from '../types/collaboration';
 
 export default function Collaboration() {
@@ -19,10 +21,10 @@ export default function Collaboration() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [stats, setStats] = useState<CollaborationStats>({
-    totalMessages: 1247,
-    activeUsers: 24,
-    channels: 12,
-    messagesLast24h: 183
+    totalMessages: 0,
+    activeUsers: 0,
+    channels: 0,
+    messagesLast24h: 0
   });
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +32,7 @@ export default function Collaboration() {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,17 +44,9 @@ export default function Collaboration() {
 
   useEffect(() => {
     if (selectedChannel) {
-      // Load messages for this channel from storage
-      const channelMsgs = channelMessages[selectedChannel.id];
-      if (channelMsgs) {
-        // Channel has messages, use them
-        setMessages(channelMsgs);
-      } else {
-        // First time loading this channel, load mock messages
-        loadMessages(selectedChannel.id);
-      }
+      loadMessages(selectedChannel.id);
     }
-  }, [selectedChannel]); // Remove channelMessages from dependencies to prevent loop
+  }, [selectedChannel]);
 
   useEffect(() => {
     scrollToBottom();
@@ -61,315 +56,125 @@ export default function Collaboration() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadChannels = () => {
-    const mockChannels: Channel[] = [
-      {
-        id: '1',
-        name: 'general',
-        type: 'team',
-        description: 'General team discussions',
-        members: ['user1', 'user2', 'user3'],
-        unreadCount: 3,
-        createdAt: '2024-01-15T10:00:00Z',
-        createdBy: 'admin',
-        isPinned: true,
-        lastMessage: {
-          id: 'm1',
-          channelId: '1',
-          userId: 'user1',
-          userName: 'Sarah Johnson',
-          type: 'text',
-          content: 'Great work on the infrastructure deployment!',
-          timestamp: '2024-01-20T09:45:00Z'
-        }
-      },
-      {
-        id: '2',
-        name: 'aws-infrastructure',
-        type: 'project',
-        description: 'AWS infrastructure discussions',
-        members: ['user1', 'user2', 'user4'],
-        unreadCount: 7,
-        createdAt: '2024-01-16T14:30:00Z',
-        createdBy: 'user1',
-        lastMessage: {
-          id: 'm2',
-          channelId: '2',
-          userId: 'user2',
-          userName: 'Mike Chen',
-          type: 'text',
-          content: 'Just deployed the new EKS cluster',
-          timestamp: '2024-01-20T10:15:00Z'
-        }
-      },
-      {
-        id: '3',
-        name: 'security-alerts',
-        type: 'announcement',
-        description: 'Security alerts and updates',
-        members: ['user1', 'user2', 'user3', 'user4'],
-        unreadCount: 0,
-        createdAt: '2024-01-17T08:00:00Z',
-        createdBy: 'admin',
-        isPinned: true,
-        lastMessage: {
-          id: 'm3',
-          channelId: '3',
-          userId: 'admin',
-          userName: 'System',
-          type: 'system',
-          content: 'New security patch available for production',
-          timestamp: '2024-01-19T16:00:00Z'
-        }
-      },
-      {
-        id: '4',
-        name: 'devops-team',
-        type: 'team',
-        description: 'DevOps team collaboration',
-        members: ['user1', 'user3', 'user5'],
-        unreadCount: 0,
-        createdAt: '2024-01-18T11:00:00Z',
-        createdBy: 'user3',
-        lastMessage: {
-          id: 'm4',
-          channelId: '4',
-          userId: 'user5',
-          userName: 'Emily Davis',
-          type: 'text',
-          content: 'CI/CD pipeline is running smoothly',
-          timestamp: '2024-01-20T08:30:00Z'
-        }
-      },
-      {
-        id: '5',
-        name: 'cost-optimization',
-        type: 'project',
-        description: 'Cost optimization strategies',
-        members: ['user1', 'user2', 'user6'],
-        unreadCount: 2,
-        createdAt: '2024-01-19T09:00:00Z',
-        createdBy: 'user6',
-        lastMessage: {
-          id: 'm5',
-          channelId: '5',
-          userId: 'user6',
-          userName: 'James Wilson',
-          type: 'text',
-          content: 'Found opportunities to save $5k/month',
-          timestamp: '2024-01-20T09:00:00Z'
-        }
+  const loadChannels = async () => {
+    try {
+      setLoading(true);
+      const url = `${API_URL}/collaboration/channels`;
+      console.log('Fetching channels from:', url);
+      const response = await fetch(url);
+      console.log('Channels response status:', response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Channels error response:', errorText);
+        throw new Error(`Failed to fetch channels: ${response.status}`);
       }
-    ];
-    setChannels(mockChannels);
-    setSelectedChannel(mockChannels[0]);
-  };
-
-  const loadOnlineUsers = () => {
-    const mockUsers: OnlineUser[] = [
-      {
-        id: 'user1',
-        name: 'Sarah Johnson',
-        email: 'sarah@example.com',
-        status: 'online',
-        statusMessage: 'Working on AWS deployment',
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 'user2',
-        name: 'Mike Chen',
-        email: 'mike@example.com',
-        status: 'online',
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 'user3',
-        name: 'Emily Davis',
-        email: 'emily@example.com',
-        status: 'away',
-        statusMessage: 'In a meeting',
-        lastSeen: new Date(Date.now() - 300000).toISOString()
-      },
-      {
-        id: 'user4',
-        name: 'David Park',
-        email: 'david@example.com',
-        status: 'busy',
-        statusMessage: 'Do not disturb',
-        lastSeen: new Date(Date.now() - 600000).toISOString()
-      },
-      {
-        id: 'user5',
-        name: 'Lisa Anderson',
-        email: 'lisa@example.com',
-        status: 'online',
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 'user6',
-        name: 'James Wilson',
-        email: 'james@example.com',
-        status: 'offline',
-        lastSeen: new Date(Date.now() - 3600000).toISOString()
+      const data = await response.json();
+      console.log('Channels loaded:', data.length);
+      setChannels(data);
+      if (data.length > 0) {
+        setSelectedChannel(data[0]);
       }
-    ];
-    setOnlineUsers(mockUsers);
+    } catch (error: any) {
+      console.error('Error loading channels:', error);
+      toast.error(`Failed to load channels: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const loadStats = () => {
-    // Already set in initial state
+  const loadOnlineUsers = async () => {
+    try {
+      const response = await fetch(`${API_URL}/collaboration/users/online`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      const data = await response.json();
+      setOnlineUsers(data);
+    } catch (error: any) {
+      console.error('Error loading users:', error);
+    }
   };
 
-  const loadMessages = (channelId: string) => {
-    const mockMessages: Message[] = [
-      {
-        id: 'm1',
-        channelId: channelId,
-        userId: 'user1',
-        userName: 'Sarah Johnson',
-        type: 'text',
-        content: 'Good morning team! Ready to tackle the AWS migration today.',
-        timestamp: '2024-01-20T08:00:00Z'
-      },
-      {
-        id: 'm2',
-        channelId: channelId,
-        userId: 'user2',
-        userName: 'Mike Chen',
-        type: 'text',
-        content: 'Morning! I\'ve prepared the terraform scripts for review.',
-        timestamp: '2024-01-20T08:05:00Z',
-        reactions: [
-          { emoji: '👍', users: ['user1', 'user3'], count: 2 }
-        ]
-      },
-      {
-        id: 'm3',
-        channelId: channelId,
-        userId: 'user1',
-        userName: 'Sarah Johnson',
-        type: 'code',
-        content: `resource "aws_instance" "web" {
-  ami           = "ami-0c55b159cbfafe1f0"
-  instance_type = "t3.micro"
-  
-  tags = {
-    Name = "WebServer"
-    Environment = "production"
-  }
-}`,
-        timestamp: '2024-01-20T08:15:00Z'
-      },
-      {
-        id: 'm4',
-        channelId: channelId,
-        userId: 'user3',
-        userName: 'Emily Davis',
-        type: 'text',
-        content: '@Sarah Johnson Looks good! Should we add monitoring to this instance?',
-        mentions: ['user1'],
-        timestamp: '2024-01-20T08:20:00Z'
-      },
-      {
-        id: 'm5',
-        channelId: channelId,
-        userId: 'user1',
-        userName: 'Sarah Johnson',
-        type: 'text',
-        content: 'Yes, great idea! I\'ll add CloudWatch alarms.',
-        timestamp: '2024-01-20T08:25:00Z',
-        replyTo: 'm4'
-      },
-      {
-        id: 'm6',
-        channelId: channelId,
-        userId: 'system',
-        userName: 'System',
-        type: 'system',
-        content: 'Mike Chen uploaded deployment-plan.pdf',
-        timestamp: '2024-01-20T08:30:00Z',
-        attachments: [
-          {
-            id: 'a1',
-            name: 'deployment-plan.pdf',
-            type: 'application/pdf',
-            size: 245678,
-            url: '/files/deployment-plan.pdf'
-          }
-        ]
-      },
-      {
-        id: 'm7',
-        channelId: channelId,
-        userId: 'user4',
-        userName: 'David Park',
-        type: 'text',
-        content: 'Just reviewed the security group rules. All looks secure! 🔒',
-        timestamp: '2024-01-20T09:00:00Z',
-        reactions: [
-          { emoji: '✅', users: ['user1', 'user2', 'user3'], count: 3 },
-          { emoji: '🔒', users: ['user1'], count: 1 }
-        ]
-      },
-      {
-        id: 'm8',
-        channelId: channelId,
-        userId: 'user2',
-        userName: 'Mike Chen',
-        type: 'text',
-        content: 'Deployment is progressing smoothly. ETA: 30 minutes',
-        timestamp: '2024-01-20T09:30:00Z'
-      },
-      {
-        id: 'm9',
-        channelId: channelId,
-        userId: 'user1',
-        userName: 'Sarah Johnson',
-        type: 'text',
-        content: 'Great work on the infrastructure deployment! Everything is running perfectly.',
-        timestamp: '2024-01-20T09:45:00Z'
+  const loadStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/collaboration/stats`);
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      const data = await response.json();
+      setStats({
+        totalMessages: parseInt(data.total_messages) || 0,
+        activeUsers: parseInt(data.active_users) || 0,
+        channels: parseInt(data.channels) || 0,
+        messagesLast24h: parseInt(data.messages_last_24h) || 0
+      });
+    } catch (error: any) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
+  const loadMessages = async (channelId: string) => {
+    try {
+      const url = `${API_URL}/collaboration/channels/${channelId}/messages`;
+      console.log('Fetching messages from:', url);
+      const response = await fetch(url);
+      console.log('Messages response status:', response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Messages error response:', errorText);
+        throw new Error(`Failed to fetch messages: ${response.status}`);
       }
-    ];
-    // Store messages for this channel
-    setChannelMessages(prev => ({
-      ...prev,
-      [channelId]: mockMessages
-    }));
-    setMessages(mockMessages);
+      const data = await response.json();
+      console.log('Messages loaded:', data.length);
+      
+      setChannelMessages(prev => ({
+        ...prev,
+        [channelId]: data
+      }));
+      setMessages(data);
+    } catch (error: any) {
+      console.error('Error loading messages:', error);
+      toast.error(`Failed to load messages: ${error.message}`);
+    }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedChannel) return;
 
     const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Current User';
+    const userId = user?.id || 'current-user';
     
-    const newMessage: Message = {
-      id: `m${Date.now()}`,
-      channelId: selectedChannel.id,
-      userId: user?.id || 'current-user',
-      userName,
-      type: 'text',
-      content: messageInput,
-      timestamp: new Date().toISOString()
-    };
+    try {
+      const url = `${API_URL}/collaboration/channels/${selectedChannel.id}/messages`;
+      const payload = { userId, userName, type: 'text', content: messageInput };
+      console.log('Sending message to:', url, payload);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-    console.log('Sending message:', newMessage);
-    console.log('Current messages count:', messages.length);
-    
-    // Get current messages for this channel (or empty array)
-    const currentChannelMsgs = channelMessages[selectedChannel.id] || messages;
-    const updatedMessages = [...currentChannelMsgs, newMessage];
-    
-    // Update both states
-    setChannelMessages(prev => ({
-      ...prev,
-      [selectedChannel.id]: updatedMessages
-    }));
-    setMessages(updatedMessages);
-    
-    console.log('Updated messages count:', updatedMessages.length);
-    setMessageInput('');
-    setIsTyping(false);
+      console.log('Send message response status:', response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Send message error response:', errorText);
+        throw new Error(`Failed to send message: ${response.status}`);
+      }
+      
+      const newMessage = await response.json();
+      
+      // Update messages in state
+      const updatedMessages = [...messages, newMessage];
+      setChannelMessages(prev => ({
+        ...prev,
+        [selectedChannel.id]: updatedMessages
+      }));
+      setMessages(updatedMessages);
+      
+      setMessageInput('');
+      setIsTyping(false);
+      toast.success('Message sent');
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -383,44 +188,11 @@ export default function Collaboration() {
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0 && selectedChannel) {
       const file = files[0];
-      const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Current User';
-      
-      const newMessage: Message = {
-        id: `m${Date.now()}`,
-        channelId: selectedChannel.id,
-        userId: user?.id || 'current-user',
-        userName,
-        type: 'file',
-        content: file.name,
-        timestamp: new Date().toISOString(),
-        attachments: [{
-          id: `a${Date.now()}`,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: URL.createObjectURL(file)
-        }]
-      };
-      
-      console.log('Sending file:', newMessage);
-      console.log('Current messages count:', messages.length);
-      
-      // Get current messages for this channel (or empty array)
-      const currentChannelMsgs = channelMessages[selectedChannel.id] || messages;
-      const updatedMessages = [...currentChannelMsgs, newMessage];
-      
-      // Update both states
-      setChannelMessages(prev => ({
-        ...prev,
-        [selectedChannel.id]: updatedMessages
-      }));
-      setMessages(updatedMessages);
-      
-      console.log('Updated messages count:', updatedMessages.length);
+      toast.info(`File upload feature coming soon: ${file.name}`);
       e.target.value = ''; // Reset file input
     }
   };
@@ -494,34 +266,26 @@ export default function Collaboration() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const addReaction = (messageId: string, emoji: string) => {
-    setMessages(messages.map(msg => {
-      if (msg.id === messageId) {
-        const reactions = msg.reactions || [];
-        const existingReaction = reactions.find(r => r.emoji === emoji);
-        
-        if (existingReaction) {
-          if (existingReaction.users.includes(user?.id || 'current-user')) {
-            // Remove reaction
-            existingReaction.users = existingReaction.users.filter(u => u !== (user?.id || 'current-user'));
-            existingReaction.count--;
-            return { ...msg, reactions: reactions.filter(r => r.count > 0) };
-          } else {
-            // Add reaction
-            existingReaction.users.push(user?.id || 'current-user');
-            existingReaction.count++;
-            return { ...msg, reactions };
-          }
-        } else {
-          // New reaction
-          return {
-            ...msg,
-            reactions: [...reactions, { emoji, users: [user?.id || 'current-user'], count: 1 }]
-          };
-        }
+  const addReaction = async (messageId: string, emoji: string) => {
+    try {
+      const userId = user?.id || 'current-user';
+      
+      const response = await fetch(`${API_URL}/collaboration/messages/${messageId}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, emoji })
+      });
+
+      if (!response.ok) throw new Error('Failed to add reaction');
+      
+      // Reload messages to get updated reactions
+      if (selectedChannel) {
+        await loadMessages(selectedChannel.id);
       }
-      return msg;
-    }));
+    } catch (error: any) {
+      console.error('Error adding reaction:', error);
+      toast.error('Failed to add reaction');
+    }
   };
 
   const filteredChannels = channels.filter(channel =>
@@ -530,15 +294,22 @@ export default function Collaboration() {
 
   return (
     <MainLayout>
-    <div className="h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 flex">
-      {/* Sidebar - Channels */}
+    {loading ? (
+      <div className="h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-800 dark:text-gray-300 font-semibold">Loading collaboration...</p>
+        </div>
+      </div>
+    ) : (
+    <div className="h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 flex">{/* Sidebar - Channels */}
       <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Channels</h2>
             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-              <Plus className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <Plus className="w-5 h-5 text-gray-800 dark:text-gray-300" />
             </button>
           </div>
 
@@ -560,11 +331,11 @@ export default function Collaboration() {
           <div className="grid grid-cols-2 gap-3 text-center">
             <div>
               <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{stats.activeUsers}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Online</p>
+              <p className="text-xs text-gray-800 dark:text-gray-300 font-semibold">Online</p>
             </div>
             <div>
               <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{stats.messagesLast24h}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Messages 24h</p>
+              <p className="text-xs text-gray-800 dark:text-gray-300 font-semibold">Messages 24h</p>
             </div>
           </div>
         </div>
@@ -591,14 +362,14 @@ export default function Collaboration() {
               
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900 dark:text-white truncate">
+                  <span className="font-bold text-gray-900 dark:text-white truncate">
                     {channel.name}
                   </span>
                   {channel.isPinned && <Pin className="w-3 h-3 text-gray-400" />}
                   {channel.isMuted && <BellOff className="w-3 h-3 text-gray-400" />}
                 </div>
                 {channel.lastMessage && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  <p className="text-xs text-gray-800 dark:text-gray-300 font-medium truncate">
                     {channel.lastMessage.userName}: {channel.lastMessage.content}
                   </p>
                 )}
@@ -625,10 +396,10 @@ export default function Collaboration() {
                   {getChannelIcon(selectedChannel.type)}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                  <h3 className="font-bold text-gray-900 dark:text-white">
                     {selectedChannel.name}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-800 dark:text-gray-300 font-semibold">
                     {selectedChannel.members.length} members
                   </p>
                 </div>
@@ -640,37 +411,36 @@ export default function Collaboration() {
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   title="Start voice call"
                 >
-                  <Phone className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <Phone className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                 </button>
                 <button 
                   onClick={handleVideoCall}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   title="Start video call"
                 >
-                  <Video className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <Video className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                 </button>
                 <button 
                   onClick={handleChannelSettings}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   title="Channel settings"
                 >
-                  <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <Settings className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                 </button>
                 <button
                   onClick={() => setShowUserPanel(!showUserPanel)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <Users className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <Users className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                 </button>
               </div>
             </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-              {console.log('Rendering messages, count:', messages.length)}
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-gray-500 dark:text-gray-400">No messages yet. Start the conversation!</p>
+                  <p className="text-gray-800 dark:text-gray-300 font-semibold">No messages yet. Start the conversation!</p>
                 </div>
               ) : (
                 messages.map((message, index) => {
@@ -693,10 +463,10 @@ export default function Collaboration() {
                       <div className="flex-1 min-w-0">
                         {showAvatar && (
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <span className="font-bold text-gray-900 dark:text-white">
                               {message.userName}
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-xs text-gray-800 dark:text-gray-300 font-medium">
                               {formatTime(message.timestamp)}
                             </span>
                           </div>
@@ -716,8 +486,8 @@ export default function Collaboration() {
                             </p>
                           </div>
                         ) : (
-                          <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-2 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
-                            <p className="text-gray-900 dark:text-gray-100 break-words">
+                          <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-2 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                            <p className="text-gray-900 dark:text-gray-100 break-words font-medium">
                               {message.content}
                             </p>
                           </div>
@@ -732,8 +502,8 @@ export default function Collaboration() {
                                 href={attachment.url}
                                 className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                               >
-                                <File className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                                <span className="text-sm text-gray-900 dark:text-gray-100">
+                                <File className="w-4 h-4 text-gray-800 dark:text-gray-300" />
+                                <span className="text-sm text-gray-900 dark:text-gray-100 font-semibold">
                                   {attachment.name}
                                 </span>
                               </a>
@@ -751,7 +521,7 @@ export default function Collaboration() {
                                 className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
                               >
                                 <span>{reaction.emoji}</span>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">
+                                <span className="text-xs text-gray-800 dark:text-gray-300 font-semibold">
                                   {reaction.count}
                                 </span>
                               </button>
@@ -785,7 +555,7 @@ export default function Collaboration() {
               {typingUsers.length > 0 && (
                 <div className="flex gap-3">
                   <div className="w-10" />
-                  <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                  <div className="text-sm text-gray-800 dark:text-gray-300 font-medium italic">
                     {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
                   </div>
                 </div>
@@ -811,14 +581,14 @@ export default function Collaboration() {
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       title="Attach file"
                     >
-                      <Paperclip className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      <Paperclip className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                     </button>
                     <button 
                       onClick={handleCodeBlock}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       title="Insert code block"
                     >
-                      <Code className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      <Code className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                     </button>
                     <div className="relative">
                       <button 
@@ -826,10 +596,10 @@ export default function Collaboration() {
                         className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         title="Add emoji"
                       >
-                        <Smile className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        <Smile className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                       </button>
                       {showEmojiPicker && (
-                        <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 z-50">
+                        <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 z-50">
                           <div className="grid grid-cols-10 gap-1 w-80">
                             {commonEmojis.map((emoji, index) => (
                               <button
@@ -849,7 +619,7 @@ export default function Collaboration() {
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       title="Mention user"
                     >
-                      <AtSign className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      <AtSign className="w-5 h-5 text-gray-800 dark:text-gray-300" />
                     </button>
                   </div>
                   <textarea
@@ -865,12 +635,7 @@ export default function Collaboration() {
                   />
                 </div>
                 <button
-                  onClick={() => {
-                    console.log('Send button clicked!');
-                    console.log('Message input:', messageInput);
-                    console.log('Selected channel:', selectedChannel?.name);
-                    handleSendMessage();
-                  }}
+                  onClick={handleSendMessage}
                   disabled={!messageInput.trim()}
                   className="p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
                   title={!messageInput.trim() ? 'Type a message first' : 'Send message'}
@@ -884,7 +649,7 @@ export default function Collaboration() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">Select a channel to start chatting</p>
+              <p className="text-gray-800 dark:text-gray-300 font-semibold">Select a channel to start chatting</p>
             </div>
           </div>
         )}
@@ -894,8 +659,8 @@ export default function Collaboration() {
       {showUserPanel && (
         <div className="w-64 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700">
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Team Members</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-1">Team Members</h3>
+            <p className="text-sm text-gray-800 dark:text-gray-300 font-semibold">
               {onlineUsers.filter(u => u.status === 'online').length} online
             </p>
           </div>
@@ -915,15 +680,15 @@ export default function Collaboration() {
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 dark:text-white truncate">
+                    <p className="font-bold text-gray-900 dark:text-white truncate">
                       {user.name}
                     </p>
                     {user.statusMessage ? (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-xs text-gray-800 dark:text-gray-300 font-medium truncate">
                         {user.statusMessage}
                       </p>
                     ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                      <p className="text-xs text-gray-800 dark:text-gray-300 font-medium capitalize">
                         {user.status}
                       </p>
                     )}
@@ -935,6 +700,7 @@ export default function Collaboration() {
         </div>
       )}
     </div>
+    )}
     </MainLayout>
   );
 }

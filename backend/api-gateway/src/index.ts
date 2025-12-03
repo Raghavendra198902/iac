@@ -211,6 +211,10 @@ app.use('/api', createProjectRoutes(pool));
 import { createAssetRoutes } from './routes/asset-routes';
 app.use('/api', createAssetRoutes(pool));
 
+// Collaboration routes (no auth for development)
+import { createCollaborationRoutes } from './routes/collaboration';
+app.use('/api/collaboration', createCollaborationRoutes(pool));
+
 // Authentication middleware for protected routes
 app.use('/api', authMiddleware);
 

@@ -133,7 +133,7 @@ export default function ProjectWorkflow() {
         <div className="p-6 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading projects...</p>
+            <p className="text-gray-900 dark:text-gray-100 font-semibold">Loading projects...</p>
           </div>
         </div>
       </MainLayout>
@@ -321,8 +321,8 @@ export default function ProjectWorkflow() {
         </div>
 
         {/* Project Selector */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Select Project</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Select Project</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {projects.map((project) => (
               <div
@@ -330,12 +330,12 @@ export default function ProjectWorkflow() {
                 onClick={() => setSelectedProject(project.id)}
                 className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                   selectedProject === project.id
-                    ? 'border-indigo-600 bg-white shadow-lg'
-                    : 'border-gray-200 hover:border-indigo-300 bg-white'
+                    ? 'border-indigo-600 bg-white dark:bg-gray-700 shadow-lg'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-300 bg-white dark:bg-gray-800'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-gray-700">{project.id}</span>
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{project.id}</span>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-semibold border ${getProjectStatusColor(
                       project.status
@@ -344,10 +344,10 @@ export default function ProjectWorkflow() {
                     {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                   </span>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-1">{project.name}</h3>
-                <p className="text-sm text-gray-900 mb-3">{project.description}</p>
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">{project.name}</h3>
+                <p className="text-sm text-gray-800 dark:text-gray-300 font-medium mb-3">{project.description}</p>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900">
+                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900 dark:text-gray-100">
                     <span>Progress</span>
                     <span className="font-bold">{project.progress}%</span>
                   </div>
@@ -357,7 +357,7 @@ export default function ProjectWorkflow() {
                       style={{ width: `${project.progress}%` }}
                     />
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-900">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200">
                     <Calendar className="w-3 h-3" />
                     Target: {project.targetDate}
                   </div>
@@ -368,53 +368,53 @@ export default function ProjectWorkflow() {
         </div>
 
         {/* Workflow Description */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Integrated Workflow Process</h2>
-          <div className="prose prose-sm max-w-none text-gray-800">
-            <p className="mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Integrated Workflow Process</h2>
+          <div className="prose prose-sm max-w-none text-gray-900 dark:text-gray-100">
+            <p className="mb-4 font-medium">
               This comprehensive workflow ensures seamless collaboration across all teams from initial
               architecture design to final deployment:
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="bg-white rounded-lg p-4 border-2 border-blue-300">
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-blue-300 dark:border-blue-600">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                   <Layers className="w-4 h-4 text-blue-600" />
                   Architecture Phase
                 </h3>
-                <ul className="text-sm space-y-1 text-gray-900">
+                <ul className="text-sm space-y-1 text-gray-800 dark:text-gray-200 font-medium">
                   <li>• EA creates project charter and HLD</li>
                   <li>• SA develops detailed Solution Architecture</li>
                   <li>• LLD defines technical implementation details</li>
                 </ul>
               </div>
-              <div className="bg-white rounded-lg p-4 border-2 border-purple-300">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-purple-300 dark:border-purple-600">
                 <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                   <Database className="w-4 h-4 text-purple-600" />
                   Configuration Phase
                 </h3>
-                <ul className="text-sm space-y-1 text-gray-900">
+                <ul className="text-sm space-y-1 text-gray-800 dark:text-gray-200 font-medium">
                   <li>• CMDB identifies infrastructure assets</li>
                   <li>• Configuration items mapped to design</li>
                   <li>• Resource inventory validated</li>
                 </ul>
               </div>
-              <div className="bg-white rounded-lg p-4 border-2 border-green-300">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-green-300 dark:border-green-600">
                 <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-green-600" />
                   Planning Phase
                 </h3>
-                <ul className="text-sm space-y-1 text-gray-900">
+                <ul className="text-sm space-y-1 text-gray-800 dark:text-gray-200 font-medium">
                   <li>• PM creates project budget</li>
                   <li>• Team members assigned to tasks</li>
                   <li>• Resources allocated and tracked</li>
                 </ul>
               </div>
-              <div className="bg-white rounded-lg p-4 border-2 border-orange-300">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-orange-300 dark:border-orange-600">
                 <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                   <Rocket className="w-4 h-4 text-orange-600" />
                   Implementation Phase
                 </h3>
-                <ul className="text-sm space-y-1 text-gray-900">
+                <ul className="text-sm space-y-1 text-gray-800 dark:text-gray-200 font-medium">
                   <li>• SE designs implementation flow</li>
                   <li>• Automation playbooks created</li>
                   <li>• Agents execute deployment</li>
@@ -426,10 +426,10 @@ export default function ProjectWorkflow() {
 
         {/* Real-Time Notifications */}
         {notifications.length > 0 && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border-2 border-blue-300 dark:border-blue-600 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Bell className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 Live Updates ({notifications.length})
               </h2>
             </div>
@@ -437,7 +437,7 @@ export default function ProjectWorkflow() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="bg-white rounded-lg p-4 border border-blue-200 flex items-start gap-3 hover:shadow-md transition-shadow"
+                  className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-blue-300 dark:border-blue-600 flex items-start gap-3 hover:shadow-md transition-shadow"
                 >
                   {/* User Avatar */}
                   <UserAvatar name={notification.userName} size="sm" />
@@ -453,19 +453,19 @@ export default function ProjectWorkflow() {
                       {notification.type === 'progress-update' && (
                         <TrendingUp className="w-4 h-4 text-purple-600" />
                       )}
-                      <span className="text-sm font-semibold text-gray-900">{notification.userName}</span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{notification.userName}</span>
+                      <span className="text-xs text-gray-800 dark:text-gray-300 font-semibold">
                         {new Date(notification.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700">{notification.message}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300 font-medium">{notification.message}</p>
                   </div>
                   
                   <button
                     onClick={() => clearNotification(notification.id)}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors flex-shrink-0"
                   >
-                    <XIcon className="w-4 h-4 text-gray-400" />
+                    <XIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                   </button>
                 </div>
               ))}
@@ -476,18 +476,18 @@ export default function ProjectWorkflow() {
         {/* Current Project Workflow */}
         {currentProject && (
           <>
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{currentProject.name}</h2>
-                  <p className="text-gray-600">{currentProject.description}</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{currentProject.name}</h2>
+                  <p className="text-gray-800 dark:text-gray-300 font-medium">{currentProject.description}</p>
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold text-indigo-600">{currentProject.progress}%</div>
-                  <div className="text-sm text-gray-500">Complete</div>
+                  <div className="text-sm text-gray-800 dark:text-gray-300 font-semibold">Complete</div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-4 text-sm text-gray-800 dark:text-gray-300 font-semibold">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   Started: {currentProject.createdDate}
@@ -501,7 +501,7 @@ export default function ProjectWorkflow() {
 
             {/* Workflow Steps */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">Workflow Steps for {currentProject.id}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Workflow Steps for {currentProject.id}</h2>
               {currentProject.workflowSteps.map((step, index) => {
             const Icon = iconMap[step.id] || Layers;
             const isLast = index === currentProject.workflowSteps.length - 1;
@@ -510,11 +510,11 @@ export default function ProjectWorkflow() {
               <div key={step.id} className="relative">
                 {/* Connector Line */}
                 {!isLast && (
-                  <div className="absolute left-8 top-20 w-0.5 h-full bg-gray-200 -ml-0.5" />
+                  <div className="absolute left-8 top-20 w-0.5 h-full bg-gray-300 dark:bg-gray-600 -ml-0.5" />
                 )}
 
                 {/* Step Card */}
-                <div className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-lg transition-all">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:shadow-lg transition-all">
                   <div className="p-6">
                     <div className="flex items-start gap-4">
                       {/* Icon */}
@@ -544,8 +544,8 @@ export default function ProjectWorkflow() {
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-1">{step.title}</h3>
-                            <p className="text-gray-600 text-sm">{step.description}</p>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{step.title}</h3>
+                            <p className="text-gray-800 dark:text-gray-300 text-sm font-medium">{step.description}</p>
                           </div>
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(
@@ -559,11 +559,11 @@ export default function ProjectWorkflow() {
 
                         {/* Owner & Assignee */}
                         <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-300 font-semibold">
                             <Users className="w-4 h-4" />
                             <span>Team: {step.ownerTeam}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-300 font-semibold">
                             <Users className="w-4 h-4" />
                             <span>Assigned: {step.assignee}</span>
                           </div>
@@ -618,27 +618,27 @@ export default function ProjectWorkflow() {
         )}
 
         {/* Integration Points */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-indigo-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border-2 border-indigo-300 dark:border-indigo-600 p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <Settings className="w-6 h-6 text-indigo-600" />
             Integration Points & Data Flow
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg p-4 border border-indigo-200">
-              <h3 className="font-semibold text-gray-900 mb-2">EA → SA → CMDB</h3>
-              <p className="text-sm text-gray-800">
+            <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-indigo-300 dark:border-indigo-600">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2">EA → SA → CMDB</h3>
+              <p className="text-sm text-gray-800 dark:text-gray-300 font-medium">
                 Architecture documents (HLD/SA/LLD) reference CMDB configuration items for infrastructure mapping
               </p>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-indigo-200">
-              <h3 className="font-semibold text-gray-900 mb-2">CMDB → PM → SE</h3>
-              <p className="text-sm text-gray-800">
+            <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-indigo-300 dark:border-indigo-600">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2">CMDB → PM → SE</h3>
+              <p className="text-sm text-gray-800 dark:text-gray-300 font-medium">
                 CMDB assets inform budget planning and resource allocation for implementation teams
               </p>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-indigo-200">
-              <h3 className="font-semibold text-gray-900 mb-2">SE → Agents → Deployment</h3>
-              <p className="text-sm text-gray-800">
+            <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border-2 border-indigo-300 dark:border-indigo-600">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2">SE → Agents → Deployment</h3>
+              <p className="text-sm text-gray-800 dark:text-gray-300 font-medium">
                 Implementation playbooks are executed by agents on CMDB-tracked infrastructure
               </p>
             </div>
@@ -659,37 +659,37 @@ export default function ProjectWorkflow() {
         )}
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <a
               href="/ea/repository?doc=sa"
-              className="p-4 border-2 border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors flex items-center gap-3 no-underline"
+              className="p-4 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 no-underline"
             >
-              <FileText className="w-8 h-8 text-indigo-600" />
+              <FileText className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
               <div>
-                <div className="font-semibold text-gray-900">Create SA Document</div>
-                <div className="text-sm text-gray-800">Start with Solution Architecture</div>
+                <div className="font-bold text-gray-900 dark:text-gray-100">Create SA Document</div>
+                <div className="text-sm text-gray-800 dark:text-gray-300 font-medium">Start with Solution Architecture</div>
               </div>
             </a>
             <a
               href="/cmdb"
-              className="p-4 border-2 border-purple-200 rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-3 no-underline"
+              className="p-4 border-2 border-purple-300 dark:border-purple-600 rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 no-underline"
             >
-              <Database className="w-8 h-8 text-purple-600" />
+              <Database className="w-8 h-8 text-purple-600 dark:text-purple-400" />
               <div>
-                <div className="font-semibold text-gray-900">View CMDB Assets</div>
-                <div className="text-sm text-gray-800">Browse configuration items</div>
+                <div className="font-bold text-gray-900 dark:text-gray-100">View CMDB Assets</div>
+                <div className="text-sm text-gray-800 dark:text-gray-300 font-medium">Browse configuration items</div>
               </div>
             </a>
             <a
               href="/agents/downloads"
-              className="p-4 border-2 border-green-200 rounded-lg hover:bg-green-50 transition-colors flex items-center gap-3 no-underline"
+              className="p-4 border-2 border-green-300 dark:border-green-600 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 no-underline"
             >
-              <Download className="w-8 h-8 text-green-600" />
+              <Download className="w-8 h-8 text-green-600 dark:text-green-400" />
               <div>
-                <div className="font-semibold text-gray-900">Download Agents</div>
-                <div className="text-sm text-gray-800">Deploy automation agents</div>
+                <div className="font-bold text-gray-900 dark:text-gray-100">Download Agents</div>
+                <div className="text-sm text-gray-800 dark:text-gray-300 font-medium">Deploy automation agents</div>
               </div>
             </a>
           </div>
