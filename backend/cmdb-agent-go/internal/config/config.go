@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Server    ServerConfig    `yaml:"server"`
 	Agent     AgentConfig     `yaml:"agent"`
+	WebUI     WebUIConfig     `yaml:"webui"`
 	Auth      AuthConfig      `yaml:"auth"`
 	Logging   LoggingConfig   `yaml:"logging"`
 	Transport TransportConfig `yaml:"transport"`
@@ -28,6 +29,13 @@ type AgentConfig struct {
 	Collectors []CollectorConfig   `yaml:"collectors"`
 	DataDir    string              `yaml:"data_dir"`
 	SocketPath string              `yaml:"socket_path"`
+}
+
+type WebUIConfig struct {
+	Enabled       bool   `yaml:"enabled"`
+	ListenAddress string `yaml:"listen_address"`
+	AuthEnabled   bool   `yaml:"auth_enabled"`
+	RateLimit     int    `yaml:"rate_limit"`
 }
 
 type CollectorConfig struct {
@@ -80,6 +88,12 @@ func Load(path string) (*Config, error) {
 	}
 	if cfg.Agent.SocketPath == "" {
 		cfg.Agent.SocketPath = "/var/run/cmdb-agent.sock"
+	}
+	if cfg.WebUI.ListenAddress == "" {
+		cfg.WebUI.ListenAddress = "127.0.0.1:8080"
+	}
+	if cfg.WebUI.RateLimit == 0 {
+		cfg.WebUI.RateLimit = 60
 	}
 	if cfg.Transport.BatchMaxSizeKB == 0 {
 		cfg.Transport.BatchMaxSizeKB = 512

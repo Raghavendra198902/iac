@@ -14,6 +14,7 @@ import (
 	"github.com/iac/cmdb-agent/internal/logger"
 	"github.com/iac/cmdb-agent/internal/queue"
 	"github.com/iac/cmdb-agent/internal/transport"
+	"github.com/iac/cmdb-agent/internal/webui"
 	"github.com/robfig/cron/v3"
 )
 
@@ -27,6 +28,7 @@ type Agent struct {
 	enforcement *enforcement.Engine
 	deployment  *deployment.Manager
 	api         *api.Server
+	webui       *webui.Server
 	hostname    string
 }
 
@@ -71,6 +73,12 @@ func New(cfg *config.Config, log *logger.Logger) (*Agent, error) {
 	// Initialize API server
 	apiServer := api.NewServer(cfg, log)
 
+	// Initialize Web UI server
+	var webuiServer *webui.Server
+	if cfg.WebUI.Enabled {
+		webuiServer = webui.NewServer(cfg, log)
+	}
+
 	agent := &Agent{
 		config:      cfg,
 		log:         log,
@@ -81,6 +89,7 @@ func New(cfg *config.Config, log *logger.Logger) (*Agent, error) {
 		enforcement: ee,
 		deployment:  dm,
 		api:         apiServer,
+		webui:       webuiServer,
 		hostname:    hostname,
 	}
 
@@ -114,6 +123,15 @@ func (a *Agent) Start(ctx context.Context) error {
 		}
 	}()
 
+	// Start Web UI server
+	if a.webui != nil {
+		go func() {
+			if err := a.webui.Start(ctx, a.config.WebUI.ListenAddress); err != nil {
+				a.log.Error("Web UI server error", "error", err)
+			}
+		}()
+	}
+
 	// Send initial heartbeat
 	a.sendHeartbeat()
 
@@ -146,6 +164,13 @@ func (a *Agent) Stop() error {
 
 	// Stop API
 	a.api.Stop()
+
+	// Stop Web UI
+	if a.webui != nil {
+		if err := a.webui.Stop(); err != nil {
+			a.log.Error("Error stopping web UI", "error", err)
+		}
+	}
 
 	// Close queue
 	if err := a.queue.Close(); err != nil {

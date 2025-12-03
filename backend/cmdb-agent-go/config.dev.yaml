@@ -25,6 +25,12 @@ agent:
       enabled: true
       mode: full
 
+webui:
+  enabled: true
+  listen_address: "127.0.0.1:8080"
+  auth_enabled: true
+  rate_limit: 60  # requests per minute
+
 auth:
   method: oauth2
   cert_file: ""
