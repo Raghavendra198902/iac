@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" 
+           Name="CMDB Agent" 
+           Language="1033" 
+           Version="1.0.0" 
+           Manufacturer="Infrastructure as Code Platform" 
+           UpgradeCode="A7F3B2E1-4C5D-6E7F-8A9B-0C1D2E3F4A5B">
+    
+    <Package InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perMachine"
+             Platform="x64"
+             Description="CMDB Agent for Windows - Configuration item collection and policy enforcement"
+             Comments="Unified CMDB Agent with Web UI, monitoring, and enforcement capabilities"
+             Manufacturer="Infrastructure as Code Platform" />
+
+    <MajorUpgrade 
+      DowngradeErrorMessage="A newer version of CMDB Agent is already installed."
+      AllowSameVersionUpgrades="yes" />
+    
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Define Features -->
+    <Feature Id="ProductFeature" 
+             Title="CMDB Agent" 
+             Level="1"
+             Description="Main CMDB Agent service and CLI tools"
+             ConfigurableDirectory="INSTALLFOLDER"
+             AllowAdvertise="no">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="EnvironmentPath" />
+      <ComponentRef Id="ApplicationShortcuts" />
+    </Feature>
+
+    <Feature Id="DocumentationFeature"
+             Title="Documentation"
+             Level="1"
+             Description="User guides and documentation">
+      <ComponentGroupRef Id="DocumentationComponents" />
+    </Feature>
+
+    <!-- Directory Structure -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="CMDB Agent">
+          <Directory Id="LOGSFOLDER" Name="logs" />
+          <Directory Id="DOCSFOLDER" Name="docs" />
+        </Directory>
+      </Directory>
+
+      <!-- Start Menu -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="CMDB Agent" />
+      </Directory>
+
+      <!-- Desktop -->
+      <Directory Id="DesktopFolder" Name="Desktop" />
+
+      <!-- ProgramData -->
+      <Directory Id="CommonAppDataFolder">
+        <Directory Id="APPDATAFOLDER" Name="CMDB Agent" />
+      </Directory>
+    </Directory>
+
+    <!-- Main Components -->
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- Agent Executable -->
+      <Component Id="AgentExe" Guid="B8F4C3E2-5D6E-7F8A-9B0C-1D2E3F4A5B6C" Win64="yes">
+        <File Id="AgentExeFile" 
+              Source="dist\cmdb-agent-windows-amd64.exe" 
+              Name="cmdb-agent.exe"
+              KeyPath="yes"
+              Checksum="yes">
+          
+          <!-- Desktop Shortcut -->
+          <Shortcut Id="DesktopShortcut"
+                    Directory="DesktopFolder"
+                    Name="CMDB Agent"
+                    Description="CMDB Agent Service Manager"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AgentIcon.exe"
+                    IconIndex="0"
+                    Advertise="yes" />
+        </File>
+
+        <!-- Windows Service Installation -->
+        <ServiceInstall Id="CMDBAgentService"
+                        Name="CMDBAgent"
+                        DisplayName="CMDB Agent"
+                        Description="Unified CMDB Agent for configuration item collection and policy enforcement"
+                        Type="ownProcess"
+                        Start="auto"
+                        Account="LocalSystem"
+                        ErrorControl="normal"
+                        Arguments='--config="[INSTALLFOLDER]config.yaml"'>
+          <util:ServiceConfig xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
+                             FirstFailureActionType="restart"
+                             SecondFailureActionType="restart"
+                             ThirdFailureActionType="restart"
+                             RestartServiceDelayInSeconds="60"
+                             ResetPeriodInDays="1" />
+        </ServiceInstall>
+
+        <ServiceControl Id="StartCMDBAgentService"
+                       Name="CMDBAgent"
+                       Start="install"
+                       Stop="both"
+                       Remove="uninstall"
+                       Wait="yes" />
+      </Component>
+
+      <!-- CLI Tool -->
+      <Component Id="CLIExe" Guid="C9F5D4E3-6E7F-8A9B-0C1D-2E3F4A5B6C7D" Win64="yes">
+        <File Id="CLIExeFile" 
+              Source="dist\cmdb-agent-cli-windows-amd64.exe" 
+              Name="cmdb-agent-cli.exe"
+              KeyPath="yes"
+              Checksum="yes" />
+      </Component>
+
+      <!-- Configuration File -->
+      <Component Id="ConfigYaml" Guid="DAF6E5F4-7F8A-9B0C-1D2E-3F4A5B6C7D8E" Win64="yes">
+        <File Id="ConfigYamlFile" 
+              Source="config.example.yaml" 
+              Name="config.yaml"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- PowerShell Scripts -->
+      <Component Id="InstallScript" Guid="EBF7F6F5-8A9B-0C1D-2E3F-4A5B6C7D8E9F" Win64="yes">
+        <File Id="InstallPS1File" 
+              Source="install-windows.ps1" 
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="UninstallScript" Guid="FCF8F7F6-9B0C-1D2E-3F4A-5B6C7D8E9FA0" Win64="yes">
+        <File Id="UninstallPS1File" 
+              Source="uninstall-windows.ps1" 
+              KeyPath="yes" />
+      </Component>
+
+      <!-- README -->
+      <Component Id="ReadmeFile" Guid="0DF9F8F7-0C1D-2E3F-4A5B-6C7D8E9FA0B1" Win64="yes">
+        <File Id="ReadmeMdFile" 
+              Source="README.md" 
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Documentation Components -->
+    <ComponentGroup Id="DocumentationComponents" Directory="DOCSFOLDER">
+      <Component Id="FeaturesDoc" Guid="1EF0F9F8-1D2E-3F4A-5B6C-7D8E9FA0B1C2" Win64="yes">
+        <File Id="FeaturesMdFile" 
+              Source="FEATURES.md" 
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="WebUIDoc" Guid="2FF1F0F9-2E3F-4A5B-6C7D-8E9FA0B1C2D3" Win64="yes">
+        <File Id="WebUIMdFile" 
+              Source="WEBUI_GUIDE.md" 
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="WindowsBuildDoc" Guid="30F2F1F0-3F4A-5B6C-7D8E-9FA0B1C2D3E4" Win64="yes">
+        <File Id="WindowsBuildMdFile" 
+              Source="WINDOWS_BUILD_GUIDE.md" 
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="FlowchartDoc" Guid="41F3F2F1-4A5B-6C7D-8E9F-A0B1C2D3E4F5" Win64="yes">
+        <File Id="FlowchartMdFile" 
+              Source="FLOWCHART.md" 
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Environment PATH Component -->
+    <Component Id="EnvironmentPath" Guid="52F4F3F2-5B6C-7D8E-9FA0-B1C2D3E4F5A6" Directory="INSTALLFOLDER" Win64="yes">
+      <Environment Id="PATH" 
+                   Name="PATH" 
+                   Value="[INSTALLFOLDER]" 
+                   Permanent="no" 
+                   Part="last" 
+                   Action="set" 
+                   System="yes" />
+      
+      <RegistryValue Root="HKLM" 
+                     Key="Software\CMDBAgent" 
+                     Name="InstallPath" 
+                     Type="string" 
+                     Value="[INSTALLFOLDER]" 
+                     KeyPath="yes" />
+      
+      <RegistryValue Root="HKLM" 
+                     Key="Software\CMDBAgent" 
+                     Name="Version" 
+                     Type="string" 
+                     Value="1.0.0" />
+    </Component>
+
+    <!-- Start Menu Shortcuts -->
+    <Component Id="ApplicationShortcuts" Guid="63F5F4F3-6C7D-8E9F-A0B1-C2D3E4F5A6B7" Directory="ApplicationProgramsFolder" Win64="yes">
+      <Shortcut Id="WebUIShortcut"
+                Name="CMDB Agent Web UI"
+                Description="Open CMDB Agent Web Dashboard"
+                Target="http://localhost:8080"
+                Icon="AgentIcon.exe"
+                IconIndex="0" />
+
+      <Shortcut Id="ConfigShortcut"
+                Name="Agent Configuration"
+                Description="Edit CMDB Agent Configuration"
+                Target="[INSTALLFOLDER]config.yaml"
+                Icon="AgentIcon.exe"
+                IconIndex="0" />
+
+      <Shortcut Id="LogsShortcut"
+                Name="View Logs"
+                Description="View CMDB Agent Logs"
+                Target="[LOGSFOLDER]"
+                Icon="AgentIcon.exe"
+                IconIndex="0" />
+
+      <Shortcut Id="DocsShortcut"
+                Name="Documentation"
+                Description="CMDB Agent Documentation"
+                Target="[DOCSFOLDER]"
+                Icon="AgentIcon.exe"
+                IconIndex="0" />
+
+      <Shortcut Id="UninstallShortcut"
+                Name="Uninstall CMDB Agent"
+                Description="Uninstall CMDB Agent"
+                Target="[SystemFolder]msiexec.exe"
+                Arguments="/x [ProductCode]"
+                Icon="AgentIcon.exe"
+                IconIndex="0" />
+
+      <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall" />
+      
+      <RegistryValue Root="HKCU" 
+                     Key="Software\CMDBAgent" 
+                     Name="installed" 
+                     Type="integer" 
+                     Value="1" 
+                     KeyPath="yes" />
+    </Component>
+
+    <!-- Icons -->
+    <Icon Id="AgentIcon.exe" SourceFile="dist\cmdb-agent-windows-amd64.exe" />
+    
+    <!-- Properties -->
+    <Property Id="ARPPRODUCTICON" Value="AgentIcon.exe" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Raghavendra198902/iac" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/Raghavendra198902/iac/issues" />
+    <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <!-- UI -->
+    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+
+    <!-- Custom License -->
+    <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="dialog.bmp" />
+
+    <!-- Launch Condition -->
+    <Condition Message="This application requires Windows 10 or Windows Server 2016 or higher.">
+      <![CDATA[Installed OR (VersionNT >= 603)]]>
+    </Condition>
+
+    <!-- Custom Actions -->
+    <CustomAction Id="OpenWebUI" 
+                  Directory="INSTALLFOLDER" 
+                  ExeCommand="cmd.exe /c start http://localhost:8080" 
+                  Return="asyncNoWait" />
+
+    <InstallExecuteSequence>
+      <Custom Action="OpenWebUI" After="InstallFinalize">NOT Installed AND UILevel > 2</Custom>
+    </InstallExecuteSequence>
+
+  </Product>
+</Wix>
