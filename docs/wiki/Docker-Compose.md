@@ -1,6 +1,67 @@
-# Docker Compose
+---
+**Document Type:** Container Orchestration Guide  
+**Audience:** Developers, DevOps Engineers, Container Administrators  
+**Classification:** Technical - Container Management  
+**Version:** 2.0  
+**Last Updated:** December 3, 2025  
+**Reading Time:** ~45 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
+
+# 🐳 Docker Compose - IAC Dharma Platform
 
 > **Container Orchestration Made Simple** - Complete guide to running IAC Dharma with Docker Compose for development, testing, and production deployments
+
+---
+
+## 🎯 Docker Compose Service Architecture
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#01579b','primaryBorderColor':'#1976d2','lineColor':'#1976d2','secondaryColor':'#e8f5e9','tertiaryColor':'#fff3e0'}}}%%
+flowchart TD
+    A[docker-compose up] --> B[Load Configuration]
+    
+    B --> C[Create Network]
+    C --> D[iac-network Bridge]
+    
+    D --> E[Start Infrastructure]
+    E --> E1[PostgreSQL :5432]
+    E --> E2[Redis :6379]
+    E --> E3[RabbitMQ :5672]
+    
+    E1 --> F{Health Check}
+    E2 --> F
+    E3 --> F
+    
+    F -->|Healthy| G[Start Microservices]
+    F -->|Unhealthy| H[Retry/Fail]
+    
+    G --> G1[API Gateway :3000]
+    G --> G2[Blueprint Service :3001]
+    G --> G3[IAC Generator :3002]
+    G --> G4[AI Engine :8000]
+    G --> G5[Cost Service :3005]
+    
+    G1 --> I[Start Frontend]
+    I --> I1[React App :5173]
+    
+    G1 --> J[Start Monitoring]
+    J --> J1[Prometheus :9090]
+    J --> J2[Grafana :3030]
+    J --> J3[Jaeger :16686]
+    
+    I1 --> K[✅ Platform Ready]
+    J1 --> K
+    J2 --> K
+    J3 --> K
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style K fill:#c8e6c9,stroke:#2e7d32,stroke-width:4px
+    style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style F fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+```
+
+---
 
 [![Docker](https://img.shields.io/badge/Docker-20.10+-2496ED.svg?logo=docker)](https://www.docker.com/)
 [![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2.0+-2496ED.svg)](https://docs.docker.com/compose/)

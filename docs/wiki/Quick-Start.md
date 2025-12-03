@@ -1,10 +1,56 @@
-# Quick Start Guide
+---
+**Document Type:** Quick Start Guide  
+**Audience:** Developers, DevOps Engineers, New Users  
+**Classification:** Public - Getting Started  
+**Version:** 2.0  
+**Last Updated:** December 3, 2025  
+**Estimated Time:** 10-15 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
 
-Get your IAC Dharma platform up and running in under 10 minutes with this comprehensive quick start guide.
+# ⚡ Quick Start Guide - IAC Dharma
+
+> **Get from zero to deployed in 10 minutes** - Complete quick start with visual workflow, CLI commands, and verification steps
 
 ---
 
-## Table of Contents
+## 🚀 Quick Start Journey
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#01579b','primaryBorderColor':'#1976d2','lineColor':'#1976d2','secondaryColor':'#e8f5e9','tertiaryColor':'#fff3e0'}}}%%
+flowchart TD
+    A[📋 Check Prerequisites] --> B{All Requirements Met?}
+    B -->|Yes| C[📦 Install Platform]
+    B -->|No| B1[Install Missing Software]
+    B1 --> A
+    
+    C --> D[⚙️ Configure Environment]
+    D --> E[🚀 Start Services]
+    E --> F[⏱️ Wait 60 Seconds]
+    F --> G[✅ Verify Health]
+    
+    G --> H{All Services Healthy?}
+    H -->|Yes| I[🌐 Access Dashboard]
+    H -->|No| J[Check Logs]
+    J --> K[Troubleshoot]
+    K --> E
+    
+    I --> L[🎨 Create Blueprint]
+    L --> M[🔍 Validate & Estimate]
+    M --> N[🚀 Deploy Infrastructure]
+    N --> O[✨ Success!]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style O fill:#c8e6c9,stroke:#2e7d32,stroke-width:4px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style I fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+```
+
+---
+
+## ⏱️ Time to Production: **10-15 Minutes**
+
+## 📚 Table of Contents
 
 | Section | Description | Time |
 |---------|-------------|------|

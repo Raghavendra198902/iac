@@ -1,3 +1,89 @@
+---
+**Document Type:** Performance Engineering & Optimization Guide  
+**Audience:** Performance Engineers, DevOps Teams, Backend Developers  
+**Classification:** Technical - Performance Optimization  
+**Version:** 2.0  
+**Last Updated:** December 3, 2025  
+**Reading Time:** ~2.5 hours  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
+
+# ⚡ Performance Tuning - IAC Dharma Platform
+
+> **Performance Excellence**: Comprehensive optimization guide achieving P95 < 200ms API response, 1000+ req/s throughput, and 94% cache hit rate
+
+---
+
+## 🎯 Performance Optimization Workflow
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#01579b','primaryBorderColor':'#1976d2','lineColor':'#1976d2','secondaryColor':'#e8f5e9','tertiaryColor':'#fff3e0'}}}%%
+flowchart TD
+    A[Performance Baseline] --> B[Measure & Profile]
+    
+    B --> C[APM Tools]
+    B --> D[Load Testing]
+    B --> E[Profiling]
+    
+    C --> F[Identify Bottlenecks]
+    D --> F
+    E --> F
+    
+    F --> G{Bottleneck Type}
+    
+    G -->|Database| H[Query Optimization]
+    G -->|API| I[Code Optimization]
+    G -->|Frontend| J[Bundle Optimization]
+    G -->|Network| K[CDN/Compression]
+    G -->|Cache| L[Cache Strategy]
+    
+    H --> H1[Add Indexes]
+    H1 --> H2[Query Rewrite]
+    H2 --> H3[Connection Pooling]
+    
+    I --> I1[Async Processing]
+    I1 --> I2[Clustering]
+    I2 --> I3[Remove N+1]
+    
+    J --> J1[Code Splitting]
+    J1 --> J2[Lazy Loading]
+    J2 --> J3[Tree Shaking]
+    
+    K --> K1[Enable HTTP/2]
+    K1 --> K2[Gzip/Brotli]
+    K2 --> K3[CDN Setup]
+    
+    L --> L1[Redis Caching]
+    L1 --> L2[Cache Warming]
+    L2 --> L3[TTL Tuning]
+    
+    H3 --> M[Test Changes]
+    I3 --> M
+    J3 --> M
+    K3 --> M
+    L3 --> M
+    
+    M --> N{Performance Improved?}
+    
+    N -->|Yes| O[Deploy & Monitor]
+    N -->|No| P[Rollback & Retry]
+    
+    O --> Q[Track Metrics]
+    Q --> R{Meets SLO?}
+    
+    R -->|Yes| S[✅ Optimize Complete]
+    R -->|No| B
+    
+    P --> F
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style F fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    style S fill:#c8e6c9,stroke:#2e7d32,stroke-width:4px
+    style N fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+```
+
+---
+
 # Performance Tuning
 
 Comprehensive guide to optimizing IAC Dharma for maximum performance, scalability, and efficiency across all components.

@@ -1,3 +1,74 @@
+---
+**Document Type:** Security Hardening & Best Practices Guide  
+**Audience:** Security Engineers, DevSecOps Teams, Compliance Officers  
+**Classification:** Critical - Security & Compliance  
+**Version:** 2.0  
+**Last Updated:** December 3, 2025  
+**Reading Time:** ~2 hours  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
+
+# 🛡️ Security Best Practices - IAC Dharma Platform
+
+> **Defense-in-Depth Excellence**: Comprehensive security guidelines and hardening procedures for zero-trust, compliant infrastructure
+
+---
+
+## 🎯 Security Architecture Layers
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd'}}}%%
+flowchart TD
+    A[Security Framework] --> B[Perimeter Security]
+    A --> C[Network Security]
+    A --> D[Application Security]
+    A --> E[Data Security]
+    A --> F[Identity Security]
+    
+    B --> B1[DDoS Protection]
+    B --> B2[WAF Rules]
+    B --> B3[Firewall]
+    
+    C --> C1[VPC Isolation]
+    C --> C2[Network Policies]
+    C --> C3[TLS 1.3]
+    
+    D --> D1[Input Validation]
+    D --> D2[OWASP Top 10]
+    D --> D3[Code Scanning]
+    
+    E --> E1[Encryption at Rest]
+    E --> E2[Encryption in Transit]
+    E --> E3[Backup Encryption]
+    
+    F --> F1[MFA Required]
+    F --> F2[RBAC]
+    F --> F3[SSO Integration]
+    
+    B1 --> G[✅ Zero Trust]
+    B2 --> G
+    B3 --> G
+    C1 --> G
+    C2 --> G
+    C3 --> G
+    D1 --> G
+    D2 --> G
+    D3 --> G
+    E1 --> G
+    E2 --> G
+    E3 --> G
+    F1 --> G
+    F2 --> G
+    F3 --> G
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:4px
+    style G fill:#c8e6c9,stroke:#2e7d32,stroke-width:4px
+    style B fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style E fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+```
+
+---
+
 # Security Best Practices
 
 Comprehensive security guidelines and hardening procedures for IAC Dharma deployment across all environments.

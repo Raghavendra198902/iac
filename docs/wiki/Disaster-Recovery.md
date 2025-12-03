@@ -1,3 +1,79 @@
+---
+**Document Type:** Disaster Recovery & Business Continuity Plan  
+**Audience:** SREs, Infrastructure Teams, Business Continuity Managers  
+**Classification:** Critical - Business Continuity  
+**Version:** 2.0  
+**Last Updated:** December 3, 2025  
+**Reading Time:** ~45 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
+
+# 🚨 Disaster Recovery - IAC Dharma Platform
+
+> **Business Continuity Assurance**: Enterprise disaster recovery with multi-region failover, 99.99% availability, RTO < 1 hour, RPO < 15 minutes
+
+---
+
+## 🎯 Disaster Recovery Workflow
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#01579b','primaryBorderColor':'#1976d2','lineColor':'#1976d2','secondaryColor':'#e8f5e9','tertiaryColor':'#fff3e0'}}}%%
+flowchart TD
+    A[Normal Operations] --> B{Disaster Detection}
+    
+    B -->|Health Check Fail| C[Alert Triggered]
+    B -->|Manual Trigger| C
+    B -->|No Issue| A
+    
+    C --> D[Incident Classification]
+    
+    D --> E{Severity Level}
+    
+    E -->|P1: Critical| F[Activate Full DR]
+    E -->|P2: High| G[Activate Partial DR]
+    E -->|P3: Medium| H[Local Recovery]
+    
+    F --> F1[Notify Stakeholders]
+    F1 --> F2[Failover to DR Region]
+    F2 --> F3[DNS Cutover]
+    F3 --> F4[Verify Services]
+    
+    G --> G1[Scale DR Resources]
+    G1 --> G2[Redirect Traffic]
+    G2 --> F4
+    
+    H --> H1[Restart Services]
+    H1 --> H2[Restore from Backup]
+    H2 --> F4
+    
+    F4 --> I{All Services OK?}
+    
+    I -->|Yes| J[Update Status]
+    I -->|No| K[Emergency Escalation]
+    
+    J --> L[Monitor Closely]
+    L --> M[Post-Incident Review]
+    
+    K --> F2
+    
+    M --> N{Primary Restored?}
+    N -->|Yes| O[Failback Plan]
+    N -->|No| L
+    
+    O --> P[Sync Data]
+    P --> Q[Test Primary]
+    Q --> R[DNS Cutback]
+    R --> S[✅ Normal Operations]
+    
+    style A fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style C fill:#ffebee,stroke:#c62828,stroke-width:3px
+    style F fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style I fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style S fill:#c8e6c9,stroke:#2e7d32,stroke-width:4px
+```
+
+---
+
 # Disaster Recovery
 
 Comprehensive guide to disaster recovery planning, backup strategies, and business continuity for IAC Dharma.

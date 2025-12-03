@@ -1,3 +1,74 @@
+---
+**Document Type:** Backup & Disaster Recovery Guide  
+**Audience:** DevOps Engineers, SREs, Database Administrators  
+**Classification:** Critical - Business Continuity  
+**Version:** 2.0  
+**Last Updated:** December 3, 2025  
+**Reading Time:** ~90 minutes  
+**Copyright:** © 2024-2025 Raghavendra Deshpande. All Rights Reserved.  
+---
+
+# 💾 Backup and Recovery - IAC Dharma Platform
+
+> **Business Continuity Excellence**: Comprehensive backup, disaster recovery, and business continuity with RTO < 1 hour, RPO < 15 minutes
+
+---
+
+## 🎯 Backup & Recovery Workflow
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#01579b','primaryBorderColor':'#1976d2','lineColor':'#1976d2','secondaryColor':'#e8f5e9','tertiaryColor':'#fff3e0'}}}%%
+flowchart TD
+    A[Production Data] --> B[Backup Orchestrator]
+    
+    B --> C[Full Backup]
+    B --> D[Incremental Backup]
+    B --> E[Continuous Backup]
+    
+    C --> C1[Weekly: Sunday 3AM]
+    D --> D1[Daily: 2AM]
+    E --> E1[Real-time WAL/Binlog]
+    
+    C1 --> F[Encryption Layer]
+    D1 --> F
+    E1 --> F
+    
+    F --> G[Storage Destinations]
+    
+    G --> G1[Local Disk]
+    G --> G2[S3/Azure Blob/GCS]
+    G --> G3[Offsite DR Location]
+    G --> G4[Air-Gapped Archive]
+    
+    G1 --> H[Verification]
+    G2 --> H
+    G3 --> H
+    G4 --> H
+    
+    H --> I{Backup Valid?}
+    I -->|Yes| J[✅ Backup Catalog]
+    I -->|No| K[🚨 Alert & Retry]
+    
+    K --> B
+    
+    J --> L{Disaster?}
+    L -->|No| M[Regular Retention]
+    L -->|Yes| N[Recovery Process]
+    
+    N --> N1[Select Recovery Point]
+    N1 --> N2[Restore Data]
+    N2 --> N3[Verify Integrity]
+    N3 --> N4[✅ Service Restored]
+    
+    style A fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    style J fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style K fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style N4 fill:#c8e6c9,stroke:#2e7d32,stroke-width:4px
+```
+
+---
+
 # Backup and Recovery
 
 Comprehensive backup, disaster recovery, and business continuity strategies for IAC Dharma platform.
