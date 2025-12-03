@@ -43,14 +43,19 @@ const StakeholderManagement = lazy(() => import('./pages/ea/StakeholderManagemen
 
 // Project Management Pages
 const ProjectManagement = lazy(() => import('./pages/pm/ProjectManagement'));
+const PMRequirements = lazy(() => import('./pages/pm/Requirements'));
 
 // Software Engineering Pages
 const SoftwareEngineering = lazy(() => import('./pages/se/SoftwareEngineering'));
+const SETasks = lazy(() => import('./pages/se/Tasks'));
+const SEPlaybooks = lazy(() => import('./pages/se/Playbooks'));
 
 // Agent Downloads
 const AgentDownloads = lazy(() => import('./pages/agents/AgentDownloads'));
 const UploadAgent = lazy(() => import('./pages/agents/UploadAgent'));
 const DownloadsPage = lazy(() => import('./pages/DownloadsPage'));
+const Enforcement = lazy(() => import('./pages/agents/Enforcement'));
+const Monitoring = lazy(() => import('./pages/agents/Monitoring'));
 
 // CMDB
 const CMDBPage = lazy(() => import('./pages/cmdb/CMDBPage'));
@@ -126,15 +131,18 @@ function App() {
                   
                   {/* Project Management Routes */}
                   <Route path="/pm/roadmap" element={<ProjectManagement />} />
-                  <Route path="/pm/requirements" element={<ProjectManagement />} />
+                  <Route path="/pm/requirements" element={<PMRequirements />} />
                   
                   {/* Software Engineering Routes */}
                   <Route path="/se/projects" element={<SoftwareEngineering />} />
-                  <Route path="/se/tasks" element={<SoftwareEngineering />} />
+                  <Route path="/se/tasks" element={<SETasks />} />
+                  <Route path="/se/playbooks" element={<SEPlaybooks />} />
                   
                   {/* Agent Downloads */}
                   <Route path="/agents/downloads" element={<AgentDownloads />} />
                   <Route path="/agents/upload" element={<UploadAgent />} />
+                  <Route path="/agents/enforcement" element={<Enforcement />} />
+                  <Route path="/agents/monitoring" element={<Monitoring />} />
                   <Route path="/downloads" element={<DownloadsPage />} />
                   
                   {/* CMDB */}

@@ -1,0 +1,64 @@
+server:
+  primary: http://192.168.1.9:3000
+  secondary: ""
+  ca_bundle: ""
+
+agent:
+  version: 1.0.0
+  hostname: "rrdubantu-local"
+  data_dir: /tmp/cmdb-agent-data
+  socket_path: /tmp/cmdb-agent.sock
+  tags:
+    env: local
+    owner: rrd
+    location: development
+  collectors:
+    - name: system
+      schedule: "@every 30s"
+      enabled: true
+      mode: full
+    - name: hardware
+      schedule: "@every 1m"
+      enabled: true
+      mode: full
+    - name: network
+      schedule: "@every 1m"
+      enabled: true
+      mode: full
+    - name: software
+      schedule: "@every 5m"
+      enabled: true
+      mode: full
+    - name: services
+      schedule: "@every 2m"
+      enabled: true
+      mode: full
+
+webui:
+  enabled: true
+  listen_address: "0.0.0.0:8080"
+  auth_enabled: false
+  rate_limit: 60
+
+auth:
+  method: none
+  cert_file: ""
+  key_file: ""
+  token_url: ""
+  client_id: ""
+  client_secret: ""
+
+logging:
+  level: info
+  output: stdout
+  file_path: /tmp/cmdb-agent.log
+  max_size_mb: 10
+  max_backups: 3
+
+transport:
+  batch_max_size_kb: 512
+  batch_max_items: 50
+  compression: true
+  retry_attempts: 3
+  retry_backoff_ms: 1000
+  timeout: 30

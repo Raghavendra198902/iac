@@ -13,20 +13,26 @@ import {
   Package,
   HardDrive,
   Cpu,
-  ExternalLink,
   Terminal,
   FileCode,
   Lock,
   Zap,
   Cloud,
   Activity,
-  TrendingUp,
   Copy,
   Check,
   Laptop,
   MonitorDown,
   Upload,
 } from 'lucide-react';
+
+interface AlternateDownload {
+  type: string;
+  url: string;
+  size: string;
+  status?: string;
+  note?: string;
+}
 
 interface Agent {
   id: string;
@@ -45,6 +51,7 @@ interface Agent {
     cpu: string;
   };
   downloadUrl: string;
+  alternateDownloads?: AlternateDownload[];
   checksum: string;
   releaseDate: string;
   color: string;
@@ -63,12 +70,13 @@ export default function AgentDownloads() {
       platform: 'Windows',
       icon: Shield,
       version: '1.0.0',
-      size: '15 MB',
+      size: '6 MB',
       architecture: ['x64'],
-      description: 'Professional MSI installer with Windows service, PATH integration, and Start Menu shortcuts.',
+      description: 'Production-ready ZIP package with PowerShell installer, Windows service, and enterprise features. MSI installer available (build required).',
       features: [
-        '⚡ Native Windows MSI installer (15 MB)',
-        '🎯 Professional installation wizard with GUI',
+        '📦 ZIP package with PowerShell installer (6 MB)',
+        '⚡ MSI installer source files included (build on Windows)',
+        '🎯 Automated PowerShell installation script',
         '🔄 Automatic Windows service installation',
         '🚀 Service auto-start on boot (LocalSystem)',
         '📊 Real-time system monitoring',
@@ -78,13 +86,12 @@ export default function AgentDownloads() {
         '🔐 Secure mTLS/OAuth2 authentication',
         '🌐 Built-in Web UI dashboard (port 8080)',
         '📝 Windows Event Log integration',
-        '🔧 PowerShell management tools included',
+        '🔧 CLI tools included (cmdb-agent-cli.exe)',
         '📍 Automatic PATH environment variable',
         '⭐ Start Menu shortcuts (Web UI, Config, Logs, Docs)',
         '🖥️ Desktop shortcut for quick access',
-        '🔄 Upgrade support (preserves configuration)',
-        '🗑️ Clean uninstaller via Control Panel',
-        '📦 Control Panel Add/Remove Programs entry',
+        '🗑️ Uninstall script included (Uninstall.ps1)',
+        '📖 Complete documentation and guides',
       ],
       requirements: {
         os: 'Windows 10/11, Server 2016+',
@@ -92,9 +99,9 @@ export default function AgentDownloads() {
         disk: '50 MB available space',
         cpu: 'x64 (64-bit) processor',
       },
-      downloadUrl: '/downloads/cmdb-agent-1.0.0-x64.msi',
-      checksum: 'sha256:calculated_on_build',
-      releaseDate: '2025-12-03',
+      downloadUrl: '/downloads/cmdb-agent-windows-1.0.0.zip',
+      checksum: 'sha256:see .sha256 file',
+      releaseDate: '2024-12-03',
       color: 'blue',
     },
     {
@@ -103,22 +110,26 @@ export default function AgentDownloads() {
       platform: 'Linux',
       icon: Terminal,
       version: '1.0.0',
-      size: '7.5 MB',
+      size: '5.9 MB',
       architecture: ['x86_64', 'aarch64'],
-      description: 'Lightweight CMDB agent for Linux servers and workstations with comprehensive monitoring.',
+      description: 'Lightweight CMDB agent for Linux servers and workstations with systemd service and automated installation.',
       features: [
-        '⚡ Lightweight Go binary (7.5 MB)',
-        '📦 DEB/RPM packages available',
-        '🔄 Systemd service integration',
-        '📊 Complete system inventory',
+        '⚡ Lightweight Go binary (5.9 MB amd64, 5.3 MB arm64)',
+        '📦 Automated installation script included',
+        '🔄 Systemd service integration with auto-start',
+        '📊 Complete system inventory collection',
         '💾 Hardware/software tracking',
         '📜 License compliance (dpkg/rpm)',
         '🐳 Container discovery (Docker, Podman)',
         '🛡️ Policy enforcement engine',
         '🔐 Secure mTLS/OAuth2 authentication',
-        '🌐 Built-in Web UI dashboard',
-        '📝 Syslog integration',
-        '🔧 Shell management tools',
+        '🌐 Built-in Web UI dashboard (port 8080)',
+        '📝 Syslog and journald integration',
+        '🔧 CLI tools included',
+        '👤 Runs as dedicated cmdb-agent user',
+        '🔒 Security hardening (NoNewPrivileges, PrivateTmp)',
+        '📖 Complete documentation included',
+        '🗑️ Easy uninstall script',
       ],
       requirements: {
         os: 'RHEL/CentOS 7+, Ubuntu 18.04+, Debian 10+',
@@ -126,9 +137,17 @@ export default function AgentDownloads() {
         disk: '50 MB available space',
         cpu: 'x86_64 or ARM64',
       },
-      downloadUrl: '/downloads/cmdb-agent-linux-amd64.tar.gz',
-      checksum: 'sha256:pending',
-      releaseDate: '2025-12-03',
+      downloadUrl: '/downloads/cmdb-agent-linux-amd64-1.0.0.tar.gz',
+      alternateDownloads: [
+        {
+          type: 'ARM64',
+          url: '/downloads/cmdb-agent-linux-arm64-1.0.0.tar.gz',
+          size: '5.3 MB',
+          note: 'For ARM64/aarch64 processors'
+        }
+      ],
+      checksum: 'sha256:see .sha256 file',
+      releaseDate: '2024-12-03',
       color: 'green',
     },
     {
@@ -137,32 +156,43 @@ export default function AgentDownloads() {
       platform: 'macOS',
       icon: Monitor,
       version: '1.0.0',
-      size: '7.5 MB',
+      size: '5.9 MB',
       architecture: ['Intel', 'Apple Silicon'],
-      description: 'Native CMDB agent for macOS with Gatekeeper support and universal binary.',
+      description: 'Native CMDB agent for macOS with LaunchDaemon service and automated installation for Intel and Apple Silicon.',
       features: [
-        '⚡ Lightweight Go binary (7.5 MB)',
-        '🍎 Universal binary (Intel + M1/M2/M3)',
-        '📦 PKG installer with launchd',
+        '⚡ Lightweight Go binary (5.9 MB Intel, 5.5 MB Apple Silicon)',
+        '🍎 Separate packages for Intel and Apple Silicon',
+        '📦 Automated installation script included',
+        '🔄 LaunchDaemon service with auto-start',
         '📊 System Profiler integration',
         '💾 Hardware/software inventory',
-        '📜 License tracking (Homebrew)',
-        '🔒 FileVault and T2 monitoring',
+        '📜 License tracking (Homebrew, App Store)',
+        '🔒 FileVault and security monitoring',
         '🛡️ Policy enforcement engine',
         '🔐 Secure mTLS/OAuth2 authentication',
-        '🌐 Built-in Web UI dashboard',
-        '🔧 Native macOS tools',
+        '🌐 Built-in Web UI dashboard (port 8080)',
+        '🔧 CLI tools included',
         '📝 Unified logging support',
+        '🗑️ Easy uninstall script',
+        '📖 Complete documentation included',
       ],
       requirements: {
-        os: 'macOS 11 (Big Sur) or later',
+        os: 'macOS 10.15 (Catalina) or later',
         ram: '100 MB minimum',
         disk: '50 MB available space',
-        cpu: 'Intel Core i5 or Apple M1/M2/M3',
+        cpu: 'Intel Core i5 or Apple Silicon (M1/M2/M3)',
       },
-      downloadUrl: '/downloads/cmdb-agent-macos-universal.pkg',
-      checksum: 'sha256:pending',
-      releaseDate: '2025-12-03',
+      downloadUrl: '/downloads/cmdb-agent-macos-amd64-1.0.0.tar.gz',
+      alternateDownloads: [
+        {
+          type: 'Apple Silicon (M1/M2/M3)',
+          url: '/downloads/cmdb-agent-macos-arm64-1.0.0.tar.gz',
+          size: '5.5 MB',
+          note: 'For Apple Silicon Macs'
+        }
+      ],
+      checksum: 'sha256:see .sha256 file',
+      releaseDate: '2024-12-03',
       color: 'purple',
     },
     {
@@ -318,16 +348,16 @@ export default function AgentDownloads() {
                 </motion.span>
               </h1>
               <p className="text-blue-100 text-lg">
-                Cross-platform agents for comprehensive IT asset discovery and monitoring
+                Production-ready agents for Windows, Linux (AMD64/ARM64), and macOS (Intel/Apple Silicon) - v1.0.0
               </p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             {[
-              { label: 'Platforms', value: '6', icon: Server },
-              { label: 'Active Deployments', value: '10K+', icon: Shield },
-              { label: 'Uptime', value: '99.9%', icon: CheckCircle },
-              { label: 'Latest Release', value: 'Today', icon: Package },
+              { label: 'Platforms', value: '5', icon: Server },
+              { label: 'Architectures', value: 'x64/ARM64', icon: Cpu },
+              { label: 'Package Size', value: '5-6 MB', icon: Package },
+              { label: 'Latest Release', value: 'v1.0.0', icon: CheckCircle },
             ].map((stat, idx) => (
               <motion.div
                 key={idx}
@@ -559,22 +589,24 @@ export default function AgentDownloads() {
                 <span className="text-gray-900 dark:text-gray-100">Windows Installation</span>
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 font-mono text-sm text-gray-900 dark:text-gray-100">
-                <div>1. Download .msi installer</div>
-                <div>2. Run as Administrator</div>
-                <div>3. Follow setup wizard</div>
-                <div>4. Verify: <code className="bg-white px-2 py-1 rounded">cmdb-agent --version</code></div>
+                <div>1. Download and extract ZIP</div>
+                <div>2. Open PowerShell as Administrator</div>
+                <div>3. cd to extracted folder</div>
+                <div>4. Run: <code className="bg-white dark:bg-gray-600 px-2 py-1 rounded">.\Install.ps1</code></div>
+                <div>5. Access: <code className="bg-white dark:bg-gray-600 px-2 py-1 rounded">http://localhost:8080</code></div>
               </div>
             </div>
             <div className="space-y-3">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="text-gray-900 dark:text-gray-100">Linux Installation</span>
+                <span className="text-gray-900 dark:text-gray-100">Linux/macOS Installation</span>
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 font-mono text-sm text-gray-900 dark:text-gray-100">
-                <div>tar -xzf cmdb-agent.tar.gz</div>
+                <div>tar xzf cmdb-agent-*.tar.gz</div>
+                <div>cd cmdb-agent-*</div>
                 <div>sudo ./install.sh</div>
-                <div>systemctl enable cmdb-agent</div>
-                <div>systemctl start cmdb-agent</div>
+                <div>cmdb-agent-cli status</div>
+                <div>Access: <code className="bg-white dark:bg-gray-600 px-2 py-1 rounded">http://localhost:8080</code></div>
               </div>
             </div>
           </div>
@@ -596,9 +628,9 @@ export default function AgentDownloads() {
             <div>
               <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">Security Verification</h4>
               <p className="text-sm text-amber-900 dark:text-amber-100">
-                Always verify the SHA-256 checksum after download. All agents are signed with our
-                code-signing certificate. For enterprise deployments, contact your IT administrator
-                for internal distribution channels.
+                Always verify the SHA-256 checksum after download (see .sha256 files). Each package includes
+                checksums.txt for binary verification. For Windows MSI builds, use the included WiX build tools.
+                Default credentials: admin/changeme - <strong>change immediately after first login</strong>.
               </p>
             </div>
           </div>
@@ -677,6 +709,47 @@ export default function AgentDownloads() {
                   <Download className="w-5 h-5" />
                   Download {selectedAgent.name} v{selectedAgent.version}
                 </a>
+
+                {/* Alternate Downloads */}
+                {selectedAgent.alternateDownloads && selectedAgent.alternateDownloads.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <Package className="w-5 h-5 text-purple-500" />
+                      Alternate Downloads
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedAgent.alternateDownloads.map((alt, idx) => (
+                        <a
+                          key={idx}
+                          href={alt.url}
+                          download
+                          className={`block w-full px-4 py-3 ${alt.status ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'} rounded-lg transition-colors no-underline`}
+                          onClick={alt.status ? (e) => e.preventDefault() : () => setSelectedAgent(null)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Download className={`w-4 h-4 ${alt.status ? 'text-gray-400' : 'text-blue-600'}`} />
+                              <div>
+                                <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                  {alt.type}
+                                  {alt.status && (
+                                    <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full">
+                                      {alt.status}
+                                    </span>
+                                  )}
+                                </div>
+                                {alt.note && (
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">{alt.note}</div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">{alt.size}</div>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>

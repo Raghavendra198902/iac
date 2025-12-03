@@ -404,14 +404,14 @@ export default function SoftwareEngineering() {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 bg-white dark:bg-gray-900 min-h-screen">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Software Engineering Framework
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-800 dark:text-gray-300 font-medium">
               Micro-Level Implementation & Delivery Blueprint - 20 Core Engineering Domains
             </p>
           </div>
@@ -443,15 +443,15 @@ export default function SoftwareEngineering() {
           ].map((stat, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-600 p-6 hover:shadow-lg transition-shadow"
             >
               <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg bg-${stat.color}-50`}>
-                  <stat.icon className={`w-5 h-5 text-${stat.color}-600`} />
+                <div className={`p-2 rounded-lg bg-${stat.color}-50 dark:bg-${stat.color}-900/30`}>
+                  <stat.icon className={`w-5 h-5 text-${stat.color}-600 dark:text-${stat.color}-400`} />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stat.value}</div>
+              <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -465,7 +465,7 @@ export default function SoftwareEngineering() {
             return (
               <div
                 key={section.id}
-                className={`bg-white rounded-lg border-2 ${colors.border} overflow-hidden transition-all hover:shadow-md`}
+                className={`bg-white dark:bg-gray-800 rounded-lg border-2 ${colors.border} dark:border-gray-600 overflow-hidden transition-all hover:shadow-md`}
               >
                 {/* Section Header */}
                 <button
@@ -473,14 +473,14 @@ export default function SoftwareEngineering() {
                   className={`w-full p-6 flex items-center justify-between ${colors.hover} transition-colors`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-lg ${colors.bg}`}>
-                      <Icon className={`w-6 h-6 ${colors.icon}`} />
+                    <div className={`p-3 rounded-lg ${colors.bg} dark:bg-gray-700`}>
+                      <Icon className={`w-6 h-6 ${colors.icon} dark:text-white`} />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         {section.id}. {section.title}
                       </h3>
-                      <p className="text-sm text-gray-500">{section.items.length} practices</p>
+                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{section.items.length} practices</p>
                     </div>
                   </div>
                   {section.expanded ? (
@@ -492,12 +492,12 @@ export default function SoftwareEngineering() {
 
                 {/* Section Content */}
                 {section.expanded && (
-                  <div className={`p-6 pt-0 ${colors.bg} border-t ${colors.border}`}>
+                  <div className={`p-6 pt-4 ${colors.bg} dark:bg-gray-800 border-t-2 ${colors.border} dark:border-gray-600`}>
                     <ul className="space-y-3">
                       {section.items.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-3">
-                          <div className={`mt-1.5 w-2 h-2 rounded-full ${colors.icon.replace('text-', 'bg-')}`} />
-                          <span className="text-gray-700 flex-1">{item}</span>
+                          <div className={`mt-1.5 w-2 h-2 rounded-full ${colors.icon.replace('text-', 'bg-')} dark:bg-white`} />
+                          <span className="text-gray-900 dark:text-gray-100 font-medium flex-1">{item}</span>
                         </li>
                       ))}
                     </ul>
@@ -509,28 +509,28 @@ export default function SoftwareEngineering() {
         </div>
 
         {/* Bottom Summary */}
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200 p-6">
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-lg border-2 border-orange-300 dark:border-orange-700 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <Code2 className="w-6 h-6 text-orange-600" />
-            <h3 className="text-lg font-semibold text-gray-900">
+            <Code2 className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               Software Engineering Excellence
             </h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium text-gray-900 dark:text-gray-100">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />
               <span>Full-stack engineering practices from code to deployment</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />
               <span>Security, testing, and compliance integrated at every layer</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />
               <span>DevOps and observability engineering standards</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />
               <span>Quality gates and governance for engineering excellence</span>
             </div>
           </div>

@@ -1,50 +1,73 @@
-# CMDB Agent (Go)
+# CMDB Agent
 
-Unified, lightweight, cross-platform endpoint agent for CMDB inventory collection, telemetry, monitoring, enforcement, and deployment.
+> **Production-Ready v1.0.0** - Unified, lightweight, cross-platform endpoint agent for comprehensive IT asset management, monitoring, and automation.
 
-## Features
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/go-1.22+-00ADD8.svg)](https://go.dev/)
+[![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS-success.svg)](#supported-platforms)
+[![Release](https://img.shields.io/badge/release-v1.0.0-green.svg)](https://github.com/Raghavendra198902/iac/releases)
 
-- **Inventory & CI Collection** – Hardware, software, network, services, users, certificates
-- **Telemetry** – Real-time metrics, heartbeats, health status
-- **Monitoring & Enforcement** – Configuration drift detection, policy violations, security posture
-- **Deployment & Patching** – Automated software/patch deployment with rollback
-- **Policy Evaluation** – Dynamic rule evaluation and adaptive enforcement
-- **Self-Update & Health** – Automatic updates, health checks, and resilience
+## 🚀 Quick Start
 
-## Supported Platforms
+**Download Now:** [http://192.168.1.9:5173/agents/downloads](http://192.168.1.9:5173/agents/downloads)
 
-- Linux (Ubuntu, Debian, RHEL, CentOS, Rocky, AlmaLinux, Fedora, SUSE)
-- Windows (7, 8, 10, 11, Server 2012–2025)
-- macOS (10.15+ Catalina → latest)
-- BSD (FreeBSD, OpenBSD, NetBSD)
+Choose your platform and follow the [Quick Start Guide](QUICKSTART.md) for installation in 5 minutes.
 
-## Architecture
+---
 
-```
-cmdb-agent (main daemon)
-├── Collectors (system, hardware, software, network, services, users, certs)
-├── Queue (BoltDB for local persistence)
-├── Transport (HTTPS with mTLS)
-├── Enforcement Engine (policy evaluation & actions)
-├── Deployment Manager (software/patch deployment)
-└── API Server (UNIX socket for local control)
-```
+## ✨ Features
 
-## Quick Start
+### Core Capabilities
+- 📊 **Automated Inventory Collection** – Hardware, software, network, services
+- 🔍 **Real-time Monitoring** – System health, resource usage, telemetry
+- 🌐 **Built-in Web UI** – Interactive dashboard on port 8080
+- 🔐 **Secure Communication** – mTLS/OAuth2 authentication
+- ⚙️ **Configuration Management** – YAML-based, hot-reload support
+- 🛠️ **CLI Tools** – Command-line interface for management
+- 🔄 **Service Integration** – Windows Service, systemd, LaunchDaemon
+- 📝 **Comprehensive Logging** – Debug, info, warn, error levels
 
-### Download Pre-built Binaries
+### Coming Soon (v1.1+)
+- 🎯 **Policy Enforcement** – Automated compliance and remediation
+- 📦 **Deployment Automation** – Software/patch deployment with rollback
+- 🔒 **Certificate Management** – SSL/TLS certificate discovery and tracking
+- 👥 **User & Group Auditing** – Complete user management tracking
+
+See the [Roadmap](ROADMAP.md) for detailed future plans.
+
+---
+
+## 🖥️ Supported Platforms
+
+| Platform | Architecture | Package Size | Status |
+|----------|-------------|--------------|--------|
+| **Windows** | x64 | 6.0 MB | ✅ Ready |
+| **Linux** | AMD64 | 5.9 MB | ✅ Ready |
+| **Linux** | ARM64 | 5.3 MB | ✅ Ready |
+| **macOS** | Intel | 5.9 MB | ✅ Ready |
+| **macOS** | Apple Silicon | 5.5 MB | ✅ Ready |
+
+**Requirements:**
+- Windows 10/11, Server 2016+
+- Linux: RHEL/CentOS 7+, Ubuntu 18.04+, Debian 10+
+- macOS 10.15+ (Catalina or later)
+- 100 MB RAM minimum
+- 50 MB disk space
+
+---
+
+## 📥 Installation
+
+### Quick Install
 
 **Windows:**
 ```powershell
-# Download from releases
-Invoke-WebRequest -Uri "https://github.com/Raghavendra198902/iac/releases/download/v1.0.0/cmdb-agent-windows-1.0.0.zip" -OutFile "cmdb-agent.zip"
+# Download and extract
+Expand-Archive cmdb-agent-windows-1.0.0.zip -DestinationPath C:\cmdb-agent
 
-# Extract
-Expand-Archive -Path "cmdb-agent.zip" -DestinationPath "C:\Temp\cmdb-agent"
-
-# Install (as Administrator)
-cd C:\Temp\cmdb-agent\cmdb-agent-windows-1.0.0
-.\install-windows.ps1
+# Run as Administrator
+cd C:\cmdb-agent\cmdb-agent-windows-1.0.0
+.\Install.ps1
 ```
 
 **Linux:**

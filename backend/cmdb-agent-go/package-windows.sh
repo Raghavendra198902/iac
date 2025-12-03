@@ -37,6 +37,14 @@ echo "📋 Copying installation scripts..."
 cp install-windows.ps1 "$PACKAGE_DIR/"
 cp uninstall-windows.ps1 "$PACKAGE_DIR/"
 
+# Copy MSI build files
+echo "📋 Copying MSI build files..."
+mkdir -p "$PACKAGE_DIR/msi-builder"
+cp build-msi.bat "$PACKAGE_DIR/msi-builder/"
+cp cmdb-agent.wxs "$PACKAGE_DIR/msi-builder/"
+cp license.rtf "$PACKAGE_DIR/msi-builder/"
+cp BUILD_MSI_GUIDE.md "$PACKAGE_DIR/msi-builder/"
+
 # Copy documentation
 echo "📋 Copying documentation..."
 cp README.md "$PACKAGE_DIR/"
@@ -117,6 +125,29 @@ Uninstallation:
 ---------------
 Run (as Administrator):
 .\uninstall-windows.ps1
+
+Building MSI Installer (Optional):
+----------------------------------
+This package includes MSI build files in the 'msi-builder' folder.
+To create a professional MSI installer on Windows:
+
+1. Install WiX Toolset 3.11+ from https://wixtoolset.org/
+2. Open Command Prompt as Administrator
+3. Navigate to the msi-builder folder
+4. Run: build-msi.bat
+
+This will create cmdb-agent-1.0.0-x64.msi (approx 15 MB)
+
+The MSI installer provides:
+- Professional installation wizard
+- Windows Service with auto-start
+- PATH environment variable integration
+- Start Menu shortcuts
+- Desktop shortcut
+- Clean uninstaller via Control Panel
+- Upgrade support
+
+See msi-builder/BUILD_MSI_GUIDE.md for detailed instructions.
 
 Support:
 --------

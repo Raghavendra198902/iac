@@ -21,6 +21,10 @@ import {
   BarChart3,
   Shield,
   DollarSign,
+  Activity,
+  ShieldCheck,
+  Upload,
+  BookOpen,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -267,6 +271,12 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
           icon: FileCheck,
           path: '/se/tasks',
         },
+        {
+          id: 'se-playbooks',
+          label: 'Implementation Playbooks',
+          icon: BookOpen,
+          path: '/se/playbooks',
+        },
       ],
     },
 
@@ -288,6 +298,22 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
       label: 'Agent Management',
       icon: Download,
       path: '/agents/downloads',
+    },
+    {
+      id: 'monitoring',
+      label: 'System Monitoring',
+      icon: Activity,
+      path: '/agents/monitoring',
+      badge: 'Live',
+      badgeColor: 'bg-green-600',
+    },
+    {
+      id: 'enforcement',
+      label: 'Policy Enforcement',
+      icon: ShieldCheck,
+      path: '/agents/enforcement',
+      badge: 'Active',
+      badgeColor: 'bg-indigo-600',
     },
 
     // ========== GOVERNANCE & INSIGHTS ==========

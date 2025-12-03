@@ -30,6 +30,7 @@ type Agent struct {
 	api         *api.Server
 	webui       *webui.Server
 	hostname    string
+	startTime   time.Time
 }
 
 func New(cfg *config.Config, log *logger.Logger) (*Agent, error) {
@@ -57,6 +58,9 @@ func New(cfg *config.Config, log *logger.Logger) (*Agent, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create transport: %w", err)
 	}
+
+	// Record start time for uptime tracking
+	startTime := time.Now()
 
 	// Initialize collectors
 	cm := collectors.NewManager(log, cfg)
@@ -91,6 +95,7 @@ func New(cfg *config.Config, log *logger.Logger) (*Agent, error) {
 		api:         apiServer,
 		webui:       webuiServer,
 		hostname:    hostname,
+		startTime:   startTime,
 	}
 
 	return agent, nil
@@ -277,7 +282,7 @@ func (a *Agent) sendHeartbeat() {
 		"hostname":          a.hostname,
 		"agent_version":     a.config.Agent.Version,
 		"timestamp":         time.Now().UTC().Format(time.RFC3339),
-		"uptime_seconds":    time.Since(time.Now()).Seconds(), // TODO: track actual uptime
+		"uptime_seconds":    time.Since(a.startTime).Seconds(),
 		"queue_depth":       stats["pending"],
 		"failed_items":      stats["failed"],
 		"collectors_active": len(a.config.Agent.Collectors),

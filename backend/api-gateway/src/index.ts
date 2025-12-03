@@ -150,6 +150,7 @@ setSocketIO(io);
 app.use('/api/downloads', downloadsRoutes);
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/agents', agentsRoutes);
+app.use('/api/v1/agent', agentsRoutes); // Mount again for Go agent compatibility
 app.use('/api/enforcement', enforcementRoutes);
 app.use('/api/cmdb', cmdbRoutes); // CMDB needs to be public for agent registration
 app.use('/api/security', securityRoutes); // Security events - public for agent reporting
