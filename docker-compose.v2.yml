@@ -146,6 +146,11 @@ services:
       
       # Database - Using PgBouncer
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DB_POOL_MIN: 5
       DB_POOL_MAX: 20
       
@@ -207,9 +212,16 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3001
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
       REDIS_CACHE_ENABLED: true
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-change-in-production}
     depends_on:
       pgbouncer:
         condition: service_healthy
@@ -235,6 +247,11 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3002
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
       REDIS_CACHE_ENABLED: true
@@ -263,6 +280,11 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3003
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
       REDIS_CACHE_ENABLED: true
@@ -291,6 +313,11 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3004
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
       REDIS_CACHE_ENABLED: true
@@ -318,6 +345,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3005
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
@@ -346,6 +378,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3006
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
@@ -374,6 +411,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3007
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
@@ -402,6 +444,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3008
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
@@ -430,6 +477,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3009
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
@@ -458,6 +510,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3010
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
+      DB_NAME: iac_dharma
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
       REDIS_URL: redis://redis:6379
       REDIS_CACHE_TTL: 300
