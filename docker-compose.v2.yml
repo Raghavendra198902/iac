@@ -1,0 +1,254 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: iac-postgres
+    environment:
+      POSTGRES_DB: iac_dharma
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_AUTH_METHOD:-scram-sha-256}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d iac_dharma"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # PgBouncer - Connection Pooling
+  pgbouncer:
+    image: pgbouncer/pgbouncer:latest
+    container_name: iac-pgbouncer
+    environment:
+      DATABASES_HOST: postgres
+      DATABASES_PORT: 5432
+      DATABASES_DBNAME: iac_dharma
+      DATABASES_USER: ${POSTGRES_USER:-postgres}
+      DATABASES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      
+      # Pool Configuration
+      PGBOUNCER_POOL_MODE: ${PGBOUNCER_POOL_MODE:-transaction}
+      PGBOUNCER_MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-1000}
+      PGBOUNCER_DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-25}
+      PGBOUNCER_MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-10}
+      PGBOUNCER_RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-5}
+      PGBOUNCER_RESERVE_POOL_TIMEOUT: 5
+      
+      # Timeouts
+      PGBOUNCER_SERVER_IDLE_TIMEOUT: 600
+      PGBOUNCER_SERVER_CONNECT_TIMEOUT: 15
+      PGBOUNCER_QUERY_TIMEOUT: 0
+      PGBOUNCER_QUERY_WAIT_TIMEOUT: 120
+      
+      # Logging
+      PGBOUNCER_LOG_CONNECTIONS: 1
+      PGBOUNCER_LOG_DISCONNECTIONS: 1
+      PGBOUNCER_LOG_POOLER_ERRORS: 1
+      PGBOUNCER_STATS_PERIOD: 60
+      
+      # Authentication
+      PGBOUNCER_AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-scram-sha-256}
+      PGBOUNCER_AUTH_FILE: /etc/pgbouncer/userlist.txt
+      
+      # Performance
+      PGBOUNCER_MAX_DB_CONNECTIONS: 100
+      PGBOUNCER_MAX_USER_CONNECTIONS: 100
+      PGBOUNCER_SERVER_RESET_QUERY: DISCARD ALL
+      PGBOUNCER_SERVER_CHECK_DELAY: 30
+      PGBOUNCER_SERVER_CHECK_QUERY: SELECT 1
+      
+      # Admin
+      PGBOUNCER_ADMIN_USERS: ${POSTGRES_USER:-postgres}
+      PGBOUNCER_STATS_USERS: ${POSTGRES_USER:-postgres}
+    ports:
+      - "${PGBOUNCER_PORT:-6432}:6432"
+    volumes:
+      - ./config/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+      - ./config/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "psql -h localhost -p 6432 -U ${POSTGRES_USER:-postgres} -d pgbouncer -c 'SHOW POOLS;' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Redis - Caching Layer
+  redis:
+    image: redis:7-alpine
+    container_name: iac-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory ${REDIS_MAX_MEMORY:-2gb}
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 511
+      --timeout 300
+      --tcp-keepalive 60
+      --loglevel notice
+      --databases 16
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Redis Commander - Redis GUI (Development)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: iac-redis-commander
+    environment:
+      REDIS_HOSTS: local:redis:6379
+      HTTP_USER: ${REDIS_COMMANDER_USER:-admin}
+      HTTP_PASSWORD: ${REDIS_COMMANDER_PASSWORD:-admin}
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - iac-network
+    restart: unless-stopped
+    profiles:
+      - dev
+
+  # API Gateway (updated for PgBouncer + Redis)
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: iac-api-gateway
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      
+      # Database - Using PgBouncer
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@pgbouncer:6432/iac_dharma
+      DB_POOL_MIN: 5
+      DB_POOL_MAX: 20
+      
+      # Redis Cache
+      REDIS_URL: redis://redis:6379
+      REDIS_CACHE_TTL: ${REDIS_CACHE_TTL:-300}
+      REDIS_CACHE_ENABLED: ${REDIS_CACHE_ENABLED:-true}
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRY: ${JWT_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+      
+      # Other services
+      BLUEPRINT_SERVICE_URL: http://blueprint-service:3001
+      IAC_GENERATOR_URL: http://iac-generator:3002
+      AUTOMATION_ENGINE_URL: http://automation-engine:3003
+      
+      # Feature Flags
+      ENABLE_CACHING: ${ENABLE_CACHING:-true}
+      ENABLE_GRAPHQL: ${ENABLE_GRAPHQL:-false}
+      
+      # Performance
+      COMPRESSION_ENABLED: true
+      RATE_LIMIT_WINDOW_MS: 60000
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-60}
+    ports:
+      - "${API_GATEWAY_PORT:-3000}:3000"
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: iac-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+  # Grafana - Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: iac-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: redis-datasource,postgres-datasource
+      GF_SERVER_ROOT_URL: http://localhost:${GRAFANA_PORT:-3030}
+      GF_USERS_ALLOW_SIGN_UP: false
+    ports:
+      - "${GRAFANA_PORT:-3030}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+      - postgres
+      - redis
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  iac-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
