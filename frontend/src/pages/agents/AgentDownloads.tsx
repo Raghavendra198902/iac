@@ -250,7 +250,7 @@ export default function AgentDownloads() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden">
         {/* Animated Background Orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -303,7 +303,7 @@ export default function AgentDownloads() {
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="text-xs px-3 py-1 bg-white/20 rounded-full font-normal flex items-center gap-1.5"
+                  className="text-xs px-3 py-1 bg-white/25 dark:bg-white/20 rounded-full font-normal flex items-center gap-1.5"
                 >
                   <Activity className="w-3 h-3" />
                   Live
@@ -327,17 +327,17 @@ export default function AgentDownloads() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + idx * 0.1 }}
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300"
+                className="bg-white/15 dark:bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/25 hover:bg-white/25 transition-all duration-300 text-white"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <stat.icon className="w-4 h-4" />
-                  <span className="text-sm text-blue-100">{stat.label}</span>
+                  <span className="text-sm text-blue-50">{stat.label}</span>
                 </div>
                 <motion.div
                   initial={{ scale: 1.2, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2 + idx * 0.1 }}
-                  className="text-2xl font-bold"
+                  className="text-2xl font-bold text-white"
                 >
                   {stat.value}
                 </motion.div>
@@ -428,16 +428,16 @@ export default function AgentDownloads() {
                         <Icon className={`w-6 h-6 ${colors.text}`} />
                       </motion.div>
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">{agent.name}</h3>
-                        <p className="text-sm text-gray-600">{agent.platform}</p>
+                        <h3 className="text-xl font-bold text-gray-950 dark:text-gray-100">{agent.name}</h3>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{agent.platform}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className={`text-sm font-semibold ${colors.text}`}>v{agent.version}</div>
-                      <div className="text-xs text-gray-500">{agent.size}</div>
+                      <div className="text-xs text-gray-700 dark:text-gray-300">{agent.size}</div>
                     </div>
                   </div>
-                  <p className="text-gray-700 text-sm">{agent.description}</p>
+                  <p className="text-gray-800 dark:text-gray-200 text-sm">{agent.description}</p>
                 </div>
 
                 {/* Card Body */}
@@ -445,12 +445,12 @@ export default function AgentDownloads() {
                   {/* Architecture */}
                   <div className="flex items-center gap-2">
                     <Cpu className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">Architecture:</span>
+                    <span className="text-sm text-gray-800 dark:text-gray-200">Architecture:</span>
                     <div className="flex gap-2">
                       {agent.architecture.map((arch) => (
                         <span
                           key={arch}
-                          className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
+                          className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs rounded-full"
                         >
                           {arch}
                         </span>
@@ -462,13 +462,13 @@ export default function AgentDownloads() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <HardDrive className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         <strong>OS:</strong> {agent.requirements.os}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                      <div>• RAM: {agent.requirements.ram}</div>
-                      <div>• Disk: {agent.requirements.disk}</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-800 dark:text-gray-200">
+                      <div>RAM: {agent.requirements.ram}</div>
+                      <div>Disk: {agent.requirements.disk}</div>
                     </div>
                   </div>
 
@@ -476,11 +476,11 @@ export default function AgentDownloads() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Zap className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-700">Key Features</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Key Features</span>
                     </div>
                     <ul className="space-y-1">
                       {agent.features.slice(0, 4).map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-xs text-gray-600">
+                        <li key={idx} className="flex items-start gap-2 text-xs text-gray-900 dark:text-gray-100">
                           <CheckCircle className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
                           <span>{feature}</span>
                         </li>
@@ -489,7 +489,7 @@ export default function AgentDownloads() {
                     {agent.features.length > 4 && (
                       <button
                         onClick={() => setSelectedAgent(agent)}
-                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        className="text-xs text-blue-700 dark:text-blue-400 hover:text-blue-800 font-medium"
                       >
                         +{agent.features.length - 4} more features...
                       </button>
@@ -517,9 +517,9 @@ export default function AgentDownloads() {
 
                   {/* Release Info */}
                   <div className="pt-4 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-                    <span>Released: {agent.releaseDate}</span>
+                    <span className="text-gray-800 dark:text-gray-200">Released: {agent.releaseDate}</span>
                     <button
-                      className="flex items-center gap-1 hover:text-gray-700"
+                      className="flex items-center gap-1 text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100"
                       title={agent.checksum}
                     >
                       <Lock className="w-3 h-3" />
@@ -540,16 +540,17 @@ export default function AgentDownloads() {
           className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg"
         >
           <div className="flex items-center gap-3 mb-4">
-            <FileCode className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Quick Installation Guide</h2>
+            <FileCode className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Quick Installation Guide"
+            </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-blue-600" />
-                Windows Installation
+                <Monitor className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-gray-900 dark:text-gray-100">Windows Installation</span>
               </h3>
-              <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm text-gray-700">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 font-mono text-sm text-gray-900 dark:text-gray-100">
                 <div>1. Download .msi installer</div>
                 <div>2. Run as Administrator</div>
                 <div>3. Follow setup wizard</div>
@@ -558,14 +559,14 @@ export default function AgentDownloads() {
             </div>
             <div className="space-y-3">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-green-600" />
-                Linux Installation
+                <Terminal className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span className="text-gray-900 dark:text-gray-100">Linux Installation</span>
               </h3>
-              <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm text-gray-700">
-                <div>$ tar -xzf cmdb-agent.tar.gz</div>
-                <div>$ sudo ./install.sh</div>
-                <div>$ systemctl enable cmdb-agent</div>
-                <div>$ systemctl start cmdb-agent</div>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 font-mono text-sm text-gray-900 dark:text-gray-100">
+                <div>tar -xzf cmdb-agent.tar.gz</div>
+                <div>sudo ./install.sh</div>
+                <div>systemctl enable cmdb-agent</div>
+                <div>systemctl start cmdb-agent</div>
               </div>
             </div>
           </div>
@@ -576,13 +577,13 @@ export default function AgentDownloads() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="bg-amber-50/80 dark:bg-amber-900/20 backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg"
+          className="bg-amber-50 dark:bg-amber-900/30 backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg"
         >
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 text-amber-700 dark:text-amber-400 mt-0.5 flex-shrink-0" />
             <div>
-              <h4 className="font-semibold text-amber-900 mb-1">Security Verification</h4>
-              <p className="text-sm text-amber-800">
+              <h4 className="font-semibold text-amber-900 dark:text-amber-200 mb-1">Security Verification</h4>
+              <p className="text-sm text-amber-900 dark:text-amber-100">
                 Always verify the SHA-256 checksum after download. All agents are signed with our
                 code-signing certificate. For enterprise deployments, contact your IT administrator
                 for internal distribution channels.
