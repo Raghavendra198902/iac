@@ -1,0 +1,71 @@
+server:
+  primary: https://cmdb.example.com:8443
+  secondary: https://cmdb-backup.example.com:8443
+  ca_bundle: /etc/cmdb-agent/ca.pem
+
+agent:
+  version: 1.0.0
+  hostname: ""  # Auto-detected if empty
+  data_dir: /var/lib/cmdb-agent
+  socket_path: /var/run/cmdb-agent.sock
+  tags:
+    env: production
+    datacenter: us-east-1
+    owner: infrastructure
+  collectors:
+    - name: system
+      schedule: "@every 1h"
+      enabled: true
+      mode: full
+    - name: hardware
+      schedule: "@every 6h"
+      enabled: true
+      mode: full
+    - name: software
+      schedule: "@daily"
+      enabled: true
+      mode: incremental
+    - name: network
+      schedule: "@every 1h"
+      enabled: true
+      mode: full
+    - name: process
+      schedule: "@every 5m"
+      enabled: false
+      mode: incremental
+    - name: service
+      schedule: "@every 1h"
+      enabled: true
+      mode: incremental
+    - name: user
+      schedule: "@daily"
+      enabled: true
+      mode: full
+    - name: certificate
+      schedule: "@weekly"
+      enabled: true
+      mode: full
+
+auth:
+  method: mTLS  # mTLS or oauth2
+  cert_file: /etc/cmdb-agent/agent.crt
+  key_file: /etc/cmdb-agent/agent.key
+  # For OAuth2:
+  # token_url: https://auth.example.com/oauth2/token
+  # client_id: cmdb-agent
+  # client_secret: secret
+
+logging:
+  level: info  # debug, info, warn, error
+  output: stdout  # stdout or file
+  file_path: /var/log/cmdb-agent/agent.log
+  max_size_mb: 100
+  max_backups: 5
+
+transport:
+  batch_max_size_kb: 512
+  batch_max_items: 50
+  compression: true
+  retry_attempts: 3
+  retry_backoff_ms: 1000
+  timeout: 30

@@ -1,0 +1,10 @@
+dist/
+*.db
+*.log
+coverage.out
+coverage.html
+cmdb-agent
+cmdb-agent-cli
+*.deb
+*.rpm
+.DS_Store

@@ -1,0 +1,33 @@
+[Unit]
+Description=CMDB Agent - Unified Configuration Item Collector
+Documentation=https://github.com/iac/cmdb-agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/bin/cmdb-agent --config=/etc/cmdb-agent/config.yaml
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cmdb-agent
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/cmdb-agent /var/run/cmdb-agent.sock
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=256M
+
+[Install]
+WantedBy=multi-user.target
