@@ -548,7 +548,7 @@ export default function AgentDownloads() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className={`${highContrast ? 'bg-white dark:bg-gray-900' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl'} rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg"
+          className={`${highContrast ? 'bg-white dark:bg-gray-900' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl'} rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg`}
         >
           <div className="flex items-center gap-3 mb-4">
             <FileCode className="w-6 h-6 text-blue-600 dark:text-blue-400" />
