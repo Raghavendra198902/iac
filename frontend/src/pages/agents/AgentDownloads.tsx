@@ -588,7 +588,11 @@ export default function AgentDownloads() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className={`${highContrast ? 'bg-amber-100 dark:bg-amber-900' : 'bg-amber-50 dark:bg-amber-900/30'} backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg`}
+          className={
+            highContrast 
+              ? 'bg-amber-100 dark:bg-amber-900 backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg'
+              : 'bg-amber-50 dark:bg-amber-900/30 backdrop-blur-xl border-l-4 border-amber-400 dark:border-amber-600 rounded-lg p-4 shadow-lg'
+          }
         >
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-800 dark:text-amber-300 mt-0.5 flex-shrink-0" />
