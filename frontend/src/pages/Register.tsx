@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Cloud, Mail, Lock, Eye, EyeOff, User, Building, Sparkles, Shield, Zap, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -62,52 +63,86 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-pink-400/20 dark:bg-pink-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/4 -left-48 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-1/4 -right-48 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl"
+        />
       </div>
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-2xl relative z-10">
         {/* Logo with Animation */}
-        <div className="text-center mb-8 animate-fade-in">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
           <div className="flex items-center justify-center mb-4">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative w-20 h-20 bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
-                <Cloud className="w-12 h-12 text-white animate-float" />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"
+              />
+              <div className="relative w-20 h-20 bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                <Cloud className="w-12 h-12 text-white" />
                 <Sparkles className="w-4 h-4 text-white absolute top-2 right-2 animate-pulse" />
               </div>
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-2 animate-gradient">
+          <h1 className="text-4xl font-bold text-white mb-2">
             Join IAC Dharma
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 font-medium">Infrastructure as Code Platform</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Start your free 30-day trial</p>
-        </div>
+          <p className="text-gray-300 font-medium">Infrastructure as Code Platform</p>
+          <p className="text-sm text-blue-300 mt-1">Start your free 30-day trial</p>
+        </motion.div>
 
         {/* Feature Pills */}
-        <div className="flex items-center justify-center gap-3 mb-6 animate-fade-in-up">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm">
-            <CheckCircle className="w-3.5 h-3.5 text-green-600" />
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">No credit card</span>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex items-center justify-center gap-3 mb-6"
+        >
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full">
+            <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+            <span className="text-xs font-medium text-gray-200">No credit card</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-sm">
-            <Zap className="w-3.5 h-3.5 text-purple-600" />
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Quick setup</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full">
+            <Zap className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-xs font-medium text-gray-200">Quick setup</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Registration Form */}
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-gray-200/50 dark:border-gray-700/50 animate-fade-in-up animation-delay-200">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-200/50 dark:border-gray-700/50"
+        >
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl animate-shake">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+            >
               <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
-            </div>
+            </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -313,14 +348,20 @@ export default function Register() {
               <span>←</span> Back to home
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Benefits Section */}
-        <div className="mt-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-800/50 backdrop-blur-sm animate-fade-in-up animation-delay-400">
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 text-center">
-            ✨ What's included in your free trial
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30"
+        >
+          <p className="text-sm font-semibold text-white mb-4 text-center flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            What's included in your free trial
           </p>
-          <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+          <div className="space-y-3 text-sm text-gray-200">
             <div className="flex items-center gap-3">
               <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                 <CheckCircle className="w-3.5 h-3.5 text-white" />
@@ -346,7 +387,7 @@ export default function Register() {
               <span>24/7 support and onboarding assistance</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
