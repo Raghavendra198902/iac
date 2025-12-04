@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Cloud, Mail, Lock, Eye, EyeOff, User, Building, Sparkles, Shield, Zap, CheckCircle, Users, Briefcase, Globe2, Phone, ChevronRight, ArrowLeft, Camera, Upload, X } from 'lucide-react';
+import { Cloud, Mail, Lock, Eye, EyeOff, User, Building, Sparkles, Shield, Zap, CheckCircle, Users, Briefcase, Globe2, Phone, ChevronRight, ArrowLeft, Camera, Upload, X, Smartphone, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import QRCode from 'qrcode';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -30,6 +31,11 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [mfaSecret, setMfaSecret] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [secretCopied, setSecretCopied] = useState(false);
 
   const roles = ['DevOps Engineer', 'Cloud Architect', 'IT Manager', 'CTO/CIO', 'Developer', 'System Administrator', 'Other'];
   const teamSizes = ['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'];
@@ -110,6 +116,50 @@ export default function Register() {
       fileInputRef.current.value = '';
     }
   };
+
+  const generateMfaSecret = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let secret = '';
+    for (let i = 0; i < 32; i++) {
+      secret += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return secret;
+  };
+
+  const generateQrCode = async (secret: string) => {
+    const email = formData.email || 'user@example.com';
+    const issuer = 'Dharma IaC Platform';
+    const otpauth = `otpauth://totp/${issuer}:${email}?secret=${secret}&issuer=${issuer}`;
+    
+    try {
+      const qrUrl = await QRCode.toDataURL(otpauth, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      setQrCodeUrl(qrUrl);
+    } catch (err) {
+      console.error('QR code generation error:', err);
+      setError('Failed to generate QR code');
+    }
+  };
+
+  const copySecret = () => {
+    navigator.clipboard.writeText(mfaSecret);
+    setSecretCopied(true);
+    setTimeout(() => setSecretCopied(false), 2000);
+  };
+
+  useEffect(() => {
+    if (mfaEnabled && !mfaSecret) {
+      const secret = generateMfaSecret();
+      setMfaSecret(secret);
+      generateQrCode(secret);
+    }
+  }, [mfaEnabled, formData.email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -675,6 +725,110 @@ export default function Register() {
                       {' '}and{' '}
                       <Link to="/privacy" className="text-purple-600 dark:text-purple-400 hover:text-purple-500 font-medium underline">Privacy Policy</Link>
                     </label>
+                  </div>
+
+                  {/* MFA Setup (Optional) */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+                    <div className="flex items-start mb-4">
+                      <input
+                        id="enable-mfa"
+                        type="checkbox"
+                        checked={mfaEnabled}
+                        onChange={(e) => setMfaEnabled(e.target.checked)}
+                        className="h-4 w-4 mt-1 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label htmlFor="enable-mfa" className="ml-3 block cursor-pointer select-none">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          <Smartphone className="w-4 h-4" />
+                          Enable Two-Factor Authentication (Recommended)
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          Secure your account with Google Authenticator or similar TOTP app
+                        </p>
+                      </label>
+                    </div>
+
+                    <AnimatePresence>
+                      {mfaEnabled && qrCodeUrl && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-900"
+                        >
+                          <div className="text-center">
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center justify-center gap-2">
+                              <Shield className="w-5 h-5 text-purple-600" />
+                              Setup Google Authenticator
+                            </h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                              Scan this QR code with your authenticator app
+                            </p>
+
+                            {/* QR Code */}
+                            <div className="bg-white p-4 rounded-lg inline-block shadow-lg mb-4">
+                              <img src={qrCodeUrl} alt="MFA QR Code" className="w-64 h-64" />
+                            </div>
+
+                            {/* Manual Entry Section */}
+                            <div className="mb-4">
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Can't scan? Enter this code manually:</p>
+                              <div className="flex items-center justify-center gap-2">
+                                <code className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-mono text-gray-900 dark:text-white">
+                                  {mfaSecret}
+                                </code>
+                                <button
+                                  type="button"
+                                  onClick={copySecret}
+                                  className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-1"
+                                >
+                                  {secretCopied ? (
+                                    <><CheckCircle className="w-4 h-4" /> Copied</>
+                                  ) : (
+                                    <><Copy className="w-4 h-4" /> Copy</>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Verification Code Input */}
+                            <div className="max-w-xs mx-auto">
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 text-left">
+                                Enter 6-digit code to verify
+                              </label>
+                              <input
+                                type="text"
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                placeholder="000000"
+                                maxLength={6}
+                                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center text-xl font-mono tracking-widest"
+                              />
+                              {verificationCode.length === 6 && (
+                                <motion.p
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="text-xs text-green-600 dark:text-green-400 mt-2"
+                                >
+                                  ✓ Code will be verified during registration
+                                </motion.p>
+                              )}
+                            </div>
+
+                            {/* Instructions */}
+                            <div className="mt-4 text-left bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                              <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-2">📱 Setup Instructions:</p>
+                              <ol className="text-xs text-blue-800 dark:text-blue-400 space-y-1 list-decimal list-inside">
+                                <li>Install Google Authenticator or Authy on your phone</li>
+                                <li>Open the app and tap "Add Account" or "+"</li>
+                                <li>Scan the QR code above or enter the secret manually</li>
+                                <li>Enter the 6-digit code shown in the app to verify</li>
+                              </ol>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <div className="flex gap-3">
