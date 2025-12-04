@@ -87,6 +87,13 @@ const AIArchitectureLanding = lazy(() => import('./pages/ai/AIArchitectureLandin
 const OneClickMode = lazy(() => import('./pages/ai/OneClickMode'));
 const AdvancedMode = lazy(() => import('./pages/ai/AdvancedMode'));
 
+// Additional Pages
+const Favorites = lazy(() => import('./pages/Favorites'));
+const RecentActivity = lazy(() => import('./pages/RecentActivity'));
+const Profile = lazy(() => import('./pages/Profile'));
+const HelpSupport = lazy(() => import('./pages/HelpSupport'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -174,6 +181,13 @@ function App() {
                   
                   {/* Cost Management */}
                   <Route path="/cost" element={<CostManagement />} />
+                  
+                  {/* Additional Pages */}
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/recent" element={<RecentActivity />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/help" element={<HelpSupport />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
                   
                   {/* AI Architecture Routes */}
                   <Route path="/ai" element={<AIArchitectureLanding />} />
