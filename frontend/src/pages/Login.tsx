@@ -653,11 +653,3 @@ export default function Login() {
     </div>
   );
 }
-              )}
-            </motion.div>
-          )}
-        </motion.div>
-      </div>
-    </div>
-  );
-}
