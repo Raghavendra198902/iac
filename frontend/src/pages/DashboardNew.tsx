@@ -39,7 +39,8 @@ import {
   Globe,
   BarChart3,
   PieChart,
-  LineChart
+  LineChart,
+  Plus
 } from 'lucide-react';
 
 export default function DashboardNew() {
