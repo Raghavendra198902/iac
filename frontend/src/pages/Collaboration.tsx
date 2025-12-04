@@ -401,7 +401,7 @@ export default function Collaboration() {
               >
                 <Sparkles className="w-6 h-6 text-blue-600" />
               </motion.div>
-              Channels
+              Dharma IaC Channels
             </h2>
             <div className="flex items-center gap-2">
               <motion.button
@@ -750,10 +750,10 @@ export default function Collaboration() {
                       transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                       className="mb-4"
                     >
-                      <MessageSquare className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto\" />
+                      <MessageSquare className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto" />
                     </motion.div>
                     <p className="text-gray-600 dark:text-gray-400 font-semibold text-lg">No messages yet</p>
-                    <p className="text-gray-500 dark:text-gray-500 text-sm mt-2\">Start the conversation!</p>
+                    <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Start the conversation!</p>
                   </div>
                 </motion.div>
               ) : (
@@ -1082,10 +1082,10 @@ export default function Collaboration() {
                 <MessageSquare className="w-20 h-20 text-gray-300 dark:text-gray-700 mx-auto" />
               </motion.div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Select a channel
+                Select a Dharma IaC channel
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Choose a channel from the sidebar to start chatting
+                Choose a channel from the sidebar to collaborate with your team
               </p>
             </div>
           </motion.div>
@@ -1106,7 +1106,7 @@ export default function Collaboration() {
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-600" />
-                  Team Members
+                  Dharma Team
                 </h3>
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
