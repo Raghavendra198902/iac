@@ -29,10 +29,6 @@ export default function Login() {
   const mfaInputs = useRef<(HTMLInputElement | null)[]>([]);
   const [mfaEnabled, setMfaEnabled] = useState(true); // Simulate MFA enabled
   const [showMfaQR, setShowMfaQR] = useState(false);
-  const [mfaCode, setMfaCode] = useState(['', '', '', '', '', '']);
-  const mfaInputs = useRef<(HTMLInputElement | null)[]>([]);
-  const [mfaEnabled, setMfaEnabled] = useState(false);
-  const [showMfaQR, setShowMfaQR] = useState(false);
 
   // Check biometric availability
   useEffect(() => {
