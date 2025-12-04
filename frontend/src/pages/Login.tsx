@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Cloud, Mail, Lock, Eye, EyeOff, Sparkles, Shield, Zap, Smartphone, Key, Check, ArrowLeft, Building2, Users, Globe } from 'lucide-react';
+import { Cloud, Mail, Lock, Eye, EyeOff, Sparkles, Shield, Zap, Smartphone, Key, Check, ArrowLeft, Building2, Users, Globe, Fingerprint, Scan } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type AuthStep = 'credentials' | 'otp' | 'success';
-type AuthMethod = 'password' | 'otp';
+type AuthMethod = 'password' | 'otp' | 'biometric';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,6 +23,32 @@ export default function Login() {
   const [error, setError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+
+  // Check biometric availability
+  useEffect(() => {
+    const checkBiometric = async () => {
+      if (window.PublicKeyCredential) {
+        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        setBiometricAvailable(available);
+      }
+    };
+    checkBiometric();
+  }, []);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+
+  // Check biometric availability
+  useEffect(() => {
+    const checkBiometric = async () => {
+      if (window.PublicKeyCredential) {
+        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        setBiometricAvailable(available);
+      }
+    };
+    checkBiometric();
+  }, []);
 
   // OTP Resend Timer
   useEffect(() => {
@@ -152,6 +178,48 @@ export default function Login() {
     if (resendTimer > 0) return;
     setOtp(['', '', '', '', '', '']);
     await handleSendOTP();
+  };
+
+  const handleBiometricLogin = async () => {
+    setBiometricLoading(true);
+    setError('');
+    
+    try {
+      // In production, get challenge from server
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      const credential = await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          timeout: 60000,
+          userVerification: 'required',
+        }
+      }) as PublicKeyCredential;
+
+      if (credential) {
+        // In production, send credential to server for verification
+        console.log('Biometric authentication successful', credential);
+        
+        // Simulate successful login
+        setAuthStep('success');
+        setTimeout(() => {
+          login(formData.email, 'password123');
+          navigate('/dashboard');
+        }, 2000);
+      }
+    } catch (err: any) {
+      console.error('Biometric authentication failed:', err);
+      if (err.name === 'NotAllowedError') {
+        setError('Biometric authentication cancelled or not available.');
+      } else if (err.name === 'InvalidStateError') {
+        setError('No biometric credentials found. Please register first.');
+      } else {
+        setError('Biometric authentication failed. Please try another method.');
+      }
+    } finally {
+      setBiometricLoading(false);
+    }
   };
 
   return (
@@ -324,6 +392,19 @@ export default function Login() {
                       <Smartphone className="w-4 h-4 inline mr-2" />
                       OTP
                     </button>
+                    {biometricAvailable && (
+                      <button
+                        onClick={() => setAuthMethod('biometric')}
+                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${
+                          authMethod === 'biometric'
+                            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-md'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Fingerprint className="w-4 h-4 inline mr-2" />
+                        Biometric
+                      </button>
+                    )}
                   </div>
 
                   {/* Error Message */}
@@ -419,25 +500,69 @@ export default function Login() {
                       </div>
                     )}
 
-                    {/* Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden group"
-                    >
-                      {loading ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                          />
-                          {authMethod === 'otp' ? 'Sending OTP...' : 'Signing in...'}
-                        </span>
-                      ) : (
-                        <span>{authMethod === 'otp' ? 'Send OTP' : 'Sign In'}</span>
-                      )}
-                    </button>
+                    {/* Biometric Authentication UI */}
+                    {authMethod === 'biometric' && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center py-8"
+                      >
+                        <motion.div
+                          animate={{ 
+                            scale: biometricLoading ? [1, 1.1, 1] : 1,
+                            rotate: biometricLoading ? 360 : 0
+                          }}
+                          transition={{ 
+                            duration: 2,
+                            repeat: biometricLoading ? Infinity : 0,
+                            ease: "linear"
+                          }}
+                          className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl"
+                        >
+                          <Scan className="w-16 h-16 text-white" />
+                        </motion.div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                          Biometric Authentication
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                          {biometricLoading ? 'Scanning...' : 'Use your fingerprint or face to sign in securely'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleBiometricLogin}
+                          disabled={biometricLoading}
+                          className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Fingerprint className="w-6 h-6" />
+                          {biometricLoading ? 'Authenticating...' : 'Authenticate'}
+                        </button>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-4">
+                          Your biometric data never leaves your device
+                        </p>
+                      </motion.div>
+                    )}
+
+                    {/* Submit Button - Hide for biometric method */}
+                    {authMethod !== 'biometric' && (
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden group"
+                      >
+                        {loading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                            />
+                            {authMethod === 'otp' ? 'Sending OTP...' : 'Signing in...'}
+                          </span>
+                        ) : (
+                          <span>{authMethod === 'otp' ? 'Send OTP' : 'Sign In'}</span>
+                        )}
+                      </button>
+                    )}
                   </form>
 
                   {/* Divider */}
