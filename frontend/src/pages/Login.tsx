@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Cloud, Mail, Lock, Eye, EyeOff, Sparkles, Shield, Zap, Smartphone, Key, Check, ArrowLeft, Building2, Users, Globe, Fingerprint, Scan } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type AuthStep = 'credentials' | 'otp' | 'success';
+type AuthStep = 'credentials' | 'otp' | 'mfa' | 'success';
 type AuthMethod = 'password' | 'otp' | 'biometric';
 
 export default function Login() {
@@ -25,6 +25,14 @@ export default function Login() {
   const [resendTimer, setResendTimer] = useState(0);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
+  const [mfaCode, setMfaCode] = useState(['', '', '', '', '', '']);
+  const mfaInputs = useRef<(HTMLInputElement | null)[]>([]);
+  const [mfaEnabled, setMfaEnabled] = useState(true); // Simulate MFA enabled
+  const [showMfaQR, setShowMfaQR] = useState(false);
+  const [mfaCode, setMfaCode] = useState(['', '', '', '', '', '']);
+  const mfaInputs = useRef<(HTMLInputElement | null)[]>([]);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [showMfaQR, setShowMfaQR] = useState(false);
 
   // Check biometric availability
   useEffect(() => {
@@ -151,13 +159,23 @@ export default function Login() {
     
     try {
       await login(formData.email, formData.password);
-      setAuthStep('success');
-      setTimeout(() => navigate('/dashboard'), 1500);
+      
+      // Check if MFA is enabled for this account
+      if (mfaEnabled) {
+        setAuthStep('mfa');
+        setLoading(false);
+        setTimeout(() => mfaInputs.current[0]?.focus(), 300);
+      } else {
+        setAuthStep('success');
+        setTimeout(() => navigate('/dashboard'), 1500);
+      }
     } catch (err: any) {
       console.error('Login failed:', err);
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
-      setLoading(false);
+      if (!mfaEnabled) {
+        setLoading(false);
+      }
     }
   };
 
@@ -206,6 +224,57 @@ export default function Login() {
       }
     } finally {
       setBiometricLoading(false);
+    }
+  };
+
+  const handleMfaChange = (index: number, value: string) => {
+    if (value.length <= 1 && /^\d*$/.test(value)) {
+      const newMfa = [...mfaCode];
+      newMfa[index] = value;
+      setMfaCode(newMfa);
+      
+      if (value && index < 5) {
+        mfaInputs.current[index + 1]?.focus();
+      }
+    }
+  };
+
+  const handleMfaKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !mfaCode[index] && index > 0) {
+      mfaInputs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleMfaPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').slice(0, 6);
+    if (/^\d+$/.test(pastedData)) {
+      const newMfa = pastedData.split('').concat(Array(6).fill('')).slice(0, 6);
+      setMfaCode(newMfa);
+      mfaInputs.current[5]?.focus();
+    }
+  };
+
+  const handleVerifyMfa = async () => {
+    const mfaCodeStr = mfaCode.join('');
+    if (mfaCodeStr.length !== 6) {
+      setError('Please enter complete 6-digit MFA code');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      // In production, verify TOTP code with server
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('MFA verification successful');
+      setAuthStep('success');
+      setTimeout(() => navigate('/dashboard'), 1500);
+    } catch (err: any) {
+      setError('Invalid MFA code. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -695,6 +764,124 @@ export default function Login() {
                       Resend OTP
                     </button>
                   )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* MFA Verification Screen (Google Authenticator) */}
+            {authStep === 'mfa' && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-200/50 dark:border-gray-700/50"
+              >
+                <button
+                  onClick={() => {
+                    setAuthStep('credentials');
+                    setMfaCode(['', '', '', '', '', '']);
+                    setError('');
+                  }}
+                  className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm font-medium">Back</span>
+                </button>
+
+                <div className="text-center mb-8">
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl"
+                  >
+                    <Shield className="w-10 h-10 text-white" />
+                  </motion.div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Multi-Factor Authentication</h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Enter the 6-digit code from your<br />
+                    <span className="font-semibold text-gray-900 dark:text-white">Google Authenticator</span> app
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <Sparkles className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <span className="text-xs font-semibold text-green-700 dark:text-green-300">Enhanced Security Active</span>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+                    >
+                      <p className="text-sm text-red-600 dark:text-red-400 font-medium text-center">{error}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* MFA Code Input */}
+                <div className="flex gap-3 justify-center mb-8">
+                  {mfaCode.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => (mfaInputs.current[index] = el)}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleMfaChange(index, e.target.value)}
+                      onKeyDown={(e) => handleMfaKeyDown(index, e)}
+                      onPaste={index === 0 ? handleMfaPaste : undefined}
+                      className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                    />
+                  ))}
+                </div>
+
+                {/* Info */}
+                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                        Time-based One-Time Password (TOTP)
+                      </p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        Open your Google Authenticator app and enter the current 6-digit code for IAC Dharma
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Verify Button */}
+                <button
+                  onClick={handleVerifyMfa}
+                  disabled={loading || mfaCode.some(d => !d)}
+                  className="w-full py-4 px-6 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 mb-4"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      Verifying...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      <Shield className="w-5 h-5" />
+                      Verify & Sign In
+                    </span>
+                  )}
+                </button>
+
+                {/* Help Text */}
+                <div className="text-center">
+                  <button className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    Lost access to authenticator?
+                  </button>
                 </div>
               </motion.div>
             )}
