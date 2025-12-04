@@ -24,8 +24,9 @@ import {
   Wifi,
   WifiOff
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Notification {
   id: string;
@@ -48,6 +49,8 @@ interface HeaderProps {
 }
 
 export default function Header({ user, onToggleSidebar }: HeaderProps) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -143,6 +146,11 @@ export default function Header({ user, onToggleSidebar }: HeaderProps) {
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const getNotificationIcon = (type: Notification['type']) => {
@@ -560,7 +568,10 @@ export default function Header({ user, onToggleSidebar }: HeaderProps) {
                 </div>
 
                 <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-                  <button className="flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors w-full">
+                  <button 
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors w-full"
+                  >
                     <LogOut className="w-4 h-4" />
                     Sign Out
                   </button>
