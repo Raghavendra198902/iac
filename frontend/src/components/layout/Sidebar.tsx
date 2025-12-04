@@ -134,7 +134,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'favorites',
-      label: 'Favorites',
+      label: 'Favorites (Arjuna)',
       icon: Star,
       path: '/favorites',
       badge: '5',
@@ -142,7 +142,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'recent',
-      label: 'Recent Activity',
+      label: 'Recent Activity (Sanjaya)',
       icon: Clock,
       path: '/recent',
       badge: 'NEW',
@@ -156,13 +156,13 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'dashboard',
-      label: 'Executive Dashboard',
+      label: 'Executive Dashboard (Yudhishthira)',
       icon: LayoutDashboard,
       path: '/dashboard',
     },
     {
       id: 'search',
-      label: 'Global Search',
+      label: 'Global Search (Vidura)',
       icon: Search,
       path: '/search',
       badge: 'AI',
@@ -176,7 +176,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'collaboration',
-      label: 'Team Chat',
+      label: 'Team Chat (Nakula)',
       icon: MessageSquare,
       path: '/collaboration',
       badge: 'LIVE',
@@ -184,18 +184,18 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'workflow',
-      label: 'Project Workflow',
+      label: 'Project Workflow (Sahadeva)',
       icon: GitBranch,
       children: [
         {
           id: 'workflow-projects',
-          label: 'Active Projects',
+          label: 'Active Projects (Bhima)',
           icon: GitBranch,
           path: '/workflow',
         },
         {
           id: 'workflow-team',
-          label: 'Team Coordination',
+          label: 'Team Coordination (Draupadi)',
           icon: Users,
           path: '/workflow/team',
         },
@@ -209,24 +209,24 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'ea',
-      label: 'Enterprise Architecture',
+      label: 'Enterprise Architecture (Krishna)',
       icon: Layers,
       children: [
         {
           id: 'ea-overview',
-          label: 'Architecture Dashboard',
+          label: 'Architecture Dashboard (Vishwakarma)',
           icon: Layers,
           path: '/ea',
         },
         {
           id: 'ea-repository',
-          label: 'Repository',
+          label: 'Repository (Vyasa)',
           icon: FileText,
           path: '/ea/repository',
         },
         {
           id: 'ea-sa',
-          label: 'Solution Architecture',
+          label: 'Solution Architecture (Dronacharya)',
           icon: Network,
           path: '/ea/repository?doc=sa',
           badge: 'SA',
@@ -234,7 +234,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
         },
         {
           id: 'ea-ta',
-          label: 'Technical Architecture',
+          label: 'Technical Architecture (Karna)',
           icon: FileCode,
           path: '/ea/repository?doc=ta',
           badge: 'TA',
@@ -244,7 +244,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'templates',
-      label: 'IaC Templates',
+      label: 'IaC Templates (Brahma)',
       icon: Layers,
       path: '/templates',
       badge: 'AI',
@@ -258,12 +258,12 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'pm',
-      label: 'Product Management',
+      label: 'Product Management (Dhritarashtra)',
       icon: Briefcase,
       children: [
         {
           id: 'pm-roadmap',
-          label: 'Product Roadmap',
+          label: 'Product Roadmap (Shakuni)',
           icon: Briefcase,
           path: '/pm/roadmap',
           badge: 'PM',
@@ -271,7 +271,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
         },
         {
           id: 'pm-requirements',
-          label: 'Requirements & PRDs',
+          label: 'Requirements & PRDs (Kunti)',
           icon: FileText,
           path: '/pm/requirements',
         },
@@ -279,12 +279,12 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'se',
-      label: 'Software Engineering',
+      label: 'Software Engineering (Ashwatthama)',
       icon: Code2,
       children: [
         {
           id: 'se-projects',
-          label: 'Engineering Projects',
+          label: 'Engineering Projects (Abhimanyu)',
           icon: Code2,
           path: '/se/projects',
           badge: 'SE',
@@ -292,13 +292,13 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
         },
         {
           id: 'se-tasks',
-          label: 'Tasks & Sprints',
+          label: 'Tasks & Sprints (Ghatotkacha)',
           icon: FileCheck,
           path: '/se/tasks',
         },
         {
           id: 'se-playbooks',
-          label: 'Implementation Playbooks',
+          label: 'Implementation Playbooks (Barbarika)',
           icon: BookOpen,
           path: '/se/playbooks',
         },
@@ -312,7 +312,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'cmdb',
-      label: 'Configuration Management',
+      label: 'Configuration Management (Hanuman)',
       icon: Database,
       path: '/cmdb',
       badge: 'CMDB',
@@ -320,13 +320,13 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'agents',
-      label: 'Agent Management',
+      label: 'Agent Management (Jatayu)',
       icon: Download,
       path: '/agents/downloads',
     },
     {
       id: 'monitoring',
-      label: 'System Monitoring',
+      label: 'System Monitoring (Garuda)',
       icon: Activity,
       path: '/agents/monitoring',
       badge: 'Live',
@@ -334,7 +334,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'enforcement',
-      label: 'Policy Enforcement',
+      label: 'Policy Enforcement (Bhishma)',
       icon: ShieldCheck,
       path: '/agents/enforcement',
       badge: 'Active',
@@ -348,7 +348,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'insights',
-      label: 'Analytics & Insights',
+      label: 'Analytics & Insights (Narada)',
       icon: BarChart3,
       path: '/insights',
       badge: 'ML',
@@ -356,7 +356,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'security',
-      label: 'Security & Compliance',
+      label: 'Security & Compliance (Duryodhana)',
       icon: Shield,
       path: '/security',
       badge: 'SOC2',
@@ -364,7 +364,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'cost',
-      label: 'FinOps & Cost Optimization',
+      label: 'FinOps & Cost Optimization (Kubera)',
       icon: DollarSign,
       path: '/cost',
       badge: 'SAVE',
@@ -378,19 +378,19 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
     },
     {
       id: 'system',
-      label: 'System Monitoring',
+      label: 'System Monitoring (Indra)',
       icon: Server,
       path: '/system',
     },
     {
       id: 'users',
-      label: 'Identity & Access',
+      label: 'Identity & Access (Yama)',
       icon: Users,
       path: '/users',
     },
     {
       id: 'settings',
-      label: 'Settings',
+      label: 'Settings (Agni)',
       icon: Settings,
       path: '/settings',
     },
