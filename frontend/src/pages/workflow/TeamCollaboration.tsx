@@ -23,6 +23,12 @@ import {
   Zap,
   TrendingUp,
   Clock,
+  X,
+  Upload,
+  FileText,
+  Edit2,
+  Save,
+  Trash2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -40,6 +46,8 @@ interface TeamMember {
   skills: string[];
   location?: string;
   phone?: string;
+  cvUrl?: string;
+  cvFileName?: string;
 }
 
 interface TeamMessage {
@@ -74,6 +82,19 @@ export default function TeamCollaboration() {
   const [searchQuery, setSearchQuery] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [editedSkills, setEditedSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState('');
+  const [inviteForm, setInviteForm] = useState({
+    name: '',
+    email: '',
+    role: '',
+    department: '',
+    phone: '',
+    location: '',
+  });
+  const [cvFile, setCvFile] = useState<File | null>(null);
 
   // Helper to get full user name
   const getUserName = () => {
@@ -272,6 +293,95 @@ export default function TeamCollaboration() {
     toast.success('Message sent');
   };
 
+  const handleInviteMember = () => {
+    if (!inviteForm.name || !inviteForm.email || !inviteForm.role || !inviteForm.department) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const newMember: TeamMember = {
+      id: Date.now().toString(),
+      name: inviteForm.name,
+      email: inviteForm.email,
+      role: inviteForm.role,
+      department: inviteForm.department,
+      phone: inviteForm.phone,
+      location: inviteForm.location,
+      status: 'offline',
+      activeProjects: 0,
+      completedTasks: 0,
+      joinedDate: new Date().toISOString().split('T')[0],
+      skills: [],
+      cvUrl: cvFile ? URL.createObjectURL(cvFile) : undefined,
+      cvFileName: cvFile?.name,
+    };
+
+    setTeamMembers([...teamMembers, newMember]);
+    setIsInviteModalOpen(false);
+    setInviteForm({
+      name: '',
+      email: '',
+      role: '',
+      department: '',
+      phone: '',
+      location: '',
+    });
+    setCvFile(null);
+    toast.success(`Invitation sent to ${newMember.name}`);
+  };
+
+  const handleCvUpload = (e: React.ChangeEvent<HTMLInputElement>, memberId?: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf' && !file.name.endsWith('.doc') && !file.name.endsWith('.docx')) {
+      toast.error('Please upload a PDF or DOC file');
+      return;
+    }
+
+    if (memberId && selectedMember?.id === memberId) {
+      const updatedMember = {
+        ...selectedMember,
+        cvUrl: URL.createObjectURL(file),
+        cvFileName: file.name,
+      };
+      setSelectedMember(updatedMember);
+      setTeamMembers(teamMembers.map(m => m.id === memberId ? updatedMember : m));
+      toast.success('CV uploaded successfully');
+    } else {
+      setCvFile(file);
+      toast.success('CV attached');
+    }
+  };
+
+  const startEditingSkills = () => {
+    if (selectedMember) {
+      setEditedSkills([...selectedMember.skills]);
+      setIsEditingSkills(true);
+    }
+  };
+
+  const saveSkills = () => {
+    if (selectedMember) {
+      const updatedMember = { ...selectedMember, skills: editedSkills };
+      setSelectedMember(updatedMember);
+      setTeamMembers(teamMembers.map(m => m.id === selectedMember.id ? updatedMember : m));
+      setIsEditingSkills(false);
+      toast.success('Skills updated successfully');
+    }
+  };
+
+  const addSkill = () => {
+    if (newSkill.trim() && !editedSkills.includes(newSkill.trim())) {
+      setEditedSkills([...editedSkills, newSkill.trim()]);
+      setNewSkill('');
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setEditedSkills(editedSkills.filter(skill => skill !== skillToRemove));
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'online':
@@ -396,6 +506,7 @@ export default function TeamCollaboration() {
                   transition={{ delay: 0.3 }}
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsInviteModalOpen(true)}
                   className="px-6 py-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-all font-semibold flex items-center gap-2 shadow-lg"
                 >
                   <Plus className="w-5 h-5" />
@@ -911,24 +1022,151 @@ export default function TeamCollaboration() {
             </div>
 
             <div className="mb-6">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-yellow-500" />
-                Skills & Expertise
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {selectedMember.skills.map((skill, idx) => (
-                  <motion.span
-                    key={idx}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.05 }}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg font-semibold border border-indigo-200 dark:border-indigo-800"
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-yellow-500" />
+                  Skills & Expertise
+                </h3>
+                {!isEditingSkills ? (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={startEditingSkills}
+                    className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm rounded-lg font-semibold flex items-center gap-2 hover:from-indigo-700 hover:to-purple-700 transition-all"
                   >
-                    {skill}
-                  </motion.span>
-                ))}
+                    <Edit2 className="w-4 h-4" />
+                    Edit
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={saveSkills}
+                    className="px-3 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-sm rounded-lg font-semibold flex items-center gap-2 hover:from-green-700 hover:to-emerald-700 transition-all"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save
+                  </motion.button>
+                )}
               </div>
+              
+              {isEditingSkills ? (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addSkill()}
+                      placeholder="Add new skill..."
+                      className="flex-1 px-3 py-2 border border-gray-300/50 dark:border-gray-600/50 rounded-lg bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={addSkill}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </motion.button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {editedSkills.map((skill, idx) => (
+                      <motion.span
+                        key={idx}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="px-3 py-1.5 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg font-semibold border border-indigo-200 dark:border-indigo-800 flex items-center gap-2"
+                      >
+                        {skill}
+                        <button
+                          onClick={() => removeSkill(skill)}
+                          className="hover:text-red-600 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </motion.span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {selectedMember.skills.map((skill, idx) => (
+                    <motion.span
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: idx * 0.05 }}
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg font-semibold border border-indigo-200 dark:border-indigo-800"
+                    >
+                      {skill}
+                    </motion.span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* CV Section */}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                CV / Resume
+              </h3>
+              {selectedMember.cvUrl ? (
+                <div className="flex items-center justify-between bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">{selectedMember.cvFileName}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Click to download</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      href={selectedMember.cvUrl}
+                      download={selectedMember.cvFileName}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold"
+                    >
+                      Download
+                    </motion.a>
+                    <label className="cursor-pointer">
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-semibold"
+                      >
+                        Replace
+                      </motion.div>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => handleCvUpload(e, selectedMember.id)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 rounded-xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600"
+                  >
+                    <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Upload CV / Resume</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PDF, DOC, or DOCX (Max 10MB)</p>
+                  </motion.div>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => handleCvUpload(e, selectedMember.id)}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -956,6 +1194,186 @@ export default function TeamCollaboration() {
                 </div>
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Completed Tasks</p>
               </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Invite Member Modal */}
+      {isInviteModalOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={() => setIsInviteModalOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", bounce: 0.3 }}
+            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl rounded-2xl p-8 max-w-2xl w-full m-4 border border-white/50 dark:border-gray-700/50 shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+                <Users className="w-8 h-8 text-indigo-600" />
+                Invite Team Member
+              </h2>
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsInviteModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="w-6 h-6" />
+              </motion.button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={inviteForm.name}
+                    onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
+                    placeholder="John Doe"
+                    className="w-full px-4 py-3 border border-gray-300/50 dark:border-gray-600/50 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={inviteForm.email}
+                    onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                    placeholder="john.doe@iacdharma.com"
+                    className="w-full px-4 py-3 border border-gray-300/50 dark:border-gray-600/50 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Role <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={inviteForm.role}
+                    onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
+                    placeholder="Software Engineer"
+                    className="w-full px-4 py-3 border border-gray-300/50 dark:border-gray-600/50 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Department <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={inviteForm.department}
+                    onChange={(e) => setInviteForm({ ...inviteForm, department: e.target.value })}
+                    placeholder="Engineering"
+                    className="w-full px-4 py-3 border border-gray-300/50 dark:border-gray-600/50 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={inviteForm.phone}
+                    onChange={(e) => setInviteForm({ ...inviteForm, phone: e.target.value })}
+                    placeholder="+1 (555) 123-4567"
+                    className="w-full px-4 py-3 border border-gray-300/50 dark:border-gray-600/50 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={inviteForm.location}
+                    onChange={(e) => setInviteForm({ ...inviteForm, location: e.target.value })}
+                    placeholder="San Francisco, CA"
+                    className="w-full px-4 py-3 border border-gray-300/50 dark:border-gray-600/50 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  CV / Resume
+                </label>
+                {cvFile ? (
+                  <div className="flex items-center justify-between bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-6 h-6 text-blue-600" />
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">{cvFile.name}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{(cvFile.size / 1024).toFixed(2)} KB</p>
+                      </div>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setCvFile(null)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer">
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      className="flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 rounded-xl p-6 border-2 border-dashed border-gray-300 dark:border-gray-600"
+                    >
+                      <Upload className="w-10 h-10 text-gray-400 mb-2" />
+                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Upload CV / Resume</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PDF, DOC, or DOCX (Max 10MB)</p>
+                    </motion.div>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => handleCvUpload(e)}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsInviteModalOpen(false)}
+                className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleInviteMember}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                <Send className="w-5 h-5" />
+                Send Invitation
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>
