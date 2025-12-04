@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Cloud, Zap, GitBranch, Lock, TrendingUp, CheckCircle2, ArrowRight, PlayCircle, Users, Award, Globe } from 'lucide-react';
+import { Shield, Cloud, Zap, GitBranch, Lock, TrendingUp, CheckCircle2, ArrowRight, PlayCircle, Users, Award, Globe, Server, Database, Cpu, HardDrive, Network } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -148,6 +148,13 @@ export default function Home() {
               delay={0.1}
             />
             <FeatureCard
+              icon={Server}
+              title="In-House Datacenter"
+              description="Manage your private datacenter infrastructure alongside cloud resources with unified orchestration and monitoring"
+              gradient="from-slate-500 to-gray-700"
+              delay={0.15}
+            />
+            <FeatureCard
               icon={Zap}
               title="AI-Powered Automation"
               description="Smart recommendations, pattern detection, and automated optimization powered by advanced machine learning algorithms"
@@ -175,6 +182,13 @@ export default function Home() {
               gradient="from-yellow-500 to-orange-500"
               delay={0.5}
             />
+            <FeatureCard
+              icon={Network}
+              title="Hybrid Cloud Orchestration"
+              description="Seamlessly bridge on-premises datacenters with cloud environments for true hybrid infrastructure management"
+              gradient="from-cyan-500 to-blue-600"
+              delay={0.55}
+            />
           </div>
         </motion.div>
 
@@ -197,6 +211,201 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Hybrid Cloud & Datacenter Section */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <div className="text-center mb-16">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white"
+            >
+              Manage <span className="text-blue-600 dark:text-blue-400">Cloud</span> & <span className="text-slate-600 dark:text-slate-400">On-Premises</span> Together
+            </motion.h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              True hybrid infrastructure management - Bridge your datacenter with public cloud seamlessly
+            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Animated Datacenter Visualization */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-br from-slate-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 shadow-xl border border-gray-300 dark:border-gray-700">
+                <div className="space-y-6">
+                  {/* Datacenter Title */}
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-gray-700 rounded-xl flex items-center justify-center shadow-lg">
+                      <Server className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">In-House Datacenter</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Private Infrastructure</p>
+                    </div>
+                  </div>
+
+                  {/* Animated Server Racks */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { icon: Server, label: 'Physical Servers', count: '120+', color: 'from-blue-500 to-blue-600' },
+                      { icon: Database, label: 'Storage Arrays', count: '500TB', color: 'from-green-500 to-green-600' },
+                      { icon: Network, label: 'Network Fabric', count: '10Gbps', color: 'from-purple-500 to-purple-600' },
+                      { icon: Cpu, label: 'Compute Power', count: '2000+', color: 'from-orange-500 to-orange-600' },
+                    ].map((item, index) => (
+                      <motion.div
+                        key={item.label}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 relative overflow-hidden group"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative z-10">
+                          <div className={`w-10 h-10 bg-gradient-to-br ${item.color} rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                            <item.icon className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{item.count}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">{item.label}</div>
+                        </div>
+                        {/* Animated pulse effect */}
+                        <motion.div
+                          className="absolute -bottom-2 -right-2 w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-xl"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.3, 0.6, 0.3],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            delay: index * 0.2,
+                          }}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Connection Indicator */}
+                  <motion.div
+                    className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-3"
+                    animate={{
+                      boxShadow: [
+                        '0 0 0 0 rgba(34, 197, 94, 0)',
+                        '0 0 0 10px rgba(34, 197, 94, 0.1)',
+                        '0 0 0 0 rgba(34, 197, 94, 0)',
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="w-3 h-3 bg-green-500 rounded-full"
+                    />
+                    <span className="text-sm font-semibold text-green-700 dark:text-green-400">
+                      Connected & Monitored 24/7
+                    </span>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right: Benefits List */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="space-y-6"
+            >
+              <div className="space-y-8">
+                {[
+                  {
+                    icon: Shield,
+                    title: 'Keep Data On-Premises',
+                    description: 'Maintain complete control over sensitive data while leveraging cloud scalability for non-critical workloads',
+                    color: 'from-blue-600 to-blue-700',
+                  },
+                  {
+                    icon: Network,
+                    title: 'Unified Management',
+                    description: 'Single pane of glass for both cloud and datacenter resources with consistent policies and governance',
+                    color: 'from-purple-600 to-purple-700',
+                  },
+                  {
+                    icon: Zap,
+                    title: 'Disaster Recovery',
+                    description: 'Automated failover between datacenter and cloud with real-time replication and recovery orchestration',
+                    color: 'from-orange-600 to-orange-700',
+                  },
+                  {
+                    icon: TrendingUp,
+                    title: 'Cost Optimization',
+                    description: 'Intelligent workload placement based on cost, performance, and compliance requirements across hybrid infrastructure',
+                    color: 'from-green-600 to-green-700',
+                  },
+                ].map((benefit, index) => (
+                  <motion.div
+                    key={benefit.title}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.15, duration: 0.5 }}
+                    whileHover={{ x: 10 }}
+                    className="flex gap-4 group"
+                  >
+                    <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${benefit.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <benefit.icon className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {benefit.title}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                        {benefit.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 }}
+                className="mt-8 p-6 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <HardDrive className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">
+                      Seamless Integration with Existing Infrastructure
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      Works with VMware, Hyper-V, OpenStack, and bare metal servers. No rip-and-replace required.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </motion.div>
+
         {/* Technology Stack */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -214,16 +423,47 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {['Terraform', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Docker'].map((tech, i) => (
+            {[
+              { name: 'Terraform', color: 'from-purple-600 to-purple-700' },
+              { name: 'Kubernetes', color: 'from-blue-600 to-blue-700' },
+              { name: 'AWS', color: 'from-orange-500 to-orange-600' },
+              { name: 'Azure', color: 'from-blue-500 to-cyan-600' },
+              { name: 'GCP', color: 'from-red-500 to-yellow-500' },
+              { name: 'Docker', color: 'from-blue-400 to-blue-600' },
+              { name: 'VMware', color: 'from-slate-600 to-gray-700' },
+              { name: 'OpenStack', color: 'from-red-600 to-red-700' },
+              { name: 'Hyper-V', color: 'from-blue-700 to-indigo-700' },
+              { name: 'Ansible', color: 'from-red-500 to-black' },
+              { name: 'Prometheus', color: 'from-orange-600 to-red-600' },
+              { name: 'Grafana', color: 'from-orange-500 to-red-500' },
+            ].map((tech, i) => (
               <motion.div
-                key={tech}
+                key={tech.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-100 dark:border-gray-700 flex items-center justify-center"
+                transition={{ delay: i * 0.05 }}
+                whileHover={{ 
+                  scale: 1.1,
+                  rotate: [0, -5, 5, 0],
+                  transition: { duration: 0.3 }
+                }}
+                className="group bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all border border-gray-100 dark:border-gray-700 flex items-center justify-center relative overflow-hidden"
               >
-                <span className="font-semibold text-gray-700 dark:text-gray-300">{tech}</span>
+                <div className={`absolute inset-0 bg-gradient-to-br ${tech.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors relative z-10">
+                  {tech.name}
+                </span>
+                <motion.div
+                  className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100"
+                  animate={{
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                />
               </motion.div>
             ))}
           </div>
