@@ -1,0 +1,719 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "IAC Dharma Platform API",
+    "description": "Comprehensive Infrastructure as Code platform with AI-powered recommendations, multi-cloud support, and automated deployment orchestration",
+    "version": "2.0.0",
+    "contact": {
+      "name": "IAC Dharma Support",
+      "email": "support@iac-dharma.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.iac-dharma.com/api",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User authentication and authorization"
+    },
+    {
+      "name": "Blueprints",
+      "description": "Infrastructure blueprint management"
+    },
+    {
+      "name": "IAC Generation",
+      "description": "Infrastructure as Code generation (Terraform, Bicep, CloudFormation)"
+    },
+    {
+      "name": "Cloud Providers",
+      "description": "Cloud provider integration (AWS, Azure, GCP)"
+    },
+    {
+      "name": "Cost Estimation",
+      "description": "Infrastructure cost estimation and optimization"
+    },
+    {
+      "name": "Monitoring",
+      "description": "Infrastructure monitoring and health checks"
+    },
+    {
+      "name": "Guardrails",
+      "description": "Policy enforcement and compliance validation"
+    },
+    {
+      "name": "AI Recommendations",
+      "description": "AI-powered infrastructure recommendations"
+    },
+    {
+      "name": "Deployments",
+      "description": "Deployment orchestration and management"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User login",
+        "description": "Authenticate user and return JWT tokens",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "SecurePassword123!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Refresh access token",
+        "description": "Get new access token using refresh token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["refreshToken"],
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token"
+          }
+        }
+      }
+    },
+    "/blueprints": {
+      "get": {
+        "tags": ["Blueprints"],
+        "summary": "List all blueprints",
+        "description": "Get list of all infrastructure blueprints",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {"type": "integer", "default": 1}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {"type": "integer", "default": 20}
+          },
+          {
+            "name": "cloudProvider",
+            "in": "query",
+            "schema": {"type": "string", "enum": ["aws", "azure", "gcp"]}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprints retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "blueprints": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/Blueprint"}
+                    },
+                    "total": {"type": "integer"},
+                    "page": {"type": "integer"},
+                    "limit": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Blueprints"],
+        "summary": "Create new blueprint",
+        "description": "Create a new infrastructure blueprint",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/BlueprintInput"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Blueprint created successfully",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Blueprint"}
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid blueprint data"
+          }
+        }
+      }
+    },
+    "/blueprints/{id}": {
+      "get": {
+        "tags": ["Blueprints"],
+        "summary": "Get blueprint by ID",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Blueprint"}
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint not found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Blueprints"],
+        "summary": "Update blueprint",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/BlueprintInput"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blueprint updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Blueprints"],
+        "summary": "Delete blueprint",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Blueprint deleted successfully"
+          }
+        }
+      }
+    },
+    "/blueprints/{id}/generate": {
+      "post": {
+        "tags": ["IAC Generation"],
+        "summary": "Generate IaC code",
+        "description": "Generate Terraform, Bicep, or CloudFormation code from blueprint",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "format": {
+                    "type": "string",
+                    "enum": ["terraform", "bicep", "cloudformation"],
+                    "default": "terraform"
+                  },
+                  "includeComments": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "IaC code generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneratedCode"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blueprints/{id}/cost": {
+      "get": {
+        "tags": ["Cost Estimation"],
+        "summary": "Estimate infrastructure cost",
+        "description": "Get cost estimation for blueprint deployment",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cost estimation completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostEstimate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blueprints/{id}/validate": {
+      "post": {
+        "tags": ["Guardrails"],
+        "summary": "Validate blueprint against policies",
+        "description": "Run guardrails policy validation",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blueprints/{id}/recommendations": {
+      "get": {
+        "tags": ["AI Recommendations"],
+        "summary": "Get AI recommendations",
+        "description": "Get AI-powered optimization recommendations",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recommendations generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Recommendation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments": {
+      "post": {
+        "tags": ["Deployments"],
+        "summary": "Deploy infrastructure",
+        "description": "Start infrastructure deployment",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["blueprintId"],
+                "properties": {
+                  "blueprintId": {"type": "string"},
+                  "environment": {
+                    "type": "string",
+                    "enum": ["dev", "staging", "production"],
+                    "default": "dev"
+                  },
+                  "autoApprove": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Deployment started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deployment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{id}": {
+      "get": {
+        "tags": ["Deployments"],
+        "summary": "Get deployment status",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deployment status retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deployment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monitoring/health": {
+      "get": {
+        "tags": ["Monitoring"],
+        "summary": "Get system health",
+        "description": "Get aggregated health status of all services",
+        "responses": {
+          "200": {
+            "description": "Health status retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {"type": "string"},
+          "refreshToken": {"type": "string"},
+          "expiresIn": {"type": "integer", "example": 3600},
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "email": {"type": "string"},
+              "name": {"type": "string"}
+            }
+          }
+        }
+      },
+      "Blueprint": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "cloudProvider": {
+            "type": "string",
+            "enum": ["aws", "azure", "gcp"]
+          },
+          "region": {"type": "string"},
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "type": {"type": "string"},
+                "name": {"type": "string"},
+                "properties": {"type": "object"}
+              }
+            }
+          },
+          "createdAt": {"type": "string", "format": "date-time"},
+          "updatedAt": {"type": "string", "format": "date-time"}
+        }
+      },
+      "BlueprintInput": {
+        "type": "object",
+        "required": ["name", "cloudProvider", "region"],
+        "properties": {
+          "name": {"type": "string", "minLength": 3, "maxLength": 100},
+          "description": {"type": "string"},
+          "cloudProvider": {
+            "type": "string",
+            "enum": ["aws", "azure", "gcp"]
+          },
+          "region": {"type": "string"},
+          "resources": {
+            "type": "array",
+            "items": {"type": "object"}
+          }
+        }
+      },
+      "GeneratedCode": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string"},
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "content": {"type": "string"},
+                "type": {"type": "string"}
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "resourceCount": {"type": "integer"},
+              "warnings": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        }
+      },
+      "CostEstimate": {
+        "type": "object",
+        "properties": {
+          "totalMonthly": {"type": "number"},
+          "totalAnnual": {"type": "number"},
+          "currency": {"type": "string", "default": "USD"},
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resource": {"type": "string"},
+                "cost": {"type": "number"},
+                "unit": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "ValidationResult": {
+        "type": "object",
+        "properties": {
+          "valid": {"type": "boolean"},
+          "violations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "policy": {"type": "string"},
+                "severity": {
+                  "type": "string",
+                  "enum": ["low", "medium", "high", "critical"]
+                },
+                "message": {"type": "string"},
+                "resource": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "Recommendation": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["cost", "security", "performance", "architecture"]
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "potentialSavings": {"type": "number"},
+          "effort": {"type": "string", "enum": ["low", "medium", "high"]}
+        }
+      },
+      "Deployment": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "blueprintId": {"type": "string"},
+          "status": {
+            "type": "string",
+            "enum": ["pending", "planning", "applying", "completed", "failed", "rolling_back"]
+          },
+          "progress": {"type": "integer", "minimum": 0, "maximum": 100},
+          "resources": {
+            "type": "object",
+            "properties": {
+              "total": {"type": "integer"},
+              "created": {"type": "integer"},
+              "updated": {"type": "integer"},
+              "deleted": {"type": "integer"}
+            }
+          },
+          "createdAt": {"type": "string", "format": "date-time"},
+          "completedAt": {"type": "string", "format": "date-time"}
+        }
+      },
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "overall": {
+            "type": "string",
+            "enum": ["healthy", "degraded", "unhealthy"]
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "service": {"type": "string"},
+                "status": {
+                  "type": "string",
+                  "enum": ["healthy", "degraded", "unhealthy"]
+                },
+                "responseTime": {"type": "number"}
+              }
+            }
+          },
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  }
+}
