@@ -36,19 +36,6 @@ export default function Login() {
     };
     checkBiometric();
   }, []);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricLoading, setBiometricLoading] = useState(false);
-
-  // Check biometric availability
-  useEffect(() => {
-    const checkBiometric = async () => {
-      if (window.PublicKeyCredential) {
-        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-        setBiometricAvailable(available);
-      }
-    };
-    checkBiometric();
-  }, []);
 
   // OTP Resend Timer
   useEffect(() => {
