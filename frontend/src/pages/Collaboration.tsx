@@ -112,28 +112,37 @@ export default function Collaboration() {
   };
 
   const loadOnlineUsers = async () => {
+    // Default users with bots always at the top
+    const defaultUsers: OnlineUser[] = [
+      { id: 'bot-ai', name: '🤖 AI Bot', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: 'bot-help', name: '❓ Application Help', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '1', name: 'Yudhishthira', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '2', name: 'Arjuna', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '3', name: 'Krishna', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '4', name: 'Bhima', avatar: '', status: 'away' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '5', name: 'Nakula', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '6', name: 'Sahadeva', avatar: '', status: 'busy' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '7', name: 'Draupadi', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+      { id: '8', name: 'Vidura', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+    ];
+    
     try {
       const response = await fetch(`${API_URL}/collaboration/users/online`);
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
-      setOnlineUsers(data);
+      
+      // If API returns data, merge with bots (bots always first)
+      if (data && data.length > 0) {
+        const bots = defaultUsers.filter(u => u.id.startsWith('bot-'));
+        const apiUsers = data.filter((u: OnlineUser) => !u.id.startsWith('bot-'));
+        setOnlineUsers([...bots, ...apiUsers]);
+      } else {
+        // Use all default users if API returns empty
+        setOnlineUsers(defaultUsers);
+      }
     } catch (error: any) {
       console.error('Error loading users:', error);
-      
-      // Set default online users
-      const defaultUsers: OnlineUser[] = [
-        { id: 'bot-ai', name: '🤖 AI Bot', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: 'bot-help', name: '❓ Application Help', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '1', name: 'Yudhishthira', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '2', name: 'Arjuna', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '3', name: 'Krishna', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '4', name: 'Bhima', avatar: '', status: 'away' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '5', name: 'Nakula', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '6', name: 'Sahadeva', avatar: '', status: 'busy' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '7', name: 'Draupadi', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-        { id: '8', name: 'Vidura', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
-      ];
-      
+      // Always set default users on error
       setOnlineUsers(defaultUsers);
     }
   };
