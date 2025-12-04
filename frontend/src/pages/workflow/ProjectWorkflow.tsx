@@ -503,8 +503,8 @@ export default function ProjectWorkflow() {
             </div>
           </motion.div>
 
-        {/* Workflow Description */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
+          {/* Workflow Description */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Integrated Workflow Process</h2>
           <div className="prose prose-sm max-w-none text-gray-900 dark:text-gray-100">
             <p className="mb-4 font-medium">
@@ -830,6 +830,7 @@ export default function ProjectWorkflow() {
             </a>
           </div>
         </div>
+      </div>
       </div>
 
       {/* Modals */}
