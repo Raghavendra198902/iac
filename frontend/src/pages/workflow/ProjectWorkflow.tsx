@@ -491,17 +491,17 @@ export default function ProjectWorkflow() {
                             className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2.5 rounded-full shadow-lg"
                           />
                         </div>
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200">
-                    <Calendar className="w-3 h-3" />
-                    Target: {project.targetDate}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200">
+                        <Calendar className="w-3 h-3" />
+                        Target: {project.targetDate}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </motion.div>
 
         {/* Workflow Description */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
