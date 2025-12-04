@@ -6,9 +6,55 @@ import {
   ArrowRight,
   CheckCircle,
   Users,
+  MessageSquare,
+  Target,
+  Handshake,
 } from 'lucide-react';
 
 export default function StakeholderManagement() {
+  const responsibilities = [
+    {
+      title: 'Stakeholder Engagement',
+      icon: Users,
+      items: [
+        'Build relationships with C-suite, business leaders, and IT teams',
+        'Conduct regular stakeholder meetings and architecture forums',
+        'Manage stakeholder expectations and communications',
+        'Create stakeholder maps and influence strategies',
+      ],
+    },
+    {
+      title: 'Workshops & Collaboration',
+      icon: MessageSquare,
+      items: [
+        'Facilitate architecture design and planning workshops',
+        'Conduct capability mapping and value stream sessions',
+        'Lead technical deep-dives and solution reviews',
+        'Enable cross-functional collaboration and alignment',
+      ],
+    },
+    {
+      title: 'Conflict Resolution',
+      icon: Handshake,
+      items: [
+        'Mediate technical disagreements and architecture conflicts',
+        'Balance competing priorities and constraints',
+        'Navigate organizational politics and resistance',
+        'Build consensus across diverse stakeholder groups',
+      ],
+    },
+    {
+      title: 'Influence & Communication',
+      icon: Target,
+      items: [
+        'Communicate complex technical concepts to business audience',
+        'Present architecture strategies to leadership',
+        'Evangelize best practices and standards',
+        'Drive organizational change and transformation',
+      ],
+    },
+  ];
+
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/30 dark:from-gray-950 dark:via-indigo-950/20 dark:to-purple-950/20">
@@ -37,22 +83,67 @@ export default function StakeholderManagement() {
                   <Users className="w-10 h-10" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold mb-2">10. Stakeholder Management & Cross-Functional Leadership</h1>
-                  <p className="text-white/90 text-lg">Engage stakeholders, conduct workshops, resolve technical conflicts</p>
+                  <h1 className="text-4xl font-bold mb-2">10. Stakeholder Management</h1>
+                  <p className="text-white/90 text-lg">Engage stakeholders, conduct workshops, resolve conflicts</p>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-8 border border-white/50 dark:border-gray-700/50 shadow-xl">
-            <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-              Key Responsibilities
-            </h2>
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-gray-700 dark:text-gray-300">
-                Content for Stakeholder Management & Cross-Functional Leadership will be added here. This page covers the comprehensive responsibilities and strategic impact of this EA focus area.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              { label: 'Active Stakeholders', value: '89', icon: Users, color: 'blue' },
+              { label: 'Workshops/Year', value: '45', icon: MessageSquare, color: 'green' },
+              { label: 'Conflicts Resolved', value: '23', icon: Handshake, color: 'purple' },
+              { label: 'Engagement Score', value: '87%', icon: Target, color: 'indigo' },
+            ].map((stat, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-gray-700/50 shadow-xl"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`p-2.5 rounded-lg bg-gradient-to-br from-${stat.color}-500 to-${stat.color}-600 shadow-lg`}>
+                    <stat.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                    {stat.value}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {responsibilities.map((section, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + idx * 0.1 }}
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-gray-700/50 shadow-xl hover:shadow-2xl transition-all"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg">
+                    <section.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                    {section.title}
+                  </h3>
+                </div>
+                <ul className="space-y-3">
+                  {section.items.map((item, itemIdx) => (
+                    <li key={itemIdx} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
           </div>
 
           <motion.div
