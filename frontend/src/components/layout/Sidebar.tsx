@@ -25,6 +25,9 @@ import {
   ShieldCheck,
   Upload,
   BookOpen,
+  Star,
+  Clock,
+  TrendingUp,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -124,6 +127,28 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
   type MenuItemOrDivider = MenuItem | SectionDivider;
 
   const menuItems: MenuItemOrDivider[] = [
+    // ========== FAVORITES & RECENT ==========
+    {
+      type: 'divider',
+      label: 'QUICK ACCESS',
+    },
+    {
+      id: 'favorites',
+      label: 'Favorites',
+      icon: Star,
+      path: '/favorites',
+      badge: '5',
+      badgeColor: 'bg-yellow-600',
+    },
+    {
+      id: 'recent',
+      label: 'Recent Activity',
+      icon: Clock,
+      path: '/recent',
+      badge: 'NEW',
+      badgeColor: 'bg-blue-600',
+    },
+    
     // ========== CORE PLATFORM ==========
     {
       type: 'divider',
@@ -385,7 +410,7 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
       <div
         className={`group relative flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${
           active
-            ? 'bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white shadow-xl shadow-blue-500/30 scale-[1.02]'
+            ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 text-white shadow-xl shadow-blue-500/30 scale-[1.02] animate-gradient bg-[length:200%_auto]'
             : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-50 dark:hover:from-gray-800 dark:hover:to-gray-800/50 hover:shadow-md hover:scale-[1.01]'
         } ${level > 0 ? 'ml-6 text-sm' : ''} ${isExpanded && hasChildren ? 'bg-gray-50 dark:bg-gray-800/30' : ''}`}
         onClick={() => {
@@ -394,6 +419,11 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
           }
         }}
       >
+        {/* Active indicator bar */}
+        {active && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full shadow-lg animate-slideInLeft"></div>
+        )}
+        
         {/* Hover glow effect */}
         {!active && (
           <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500 pointer-events-none"></div>
@@ -402,15 +432,18 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
         <div className="flex items-center gap-3 flex-1 relative z-10">
           <div className={`relative ${active ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-300`}>
             {active && (
-              <div className="absolute inset-0 bg-white/20 rounded-lg blur-md"></div>
+              <>
+                <div className="absolute inset-0 bg-white/30 rounded-lg blur-md animate-pulse"></div>
+                <div className="absolute -inset-1 bg-white/20 rounded-lg blur-sm"></div>
+              </>
             )}
-            <item.icon className={`relative w-5 h-5 ${active ? 'text-white drop-shadow-md' : 'text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'} transition-colors duration-300`} />
+            <item.icon className={`relative w-5 h-5 ${active ? 'text-white drop-shadow-md animate-bounce-subtle' : 'text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'} transition-colors duration-300`} />
           </div>
           <span className={`text-sm font-semibold ${active ? 'text-white' : 'group-hover:text-gray-900 dark:group-hover:text-gray-100'} transition-colors duration-300`}>
             {item.label}
           </span>
           {item.badge && (
-            <span className={`${item.badgeColor} text-white text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wider shadow-md ${active ? 'animate-pulse' : ''}`}>
+            <span className={`${item.badgeColor} text-white text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wider shadow-md ${active ? 'animate-pulse scale-110' : 'group-hover:scale-110 transition-transform duration-300'}`}>
               {item.badge}
             </span>
           )}
@@ -472,12 +505,17 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg blur-md opacity-75 group-hover:opacity-100 transition-all duration-300"></div>
-                <div className="relative bg-gradient-to-br from-blue-500 to-purple-500 p-2 rounded-lg transform group-hover:scale-110 transition-transform duration-300">
-                  <LayoutDashboard className="w-5 h-5 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg blur-md opacity-75 group-hover:opacity-100 transition-all duration-300 animate-pulse"></div>
+                <div className="relative bg-gradient-to-br from-blue-500 via-purple-500 to-blue-500 p-2 rounded-lg transform group-hover:scale-110 transition-transform duration-300 animate-gradient bg-[length:200%_auto]">
+                  <LayoutDashboard className="w-5 h-5 text-white drop-shadow-lg" />
                 </div>
+                {/* Rotating orbital ring */}
+                <div className="absolute inset-0 rounded-lg border-2 border-blue-400/30 group-hover:rotate-180 transition-transform duration-1000 ease-out"></div>
               </div>
-              <h2 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">Navigation</h2>
+              <div>
+                <h2 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">Navigation</h2>
+                <p className="text-[9px] font-semibold tracking-[0.15em] text-gray-500 dark:text-gray-500 uppercase">Enterprise Edition</p>
+              </div>
             </div>
             <button
               onClick={onClose}
