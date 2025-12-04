@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
-  Activity
+  Activity,
+  Briefcase
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout';
 
@@ -147,6 +148,16 @@ export default function EnterpriseArchitectureIndex() {
       features: ['Architecture Metrics', 'Portfolio Analytics', 'Compliance Reports'],
       status: 'active',
       count: 94
+    },
+    {
+      title: 'EA Responsibilities',
+      description: 'Comprehensive guide to all 15 Enterprise Architect responsibility areas',
+      icon: Briefcase,
+      color: 'emerald',
+      path: '/ea/responsibilities',
+      features: ['15 Responsibility Areas', 'Best Practices', 'Strategic Impact'],
+      status: 'active',
+      count: 15
     }
   ];
 
