@@ -40,12 +40,14 @@ import {
   BarChart3,
   PieChart,
   LineChart,
-  Plus
+  Plus,
+  Sparkles
 } from 'lucide-react';
 
 export default function DashboardNew() {
   const [selectedPeriod, setSelectedPeriod] = useState('7d');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const demoUser = {
     name: 'John Enterprise',
@@ -160,57 +162,107 @@ export default function DashboardNew() {
   return (
     <MainLayout user={demoUser}>
       {/* Modern Gradient Background Effect */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/20 via-cyan-500/20 to-blue-600/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-purple-500/20 via-pink-500/20 to-purple-600/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
       </div>
 
       {/* Header with Real-time Controls */}
-      <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative z-10">
+      <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+          <div className="flex items-center gap-3 mb-3">
+            <motion.h1 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-5xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto] tracking-tight"
+            >
               Project Dashboard
-            </h1>
-            <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-lg shadow-green-500/30">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-              Live
-            </span>
+            </motion.h1>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            >
+              <span className="px-3 py-1.5 bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 text-white text-xs font-bold rounded-full flex items-center gap-1.5 shadow-lg shadow-green-500/40 hover:shadow-green-500/60 transition-all hover:scale-105 cursor-pointer">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                LIVE
+              </span>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.3, type: "spring" }}
+              className="p-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/50 transition-all hover:scale-110 cursor-pointer"
+            >
+              <Sparkles className="w-5 h-5 text-white" />
+            </motion.div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">Real-time monitoring and analytics for all your infrastructure projects</p>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-gray-600 dark:text-gray-400 text-lg font-medium"
+          >
+            Real-time monitoring and analytics for all your infrastructure projects
+          </motion.p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
-            <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin text-blue-600' : 'text-gray-400'}`} />
-            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Auto-refresh</span>
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex items-center gap-3 flex-wrap"
+        >
+          <div className="group flex items-center gap-3 px-5 py-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5">
+            <div className="relative">
+              <RefreshCw className={`w-5 h-5 transition-all ${autoRefresh ? 'animate-spin text-blue-600' : 'text-gray-400 group-hover:text-blue-500'}`} />
+              {autoRefresh && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                </span>
+              )}
+            </div>
+            <span className="text-sm text-gray-700 dark:text-gray-300 font-semibold">Auto-refresh</span>
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${
-                autoRefresh ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30' : 'bg-gray-300 dark:bg-gray-600'
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-500 ${
+                autoRefresh 
+                  ? 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 shadow-lg shadow-blue-500/50 bg-[length:200%_auto] animate-gradient' 
+                  : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
               }`}
             >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
-                autoRefresh ? 'translate-x-6' : 'translate-x-1'
-              }`} />
+              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-all duration-500 ${
+                autoRefresh ? 'translate-x-6 rotate-180' : 'translate-x-1'
+              }`}>
+                {autoRefresh && <span className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-20"></span>}
+              </span>
             </button>
           </div>
           
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-4 py-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-xl text-gray-700 dark:text-gray-300 font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="px-5 py-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-2 border-gray-200/60 dark:border-gray-700/60 rounded-2xl text-gray-800 dark:text-gray-200 font-semibold shadow-xl hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:-translate-y-0.5 cursor-pointer"
           >
-            <option value="24h">Last 24 Hours</option>
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
+            <option value="24h">📅 Last 24 Hours</option>
+            <option value="7d">📊 Last 7 Days</option>
+            <option value="30d">📈 Last 30 Days</option>
+            <option value="90d">📉 Last 90 Days</option>
           </select>
           
-          <button className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl flex items-center gap-2 font-medium shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5">
-            <Download className="w-4 h-4" />
-            Export Report
+          <button 
+            onClick={() => setIsLoading(!isLoading)}
+            className="group relative px-6 py-3 bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-600 text-white rounded-2xl flex items-center gap-2 font-bold shadow-xl shadow-blue-500/40 transition-all hover:shadow-2xl hover:shadow-purple-500/50 hover:-translate-y-1 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <Download className="w-5 h-5 relative z-10 group-hover:rotate-12 transition-transform" />
+            <span className="relative z-10">Export Report</span>
           </button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Key Metrics Grid */}
