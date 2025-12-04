@@ -7,6 +7,9 @@ import PageTransition from '../components/ui/PageTransition';
 import FadeIn, { StaggerChildren, FadeInStagger } from '../components/ui/FadeIn';
 import WorkflowDashboardWidget from '../components/WorkflowDashboardWidget';
 import ActivityFeed from '../components/ActivityFeed';
+import WelcomeTour from '../components/WelcomeTour';
+import OnboardingChecklist from '../components/OnboardingChecklist';
+import QuickActionsPanel from '../components/QuickActionsPanel';
 
 // ECG-style heartbeat monitor component - simulates real ECG sine wave pattern
 const ECGMonitor = ({ data, color = 'blue', height = 20, width = 60, showGrid = false }: { 
@@ -473,6 +476,8 @@ export default function Dashboard() {
   return (
     <MainLayout>
       <PageTransition>
+        <WelcomeTour />
+        <OnboardingChecklist />
         <div className="space-y-8">
           {/* Enterprise Command Center Header */}
           <FadeIn>
@@ -634,6 +639,12 @@ export default function Dashboard() {
         <div className="mb-4 p-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-center font-bold text-xl rounded-lg animate-pulse">
           ⚡ ECG SINE WAVE MONITORS LOADED - VERSION 2.0 ⚡
         </div>
+
+        {/* Quick Actions Panel - User-Friendly Shortcuts */}
+        <FadeIn delay={0.25}>
+          <QuickActionsPanel />
+        </FadeIn>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {systemMetrics.map((metric, index) => {
             const Icon = metric.icon;
