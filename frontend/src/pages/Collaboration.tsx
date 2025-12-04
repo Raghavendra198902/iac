@@ -770,11 +770,11 @@ export default function Collaboration() {
                     className={`flex gap-3 group ${showAvatar ? 'mt-4' : 'mt-1'}`}
                   >
                     {/* Avatar */}
-                    <div className=\"w-10 flex-shrink-0\">
+                    <div className="w-10 flex-shrink-0">
                       {showAvatar && (
                         <motion.div
                           whileHover={{ scale: 1.1, rotate: 5 }}
-                          className=\"w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg\"
+                          className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg"
                         >
                           {message.userName.split(' ').map(n => n[0]).join('')}
                         </motion.div>
@@ -782,18 +782,18 @@ export default function Collaboration() {
                     </div>
 
                     {/* Message Content */}
-                    <div className=\"flex-1 min-w-0\">
+                    <div className="flex-1 min-w-0">
                       {showAvatar && (
-                        <div className=\"flex items-center gap-2 mb-2\">
-                          <span className=\"font-bold text-gray-900 dark:text-white\">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-bold text-gray-900 dark:text-white">
                             {message.userName}
                           </span>
-                          <span className=\"text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1\">
-                            <Clock className=\"w-3 h-3\" />
+                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
                             {formatTime(message.timestamp)}
                           </span>
                           {isCurrentUser && (
-                            <span className=\"px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold\">
+                            <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                               You
                             </span>
                           )}
@@ -804,13 +804,13 @@ export default function Collaboration() {
                       {message.type === 'code' ? (
                         <motion.div
                           whileHover={{ scale: 1.01 }}
-                          className=\"bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 overflow-x-auto shadow-lg border border-gray-700\"
+                          className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 overflow-x-auto shadow-lg border border-gray-700"
                         >
-                          <div className=\"flex items-center gap-2 mb-2 pb-2 border-b border-gray-700\">
-                            <Code className=\"w-4 h-4 text-blue-400\" />
-                            <span className=\"text-xs text-gray-400 font-semibold\">Code Block</span>
+                          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-700">
+                            <Code className="w-4 h-4 text-blue-400" />
+                            <span className="text-xs text-gray-400 font-semibold">Code Block</span>
                           </div>
-                          <pre className=\"text-sm text-gray-100 font-mono\">
+                          <pre className="text-sm text-gray-100 font-mono">
                             <code>{message.content}</code>
                           </pre>
                         </motion.div>
@@ -818,19 +818,19 @@ export default function Collaboration() {
                         <motion.div
                           initial={{ scale: 0.9 }}
                           animate={{ scale: 1 }}
-                          className=\"bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 backdrop-blur-sm border border-yellow-200 dark:border-yellow-800 rounded-xl p-3 shadow-lg\"
+                          className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 backdrop-blur-sm border border-yellow-200 dark:border-yellow-800 rounded-xl p-3 shadow-lg"
                         >
-                          <p className=\"text-sm text-yellow-800 dark:text-yellow-200 font-medium flex items-center gap-2\">
-                            <Zap className=\"w-4 h-4\" />
+                          <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
                             {message.content}
                           </p>
                         </motion.div>
                       ) : (
                         <motion.div
                           whileHover={{ scale: 1.01, y: -2 }}
-                          className=\"bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-xl px-4 py-3 border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-500/50 hover:shadow-lg transition-all group-hover:shadow-xl\"
+                          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-xl px-4 py-3 border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-500/50 hover:shadow-lg transition-all group-hover:shadow-xl"
                         >
-                          <p className=\"text-gray-900 dark:text-gray-100 break-words font-medium leading-relaxed\">
+                          <p className="text-gray-900 dark:text-gray-100 break-words font-medium leading-relaxed">
                             {message.content}
                           </p>
                         </motion.div>
@@ -838,16 +838,16 @@ export default function Collaboration() {
 
                       {/* Attachments */}
                       {message.attachments && message.attachments.length > 0 && (
-                        <div className=\"mt-2 flex gap-2 flex-wrap\">
+                        <div className="mt-2 flex gap-2 flex-wrap">
                           {message.attachments.map((attachment) => (
                             <motion.a
                               key={attachment.id}
                               href={attachment.url}
                               whileHover={{ scale: 1.05, y: -2 }}
-                              className=\"flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm rounded-xl hover:shadow-lg transition-all border border-blue-200/50 dark:border-blue-800/50\"
+                              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm rounded-xl hover:shadow-lg transition-all border border-blue-200/50 dark:border-blue-800/50"
                             >
-                              <File className=\"w-4 h-4 text-blue-600 dark:text-blue-400\" />
-                              <span className=\"text-sm text-gray-900 dark:text-gray-100 font-semibold\">
+                              <File className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              <span className="text-sm text-gray-900 dark:text-gray-100 font-semibold">
                                 {attachment.name}
                               </span>
                             </motion.a>
@@ -857,17 +857,17 @@ export default function Collaboration() {
 
                       {/* Reactions */}
                       {message.reactions && message.reactions.length > 0 && (
-                        <div className=\"mt-2 flex flex-wrap gap-1\">
+                        <div className="mt-2 flex flex-wrap gap-1">
                           {message.reactions.map((reaction, idx) => (
                             <motion.button
                               key={idx}
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => addReaction(message.id, reaction.emoji)}
-                              className=\"flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 rounded-full transition-all shadow-sm border border-blue-200/50 dark:border-blue-800/50\"
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 rounded-full transition-all shadow-sm border border-blue-200/50 dark:border-blue-800/50"
                             >
-                              <span className=\"text-base\">{reaction.emoji}</span>
-                              <span className=\"text-xs text-gray-700 dark:text-gray-300 font-bold\">
+                              <span className="text-base">{reaction.emoji}</span>
+                              <span className="text-xs text-gray-700 dark:text-gray-300 font-bold">
                                 {reaction.count}
                               </span>
                             </motion.button>
@@ -875,9 +875,9 @@ export default function Collaboration() {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
-                            className=\"flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full transition-all shadow-sm border border-gray-200 dark:border-gray-600\"
+                            className="flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full transition-all shadow-sm border border-gray-200 dark:border-gray-600"
                           >
-                            <Plus className=\"w-3 h-3 text-gray-500\" />
+                            <Plus className="w-3 h-3 text-gray-500" />
                           </motion.button>
                         </div>
                       )}
@@ -886,7 +886,7 @@ export default function Collaboration() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         whileHover={{ opacity: 1, y: 0 }}
-                        className=\"mt-2 opacity-0 group-hover:opacity-100 transition-all flex gap-1 flex-wrap\"
+                        className="mt-2 opacity-0 group-hover:opacity-100 transition-all flex gap-1 flex-wrap"
                       >
                         {quickReactions.map((reaction) => (
                           <motion.button
@@ -894,24 +894,25 @@ export default function Collaboration() {
                             whileHover={{ scale: 1.2, y: -2 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => addReaction(message.id, reaction.emoji)}
-                            className=\"p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all\"\n                            title={reaction.label}
+                            className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all"
+                            title={reaction.label}
                           >
-                            <span className=\"text-lg\">{reaction.emoji}</span>
+                            <span className="text-lg">{reaction.emoji}</span>
                           </motion.button>
                         ))}
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className=\"p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all\"
+                          className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all"
                         >
-                          <Reply className=\"w-4 h-4 text-gray-400\" />
+                          <Reply className="w-4 h-4 text-gray-400" />
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className=\"p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all\"
+                          className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all"
                         >
-                          <MoreVertical className=\"w-4 h-4 text-gray-400\" />
+                          <MoreVertical className="w-4 h-4 text-gray-400" />
                         </motion.button>
                       </motion.div>
                     </div>
