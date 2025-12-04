@@ -42,6 +42,24 @@ const AnalyticsKPIs = lazy(() => import('./pages/ea/AnalyticsKPIs'));
 const ArchitectureRepository = lazy(() => import('./pages/ea/ArchitectureRepository'));
 const StakeholderManagement = lazy(() => import('./pages/ea/StakeholderManagement'));
 
+// EA Responsibilities Pages
+const EAResponsibilitiesIndex = lazy(() => import('./pages/ea/responsibilities/index'));
+const ArchitectureStrategyGovernance = lazy(() => import('./pages/ea/responsibilities/ArchitectureStrategyGovernance'));
+const BusinessITAlignment = lazy(() => import('./pages/ea/responsibilities/BusinessITAlignment'));
+const SolutionOversight = lazy(() => import('./pages/ea/responsibilities/SolutionOversight'));
+const PortfolioRationalization = lazy(() => import('./pages/ea/responsibilities/PortfolioRationalization'));
+const InnovationEmergingTech = lazy(() => import('./pages/ea/responsibilities/InnovationEmergingTech'));
+const SecurityCompliance = lazy(() => import('./pages/ea/responsibilities/SecurityCompliance'));
+const DataArchitectureResp = lazy(() => import('./pages/ea/responsibilities/DataArchitecture'));
+const IntegrationAPI = lazy(() => import('./pages/ea/responsibilities/IntegrationAPI'));
+const CloudInfrastructure = lazy(() => import('./pages/ea/responsibilities/CloudInfrastructure'));
+const StakeholderMgmt = lazy(() => import('./pages/ea/responsibilities/StakeholderManagement'));
+const StandardsTemplates = lazy(() => import('./pages/ea/responsibilities/StandardsTemplates'));
+const LifecycleImprovement = lazy(() => import('./pages/ea/responsibilities/LifecycleImprovement'));
+const ProgramDelivery = lazy(() => import('./pages/ea/responsibilities/ProgramDelivery'));
+const DocumentationCommunication = lazy(() => import('./pages/ea/responsibilities/DocumentationCommunication'));
+const PeopleLeadership = lazy(() => import('./pages/ea/responsibilities/PeopleLeadership'));
+
 // Project Management Pages
 const ProjectManagement = lazy(() => import('./pages/pm/ProjectManagement'));
 const PMRequirements = lazy(() => import('./pages/pm/Requirements'));
@@ -141,6 +159,24 @@ function App() {
                   <Route path="/ea/analytics" element={<AnalyticsKPIs />} />
                   <Route path="/ea/repository" element={<ArchitectureRepository />} />
                   <Route path="/ea/stakeholders" element={<StakeholderManagement />} />
+                  
+                  {/* EA Responsibilities Routes */}
+                  <Route path="/ea/responsibilities" element={<EAResponsibilitiesIndex />} />
+                  <Route path="/ea/responsibilities/strategy-governance" element={<ArchitectureStrategyGovernance />} />
+                  <Route path="/ea/responsibilities/business-it-alignment" element={<BusinessITAlignment />} />
+                  <Route path="/ea/responsibilities/solution-oversight" element={<SolutionOversight />} />
+                  <Route path="/ea/responsibilities/portfolio-rationalization" element={<PortfolioRationalization />} />
+                  <Route path="/ea/responsibilities/innovation-emerging-tech" element={<InnovationEmergingTech />} />
+                  <Route path="/ea/responsibilities/security-compliance" element={<SecurityCompliance />} />
+                  <Route path="/ea/responsibilities/data-architecture" element={<DataArchitectureResp />} />
+                  <Route path="/ea/responsibilities/integration-api" element={<IntegrationAPI />} />
+                  <Route path="/ea/responsibilities/cloud-infrastructure" element={<CloudInfrastructure />} />
+                  <Route path="/ea/responsibilities/stakeholder-management" element={<StakeholderMgmt />} />
+                  <Route path="/ea/responsibilities/standards-templates" element={<StandardsTemplates />} />
+                  <Route path="/ea/responsibilities/lifecycle-improvement" element={<LifecycleImprovement />} />
+                  <Route path="/ea/responsibilities/program-delivery" element={<ProgramDelivery />} />
+                  <Route path="/ea/responsibilities/documentation-communication" element={<DocumentationCommunication />} />
+                  <Route path="/ea/responsibilities/people-leadership" element={<PeopleLeadership />} />
                   
                   {/* Project Management Routes */}
                   <Route path="/pm/roadmap" element={<ProjectManagement />} />
