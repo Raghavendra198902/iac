@@ -1433,16 +1433,31 @@ export default function Collaboration() {
                         {usr.name.split(' ').map(n => n[0]).join('')}
                       </motion.div>
                       <motion.div
-                        animate={usr.status === 'online' ? { scale: [1, 1.2, 1] } : {}}
+                        animate={
+                          (usr.id === 'bot-ai' || usr.id === 'bot-help')
+                            ? { scale: [1, 1.3, 1], boxShadow: ['0 0 0 0 rgba(34, 197, 94, 0.7)', '0 0 0 8px rgba(34, 197, 94, 0)', '0 0 0 0 rgba(34, 197, 94, 0)'] }
+                            : usr.status === 'online' ? { scale: [1, 1.2, 1] } : {}
+                        }
                         transition={{ duration: 2, repeat: Infinity }}
                         className={`absolute -bottom-1 -right-1 w-4 h-4 ${getStatusColor(usr.status)} rounded-full border-2 border-white dark:border-gray-800 shadow-lg`}
                       />
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {usr.name}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {usr.name}
+                        </p>
+                        {(usr.id === 'bot-ai' || usr.id === 'bot-help') && (
+                          <motion.span
+                            animate={{ opacity: [0.7, 1, 0.7] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="px-2 py-0.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px] font-bold rounded-full shadow-lg"
+                          >
+                            ALWAYS ON
+                          </motion.span>
+                        )}
+                      </div>
                       {usr.statusMessage ? (
                         <p className="text-xs text-gray-600 dark:text-gray-400 font-medium truncate flex items-center gap-1">
                           <MessageCircle className="w-3 h-3" />
@@ -1451,7 +1466,7 @@ export default function Collaboration() {
                       ) : (
                         <p className="text-xs text-gray-600 dark:text-gray-400 font-medium capitalize flex items-center gap-1">
                           <Circle className="w-2 h-2 fill-current" />
-                          {usr.status}
+                          {(usr.id === 'bot-ai' || usr.id === 'bot-help') ? 'Always Available' : usr.status}
                         </p>
                       )}
                     </div>
