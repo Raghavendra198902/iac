@@ -1,0 +1,202 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feature-flags
+  namespace: iac-platform
+  labels:
+    app: dharma-platform
+    component: feature-flags
+data:
+  # Core Features
+  ENABLE_MULTI_CLOUD: "true"
+  ENABLE_AI_RECOMMENDATIONS: "true"
+  ENABLE_COST_ESTIMATION: "true"
+  ENABLE_DRIFT_DETECTION: "true"
+  ENABLE_GUARDRAILS: "true"
+  
+  # Advanced Features
+  ENABLE_CMDB_INTEGRATION: "false"
+  ENABLE_BACKUP_RESTORE: "false"
+  ENABLE_DISASTER_RECOVERY: "false"
+  ENABLE_COMPLIANCE_REPORTING: "true"
+  
+  # Experimental Features
+  ENABLE_ML_COST_PREDICTION: "false"
+  ENABLE_AUTO_REMEDIATION: "false"
+  ENABLE_PREDICTIVE_SCALING: "false"
+  
+  # UI Features
+  ENABLE_DARK_MODE: "true"
+  ENABLE_BLUEPRINT_TEMPLATES: "true"
+  ENABLE_COLLABORATION: "false"
+  
+  # API Features
+  ENABLE_GRAPHQL_API: "false"
+  ENABLE_WEBSOCKET: "false"
+  ENABLE_BATCH_OPERATIONS: "true"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logging-config
+  namespace: iac-platform
+  labels:
+    app: dharma-platform
+    component: logging
+data:
+  # Logging Configuration
+  LOG_LEVEL: "info"  # debug | info | warn | error
+  LOG_FORMAT: "json"  # json | text
+  
+  # Loki Configuration
+  LOKI_URL: "http://loki:3100"
+  LOKI_BATCH_SIZE: "1024"
+  LOKI_TIMEOUT_MS: "10000"
+  
+  # Log Retention
+  LOG_RETENTION_DAYS: "30"
+  ERROR_LOG_RETENTION_DAYS: "90"
+  
+  # Log Levels by Service
+  API_GATEWAY_LOG_LEVEL: "info"
+  IAC_GENERATOR_LOG_LEVEL: "info"
+  BLUEPRINT_SERVICE_LOG_LEVEL: "info"
+  MONITORING_SERVICE_LOG_LEVEL: "debug"
+  GUARDRAILS_ENGINE_LOG_LEVEL: "info"
+  
+  # Performance Logging
+  LOG_SLOW_QUERIES: "true"
+  SLOW_QUERY_THRESHOLD_MS: "1000"
+  LOG_REQUEST_RESPONSE: "false"  # Set to true only in development
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-dashboards
+  namespace: iac-platform
+  labels:
+    app: dharma-platform
+    component: monitoring
+data:
+  # Grafana Configuration
+  GRAFANA_URL: "http://grafana:3001"
+  GRAFANA_ORG_ID: "1"
+  
+  # Prometheus Configuration
+  PROMETHEUS_URL: "http://prometheus:9090"
+  SCRAPE_INTERVAL_SECONDS: "15"
+  
+  # Dashboard IDs
+  INFRASTRUCTURE_DASHBOARD: "infra-001"
+  APPLICATION_DASHBOARD: "app-001"
+  COST_DASHBOARD: "cost-001"
+  SECURITY_DASHBOARD: "security-001"
+  
+  # Metrics Export
+  EXPORT_METRICS_ENABLED: "true"
+  METRICS_EXPORT_FORMAT: "prometheus"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+  namespace: iac-platform
+  labels:
+    app: dharma-platform
+    component: database
+data:
+  # PostgreSQL Configuration
+  POSTGRES_DB: "iac_dharma"
+  POSTGRES_USER: "dharma_admin"
+  POSTGRES_MAX_CONNECTIONS: "100"
+  POSTGRES_SHARED_BUFFERS: "256MB"
+  
+  # Connection Pool
+  DB_POOL_MIN: "2"
+  DB_POOL_MAX: "20"
+  DB_IDLE_TIMEOUT_MS: "10000"
+  DB_CONNECTION_TIMEOUT_MS: "5000"
+  
+  # MongoDB Configuration
+  MONGODB_DB: "iac_dharma_nosql"
+  MONGODB_MAX_POOL_SIZE: "50"
+  
+  # Redis Configuration
+  REDIS_DB: "0"
+  REDIS_MAX_RETRIES: "3"
+  REDIS_RETRY_DELAY_MS: "1000"
+  
+  # RabbitMQ Configuration
+  RABBITMQ_VHOST: "/"
+  RABBITMQ_PREFETCH_COUNT: "10"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-config
+  namespace: iac-platform
+  labels:
+    app: dharma-platform
+    component: security
+data:
+  # Security Headers
+  ENABLE_HSTS: "true"
+  HSTS_MAX_AGE_SECONDS: "31536000"
+  ENABLE_CSP: "true"
+  ENABLE_X_FRAME_OPTIONS: "true"
+  
+  # CORS
+  CORS_MAX_AGE_SECONDS: "86400"
+  CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,PATCH"
+  CORS_ALLOWED_HEADERS: "Content-Type,Authorization,X-Request-ID"
+  
+  # Encryption
+  ENCRYPTION_ALGORITHM: "aes-256-gcm"
+  ENABLE_DATA_ENCRYPTION_AT_REST: "true"
+  
+  # Audit Logging
+  ENABLE_AUDIT_LOG: "true"
+  AUDIT_LOG_SENSITIVE_DATA: "false"
+  AUDIT_LOG_RETENTION_DAYS: "365"
+  
+  # API Security
+  ENABLE_API_KEY_ROTATION: "true"
+  API_KEY_ROTATION_DAYS: "90"
+  ENABLE_IP_WHITELIST: "false"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notification-config
+  namespace: iac-platform
+  labels:
+    app: dharma-platform
+    component: notification
+data:
+  # Email Configuration
+  SMTP_HOST: ""
+  SMTP_PORT: "587"
+  SMTP_SECURE: "true"
+  EMAIL_FROM: "noreply@iac-platform.com"
+  
+  # Slack Configuration
+  SLACK_WEBHOOK_URL: ""
+  SLACK_CHANNEL: "#iac-alerts"
+  SLACK_USERNAME: "IAC Platform Bot"
+  
+  # Webhook Configuration
+  WEBHOOK_TIMEOUT_MS: "5000"
+  WEBHOOK_RETRY_ATTEMPTS: "3"
+  
+  # Notification Preferences
+  NOTIFY_ON_DEPLOYMENT_START: "true"
+  NOTIFY_ON_DEPLOYMENT_COMPLETE: "true"
+  NOTIFY_ON_DEPLOYMENT_FAILURE: "true"
+  NOTIFY_ON_DRIFT_DETECTED: "true"
+  NOTIFY_ON_COST_THRESHOLD: "true"
+  NOTIFY_ON_POLICY_VIOLATION: "true"

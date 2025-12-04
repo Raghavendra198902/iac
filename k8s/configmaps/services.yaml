@@ -1,0 +1,370 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: iac-platform
+  labels:
+    app: api-gateway
+    component: config
+data:
+  # Service Configuration
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+  
+  # CORS Configuration
+  CORS_ORIGIN: "https://iac.yourdomain.com"
+  CORS_CREDENTIALS: "true"
+  
+  # Rate Limiting
+  RATE_LIMIT_WINDOW_MS: "900000"  # 15 minutes
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  
+  # Service Discovery
+  IAC_GENERATOR_URL: "http://iac-generator:4001"
+  BLUEPRINT_SERVICE_URL: "http://blueprint-service:4002"
+  CLOUD_PROVIDER_SERVICE_URL: "http://cloud-provider-service:4003"
+  COSTING_SERVICE_URL: "http://costing-service:4004"
+  MONITORING_SERVICE_URL: "http://monitoring-service:4005"
+  GUARDRAILS_ENGINE_URL: "http://guardrails-engine:4006"
+  AI_RECOMMENDATIONS_URL: "http://ai-recommendations-service:4007"
+  AUTOMATION_ENGINE_URL: "http://automation-engine:4008"
+  ORCHESTRATOR_SERVICE_URL: "http://orchestrator-service:4009"
+  SSO_SERVICE_URL: "http://sso-service:4010"
+  
+  # Timeout Configuration
+  REQUEST_TIMEOUT_MS: "30000"
+  
+  # Health Check
+  HEALTH_CHECK_INTERVAL_MS: "30000"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iac-generator-config
+  namespace: iac-platform
+  labels:
+    app: iac-generator
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4001"
+  LOG_LEVEL: "info"
+  
+  # Template Configuration
+  TERRAFORM_VERSION: "1.6.0"
+  TEMPLATE_CACHE_TTL_SECONDS: "3600"
+  MAX_TEMPLATE_SIZE_MB: "10"
+  
+  # Provider Versions
+  AWS_PROVIDER_VERSION: "~> 5.0"
+  AZURE_PROVIDER_VERSION: "~> 3.0"
+  GCP_PROVIDER_VERSION: "~> 5.0"
+  
+  # Generation Options
+  ENABLE_STATE_LOCKING: "true"
+  ENABLE_BACKEND_CONFIG: "true"
+  DEFAULT_TERRAFORM_BACKEND: "s3"
+  
+  # Validation
+  VALIDATE_SYNTAX: "true"
+  VALIDATE_PROVIDERS: "true"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blueprint-service-config
+  namespace: iac-platform
+  labels:
+    app: blueprint-service
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4002"
+  LOG_LEVEL: "info"
+  
+  # Blueprint Validation
+  MAX_RESOURCES_PER_BLUEPRINT: "500"
+  MAX_BLUEPRINT_SIZE_MB: "5"
+  ENABLE_DEPENDENCY_VALIDATION: "true"
+  ENABLE_COST_VALIDATION: "true"
+  MAX_COST_THRESHOLD_USD: "10000"
+  
+  # Naming Convention
+  ENFORCE_NAMING_CONVENTION: "true"
+  NAMING_PATTERN: "kebab-case"
+  
+  # Storage
+  BLUEPRINT_RETENTION_DAYS: "365"
+  AUTO_ARCHIVE_ENABLED: "true"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloud-provider-service-config
+  namespace: iac-platform
+  labels:
+    app: cloud-provider-service
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4003"
+  LOG_LEVEL: "info"
+  
+  # Provider Configuration
+  ENABLED_PROVIDERS: "aws,azure,gcp"
+  DEFAULT_PROVIDER: "aws"
+  
+  # AWS Configuration
+  AWS_DEFAULT_REGION: "us-east-1"
+  AWS_SUPPORTED_REGIONS: "us-east-1,us-west-2,eu-west-1,ap-southeast-1"
+  
+  # Azure Configuration
+  AZURE_DEFAULT_REGION: "eastus"
+  AZURE_SUPPORTED_REGIONS: "eastus,westus2,northeurope,southeastasia"
+  
+  # GCP Configuration
+  GCP_DEFAULT_REGION: "us-central1"
+  GCP_SUPPORTED_REGIONS: "us-central1,us-east1,europe-west1,asia-southeast1"
+  
+  # API Configuration
+  API_TIMEOUT_MS: "30000"
+  MAX_RETRIES: "3"
+  RETRY_DELAY_MS: "1000"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: costing-service-config
+  namespace: iac-platform
+  labels:
+    app: costing-service
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4004"
+  LOG_LEVEL: "info"
+  
+  # Pricing Configuration
+  PRICING_UPDATE_INTERVAL_HOURS: "24"
+  PRICING_CACHE_TTL_SECONDS: "86400"  # 24 hours
+  
+  # Currency
+  DEFAULT_CURRENCY: "USD"
+  SUPPORTED_CURRENCIES: "USD,EUR,GBP"
+  
+  # Cost Estimation
+  INCLUDE_DATA_TRANSFER: "true"
+  INCLUDE_STORAGE_COSTS: "true"
+  INCLUDE_COMPUTE_COSTS: "true"
+  APPLY_RESERVED_INSTANCE_DISCOUNT: "true"
+  RESERVED_INSTANCE_DISCOUNT_PERCENT: "30"
+  
+  # Alerts
+  ENABLE_COST_ALERTS: "true"
+  COST_ALERT_THRESHOLD_USD: "1000"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-service-config
+  namespace: iac-platform
+  labels:
+    app: monitoring-service
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4005"
+  LOG_LEVEL: "info"
+  
+  # Monitoring Configuration
+  METRICS_COLLECTION_INTERVAL_SECONDS: "60"
+  HEALTH_CHECK_INTERVAL_SECONDS: "30"
+  DRIFT_DETECTION_INTERVAL_MINUTES: "15"
+  
+  # Data Retention
+  METRICS_RETENTION_DAYS: "90"
+  LOGS_RETENTION_DAYS: "30"
+  ALERTS_RETENTION_DAYS: "180"
+  
+  # Alerting
+  ENABLE_ALERTS: "true"
+  ALERT_EMAIL_ENABLED: "false"
+  ALERT_SLACK_ENABLED: "false"
+  ALERT_WEBHOOK_ENABLED: "true"
+  
+  # Drift Detection
+  ENABLE_DRIFT_DETECTION: "true"
+  DRIFT_CHECK_CONCURRENCY: "5"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guardrails-engine-config
+  namespace: iac-platform
+  labels:
+    app: guardrails-engine
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4006"
+  LOG_LEVEL: "info"
+  
+  # Policy Configuration
+  POLICY_DIRECTORY: "/app/policies"
+  ENABLE_POLICY_CACHING: "true"
+  POLICY_CACHE_TTL_SECONDS: "300"
+  
+  # Enforcement
+  ENFORCEMENT_MODE: "advisory"  # advisory | enforcing
+  FAIL_ON_CRITICAL: "false"
+  FAIL_ON_HIGH: "false"
+  
+  # Policy Categories
+  ENABLE_SECURITY_POLICIES: "true"
+  ENABLE_COMPLIANCE_POLICIES: "true"
+  ENABLE_COST_POLICIES: "true"
+  ENABLE_TAGGING_POLICIES: "true"
+  
+  # Reporting
+  GENERATE_POLICY_REPORTS: "true"
+  REPORT_FORMAT: "json"  # json | html | pdf
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-recommendations-config
+  namespace: iac-platform
+  labels:
+    app: ai-recommendations-service
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4007"
+  LOG_LEVEL: "info"
+  
+  # AI Model Configuration
+  AI_PROVIDER: "openai"  # openai | anthropic | azure-openai
+  MODEL_NAME: "gpt-4"
+  MAX_TOKENS: "2000"
+  TEMPERATURE: "0.7"
+  
+  # Recommendation Settings
+  ENABLE_SECURITY_RECOMMENDATIONS: "true"
+  ENABLE_COST_OPTIMIZATION: "true"
+  ENABLE_PERFORMANCE_RECOMMENDATIONS: "true"
+  ENABLE_ARCHITECTURE_SUGGESTIONS: "true"
+  
+  # Context
+  MAX_CONTEXT_LENGTH: "8000"
+  INCLUDE_BEST_PRACTICES: "true"
+  INCLUDE_ANTI_PATTERNS: "true"
+  
+  # Caching
+  CACHE_RECOMMENDATIONS: "true"
+  CACHE_TTL_SECONDS: "3600"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: automation-engine-config
+  namespace: iac-platform
+  labels:
+    app: automation-engine
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4008"
+  LOG_LEVEL: "info"
+  
+  # Workflow Configuration
+  MAX_CONCURRENT_WORKFLOWS: "10"
+  WORKFLOW_TIMEOUT_MINUTES: "60"
+  ENABLE_WORKFLOW_PERSISTENCE: "true"
+  
+  # Execution
+  ENABLE_DRY_RUN: "true"
+  REQUIRE_APPROVAL: "true"
+  AUTO_ROLLBACK_ON_ERROR: "true"
+  
+  # Integration
+  TERRAFORM_EXEC_PATH: "/usr/local/bin/terraform"
+  ANSIBLE_EXEC_PATH: "/usr/local/bin/ansible-playbook"
+  
+  # Logging
+  LOG_WORKFLOW_STEPS: "true"
+  LOG_TERRAFORM_OUTPUT: "true"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestrator-service-config
+  namespace: iac-platform
+  labels:
+    app: orchestrator-service
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4009"
+  LOG_LEVEL: "info"
+  
+  # Orchestration
+  MAX_PARALLEL_DEPLOYMENTS: "5"
+  DEPLOYMENT_TIMEOUT_MINUTES: "120"
+  ENABLE_DEPLOYMENT_QUEUE: "true"
+  
+  # State Management
+  ENABLE_STATE_LOCKING: "true"
+  STATE_LOCK_TIMEOUT_SECONDS: "300"
+  
+  # Rollback
+  ENABLE_AUTO_ROLLBACK: "true"
+  ROLLBACK_ON_DRIFT: "false"
+  
+  # Notifications
+  NOTIFY_ON_SUCCESS: "true"
+  NOTIFY_ON_FAILURE: "true"
+  NOTIFY_ON_DRIFT: "true"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sso-service-config
+  namespace: iac-platform
+  labels:
+    app: sso-service
+    component: config
+data:
+  NODE_ENV: "production"
+  PORT: "4010"
+  LOG_LEVEL: "info"
+  
+  # Authentication
+  JWT_EXPIRATION: "1h"
+  REFRESH_TOKEN_EXPIRATION: "7d"
+  SESSION_TIMEOUT_MINUTES: "60"
+  
+  # OAuth Providers
+  ENABLE_GOOGLE_OAUTH: "false"
+  ENABLE_GITHUB_OAUTH: "false"
+  ENABLE_AZURE_AD: "false"
+  
+  # Security
+  ENABLE_MFA: "false"
+  REQUIRE_EMAIL_VERIFICATION: "true"
+  PASSWORD_MIN_LENGTH: "12"
+  PASSWORD_REQUIRE_SPECIAL_CHAR: "true"
+  
+  # Rate Limiting
+  MAX_LOGIN_ATTEMPTS: "5"
+  LOGIN_LOCKOUT_DURATION_MINUTES: "15"
