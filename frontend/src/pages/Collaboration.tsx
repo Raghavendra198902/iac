@@ -3,7 +3,10 @@ import {
   MessageSquare, Users, Hash, Plus, Search, Send, Smile, Paperclip,
   MoreVertical, Pin, Bell, BellOff, Edit2, Trash2, Reply, Copy,
   CheckCheck, Phone, Video, Settings, User, Circle, AtSign,
-  ChevronDown, X, File, Image as ImageIcon, Code, Zap, Star
+  ChevronDown, X, File, Image as ImageIcon, Code, Zap, Star,
+  Sparkles, Brain, TrendingUp, Activity, Clock, Rocket, Shield,
+  Globe, Wifi, WifiOff, Mic, MicOff, Camera, CameraOff, ScreenShare,
+  MessageCircle, Heart, Laugh, ThumbsUp, Gift, Crown, Filter
 } from 'lucide-react';
 import { MainLayout } from '../components/layout';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,6 +14,7 @@ import FadeIn from '../components/ui/FadeIn';
 import Badge from '../components/ui/Badge';
 import { API_URL } from '../config/api';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Channel, Message, OnlineUser, CollaborationStats, ChannelType, UserStatus } from '../types/collaboration';
 
 export default function Collaboration() {
@@ -33,6 +37,12 @@ export default function Collaboration() {
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [aiMode, setAiMode] = useState(false);
+  const [showThreads, setShowThreads] = useState(false);
+  const [activeCall, setActiveCall] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -212,14 +222,38 @@ export default function Collaboration() {
 
   const handleVoiceCall = () => {
     if (!selectedChannel) return;
-    alert(`🎙️ Starting voice call in #${selectedChannel.name}...\n\nVoice call feature will connect to WebRTC service.`);
-    console.log('Starting voice call for channel:', selectedChannel.name);
+    setActiveCall(!activeCall);
+    if (!activeCall) {
+      toast.success(`🎙️ Voice call started in #${selectedChannel.name}`);
+    } else {
+      toast.success('Call ended');
+    }
   };
 
   const handleVideoCall = () => {
     if (!selectedChannel) return;
-    alert(`📹 Starting video call in #${selectedChannel.name}...\n\nVideo call feature will connect to WebRTC service.`);
-    console.log('Starting video call for channel:', selectedChannel.name);
+    setActiveCall(!activeCall);
+    setIsVideoOn(true);
+    if (!activeCall) {
+      toast.success(`📹 Video call started in #${selectedChannel.name}`);
+    } else {
+      toast.success('Call ended');
+    }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    toast.success(isMuted ? '🎤 Microphone on' : '🔇 Muted');
+  };
+
+  const toggleVideo = () => {
+    setIsVideoOn(!isVideoOn);
+    toast.success(isVideoOn ? '📹 Camera off' : '📹 Camera on');
+  };
+
+  const toggleScreenShare = () => {
+    setIsScreenSharing(!isScreenSharing);
+    toast.success(isScreenSharing ? 'Screen sharing stopped' : '🖥️ Screen sharing started');
   };
 
   const handleChannelSettings = () => {
@@ -228,6 +262,15 @@ export default function Collaboration() {
   };
 
   const commonEmojis = ['😀', '😂', '😊', '👍', '❤️', '🎉', '🔥', '👏', '✅', '💯', '🚀', '💡', '⚡', '🎯', '👀', '🤔', '😎', '🙌', '💪', '⭐'];
+
+  const quickReactions = [
+    { emoji: '👍', label: 'Like' },
+    { emoji: '❤️', label: 'Love' },
+    { emoji: '😂', label: 'Haha' },
+    { emoji: '🎉', label: 'Celebrate' },
+    { emoji: '🔥', label: 'Fire' },
+    { emoji: '💡', label: 'Idea' },
+  ];
 
   const getChannelIcon = (type: ChannelType) => {
     switch (type) {
@@ -295,277 +338,626 @@ export default function Collaboration() {
   return (
     <MainLayout>
     {loading ? (
-      <div className="h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-800 dark:text-gray-300 font-semibold">Loading collaboration...</p>
+      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-950 dark:via-blue-950/20 dark:to-purple-950/20 flex items-center justify-center relative overflow-hidden">
+        {/* Animated Background */}
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 0],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 20, repeat: Infinity }}
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"
+        />
+        
+        <div className="text-center relative z-10">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="inline-block"
+          >
+            <Sparkles className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+          </motion.div>
+          <p className="text-gray-800 dark:text-gray-300 font-semibold text-lg">Loading collaboration...</p>
         </div>
       </div>
     ) : (
-    <div className="h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 flex">{/* Sidebar - Channels */}
-      <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+    <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-950 dark:via-blue-950/20 dark:to-purple-950/20 flex relative overflow-hidden">
+      {/* Animated Background Mesh */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 0],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-400/10 to-purple-600/10 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [90, 0, 90],
+            opacity: [0.2, 0.3, 0.2],
+          }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-400/10 to-pink-600/10 rounded-full blur-3xl"
+        />
+      </div>
+      {/* Sidebar - Channels */}
+      <motion.div
+        initial={{ x: -300, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.6, type: "spring" }}
+        className="w-80 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-r border-gray-200/50 dark:border-gray-700/50 flex flex-col relative z-10 shadow-2xl"
+      >
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-5 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-950/30 dark:to-purple-950/30 backdrop-blur-xl">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Channels</h2>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-              <Plus className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-            </button>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-6 h-6 text-blue-600" />
+              </motion.div>
+              Channels
+            </h2>
+            <div className="flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-colors shadow-lg"
+              >
+                <Plus className="w-5 h-5 text-blue-600" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setAiMode(!aiMode)}
+                className={`p-2 rounded-xl transition-all ${
+                  aiMode
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50'
+                    : 'hover:bg-white dark:hover:bg-gray-700'
+                }`}
+                title="AI Mode"
+              >
+                <Brain className="w-5 h-5" />
+              </motion.button>
+            </div>
           </div>
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-600" />
             <input
               type="text"
               placeholder="Search channels..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
             />
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-2 gap-3 text-center">
-            <div>
-              <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{stats.activeUsers}</p>
-              <p className="text-xs text-gray-800 dark:text-gray-300 font-semibold">Online</p>
-            </div>
-            <div>
-              <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{stats.messagesLast24h}</p>
-              <p className="text-xs text-gray-800 dark:text-gray-300 font-semibold">Messages 24h</p>
-            </div>
+        {/* Enhanced Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="px-4 py-4 bg-gradient-to-r from-blue-50/90 to-indigo-50/90 dark:from-blue-900/30 dark:to-indigo-900/30 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50"
+        >
+          <div className="grid grid-cols-2 gap-3">
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              className="text-center p-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50"
+            >
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <div className="relative">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                </div>
+              </div>
+              <p className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                {stats.activeUsers}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold">Online Now</p>
+            </motion.div>
+            
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              className="text-center p-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50"
+            >
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <MessageSquare className="w-5 h-5 text-indigo-600" />
+              </div>
+              <p className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                {stats.messagesLast24h}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold">Messages 24h</p>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Channel List */}
-        <div className="flex-1 overflow-y-auto">
-          {filteredChannels.map((channel) => (
-            <button
-              key={channel.id}
-              onClick={() => setSelectedChannel(channel)}
-              className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-l-4 ${
-                selectedChannel?.id === channel.id
-                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                  : 'border-transparent'
-              }`}
-            >
-              <div className={`p-2 rounded-lg ${
-                selectedChannel?.id === channel.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-              }`}>
-                {getChannelIcon(channel.type)}
-              </div>
-              
-              <div className="flex-1 text-left min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-gray-900 dark:text-white truncate">
-                    {channel.name}
-                  </span>
-                  {channel.isPinned && <Pin className="w-3 h-3 text-gray-400" />}
-                  {channel.isMuted && <BellOff className="w-3 h-3 text-gray-400" />}
-                </div>
-                {channel.lastMessage && (
-                  <p className="text-xs text-gray-800 dark:text-gray-300 font-medium truncate">
-                    {channel.lastMessage.userName}: {channel.lastMessage.content}
-                  </p>
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <AnimatePresence>
+            {filteredChannels.map((channel, idx) => (
+              <motion.button
+                key={channel.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                whileHover={{ x: 4, scale: 1.02 }}
+                onClick={() => setSelectedChannel(channel)}
+                className={`w-full px-4 py-3 flex items-center gap-3 transition-all border-l-4 relative group ${
+                  selectedChannel?.id === channel.id
+                    ? 'bg-gradient-to-r from-blue-50/90 to-purple-50/90 dark:from-blue-900/30 dark:to-purple-900/30 backdrop-blur-xl border-blue-500 shadow-lg'
+                    : 'border-transparent hover:bg-white/50 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                {selectedChannel?.id === channel.id && (
+                  <motion.div
+                    layoutId="activeChannel"
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
                 )}
-              </div>
+                
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                  className={`relative p-2.5 rounded-xl ${
+                    selectedChannel?.id === channel.id
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30'
+                  }`}
+                >
+                  {getChannelIcon(channel.type)}
+                  {channel.unreadCount > 0 && (
+                    <>
+                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                      </span>
+                    </>
+                  )}
+                </motion.div>
+                
+                <div className="flex-1 text-left min-w-0 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-gray-900 dark:text-white truncate">
+                      {channel.name}
+                    </span>
+                    {channel.isPinned && (
+                      <motion.div
+                        animate={{ rotate: [0, -20, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Pin className="w-3 h-3 text-yellow-500 fill-current" />
+                      </motion.div>
+                    )}
+                    {channel.isMuted && <BellOff className="w-3 h-3 text-gray-400" />}
+                  </div>
+                  {channel.lastMessage && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium truncate mt-0.5">
+                      <span className="font-semibold">{channel.lastMessage.userName}:</span> {channel.lastMessage.content}
+                    </p>
+                  )}
+                </div>
 
-              {channel.unreadCount > 0 && (
-                <Badge variant="blue" className="text-xs px-2">
-                  {channel.unreadCount}
-                </Badge>
-              )}
-            </button>
-          ))}
+                {channel.unreadCount > 0 && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    className="relative z-10"
+                  >
+                    <Badge variant="blue" className="text-xs px-2 font-bold shadow-lg">
+                      {channel.unreadCount}
+                    </Badge>
+                  </motion.div>
+                )}
+              </motion.button>
+            ))}
+          </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        className="flex-1 flex flex-col relative z-10"
+      >
         {selectedChannel ? (
           <>
             {/* Chat Header */}
-            <div className="h-16 px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  {getChannelIcon(selectedChannel.type)}
+            <div className="min-h-16 px-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-b border-gray-200/50 dark:border-gray-700/50 flex flex-col shadow-lg">
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                    className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg"
+                  >
+                    {getChannelIcon(selectedChannel.type)}
+                  </motion.div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                      {selectedChannel.name}
+                      {aiMode && (
+                        <motion.span
+                          animate={{ opacity: [0.5, 1, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium flex items-center gap-1"
+                        >
+                          <Brain className="w-3 h-3" />
+                          AI
+                        </motion.span>
+                      )}
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold flex items-center gap-2">
+                      <Users className="w-3 h-3" />
+                      {selectedChannel.members.length} members • {onlineUsers.filter(u => u.status === 'online').length} online
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">
-                    {selectedChannel.name}
-                  </h3>
-                  <p className="text-xs text-gray-800 dark:text-gray-300 font-semibold">
-                    {selectedChannel.members.length} members
-                  </p>
+
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleVoiceCall}
+                    className={`p-2.5 rounded-xl transition-all shadow-lg ${
+                      activeCall && !isVideoOn
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                        : 'bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                    }`}
+                    title="Voice call"
+                  >
+                    <Phone className="w-5 h-5" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleVideoCall}
+                    className={`p-2.5 rounded-xl transition-all shadow-lg ${
+                      activeCall && isVideoOn
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                        : 'bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                    }`}
+                    title="Video call"
+                  >
+                    <Video className="w-5 h-5" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleChannelSettings}
+                    className="p-2.5 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-lg"
+                    title="Settings"
+                  >
+                    <Settings className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowUserPanel(!showUserPanel)}
+                    className="p-2.5 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-lg"
+                    title="Team panel"
+                  >
+                    <Users className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  </motion.button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={handleVoiceCall}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  title="Start voice call"
-                >
-                  <Phone className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                </button>
-                <button 
-                  onClick={handleVideoCall}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  title="Start video call"
-                >
-                  <Video className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                </button>
-                <button 
-                  onClick={handleChannelSettings}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  title="Channel settings"
-                >
-                  <Settings className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                </button>
-                <button
-                  onClick={() => setShowUserPanel(!showUserPanel)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <Users className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                </button>
-              </div>
+              {/* Active Call Bar */}
+              <AnimatePresence>
+                {activeCall && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pb-3 border-t border-gray-200/50 dark:border-gray-700/50 pt-3"
+                  >
+                    <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 backdrop-blur-xl rounded-xl p-3 border border-green-200/50 dark:border-green-800/50">
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="flex items-center gap-2 text-green-700 dark:text-green-300 font-semibold"
+                        >
+                          <div className="relative">
+                            <Wifi className="w-5 h-5" />
+                            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                          </div>
+                          <span className="text-sm">Call Active</span>
+                        </motion.div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">3 participants</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={toggleMute}
+                          className={`p-2 rounded-lg transition-all ${
+                            isMuted
+                              ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                        </motion.button>
+                        {isVideoOn && (
+                          <>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={toggleVideo}
+                              className="p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
+                            >
+                              {isVideoOn ? <Camera className="w-4 h-4" /> : <CameraOff className="w-4 h-4" />}
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={toggleScreenShare}
+                              className={`p-2 rounded-lg transition-all ${
+                                isScreenSharing
+                                  ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                              }`}
+                            >
+                              <ScreenShare className="w-4 h-4" />
+                            </motion.button>
+                          </>
+                        )}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={activeCall ? handleVoiceCall : handleVideoCall}
+                          className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-all font-semibold text-sm"
+                        >
+                          End Call
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2 custom-scrollbar bg-gradient-to-b from-transparent to-gray-50/50 dark:to-gray-900/50">
               {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-gray-800 dark:text-gray-300 font-semibold">No messages yet. Start the conversation!</p>
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center justify-center h-full"
+                >
+                  <div className="text-center">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      className="mb-4"
+                    >
+                      <MessageSquare className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto\" />
+                    </motion.div>
+                    <p className="text-gray-600 dark:text-gray-400 font-semibold text-lg">No messages yet</p>
+                    <p className="text-gray-500 dark:text-gray-500 text-sm mt-2\">Start the conversation!</p>
+                  </div>
+                </motion.div>
               ) : (
                 messages.map((message, index) => {
                 const showAvatar = index === 0 || messages[index - 1].userId !== message.userId;
                 const isCurrentUser = message.userId === (user?.id || 'current-user');
 
                 return (
-                  <FadeIn key={message.id} delay={index * 50}>
-                    <div className={`flex gap-3 group ${showAvatar ? 'mt-4' : 'mt-1'}`}>
-                      {/* Avatar */}
-                      <div className="w-10 flex-shrink-0">
-                        {showAvatar && (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold">
-                            {message.userName.split(' ').map(n => n[0]).join('')}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Message Content */}
-                      <div className="flex-1 min-w-0">
-                        {showAvatar && (
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-gray-900 dark:text-white">
-                              {message.userName}
-                            </span>
-                            <span className="text-xs text-gray-800 dark:text-gray-300 font-medium">
-                              {formatTime(message.timestamp)}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Message body */}
-                        {message.type === 'code' ? (
-                          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                            <pre className="text-sm text-gray-100 font-mono">
-                              <code>{message.content}</code>
-                            </pre>
-                          </div>
-                        ) : message.type === 'system' ? (
-                          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                              {message.content}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-2 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                            <p className="text-gray-900 dark:text-gray-100 break-words font-medium">
-                              {message.content}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Attachments */}
-                        {message.attachments && message.attachments.length > 0 && (
-                          <div className="mt-2 flex gap-2">
-                            {message.attachments.map((attachment) => (
-                              <a
-                                key={attachment.id}
-                                href={attachment.url}
-                                className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                              >
-                                <File className="w-4 h-4 text-gray-800 dark:text-gray-300" />
-                                <span className="text-sm text-gray-900 dark:text-gray-100 font-semibold">
-                                  {attachment.name}
-                                </span>
-                              </a>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Reactions */}
-                        {message.reactions && message.reactions.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {message.reactions.map((reaction, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => addReaction(message.id, reaction.emoji)}
-                                className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
-                              >
-                                <span>{reaction.emoji}</span>
-                                <span className="text-xs text-gray-800 dark:text-gray-300 font-semibold">
-                                  {reaction.count}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Quick Actions */}
-                        <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                          <button
-                            onClick={() => addReaction(message.id, '👍')}
-                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                          >
-                            <Smile className="w-3 h-3 text-gray-400" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-                            <Reply className="w-3 h-3 text-gray-400" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-                            <MoreVertical className="w-3 h-3 text-gray-400" />
-                          </button>
-                        </div>
-                      </div>
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                    className={`flex gap-3 group ${showAvatar ? 'mt-4' : 'mt-1'}`}
+                  >
+                    {/* Avatar */}
+                    <div className=\"w-10 flex-shrink-0\">
+                      {showAvatar && (
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className=\"w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg\"
+                        >
+                          {message.userName.split(' ').map(n => n[0]).join('')}
+                        </motion.div>
+                      )}
                     </div>
-                  </FadeIn>
+
+                    {/* Message Content */}
+                    <div className=\"flex-1 min-w-0\">
+                      {showAvatar && (
+                        <div className=\"flex items-center gap-2 mb-2\">
+                          <span className=\"font-bold text-gray-900 dark:text-white\">
+                            {message.userName}
+                          </span>
+                          <span className=\"text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1\">
+                            <Clock className=\"w-3 h-3\" />
+                            {formatTime(message.timestamp)}
+                          </span>
+                          {isCurrentUser && (
+                            <span className=\"px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold\">
+                              You
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Message body */}
+                      {message.type === 'code' ? (
+                        <motion.div
+                          whileHover={{ scale: 1.01 }}
+                          className=\"bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 overflow-x-auto shadow-lg border border-gray-700\"
+                        >
+                          <div className=\"flex items-center gap-2 mb-2 pb-2 border-b border-gray-700\">
+                            <Code className=\"w-4 h-4 text-blue-400\" />
+                            <span className=\"text-xs text-gray-400 font-semibold\">Code Block</span>
+                          </div>
+                          <pre className=\"text-sm text-gray-100 font-mono\">
+                            <code>{message.content}</code>
+                          </pre>
+                        </motion.div>
+                      ) : message.type === 'system' ? (
+                        <motion.div
+                          initial={{ scale: 0.9 }}
+                          animate={{ scale: 1 }}
+                          className=\"bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 backdrop-blur-sm border border-yellow-200 dark:border-yellow-800 rounded-xl p-3 shadow-lg\"
+                        >
+                          <p className=\"text-sm text-yellow-800 dark:text-yellow-200 font-medium flex items-center gap-2\">
+                            <Zap className=\"w-4 h-4\" />
+                            {message.content}
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          whileHover={{ scale: 1.01, y: -2 }}
+                          className=\"bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-xl px-4 py-3 border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-500/50 hover:shadow-lg transition-all group-hover:shadow-xl\"
+                        >
+                          <p className=\"text-gray-900 dark:text-gray-100 break-words font-medium leading-relaxed\">
+                            {message.content}
+                          </p>
+                        </motion.div>
+                      )}
+
+                      {/* Attachments */}
+                      {message.attachments && message.attachments.length > 0 && (
+                        <div className=\"mt-2 flex gap-2 flex-wrap\">
+                          {message.attachments.map((attachment) => (
+                            <motion.a
+                              key={attachment.id}
+                              href={attachment.url}
+                              whileHover={{ scale: 1.05, y: -2 }}
+                              className=\"flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm rounded-xl hover:shadow-lg transition-all border border-blue-200/50 dark:border-blue-800/50\"
+                            >
+                              <File className=\"w-4 h-4 text-blue-600 dark:text-blue-400\" />
+                              <span className=\"text-sm text-gray-900 dark:text-gray-100 font-semibold\">
+                                {attachment.name}
+                              </span>
+                            </motion.a>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Reactions */}
+                      {message.reactions && message.reactions.length > 0 && (
+                        <div className=\"mt-2 flex flex-wrap gap-1\">
+                          {message.reactions.map((reaction, idx) => (
+                            <motion.button
+                              key={idx}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => addReaction(message.id, reaction.emoji)}
+                              className=\"flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 rounded-full transition-all shadow-sm border border-blue-200/50 dark:border-blue-800/50\"
+                            >
+                              <span className=\"text-base\">{reaction.emoji}</span>
+                              <span className=\"text-xs text-gray-700 dark:text-gray-300 font-bold\">
+                                {reaction.count}
+                              </span>
+                            </motion.button>
+                          ))}
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className=\"flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full transition-all shadow-sm border border-gray-200 dark:border-gray-600\"
+                          >
+                            <Plus className=\"w-3 h-3 text-gray-500\" />
+                          </motion.button>
+                        </div>
+                      )}
+
+                      {/* Quick Reactions */}
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        whileHover={{ opacity: 1, y: 0 }}
+                        className=\"mt-2 opacity-0 group-hover:opacity-100 transition-all flex gap-1 flex-wrap\"
+                      >
+                        {quickReactions.map((reaction) => (
+                          <motion.button
+                            key={reaction.emoji}
+                            whileHover={{ scale: 1.2, y: -2 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => addReaction(message.id, reaction.emoji)}
+                            className=\"p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all\"\n                            title={reaction.label}
+                          >
+                            <span className=\"text-lg\">{reaction.emoji}</span>
+                          </motion.button>
+                        ))}
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className=\"p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all\"
+                        >
+                          <Reply className=\"w-4 h-4 text-gray-400\" />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className=\"p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all\"
+                        >
+                          <MoreVertical className=\"w-4 h-4 text-gray-400\" />
+                        </motion.button>
+                      </motion.div>
+                    </div>
+                  </motion.div>
                 );
               })
               )}
               
               {/* Typing indicator */}
-              {typingUsers.length > 0 && (
-                <div className="flex gap-3">
-                  <div className="w-10" />
-                  <div className="text-sm text-gray-800 dark:text-gray-300 font-medium italic">
-                    {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {typingUsers.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="flex gap-3 items-center"
+                  >
+                    <div className="w-10" />
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm rounded-xl border border-blue-200/50 dark:border-blue-800/50">
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="flex gap-1"
+                      >
+                        <span className="w-2 h-2 bg-blue-600 rounded-full" />
+                        <span className="w-2 h-2 bg-purple-600 rounded-full" style={{ animationDelay: '0.2s' }} />
+                        <span className="w-2 h-2 bg-pink-600 rounded-full" style={{ animationDelay: '0.4s' }} />
+                      </motion.div>
+                      <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                        {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
               <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
-            <div className="px-6 py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="px-6 py-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-t border-gray-200/50 dark:border-gray-700/50 shadow-2xl"
+            >
               <input
                 ref={fileInputRef}
                 type="file"
@@ -575,52 +967,79 @@ export default function Collaboration() {
               />
               <div className="flex items-end gap-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2 relative">
-                    <button 
+                  <div className="flex items-center gap-2 mb-3 relative">
+                    <motion.button
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={handleFileAttachment}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      className="p-2.5 bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-lg border border-gray-200 dark:border-gray-600"
                       title="Attach file"
                     >
-                      <Paperclip className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                    </button>
-                    <button 
+                      <Paperclip className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={handleCodeBlock}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      title="Insert code block"
+                      className="p-2.5 bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-lg border border-gray-200 dark:border-gray-600"
+                      title="Code block"
                     >
-                      <Code className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                    </button>
+                      <Code className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                    </motion.button>
                     <div className="relative">
-                      <button 
+                      <motion.button
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                        title="Add emoji"
+                        className="p-2.5 bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-lg border border-gray-200 dark:border-gray-600"
+                        title="Emoji"
                       >
-                        <Smile className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                      </button>
-                      {showEmojiPicker && (
-                        <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 z-50">
-                          <div className="grid grid-cols-10 gap-1 w-80">
-                            {commonEmojis.map((emoji, index) => (
-                              <button
-                                key={index}
-                                onClick={() => handleEmojiClick(emoji)}
-                                className="text-2xl hover:bg-gray-100 dark:hover:bg-gray-700 rounded p-1 transition-colors"
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                        <Smile className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                      </motion.button>
+                      <AnimatePresence>
+                        {showEmojiPicker && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                            className="absolute bottom-full left-0 mb-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl border border-gray-200 dark:border-gray-600 rounded-2xl shadow-2xl p-4 z-50"
+                          >
+                            <div className="grid grid-cols-10 gap-2 w-80">
+                              {commonEmojis.map((emoji, index) => (
+                                <motion.button
+                                  key={index}
+                                  whileHover={{ scale: 1.2, rotate: 10 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => handleEmojiClick(emoji)}
+                                  className="text-2xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 rounded-lg p-2 transition-all"
+                                >
+                                  {emoji}
+                                </motion.button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
-                    <button 
+                    <motion.button
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={handleMention}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      title="Mention user"
+                      className="p-2.5 bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-lg border border-gray-200 dark:border-gray-600"
+                      title="Mention"
                     >
-                      <AtSign className="w-5 h-5 text-gray-800 dark:text-gray-300" />
-                    </button>
+                      <AtSign className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                    </motion.button>
+                    {aiMode && (
+                      <motion.div
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="ml-auto flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 backdrop-blur-sm rounded-full border border-purple-200 dark:border-purple-800"
+                      >
+                        <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span className="text-xs font-semibold text-purple-700 dark:text-purple-300">AI Assist</span>
+                      </motion.div>
+                    )}
                   </div>
                   <textarea
                     value={messageInput}
@@ -629,76 +1048,145 @@ export default function Collaboration() {
                       setIsTyping(e.target.value.length > 0);
                     }}
                     onKeyDown={handleKeyDown}
-                    placeholder={`Message #${selectedChannel.name}`}
+                    placeholder={aiMode ? `Ask AI or message #${selectedChannel.name}...` : `Message #${selectedChannel.name}...`}
                     rows={3}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-5 py-4 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none shadow-lg transition-all"
                   />
                 </div>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleSendMessage}
                   disabled={!messageInput.trim()}
-                  className="p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
+                  className="p-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-lg disabled:shadow-none"
                   title={!messageInput.trim() ? 'Type a message first' : 'Send message'}
                 >
-                  <Send className="w-5 h-5" />
-                </button>
+                  <Send className="w-6 h-6" />
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 flex items-center justify-center"
+          >
             <div className="text-center">
-              <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-800 dark:text-gray-300 font-semibold">Select a channel to start chatting</p>
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="mb-6"
+              >
+                <MessageSquare className="w-20 h-20 text-gray-300 dark:text-gray-700 mx-auto" />
+              </motion.div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                Select a channel
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Choose a channel from the sidebar to start chatting
+              </p>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Right Sidebar - Online Users */}
-      {showUserPanel && (
-        <div className="w-64 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-1">Team Members</h3>
-            <p className="text-sm text-gray-800 dark:text-gray-300 font-semibold">
-              {onlineUsers.filter(u => u.status === 'online').length} online
-            </p>
-          </div>
-
-          <div className="overflow-y-auto">
-            {onlineUsers.map((user) => (
-              <div
-                key={user.id}
-                className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold">
-                      {user.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div className={`absolute bottom-0 right-0 w-3 h-3 ${getStatusColor(user.status)} rounded-full border-2 border-white dark:border-gray-800`} />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 dark:text-white truncate">
-                      {user.name}
-                    </p>
-                    {user.statusMessage ? (
-                      <p className="text-xs text-gray-800 dark:text-gray-300 font-medium truncate">
-                        {user.statusMessage}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-gray-800 dark:text-gray-300 font-medium capitalize">
-                        {user.status}
-                      </p>
-                    )}
-                  </div>
-                </div>
+      <AnimatePresence>
+        {showUserPanel && (
+          <motion.div
+            initial={{ x: 300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 300, opacity: 0 }}
+            transition={{ duration: 0.6, type: "spring" }}
+            className="w-72 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-l border-gray-200/50 dark:border-gray-700/50 relative z-10 shadow-2xl"
+          >
+            <div className="p-5 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-950/30 dark:to-purple-950/30 backdrop-blur-xl">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  Team Members
+                </h3>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowUserPanel(false)}
+                  className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </motion.button>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <span className="flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-semibold">
+                  {onlineUsers.filter(u => u.status === 'online').length} online \u2022 {onlineUsers.length} total
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto custom-scrollbar h-[calc(100%-80px)]">
+              {onlineUsers.map((usr, idx) => (
+                <motion.div
+                  key={usr.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  whileHover={{ x: 4, scale: 1.02 }}
+                  className="px-4 py-3 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 dark:hover:from-blue-900/10 dark:hover:to-purple-900/10 transition-all cursor-pointer border-l-4 border-transparent hover:border-blue-500 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <motion.div
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.6 }}
+                        className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg"
+                      >
+                        {usr.name.split(' ').map(n => n[0]).join('')}
+                      </motion.div>
+                      <motion.div
+                        animate={usr.status === 'online' ? { scale: [1, 1.2, 1] } : {}}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className={`absolute -bottom-1 -right-1 w-4 h-4 ${getStatusColor(usr.status)} rounded-full border-2 border-white dark:border-gray-800 shadow-lg`}
+                      />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {usr.name}
+                      </p>
+                      {usr.statusMessage ? (
+                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium truncate flex items-center gap-1">
+                          <MessageCircle className="w-3 h-3" />
+                          {usr.statusMessage}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium capitalize flex items-center gap-1">
+                          <Circle className="w-2 h-2 fill-current" />
+                          {usr.status}
+                        </p>
+                      )}
+                    </div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <button className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg">
+                        <MessageSquare className="w-4 h-4 text-gray-500" />
+                      </button>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
     )}
     </MainLayout>
