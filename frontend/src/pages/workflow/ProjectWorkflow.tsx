@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { UserAvatar } from '../../utils/userAvatar';
 import toast from 'react-hot-toast';
 import { API_URL } from '../../config/api';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Layers,
   FileText,
@@ -35,6 +36,10 @@ import {
   Bell,
   X as XIcon,
   FileDown,
+  Sparkles,
+  Zap,
+  Target,
+  BarChart3,
 } from 'lucide-react';
 
 interface WorkflowStep {
@@ -259,102 +264,233 @@ export default function ProjectWorkflow() {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl p-8 text-white">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-                Project Workflow Management
-                {isConnected && (
-                  <span className="flex items-center gap-2 text-sm font-normal bg-white/20 px-3 py-1 rounded-full">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    Live
-                  </span>
-                )}
-              </h1>
-              <p className="text-indigo-100 text-lg">
-                Track projects from Architecture Design to Deployment
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              {selectedProject && (
-                <button 
-                  onClick={handleExportPDF}
-                  className="px-6 py-3 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors font-semibold flex items-center gap-2 border border-white/30"
-                  title="Export project report as PDF"
-                >
-                  <FileDown className="w-5 h-5" />
-                  Export PDF
-                </button>
-              )}
-              <button 
-                onClick={() => setIsCreateModalOpen(true)}
-                className="px-6 py-3 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors font-semibold flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                New Project
-              </button>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[
-              { label: 'Total Projects', value: projectStats.totalProjects, icon: FolderOpen },
-              { label: 'Active', value: projectStats.inProgress, icon: TrendingUp },
-              { label: 'Completed', value: projectStats.completed, icon: CheckCircle },
-              { label: 'On Hold', value: projectStats.onHold, icon: Clock },
-            ].map((stat, idx) => (
-              <div
-                key={idx}
-                className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-colors"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <stat.icon className="w-5 h-5" />
-                  <span className="text-sm text-indigo-100">{stat.label}</span>
-                </div>
-                <div className="text-3xl font-bold">{stat.value}</div>
-              </div>
-            ))}
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-950 dark:via-blue-950/20 dark:to-purple-950/20">
+        {/* Animated Background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 20, repeat: Infinity }}
+            className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              rotate: [90, 0, 90],
+              opacity: [0.5, 0.3, 0.5],
+            }}
+            transition={{ duration: 25, repeat: Infinity }}
+            className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-indigo-400/20 to-pink-600/20 rounded-full blur-3xl"
+          />
         </div>
 
-        {/* Project Selector */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 p-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Select Project</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                onClick={() => setSelectedProject(project.id)}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedProject === project.id
-                    ? 'border-indigo-600 bg-white dark:bg-gray-700 shadow-lg'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-300 bg-white dark:bg-gray-800'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{project.id}</span>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold border ${getProjectStatusColor(
-                      project.status
-                    )}`}
-                  >
-                    {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                  </span>
-                </div>
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">{project.name}</h3>
-                <p className="text-sm text-gray-800 dark:text-gray-300 font-medium mb-3">{project.description}</p>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900 dark:text-gray-100">
-                    <span>Progress</span>
-                    <span className="font-bold">{project.progress}%</span>
+        <div className="relative z-10 p-6 space-y-6">
+          {/* Modern Header with Glassmorphism */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl border border-white/50 dark:border-gray-700/50 shadow-2xl"
+          >
+            {/* Animated Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-90"></div>
+            <motion.div
+              animate={{
+                backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+              }}
+              transition={{ duration: 10, repeat: Infinity }}
+              className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"
+              style={{ backgroundSize: '200% 200%' }}
+            />
+            
+            <div className="relative z-10 p-8 text-white">
+              <div className="flex items-center justify-between mb-6">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <div className="flex items-center gap-4 mb-3">
+                    <motion.div
+                      whileHover={{ rotate: 360, scale: 1.2 }}
+                      transition={{ duration: 0.6 }}
+                      className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg"
+                    >
+                      <GitBranch className="w-8 h-8" />
+                    </motion.div>
+                    <h1 className="text-4xl font-bold flex items-center gap-3">
+                      Dharma IaC Workflow
+                      {isConnected && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="flex items-center gap-2 text-sm font-normal bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/30"
+                        >
+                          <motion.div
+                            animate={{ scale: [1, 1.3, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="w-2 h-2 bg-green-400 rounded-full"
+                          ></motion.div>
+                          Live Sync
+                        </motion.span>
+                      )}
+                    </h1>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-indigo-600 h-2 rounded-full transition-all"
-                      style={{ width: `${project.progress}%` }}
+                  <p className="text-white/90 text-lg flex items-center gap-2">
+                    <Sparkles className="w-5 h-5" />
+                    Project orchestration from architecture to deployment
+                  </p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex items-center gap-3"
+                >
+                  {selectedProject && (
+                    <motion.button
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleExportPDF}
+                      className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all font-semibold flex items-center gap-2 border border-white/30 shadow-lg"
+                      title="Export project report as PDF"
+                    >
+                      <FileDown className="w-5 h-5" />
+                      Export PDF
+                    </motion.button>
+                  )}
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="px-6 py-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-all font-semibold flex items-center gap-2 shadow-lg"
+                  >
+                    <Plus className="w-5 h-5" />
+                    New Project
+                  </motion.button>
+                </motion.div>
+              </div>
+
+              {/* Modern Stats with Glassmorphism */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="grid grid-cols-1 md:grid-cols-4 gap-4"
+              >
+                {[
+                  { label: 'Total Projects', value: projectStats.totalProjects, icon: FolderOpen, color: 'from-blue-500 to-cyan-500' },
+                  { label: 'Active', value: projectStats.inProgress, icon: TrendingUp, color: 'from-green-500 to-emerald-500' },
+                  { label: 'Completed', value: projectStats.completed, icon: CheckCircle, color: 'from-purple-500 to-pink-500' },
+                  { label: 'On Hold', value: projectStats.onHold, icon: Clock, color: 'from-yellow-500 to-orange-500' },
+                ].map((stat, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + idx * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className="relative overflow-hidden bg-white/10 backdrop-blur-sm rounded-xl p-5 hover:bg-white/20 transition-all border border-white/20 shadow-lg"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <motion.div
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                        className={`p-2.5 rounded-lg bg-gradient-to-br ${stat.color} shadow-lg`}
+                      >
+                        <stat.icon className="w-5 h-5 text-white" />
+                      </motion.div>
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.7 + idx * 0.1, type: "spring", stiffness: 200 }}
+                        className="text-4xl font-bold"
+                      >
+                        {stat.value}
+                      </motion.div>
+                    </div>
+                    <span className="text-sm text-white/90 font-semibold">{stat.label}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Project Selector with Modern Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/50 dark:border-gray-700/50 p-6 shadow-xl"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Select Project
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <AnimatePresence>
+                {projects.map((project, idx) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ delay: idx * 0.1 }}
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    onClick={() => setSelectedProject(project.id)}
+                    className={`relative overflow-hidden p-5 rounded-xl cursor-pointer transition-all shadow-lg ${
+                      selectedProject === project.id
+                        ? 'bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border-2 border-indigo-500 shadow-indigo-500/30'
+                        : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                    }`}
+                  >
+                    {selectedProject === project.id && (
+                      <motion.div
+                        layoutId="activeProject"
+                        className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2 py-1 text-xs font-bold bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg">
+                          {project.id}
+                        </span>
+                        <motion.span
+                          whileHover={{ scale: 1.1 }}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold border ${getProjectStatusColor(
+                            project.status
+                          )}`}
+                        >
+                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                        </motion.span>
+                      </div>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2 text-lg">{project.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{project.description}</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs font-semibold text-gray-700 dark:text-gray-300">
+                          <span className="flex items-center gap-1">
+                            <BarChart3 className="w-3 h-3" />
+                            Progress
+                          </span>
+                          <span className="font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            {project.progress}%
+                          </span>
+                        </div>
+                        <div className="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${project.progress}%` }}
+                            transition={{ duration: 1, delay: idx * 0.1, type: "spring", stiffness: 100 }}
+                            className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2.5 rounded-full shadow-lg"
+                          />
+                        </div>
                     />
                   </div>
                   <div className="flex items-center gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200">
