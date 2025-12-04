@@ -22,7 +22,8 @@ const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Register = lazy(() => import('./pages/Register'));
-const Dashboard = lazy(() => import('./pages/DemoPage'));
+const Dashboard = lazy(() => import('./pages/DashboardNew'));
+const DemoPage = lazy(() => import('./pages/DemoPage'));
 const SystemInfo = lazy(() => import('./pages/SystemInfo'));
 const UserManagement = lazy(() => import('./pages/UserManagement'));
 
@@ -121,7 +122,7 @@ function App() {
                   
                   {/* Protected Dashboard */}
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/demo" element={<Dashboard />} />
+                  <Route path="/demo" element={<DemoPage />} />
                   <Route path="/system" element={<SystemInfo />} />
                   <Route path="/users" element={<UserManagement />} />
                   <Route path="/settings" element={<Settings />} />

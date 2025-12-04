@@ -1,48 +1,50 @@
 import { MainLayout } from '../components/layout';
-import { useTheme } from '../contexts/ThemeContext';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
   TrendingDown, 
   Activity, 
-  DollarSign,
-  Shield,
   CheckCircle2,
   AlertTriangle,
   Users,
-  Bell,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Plus,
-  Settings,
-  MoreVertical,
-  Star,
-  Heart,
-  Share2,
-  Bookmark,
-  MessageSquare,
-  Eye,
-  Lock,
-  Unlock,
-  Check,
-  X,
   Clock,
   Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  Globe,
-  Link as LinkIcon,
+  Target,
+  Zap,
+  GitBranch,
+  Package,
+  Server,
+  Cloud,
+  Database,
   Code,
   Terminal,
-  Database,
-  Server,
-  Cloud
+  FileText,
+  Folder,
+  AlertCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  MoreVertical,
+  Filter,
+  Download,
+  RefreshCw,
+  Play,
+  Pause,
+  Square,
+  Circle,
+  XCircle,
+  Rocket,
+  Shield,
+  Lock,
+  Globe,
+  BarChart3,
+  PieChart,
+  LineChart
 } from 'lucide-react';
 
 export default function DemoPage() {
-  const { theme, isDarkMode, setTheme } = useTheme();
+  const [selectedPeriod, setSelectedPeriod] = useState('7d');
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
   const demoUser = {
     name: 'John Enterprise',
@@ -51,55 +53,229 @@ export default function DemoPage() {
     tenantName: 'IAC Dharma Enterprise',
   };
 
+  // Real-time metrics simulation
+  const [metrics, setMetrics] = useState({
+    activeProjects: 24,
+    totalDeployments: 1247,
+    successRate: 98.4,
+    avgDeployTime: 3.2,
+  });
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const interval = setInterval(() => {
+      setMetrics(prev => ({
+        activeProjects: prev.activeProjects + Math.floor(Math.random() * 3) - 1,
+        totalDeployments: prev.totalDeployments + Math.floor(Math.random() * 5),
+        successRate: +(prev.successRate + (Math.random() * 0.2 - 0.1)).toFixed(1),
+        avgDeployTime: +(prev.avgDeployTime + (Math.random() * 0.4 - 0.2)).toFixed(1),
+      }));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [autoRefresh]);
+
+  const projects = [
+    {
+      id: 1,
+      name: 'Multi-Cloud Infrastructure',
+      status: 'active',
+      progress: 78,
+      team: 8,
+      deployments: 45,
+      lastDeploy: '2 hours ago',
+      health: 'excellent',
+      tags: ['AWS', 'Azure', 'Production']
+    },
+    {
+      id: 2,
+      name: 'Kubernetes Migration',
+      status: 'active',
+      progress: 92,
+      team: 12,
+      deployments: 128,
+      lastDeploy: '15 min ago',
+      health: 'good',
+      tags: ['K8s', 'Migration', 'Critical']
+    },
+    {
+      id: 3,
+      name: 'Security Compliance Upgrade',
+      status: 'warning',
+      progress: 45,
+      team: 6,
+      deployments: 23,
+      lastDeploy: '1 day ago',
+      health: 'warning',
+      tags: ['Security', 'Compliance', 'SOC2']
+    },
+    {
+      id: 4,
+      name: 'CI/CD Pipeline Optimization',
+      status: 'active',
+      progress: 88,
+      team: 5,
+      deployments: 312,
+      lastDeploy: '30 min ago',
+      health: 'excellent',
+      tags: ['DevOps', 'Automation', 'Performance']
+    },
+  ];
+
+  const recentActivity = [
+    { type: 'deployment', project: 'Multi-Cloud Infrastructure', user: 'Sarah Chen', time: '5 min ago', status: 'success' },
+    { type: 'alert', project: 'Security Compliance', message: 'High CPU usage detected', time: '12 min ago', status: 'warning' },
+    { type: 'deployment', project: 'Kubernetes Migration', user: 'Mike Ross', time: '15 min ago', status: 'success' },
+    { type: 'commit', project: 'CI/CD Pipeline', user: 'Alex Kumar', message: 'Updated deployment scripts', time: '23 min ago', status: 'info' },
+    { type: 'deployment', project: 'Multi-Cloud Infrastructure', user: 'Lisa Wang', time: '45 min ago', status: 'success' },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'excellent': return 'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400';
+      case 'good': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'warning': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400';
+      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  };
+
   return (
     <MainLayout user={demoUser}>
-      {/* Theme Status Banner */}
-      <div className="mb-6 p-6 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 text-white rounded-2xl shadow-2xl relative overflow-hidden animate-slideDown">
-        {/* Animated background effects */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                Advanced Component Showcase
-                <span className="inline-block w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400"></span>
-              </h2>
-              <p className="text-blue-100">All components are theme-aware and adapt to your selected color scheme</p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm opacity-90">Current Theme</div>
-              <div className="text-2xl font-bold tracking-wider">{theme.toUpperCase()}</div>
-              <div className="text-xs opacity-75">{isDarkMode ? 'Dark Mode' : 'Light Mode'}</div>
-              <div className="text-xs opacity-60 mt-1 font-mono bg-black/20 px-2 py-1 rounded">
-                {document.documentElement.className || '(no classes)'}
-              </div>
-            </div>
+      {/* Header with Real-time Controls */}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Project Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">Real-time monitoring and analytics for all your infrastructure projects</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin text-blue-600' : 'text-gray-400'}`} />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Auto-refresh</span>
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                autoRefresh ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                autoRefresh ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
           </div>
           
-          {/* Quick Theme Switcher */}
-          <div className="mt-4 p-4 bg-black/10 backdrop-blur-sm rounded-xl border border-white/10">
-            <div className="text-sm font-semibold mb-3 opacity-90 flex items-center gap-2">
-              <span className="inline-block w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
-              ⚡ Quick Theme Switch (Click to Test):
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="24h">Last 24 Hours</option>
+            <option value="7d">Last 7 Days</option>
+            <option value="30d">Last 30 Days</option>
+            <option value="90d">Last 90 Days</option>
+          </select>
+          
+          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-blue-500/50">
+            <Download className="w-4 h-4" />
+            Export Report
+          </button>
+        </div>
+      </div>
+
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Rocket className="w-6 h-6" />
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <ArrowUpRight className="w-4 h-4" />
+                <span>+12%</span>
+              </div>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <button 
-                onClick={() => setTheme('light')}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-                  theme === 'light' ? 'bg-white text-blue-600 shadow-lg shadow-white/30 scale-105' : 'bg-white/20 hover:bg-white/30 hover-lift'
-                }`}
-              >
-                💡 Light
-              </button>
-              <button 
-                onClick={() => setTheme('dark')}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-                  theme === 'dark' ? 'bg-white text-blue-600 shadow-lg shadow-white/30 scale-105' : 'bg-white/20 hover:bg-white/30 hover-lift'
-                }`}
-              >
+            <div className="text-4xl font-bold mb-1">{metrics.activeProjects}</div>
+            <div className="text-blue-100">Active Projects</div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <ArrowUpRight className="w-4 h-4" />
+                <span>+0.8%</span>
+              </div>
+            </div>
+            <div className="text-4xl font-bold mb-1">{metrics.successRate}%</div>
+            <div className="text-green-100">Success Rate</div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Activity className="w-6 h-6" />
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <ArrowUpRight className="w-4 h-4" />
+                <span>+284</span>
+              </div>
+            </div>
+            <div className="text-4xl font-bold mb-1">{metrics.totalDeployments}</div>
+            <div className="text-purple-100">Total Deployments</div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Zap className="w-6 h-6" />
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <ArrowDownRight className="w-4 h-4" />
+                <span>-0.4m</span>
+              </div>
+            </div>
+            <div className="text-4xl font-bold mb-1">{metrics.avgDeployTime}m</div>
+            <div className="text-orange-100">Avg Deploy Time</div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Projects List - 2/3 width */}
+        <div className="lg:col-span-2 space-y-4">
                 🌙 Dark
               </button>
               <button 
