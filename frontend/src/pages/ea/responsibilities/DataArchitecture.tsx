@@ -6,9 +6,77 @@ import {
   ArrowRight,
   CheckCircle,
   Database,
+  Table,
+  Key,
+  Shield,
+  GitBranch,
+  FileText,
 } from 'lucide-react';
 
 export default function DataArchitecture() {
+  const responsibilities = [
+    {
+      title: 'Data Models & Design',
+      icon: Database,
+      items: [
+        'Define conceptual, logical, and physical data models',
+        'Design entity relationships and database schemas',
+        'Establish data normalization and optimization standards',
+        'Create reference data and metadata management strategies',
+      ],
+    },
+    {
+      title: 'Data Governance & Quality',
+      icon: Shield,
+      items: [
+        'Establish data governance framework and policies',
+        'Define data stewardship roles and responsibilities',
+        'Implement data quality rules and monitoring',
+        'Manage data lineage and impact analysis',
+      ],
+    },
+    {
+      title: 'Master Data Management (MDM)',
+      icon: Key,
+      items: [
+        'Design MDM strategy for customer, product, and reference data',
+        'Implement data consolidation and golden record creation',
+        'Define data matching and de-duplication rules',
+        'Manage cross-system data synchronization',
+      ],
+    },
+    {
+      title: 'Data Security & Privacy',
+      icon: FileText,
+      items: [
+        'Implement data classification and labeling',
+        'Design data encryption, masking, and tokenization',
+        'Ensure GDPR, CCPA, and privacy compliance',
+        'Manage PII/PHI protection and data retention',
+      ],
+    },
+    {
+      title: 'Data Platform & Technology',
+      icon: Table,
+      items: [
+        'Design data lakes, warehouses, and lake houses',
+        'Define big data and analytics platforms',
+        'Architect real-time streaming and event processing',
+        'Implement data mesh and domain-driven data architecture',
+      ],
+    },
+    {
+      title: 'Data Integration & API',
+      icon: GitBranch,
+      items: [
+        'Design ETL/ELT pipelines and data orchestration',
+        'Define data API standards and contracts',
+        'Implement CDC and real-time data replication',
+        'Manage data federation and virtualization',
+      ],
+    },
+  ];
+
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/30 dark:from-gray-950 dark:via-indigo-950/20 dark:to-purple-950/20">
@@ -44,15 +112,60 @@ export default function DataArchitecture() {
             </div>
           </motion.div>
 
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-8 border border-white/50 dark:border-gray-700/50 shadow-xl">
-            <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-              Key Responsibilities
-            </h2>
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-gray-700 dark:text-gray-300">
-                Content for Data Architecture & Strategy will be added here. This page covers the comprehensive responsibilities and strategic impact of this EA focus area.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              { label: 'Data Models', value: '78', icon: Database, color: 'blue' },
+              { label: 'Governance Policies', value: '45', icon: Shield, color: 'green' },
+              { label: 'MDM Domains', value: '12', icon: Key, color: 'purple' },
+              { label: 'Data Quality Score', value: '91%', icon: CheckCircle, color: 'indigo' },
+            ].map((stat, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-gray-700/50 shadow-xl"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`p-2.5 rounded-lg bg-gradient-to-br from-${stat.color}-500 to-${stat.color}-600 shadow-lg`}>
+                    <stat.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                    {stat.value}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {responsibilities.map((section, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + idx * 0.1 }}
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-gray-700/50 shadow-xl hover:shadow-2xl transition-all"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg">
+                    <section.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                    {section.title}
+                  </h3>
+                </div>
+                <ul className="space-y-3">
+                  {section.items.map((item, itemIdx) => (
+                    <li key={itemIdx} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
           </div>
 
           <motion.div
