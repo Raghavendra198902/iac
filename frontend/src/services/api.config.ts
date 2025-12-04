@@ -12,14 +12,17 @@ export const API_CONFIG = {
 
 export const API_ENDPOINTS = {
   // AI Orchestrator
-  AI_GENERATE: '/api/v1/ai/generate',
-  AI_PROJECT: '/api/v1/ai/projects',
-  AI_ARTIFACTS: '/api/v1/ai/artifacts',
-  AI_COMPLIANCE: '/api/v1/ai/compliance',
-  AI_WEBSOCKET: '/ws/ai',
+  AI_PROJECTS: '/api/projects',
+  AI_GENERATE: '/api/generate',
+  AI_ARTIFACTS: '/api/artifacts',
+  AI_STATUS: '/api/generate/status',
+  AI_WEBSOCKET: '/ws/projects',
   
-  // Auth
-  AUTH_LOGIN: '/api/v1/auth/login',
-  AUTH_REGISTER: '/api/v1/auth/register',
-  AUTH_LOGOUT: '/api/v1/auth/logout',
+  // Health
+  HEALTH: '/health',
+  
+  // Auth (future)
+  AUTH_LOGIN: '/api/auth/login',
+  AUTH_REGISTER: '/api/auth/register',
+  AUTH_LOGOUT: '/api/auth/logout',
 };

@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import uvicorn
 
-from .api import projects, generation, artifacts
+from .api import projects, generation, artifacts, websocket
 from .utils.config import settings
 
 @asynccontextmanager
@@ -38,6 +38,7 @@ app.add_middleware(
 app.include_router(projects.router)
 app.include_router(generation.router)
 app.include_router(artifacts.router)
+app.include_router(websocket.router)
 
 # Health check
 @app.get("/health")
