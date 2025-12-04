@@ -383,29 +383,49 @@ export default function Collaboration() {
     setMessageInput('');
     setIsTyping(false);
     
-    // Auto-reply from bots in bot channels
-    if (selectedChannel.name === 'ai-bot' || selectedChannel.name === 'application-help') {
+    // Auto-reply from bots in bot channels OR DM channels with bots
+    const isBotChannel = selectedChannel.name === 'ai-bot' || selectedChannel.name === 'application-help';
+    const isBotDM = selectedChannel.id === 'dm-bot-ai' || selectedChannel.id === 'dm-bot-help';
+    
+    if (isBotChannel || isBotDM) {
+      // Show typing indicator
+      setTypingUsers([isBotChannel ? (selectedChannel.name === 'ai-bot' ? '🤖 AI Bot' : '❓ Application Help') : selectedChannel.name]);
+      
       setTimeout(() => {
-        const botId = selectedChannel.name === 'ai-bot' ? 'bot-ai' : 'bot-help';
-        const botName = selectedChannel.name === 'ai-bot' ? '🤖 AI Bot' : '❓ Application Help';
+        setTypingUsers([]);
+        
+        const botId = (selectedChannel.name === 'ai-bot' || selectedChannel.id === 'dm-bot-ai') ? 'bot-ai' : 'bot-help';
+        const botName = (selectedChannel.name === 'ai-bot' || selectedChannel.id === 'dm-bot-ai') ? '🤖 AI Bot' : '❓ Application Help';
         
         let botReply = '';
         const userMsg = messageInput.toLowerCase();
         
-        if (selectedChannel.name === 'ai-bot') {
-          // AI Bot responses
-          if (userMsg.includes('cost') || userMsg.includes('price') || userMsg.includes('expensive')) {
-            botReply = '💰 I can help with cost optimization! Based on your current usage patterns, I recommend:\n\n• Right-sizing over-provisioned instances (save ~30%)\n• Implementing auto-scaling policies\n• Using reserved instances for predictable workloads\n• Enabling spot instances for non-critical tasks\n\nWould you like a detailed cost analysis report?';
-          } else if (userMsg.includes('terraform') || userMsg.includes('tf')) {
-            botReply = '🔧 Terraform best practices:\n\n• Use remote state with locking\n• Organize code with modules\n• Implement proper variable validation\n• Use workspaces for environments\n• Enable detailed logging\n\nI can review your terraform code if you share it!';
-          } else if (userMsg.includes('deploy') || userMsg.includes('deployment')) {
-            botReply = '🚀 For smooth deployments:\n\n• Use blue-green deployment strategy\n• Implement health checks\n• Enable rollback mechanisms\n• Monitor deployment metrics\n• Use canary releases for critical changes\n\nNeed help troubleshooting a specific deployment?';
-          } else if (userMsg.includes('security') || userMsg.includes('secure')) {
-            botReply = '🔒 Security recommendations:\n\n• Enable encryption at rest and in transit\n• Implement least-privilege access\n• Regular security audits\n• Use secrets management (Vault/AWS Secrets)\n• Enable MFA for all users\n\nI can perform a security audit of your infrastructure!';
-          } else if (userMsg.includes('kubernetes') || userMsg.includes('k8s')) {
-            botReply = '☸️ Kubernetes optimization tips:\n\n• Set resource limits and requests\n• Use HPA for auto-scaling\n• Implement pod disruption budgets\n• Enable monitoring with Prometheus\n• Use namespaces for isolation\n\nWhat specific K8s issue are you facing?';
+        if (selectedChannel.name === 'ai-bot' || selectedChannel.id === 'dm-bot-ai') {
+          // AI Bot responses with expanded keyword detection
+          if (userMsg.includes('hello') || userMsg.includes('hi') || userMsg.includes('hey')) {
+            botReply = '👋 Hello! I\'m your AI Infrastructure Assistant. I\'m here to help you with:\n\n• 💰 Cost optimization strategies\n• 🔧 Terraform and IaC best practices\n• 🚀 Deployment automation\n• 🔒 Security hardening\n• ☸️ Kubernetes management\n• 📊 Performance monitoring\n\nWhat would you like to know?';
+          } else if (userMsg.includes('cost') || userMsg.includes('price') || userMsg.includes('expensive') || userMsg.includes('save money') || userMsg.includes('reduce') || userMsg.includes('budget')) {
+            botReply = '💰 I can help with cost optimization! Based on your current usage patterns, I recommend:\n\n• Right-sizing over-provisioned instances (save ~30%)\n• Implementing auto-scaling policies\n• Using reserved instances for predictable workloads\n• Enabling spot instances for non-critical tasks\n• Setting up budget alerts and cost monitoring\n• Removing unused resources and orphaned volumes\n\nWould you like a detailed cost analysis report?';
+          } else if (userMsg.includes('terraform') || userMsg.includes('tf') || userMsg.includes('iac') || userMsg.includes('infrastructure as code')) {
+            botReply = '🔧 Terraform best practices:\n\n• Use remote state with locking (S3 + DynamoDB)\n• Organize code with reusable modules\n• Implement proper variable validation\n• Use workspaces for environments\n• Enable detailed logging and plan reviews\n• Version control everything\n• Use data sources instead of hardcoding\n\nI can review your terraform code if you share it!';
+          } else if (userMsg.includes('deploy') || userMsg.includes('deployment') || userMsg.includes('release') || userMsg.includes('rollout')) {
+            botReply = '🚀 For smooth deployments:\n\n• Use blue-green deployment strategy\n• Implement health checks and readiness probes\n• Enable automated rollback mechanisms\n• Monitor deployment metrics in real-time\n• Use canary releases for critical changes\n• Test in staging environment first\n• Document rollback procedures\n\nNeed help troubleshooting a specific deployment?';
+          } else if (userMsg.includes('security') || userMsg.includes('secure') || userMsg.includes('vulnerability') || userMsg.includes('compliance') || userMsg.includes('audit')) {
+            botReply = '🔒 Security recommendations:\n\n• Enable encryption at rest and in transit\n• Implement least-privilege access (IAM policies)\n• Regular security audits and penetration testing\n• Use secrets management (Vault/AWS Secrets Manager)\n• Enable MFA for all users and service accounts\n• Keep dependencies updated\n• Implement network segmentation\n• Enable CloudTrail/audit logging\n\nI can perform a security audit of your infrastructure!';
+          } else if (userMsg.includes('kubernetes') || userMsg.includes('k8s') || userMsg.includes('container') || userMsg.includes('docker') || userMsg.includes('pod')) {
+            botReply = '☸️ Kubernetes optimization tips:\n\n• Set resource limits and requests properly\n• Use HPA for auto-scaling\n• Implement pod disruption budgets\n• Enable monitoring with Prometheus/Grafana\n• Use namespaces for isolation\n• Configure liveness and readiness probes\n• Use init containers for setup tasks\n• Implement proper RBAC policies\n\nWhat specific K8s issue are you facing?';
+          } else if (userMsg.includes('performance') || userMsg.includes('slow') || userMsg.includes('optimize') || userMsg.includes('speed')) {
+            botReply = '⚡ Performance optimization strategies:\n\n• Enable caching layers (Redis/Memcached)\n• Use CDN for static assets\n• Optimize database queries and indexes\n• Implement connection pooling\n• Use async processing for heavy tasks\n• Enable compression (gzip/brotli)\n• Monitor with APM tools\n• Scale horizontally when needed\n\nWhat component needs optimization?';
+          } else if (userMsg.includes('monitoring') || userMsg.includes('observability') || userMsg.includes('logs') || userMsg.includes('metrics')) {
+            botReply = '📊 Monitoring and observability setup:\n\n• Implement the three pillars: logs, metrics, traces\n• Use Prometheus for metrics collection\n• Set up Grafana dashboards\n• Centralize logs (ELK/Loki)\n• Configure alerting rules\n• Track SLIs and SLOs\n• Enable distributed tracing\n• Monitor business metrics too\n\nNeed help setting up specific monitoring?';
+          } else if (userMsg.includes('aws') || userMsg.includes('azure') || userMsg.includes('gcp') || userMsg.includes('cloud')) {
+            botReply = '☁️ Cloud provider best practices:\n\n• Use infrastructure as code (Terraform/CloudFormation)\n• Implement multi-region for HA\n• Enable auto-scaling groups\n• Use managed services when possible\n• Implement proper tagging strategy\n• Regular cost reviews\n• Set up cloud governance policies\n• Use service quotas and limits\n\nWhich cloud provider are you using?';
+          } else if (userMsg.includes('help') || userMsg.includes('how') || userMsg.includes('what') || userMsg.includes('?')) {
+            botReply = `✨ I understand you're asking about: "${messageInput}"\n\nI can help you with:\n• 💰 Cost optimization and FinOps\n• 🔧 Infrastructure as Code (Terraform, etc.)\n• 🚀 CI/CD and deployment strategies\n• 🔒 Security and compliance\n• ☸️ Container orchestration\n• 📊 Monitoring and observability\n• ⚡ Performance tuning\n• ☁️ Multi-cloud architecture\n\nCould you provide more details about what you need?`;
+          } else if (userMsg.includes('thank') || userMsg.includes('thanks')) {
+            botReply = '😊 You\'re welcome! I\'m here 24/7 if you need any more help with your infrastructure. Feel free to ask me anything about:\n\n• Cost optimization\n• Security improvements\n• Deployment strategies\n• Performance tuning\n• Best practices\n\nHappy to help! 🚀';
           } else {
-            botReply = `✨ I understand you're asking about: "${messageInput}"\n\nI can help you with:\n• Infrastructure optimization\n• Cost analysis\n• Security recommendations\n• Deployment strategies\n• Best practices\n\nCould you provide more details about what you need?`;
+            botReply = `🤖 I received your message: "${messageInput}"\n\nI\'m an AI Infrastructure expert. I can assist with:\n• 💰 Cost optimization\n• 🔧 Terraform & IaC\n• 🚀 Deployments\n• 🔒 Security\n• ☸️ Kubernetes\n• 📊 Monitoring\n\nCould you rephrase or provide more context?`;
           }
         } else {
           // Application Help responses
