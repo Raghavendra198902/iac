@@ -395,7 +395,8 @@ export default function Collaboration() {
             botReply = '🔒 Security recommendations:\n\n• Enable encryption at rest and in transit\n• Implement least-privilege access\n• Regular security audits\n• Use secrets management (Vault/AWS Secrets)\n• Enable MFA for all users\n\nI can perform a security audit of your infrastructure!';
           } else if (userMsg.includes('kubernetes') || userMsg.includes('k8s')) {
             botReply = '☸️ Kubernetes optimization tips:\n\n• Set resource limits and requests\n• Use HPA for auto-scaling\n• Implement pod disruption budgets\n• Enable monitoring with Prometheus\n• Use namespaces for isolation\n\nWhat specific K8s issue are you facing?';
-          } else {\n            botReply = `✨ I understand you\'re asking about: "${messageInput}"\n\nI can help you with:\n• Infrastructure optimization\n• Cost analysis\n• Security recommendations\n• Deployment strategies\n• Best practices\n\nCould you provide more details about what you need?`;
+          } else {
+            botReply = `✨ I understand you're asking about: "${messageInput}"\n\nI can help you with:\n• Infrastructure optimization\n• Cost analysis\n• Security recommendations\n• Deployment strategies\n• Best practices\n\nCould you provide more details about what you need?`;
           }
         } else {
           // Application Help responses
@@ -411,7 +412,8 @@ export default function Collaboration() {
             botReply = '🔧 Troubleshooting help:\n\n1. Check the error message in notifications\n2. View detailed logs in Monitoring (Garuda)\n3. Verify permissions in SSO Service\n4. Check resource availability\n\nCan you share the specific error message you\'re seeing?';
           } else if (userMsg.includes('sidebar') || userMsg.includes('menu') || userMsg.includes('navigate')) {
             botReply = '🧭 Navigation guide:\n\n**Quick Access** - Favorites & Recent items\n**Collaboration** - Team chat & Projects\n**Architecture** - EA, Repository, Solutions\n**Operations** - CMDB, Monitoring, Guardrails\n**Governance** - Analytics, Security, FinOps\n\nEach menu item has a Mahabharat character name for easy reference!';
-          } else {\n            botReply = `👋 Thanks for reaching out!\n\nI can help you with:\n• Using platform features\n• Navigation and workflows\n• Troubleshooting issues\n• Configuration settings\n\nYour question: "${messageInput}"\n\nCould you be more specific about what you need help with?`;
+          } else {
+            botReply = `👋 Thanks for reaching out!\n\nI can help you with:\n• Using platform features\n• Navigation and workflows\n• Troubleshooting issues\n• Configuration settings\n\nYour question: "${messageInput}"\n\nCould you be more specific about what you need help with?`;
           }
         }
         
