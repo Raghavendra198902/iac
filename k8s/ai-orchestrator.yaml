@@ -1,0 +1,223 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iac-platform
+  labels:
+    name: iac-platform
+    environment: production
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-orchestrator-config
+  namespace: iac-platform
+data:
+  APP_NAME: "AI Architecture Orchestrator"
+  APP_VERSION: "1.0.0"
+  DEBUG: "false"
+  CORS_ORIGINS: "https://iac.yourdomain.com"
+  ARTIFACTS_DIR: "/data/artifacts"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ai-orchestrator-secrets
+  namespace: iac-platform
+type: Opaque
+stringData:
+  # Generate these with: kubectl create secret generic ai-orchestrator-secrets --from-literal=...
+  OPENAI_API_KEY: "your-openai-key"
+  ANTHROPIC_API_KEY: "your-anthropic-key"
+  PINECONE_API_KEY: "your-pinecone-key"
+  SECRET_KEY: "your-jwt-secret-key"
+  DATABASE_URL: "postgresql://user:password@postgres:5432/iacdb"
+  MONGODB_URL: "mongodb://user:password@mongodb:27017"
+  REDIS_URL: "redis://redis:6379"
+  RABBITMQ_URL: "amqp://user:password@rabbitmq:5672"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: artifacts-storage
+  namespace: iac-platform
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: standard
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-orchestrator
+  namespace: iac-platform
+  labels:
+    app: ai-orchestrator
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-orchestrator
+  template:
+    metadata:
+      labels:
+        app: ai-orchestrator
+        tier: backend
+    spec:
+      containers:
+      - name: fastapi
+        image: your-registry/ai-orchestrator:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: ai-orchestrator-config
+              key: APP_NAME
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: ai-orchestrator-config
+              key: DEBUG
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-orchestrator-secrets
+              key: OPENAI_API_KEY
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-orchestrator-secrets
+              key: ANTHROPIC_API_KEY
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-orchestrator-secrets
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-orchestrator-secrets
+              key: REDIS_URL
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-orchestrator-secrets
+              key: RABBITMQ_URL
+        volumeMounts:
+        - name: artifacts
+          mountPath: /data/artifacts
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: artifacts
+        persistentVolumeClaim:
+          claimName: artifacts-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-orchestrator-service
+  namespace: iac-platform
+  labels:
+    app: ai-orchestrator
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: ai-orchestrator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  namespace: iac-platform
+  labels:
+    app: celery-worker
+    tier: backend
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+        tier: backend
+    spec:
+      containers:
+      - name: celery
+        image: your-registry/ai-orchestrator:latest
+        command: ["celery", "-A", "src.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
+        envFrom:
+        - configMapRef:
+            name: ai-orchestrator-config
+        - secretRef:
+            name: ai-orchestrator-secrets
+        volumeMounts:
+        - name: artifacts
+          mountPath: /data/artifacts
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "3000m"
+      volumes:
+      - name: artifacts
+        persistentVolumeClaim:
+          claimName: artifacts-storage
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ai-orchestrator-ingress
+  namespace: iac-platform
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - api.iac.yourdomain.com
+    secretName: api-tls-cert
+  rules:
+  - host: api.iac.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-orchestrator-service
+            port:
+              number: 8000
