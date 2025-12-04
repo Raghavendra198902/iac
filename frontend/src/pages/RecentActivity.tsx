@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Layout from '../components/layout/Layout';
+import { MainLayout } from '../components/layout';
 import { Clock, Eye, Edit, FileText, Code, Database, Settings as SettingsIcon, Trash2, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -156,7 +156,7 @@ export default function RecentActivity() {
     : activities.filter(a => a.type === selectedType);
 
   return (
-    <Layout>
+    <MainLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -274,6 +274,6 @@ export default function RecentActivity() {
           </div>
         )}
       </div>
-    </Layout>
+    </MainLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Layout from '../components/layout/Layout';
+import { MainLayout } from '../components/layout';
 import { User, Mail, Phone, Building, Briefcase, MapPin, Globe, Shield, Camera, Save, Edit3, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -29,7 +29,7 @@ export default function Profile() {
   };
 
   return (
-    <Layout>
+    <MainLayout>
       <div className="p-6 max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -273,6 +273,6 @@ export default function Profile() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </MainLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Layout from '../components/layout/Layout';
+import { MainLayout } from '../components/layout';
 import { Bell, Check, Trash2, AlertCircle, Info, CheckCircle } from 'lucide-react';
 
 export default function NotificationsPage() {
@@ -23,7 +23,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <Layout>
+    <MainLayout>
       <div className="p-6 max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
@@ -49,6 +49,6 @@ export default function NotificationsPage() {
           ))}
         </div>
       </div>
-    </Layout>
+    </MainLayout>
   );
 }

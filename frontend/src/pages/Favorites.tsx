@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Layout from '../components/layout/Layout';
+import { MainLayout } from '../components/layout';
 import { Star, Trash2, ExternalLink, Clock, Folder, Filter, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -98,7 +98,7 @@ export default function Favorites() {
   });
 
   return (
-    <Layout>
+    <MainLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -232,6 +232,6 @@ export default function Favorites() {
           </div>
         )}
       </div>
-    </Layout>
+    </MainLayout>
   );
 }

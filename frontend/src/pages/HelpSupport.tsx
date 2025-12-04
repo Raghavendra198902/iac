@@ -1,4 +1,4 @@
-import Layout from '../components/layout/Layout';
+import { MainLayout } from '../components/layout';
 import { HelpCircle, Book, MessageCircle, Video, Mail, FileText, Search } from 'lucide-react';
 
 export default function HelpSupport() {
@@ -10,7 +10,7 @@ export default function HelpSupport() {
   ];
 
   return (
-    <Layout>
+    <MainLayout>
       <div className="p-6 max-w-6xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
           Help & Support
@@ -27,6 +27,6 @@ export default function HelpSupport() {
           ))}
         </div>
       </div>
-    </Layout>
+    </MainLayout>
   );
 }
