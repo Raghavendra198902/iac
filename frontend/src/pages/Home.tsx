@@ -67,50 +67,51 @@ export default function Home() {
             </span>
           </motion.div>
           
-          <h1 className="text-7xl md:text-8xl font-black mb-8 leading-tight">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight">
             <span className="bg-gradient-to-r from-gray-900 via-blue-800 to-blue-600 dark:from-white dark:via-blue-200 dark:to-blue-400 bg-clip-text text-transparent">
-              Infrastructure
+              Transform Your Cloud Infrastructure
             </span>
             <br />
             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Made Simple
+              with AI-Powered Automation
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Enterprise-grade Infrastructure as Code platform with <span className="font-semibold text-blue-600 dark:text-blue-400">AI-powered</span> recommendations, 
-            automated governance, and seamless <span className="font-semibold text-purple-600 dark:text-purple-400">multi-cloud</span> orchestration
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Enterprise Infrastructure as Code platform that combines <span className="font-bold text-blue-600 dark:text-blue-400">intelligent automation</span>, 
+            governance, and <span className="font-bold text-purple-600 dark:text-purple-400">multi-cloud orchestration</span> in one unified solution
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link
-              to="/register"
-              className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200 flex items-center gap-2"
-            >
-              Start Free Trial
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
             <Link
               to="/demo"
-              className="group px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+              className="group px-10 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 flex items-center gap-3 relative overflow-hidden"
             >
-              <PlayCircle className="w-5 h-5" />
-              Watch Demo
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <span className="relative z-10">Try Live Demo</span>
+              <PlayCircle className="w-6 h-6 relative z-10 group-hover:scale-110 transition-transform" />
+            </Link>
+            <Link
+              to="/register"
+              className="group px-10 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-bold text-lg border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all duration-300 flex items-center gap-3"
+            >
+              <span>Get Started Free</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>No credit card required</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+              <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+              <span className="font-medium">Free 14-day trial</span>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>14-day free trial</span>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span className="font-medium">No credit card needed</span>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>Cancel anytime</span>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span className="font-medium">Cancel anytime</span>
             </div>
           </div>
         </motion.div>
