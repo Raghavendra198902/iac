@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { SearchResult, SearchCategory, SearchStats } from '../types/search';
 import {
   Search,
@@ -13,9 +13,26 @@ import {
   TrendingUp,
   Clock,
   ChevronRight,
+  Sparkles,
+  Zap,
+  History,
+  Star,
+  StarOff,
+  Mic,
+  Image,
+  Code,
+  Database,
+  Cloud,
+  Brain,
+  ArrowRight,
+  Command,
+  Hash,
+  Calendar,
+  MapPin,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { MainLayout } from '../components/layout';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GlobalSearch() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,36 +41,91 @@ export default function GlobalSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [stats, setStats] = useState<SearchStats | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>([
+    'Data Analytics Pipeline',
+    'Security vulnerability',
+    'Sarah Johnson',
+    'Architecture Document',
+  ]);
+  const [savedSearches, setSavedSearches] = useState<{ query: string; category: SearchCategory }[]>([
+    { query: 'high priority tasks', category: 'tasks' },
+    { query: 'architecture documents', category: 'documents' },
+  ]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [aiMode, setAiMode] = useState(false);
+  const [sortBy, setSortBy] = useState<'relevance' | 'date' | 'popularity'>('relevance');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Search whenever query changes
   useEffect(() => {
     if (searchQuery.length >= 2) {
       performSearch();
+      // Add to history after a delay
+      const timer = setTimeout(() => {
+        if (!searchHistory.includes(searchQuery)) {
+          setSearchHistory([searchQuery, ...searchHistory.slice(0, 9)]);
+        }
+      }, 2000);
+      return () => clearTimeout(timer);
     } else {
       setResults([]);
       setStats(null);
     }
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, sortBy]);
+
+  const handleVoiceSearch = () => {
+    setIsListening(!isListening);
+    if (!isListening) {
+      toast.success('🎤 Voice search activated');
+      setTimeout(() => {
+        setSearchQuery('Cloud infrastructure monitoring');
+        setIsListening(false);
+      }, 2000);
+    }
+  };
+
+  const toggleSaveSearch = () => {
+    const exists = savedSearches.find(s => s.query === searchQuery && s.category === activeCategory);
+    if (exists) {
+      setSavedSearches(savedSearches.filter(s => s.query !== searchQuery || s.category !== activeCategory));
+      toast.success('Removed from saved searches');
+    } else {
+      setSavedSearches([{ query: searchQuery, category: activeCategory }, ...savedSearches]);
+      toast.success('⭐ Search saved!');
+    }
+  };
+
+  const isSaved = savedSearches.some(s => s.query === searchQuery && s.category === activeCategory);
 
   const performSearch = () => {
     setIsSearching(true);
     const startTime = Date.now();
 
-    // Simulate search with sample data
+    // Simulate AI-powered search with fuzzy matching
     setTimeout(() => {
       const sampleResults = generateSampleResults(searchQuery, activeCategory);
-      setResults(sampleResults);
+      
+      // Apply sorting
+      let sortedResults = [...sampleResults];
+      if (sortBy === 'date') {
+        sortedResults.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      } else if (sortBy === 'popularity') {
+        sortedResults.sort((a, b) => (b.metadata?.views || 0) - (a.metadata?.views || 0));
+      }
+      
+      setResults(sortedResults);
       
       const searchTime = Date.now() - startTime;
       setStats({
-        totalResults: sampleResults.length,
+        totalResults: sortedResults.length,
         resultsByCategory: {
-          all: sampleResults.length,
-          projects: sampleResults.filter(r => r.category === 'projects').length,
-          tasks: sampleResults.filter(r => r.category === 'tasks').length,
-          team: sampleResults.filter(r => r.category === 'team').length,
-          documents: sampleResults.filter(r => r.category === 'documents').length,
-          activities: sampleResults.filter(r => r.category === 'activities').length,
+          all: sortedResults.length,
+          projects: sortedResults.filter(r => r.category === 'projects').length,
+          tasks: sortedResults.filter(r => r.category === 'tasks').length,
+          team: sortedResults.filter(r => r.category === 'team').length,
+          documents: sortedResults.filter(r => r.category === 'documents').length,
+          activities: sortedResults.filter(r => r.category === 'activities').length,
         },
         searchTime,
       });
@@ -74,7 +146,7 @@ export default function GlobalSearch() {
         url: '/workflow',
         icon: 'folder',
         timestamp: new Date('2025-11-20'),
-        metadata: { status: 'in-progress', progress: 45, team: 8 },
+        metadata: { status: 'in-progress', progress: 45, team: 8, views: 324, relevance: 0.95 },
       },
       {
         id: 'proj-2',
@@ -85,7 +157,7 @@ export default function GlobalSearch() {
         url: '/workflow',
         icon: 'folder',
         timestamp: new Date('2025-11-22'),
-        metadata: { status: 'planning', progress: 15, team: 5 },
+        metadata: { status: 'planning', progress: 15, team: 5, views: 156, relevance: 0.88 },
       },
       {
         id: 'proj-3',
@@ -96,7 +168,7 @@ export default function GlobalSearch() {
         url: '/workflow',
         icon: 'folder',
         timestamp: new Date('2025-11-18'),
-        metadata: { status: 'in-progress', progress: 60, team: 12 },
+        metadata: { status: 'in-progress', progress: 60, team: 12, views: 489, relevance: 0.92 },
       },
       
       // Tasks
@@ -309,203 +381,533 @@ export default function GlobalSearch() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3 mb-2">
-              <Search className="w-8 h-8 text-blue-600" />
-              Global Search
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Find projects, tasks, team members, documents, and activities across your workspace
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-950 dark:via-blue-950/20 dark:to-purple-950/20 p-6 relative overflow-hidden">
+        {/* Animated Background Mesh */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-600/20 dark:from-blue-600/10 dark:to-purple-800/10 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              rotate: [90, 0, 90],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-400/20 to-pink-600/20 dark:from-purple-600/10 dark:to-pink-800/10 rounded-full blur-3xl"
+          />
+        </div>
 
-          {/* Search Bar */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
-            <div className="p-4">
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, type: "spring" }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-3 mb-2">
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className="w-10 h-10 text-blue-600" />
+                  </motion.div>
+                  AI-Powered Global Search
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <Brain className="w-4 h-4" />
+                  Intelligent search across your entire workspace with natural language processing
+                </p>
+              </div>
+              
+              {/* AI Mode Toggle */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setAiMode(!aiMode)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                  aiMode
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50'
+                    : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                {aiMode ? 'AI Mode Active' : 'Enable AI Mode'}
+              </motion.button>
+            </div>
+          </motion.div>
+
+          {/* Search Bar - Ultra Modern */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1, type: "spring" }}
+            className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 mb-6 overflow-hidden"
+          >
+            <div className="p-6">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+                <motion.div
+                  animate={isSearching ? { rotate: 360 } : {}}
+                  transition={{ duration: 1, repeat: isSearching ? Infinity : 0, ease: "linear" }}
+                  className="absolute left-5 top-1/2 -translate-y-1/2"
+                >
+                  <Search className="w-7 h-7 text-blue-600" />
+                </motion.div>
+                
                 <input
+                  ref={searchInputRef}
                   type="text"
-                  placeholder="Search for anything..."
+                  placeholder={aiMode ? "Ask anything... (e.g., 'show me high priority tasks from last week')" : "Search for anything..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-14 pr-12 py-4 text-lg border-0 focus:ring-2 focus:ring-blue-500 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                  onFocus={() => setShowHistory(true)}
+                  onBlur={() => setTimeout(() => setShowHistory(false), 200)}
+                  className="w-full pl-16 pr-40 py-5 text-lg border-0 focus:ring-2 focus:ring-blue-500 rounded-xl bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 transition-all"
                   autoFocus
                 />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                
+                {/* Action Buttons */}
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  {searchQuery && (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={toggleSaveSearch}
+                        className={`p-2 rounded-lg transition-all ${
+                          isSaved
+                            ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500'
+                        }`}
+                        title={isSaved ? "Remove from saved" : "Save search"}
+                      >
+                        {isSaved ? <Star className="w-5 h-5 fill-current" /> : <StarOff className="w-5 h-5" />}
+                      </motion.button>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setSearchQuery('')}
+                        className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all"
+                      >
+                        <X className="w-5 h-5 text-gray-500" />
+                      </motion.button>
+                    </>
+                  )}
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleVoiceSearch}
+                    className={`p-2 rounded-lg transition-all ${
+                      isListening
+                        ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 animate-pulse'
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500'
+                    }`}
+                    title="Voice search"
                   >
-                    <X className="w-5 h-5 text-gray-500" />
-                  </button>
-                )}
+                    <Mic className="w-5 h-5" />
+                  </motion.button>
+                </div>
+
+                {/* Search History Dropdown */}
+                <AnimatePresence>
+                  {showHistory && searchQuery.length === 0 && searchHistory.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+                    >
+                      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <History className="w-4 h-4" />
+                            Recent Searches
+                          </span>
+                          <button
+                            onClick={() => setSearchHistory([])}
+                            className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {searchHistory.map((query, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSearchQuery(query)}
+                            className="w-full px-4 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 group"
+                          >
+                            <Clock className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                            <span className="text-gray-700 dark:text-gray-300">{query}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {/* Category Filters */}
-              <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                      activeCategory === cat.id
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {getCategoryIcon(cat.id)}
-                    <span>{cat.label}</span>
-                    {searchQuery && (
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs ${
-                          activeCategory === cat.id
-                            ? 'bg-blue-700 text-white'
-                            : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        {cat.count}
-                      </span>
-                    )}
-                  </button>
-                ))}
+              {/* Advanced Controls Row */}
+              <div className="flex items-center gap-3 mt-6 flex-wrap">
+                {/* Category Filters */}
+                <div className="flex items-center gap-2 flex-1 overflow-x-auto pb-2">
+                  {categories.map((cat) => (
+                    <motion.button
+                      key={cat.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${
+                        activeCategory === cat.id
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                          : 'bg-gray-100/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {getCategoryIcon(cat.id)}
+                      <span>{cat.label}</span>
+                      {searchQuery && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                            activeCategory === cat.id
+                              ? 'bg-white/30 text-white'
+                              : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          {cat.count}
+                        </motion.span>
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+
+                {/* Sort Dropdown */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 border-0 text-sm font-medium text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="relevance">🎯 Relevance</option>
+                  <option value="date">📅 Date</option>
+                  <option value="popularity">🔥 Popularity</option>
+                </select>
               </div>
             </div>
 
-            {/* Search Stats */}
+            {/* Search Stats Bar */}
             {stats && searchQuery && (
-              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Found <span className="font-semibold text-gray-900 dark:text-gray-100">{stats.totalResults}</span> results
-                  in {stats.searchTime}ms
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="px-6 py-4 bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-950/30 dark:to-purple-950/30 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-blue-600" />
+                    Found <span className="font-bold text-blue-600">{stats.totalResults}</span> results
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-600 dark:text-gray-400">{stats.searchTime}ms</span>
+                  </div>
+                  {aiMode && (
+                    <motion.div
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium"
+                    >
+                      <Brain className="w-3 h-3" />
+                      AI Enhanced
+                    </motion.div>
+                  )}
                 </div>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2 px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all"
                 >
                   <Filter className="w-4 h-4" />
                   Advanced Filters
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
+
+          {/* Saved Searches */}
+          {savedSearches.length > 0 && !searchQuery && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-6"
+            >
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                Saved Searches
+              </h3>
+              <div className="flex gap-2 flex-wrap">
+                {savedSearches.map((saved, idx) => (
+                  <motion.button
+                    key={idx}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    onClick={() => {
+                      setSearchQuery(saved.query);
+                      setActiveCategory(saved.category);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:shadow-lg transition-all"
+                  >
+                    {getCategoryIcon(saved.category)}
+                    <span>{saved.query}</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           {/* Results */}
           {isSearching ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">Searching...</p>
-            </div>
-          ) : searchQuery.length < 2 ? (
-            <div className="text-center py-12">
-              <Search className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Start typing to search
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Search across projects, tasks, team members, documents, and activities
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="inline-block"
+              >
+                <Sparkles className="w-16 h-16 text-blue-600" />
+              </motion.div>
+              <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium">
+                {aiMode ? 'AI is analyzing your query...' : 'Searching...'}
               </p>
-            </div>
+            </motion.div>
+          ) : searchQuery.length < 2 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-center py-16"
+            >
+              <div className="relative inline-block mb-6">
+                <Search className="w-20 h-20 text-gray-300 dark:text-gray-700" />
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl"
+                />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Start your search journey
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Use natural language or keywords to find anything across your workspace
+              </p>
+              
+              {/* Quick Search Suggestions */}
+              <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
+                {[
+                  { icon: Hash, text: 'high priority tasks', cat: 'tasks' as SearchCategory },
+                  { icon: Calendar, text: 'projects from last month', cat: 'projects' as SearchCategory },
+                  { icon: Users, text: 'team members in cloud', cat: 'team' as SearchCategory },
+                  { icon: FileText, text: 'architecture documents', cat: 'documents' as SearchCategory },
+                ].map((suggestion, idx) => (
+                  <motion.button
+                    key={idx}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    onClick={() => {
+                      setSearchQuery(suggestion.text);
+                      setActiveCategory(suggestion.cat);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:shadow-lg transition-all"
+                  >
+                    <suggestion.icon className="w-4 h-4 text-blue-600" />
+                    {suggestion.text}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
           ) : results.length === 0 ? (
-            <div className="text-center py-12">
-              <Search className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-16"
+            >
+              <div className="relative inline-block mb-6">
+                <Search className="w-20 h-20 text-gray-300 dark:text-gray-700" />
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </motion.div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 No results found
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Try adjusting your search query or filters
               </p>
-            </div>
+            </motion.div>
           ) : (
-            <div className="space-y-3">
-              {results.map((result) => (
-                <div
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-3"
+            >
+              {results.map((result, idx) => (
+                <motion.div
                   key={result.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: idx * 0.05 }}
                   onClick={() => handleResultClick(result)}
-                  className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-500 transition-all cursor-pointer group"
+                  whileHover={{ scale: 1.01, y: -4 }}
+                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl rounded-2xl p-5 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl hover:border-blue-500/50 transition-all cursor-pointer group relative overflow-hidden"
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div className={`p-3 rounded-lg ${getCategoryColor(result.category)}`}>
+                  {/* Hover Gradient Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  <div className="relative flex items-start gap-4">
+                    {/* Icon with Ping Effect */}
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                      className={`relative p-4 rounded-xl ${getCategoryColor(result.category)} group-hover:shadow-lg transition-all`}
+                    >
                       {getCategoryIcon(result.category)}
-                    </div>
+                      {aiMode && result.metadata?.relevance && result.metadata.relevance > 0.9 && (
+                        <>
+                          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                          </span>
+                        </>
+                      )}
+                    </motion.div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors flex items-center gap-2">
                             {result.title}
+                            {aiMode && result.metadata?.relevance && (
+                              <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                                {Math.round(result.metadata.relevance * 100)}% match
+                              </span>
+                            )}
                           </h3>
                           {result.subtitle && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-2">
+                              <MapPin className="w-3 h-3" />
                               {result.subtitle}
                             </p>
                           )}
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+                        <motion.div
+                          whileHover={{ x: 5 }}
+                          className="text-gray-400 group-hover:text-blue-600 transition-colors"
+                        >
+                          <ChevronRight className="w-6 h-6" />
+                        </motion.div>
                       </div>
 
                       {result.description && (
-                        <p className="text-gray-600 dark:text-gray-300 mb-3">
+                        <p className="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
                           {result.description}
                         </p>
                       )}
 
-                      {/* Metadata */}
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span className={`px-2 py-1 rounded-full font-medium ${getCategoryColor(result.category)}`}>
+                      {/* Enhanced Metadata */}
+                      <div className="flex items-center gap-3 flex-wrap text-xs">
+                        <span className={`px-3 py-1.5 rounded-full font-semibold ${getCategoryColor(result.category)}`}>
                           {result.category.charAt(0).toUpperCase() + result.category.slice(1)}
                         </span>
                         {result.timestamp && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                          <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700/50">
+                            <Clock className="w-3.5 h-3.5" />
                             {result.timestamp.toLocaleDateString()}
                           </span>
                         )}
-                        {result.metadata && Object.keys(result.metadata).length > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Tag className="w-3 h-3" />
-                            {Object.keys(result.metadata).length} attributes
+                        {result.metadata?.views && (
+                          <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700/50">
+                            <Activity className="w-3.5 h-3.5" />
+                            {result.metadata.views} views
+                          </span>
+                        )}
+                        {result.metadata && Object.keys(result.metadata).length > 3 && (
+                          <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                            <Tag className="w-3.5 h-3.5" />
+                            +{Object.keys(result.metadata).length - 3} more
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
 
-          {/* Quick Tips */}
+          {/* Enhanced Search Tips */}
           {!searchQuery && (
-            <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
-              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Search Tips
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mt-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 backdrop-blur-xl rounded-2xl p-6 border border-blue-200/50 dark:border-blue-800/50"
+            >
+              <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                Pro Search Tips
               </h3>
-              <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>Use category filters to narrow down results to specific types</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>Search works across titles, descriptions, and metadata</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>Click on any result to navigate directly to that item</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>Use keyboard shortcut Cmd+K (Mac) or Ctrl+K (Windows) to quick search</span>
-                </li>
-              </ul>
-            </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {[
+                  { icon: Brain, title: 'Natural Language', desc: 'Ask questions naturally: "show me projects by Sarah"' },
+                  { icon: Zap, title: 'Smart Filters', desc: 'Combine categories and dates for precise results' },
+                  { icon: Star, title: 'Save Searches', desc: 'Star frequently used searches for quick access' },
+                  { icon: Mic, title: 'Voice Search', desc: 'Use voice input for hands-free searching' },
+                  { icon: Command, title: 'Keyboard Shortcuts', desc: 'Press Cmd+K (Mac) or Ctrl+K (Windows) anywhere' },
+                  { icon: History, title: 'Search History', desc: 'Access your recent searches from the dropdown' },
+                ].map((tip, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.5 + idx * 0.1 }}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
+                  >
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                      <tip.icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                        {tip.title}
+                      </h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {tip.desc}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           )}
         </div>
       </div>
