@@ -99,6 +99,8 @@ export default function Collaboration() {
         { id: '8', name: 'monitoring', type: 'public', description: 'System monitoring and alerts', unreadCount: 12, members: 87, isPrivate: false, isPinned: false, isMuted: false, lastActivity: new Date().toISOString() },
         { id: '9', name: 'ai-recommendations', type: 'public', description: 'AI-powered optimization suggestions', unreadCount: 4, members: 67, isPrivate: false, isPinned: false, isMuted: false, lastActivity: new Date().toISOString() },
         { id: '10', name: 'random', type: 'public', description: 'Off-topic and team bonding', unreadCount: 0, members: 142, isPrivate: false, isPinned: false, isMuted: false, lastActivity: new Date().toISOString() },
+        { id: '11', name: 'ai-bot', type: 'public', description: '🤖 Chat with AI Assistant for help and insights', unreadCount: 0, members: 234, isPrivate: false, isPinned: true, isMuted: false, lastActivity: new Date().toISOString() },
+        { id: '12', name: 'application-help', type: 'public', description: '❓ Get help with using the Dharma IaC platform', unreadCount: 2, members: 198, isPrivate: false, isPinned: true, isMuted: false, lastActivity: new Date().toISOString() },
       ];
       
       setChannels(defaultChannels);
@@ -120,6 +122,8 @@ export default function Collaboration() {
       
       // Set default online users
       const defaultUsers: OnlineUser[] = [
+        { id: 'bot-ai', name: '🤖 AI Bot', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
+        { id: 'bot-help', name: '❓ Application Help', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
         { id: '1', name: 'Yudhishthira', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
         { id: '2', name: 'Arjuna', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
         { id: '3', name: 'Krishna', avatar: '', status: 'online' as UserStatus, lastSeen: new Date().toISOString() },
@@ -150,10 +154,10 @@ export default function Collaboration() {
       
       // Set default stats
       setStats({
-        totalMessages: 2847,
-        activeUsers: 8,
-        channels: 10,
-        messagesLast24h: 156
+        totalMessages: 3124,
+        activeUsers: 10,
+        channels: 12,
+        messagesLast24h: 189
       });
     }
   };
@@ -182,47 +186,154 @@ export default function Collaboration() {
       
       // Set default welcome messages
       const channelName = channels.find(c => c.id === channelId)?.name || 'general';
-      const defaultMessages: Message[] = [
-        {
-          id: '1',
-          channelId,
-          userId: '3',
-          userName: 'Krishna',
-          userAvatar: '',
-          type: 'text',
-          content: `Welcome to the #${channelName} channel! 🎉 This is where the Dharma IaC team collaborates.`,
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          reactions: [{ emoji: '👍', count: 5, userIds: ['1', '2', '4', '5', '6'] }],
-          isEdited: false,
-          isPinned: false
-        },
-        {
-          id: '2',
-          channelId,
-          userId: '1',
-          userName: 'Yudhishthira',
-          userAvatar: '',
-          type: 'text',
-          content: 'Great to see everyone here! Let\'s build amazing infrastructure together.',
-          timestamp: new Date(Date.now() - 1800000).toISOString(),
-          reactions: [{ emoji: '🎉', count: 3, userIds: ['2', '3', '7'] }],
-          isEdited: false,
-          isPinned: false
-        },
-        {
-          id: '3',
-          channelId,
-          userId: '8',
-          userName: 'Vidura',
-          userAvatar: '',
-          type: 'text',
-          content: 'Feel free to share your questions and ideas here. We\'re all here to help! 🚀',
-          timestamp: new Date(Date.now() - 900000).toISOString(),
-          reactions: [{ emoji: '🔥', count: 4, userIds: ['1', '3', '5', '7'] }],
-          isEdited: false,
-          isPinned: false
-        }
-      ];
+      
+      let defaultMessages: Message[] = [];
+      
+      // Special messages for AI Bot channel
+      if (channelName === 'ai-bot') {
+        defaultMessages = [
+          {
+            id: '1',
+            channelId,
+            userId: 'bot-ai',
+            userName: '🤖 AI Bot',
+            userAvatar: '',
+            type: 'text',
+            content: 'Hello! I\'m your AI Assistant. I can help you with:\n\n🔹 Infrastructure optimization\n🔹 Terraform best practices\n🔹 Cloud cost analysis\n🔹 Deployment troubleshooting\n🔹 Security recommendations\n\nJust ask me anything!',
+            timestamp: new Date(Date.now() - 7200000).toISOString(),
+            reactions: [{ emoji: '🤖', count: 8, userIds: ['1', '2', '3', '5', '6', '7', '8', 'bot-help'] }],
+            isEdited: false,
+            isPinned: true
+          },
+          {
+            id: '2',
+            channelId,
+            userId: '3',
+            userName: 'Krishna',
+            userAvatar: '',
+            type: 'text',
+            content: 'This AI bot is incredibly helpful! Saved us hours on our last deployment.',
+            timestamp: new Date(Date.now() - 3600000).toISOString(),
+            reactions: [{ emoji: '💯', count: 4, userIds: ['1', '2', '5', '7'] }],
+            isEdited: false,
+            isPinned: false
+          },
+          {
+            id: '3',
+            channelId,
+            userId: 'bot-ai',
+            userName: '🤖 AI Bot',
+            userAvatar: '',
+            type: 'text',
+            content: '✨ I\'m constantly learning from your infrastructure patterns to provide better recommendations. Feel free to ask about anything related to your Dharma IaC platform!',
+            timestamp: new Date(Date.now() - 1800000).toISOString(),
+            reactions: [{ emoji: '✨', count: 6, userIds: ['1', '2', '3', '5', '7', '8'] }],
+            isEdited: false,
+            isPinned: false
+          }
+        ];
+      }
+      // Special messages for Application Help channel
+      else if (channelName === 'application-help') {
+        defaultMessages = [
+          {
+            id: '1',
+            channelId,
+            userId: 'bot-help',
+            userName: '❓ Application Help',
+            userAvatar: '',
+            type: 'text',
+            content: 'Welcome to Application Help! 👋\n\nI can assist you with:\n\n📚 How to use Dharma IaC features\n🎯 Navigation and workflows\n⚙️ Configuration settings\n🔧 Troubleshooting common issues\n📖 Documentation links\n\nWhat do you need help with today?',
+            timestamp: new Date(Date.now() - 7200000).toISOString(),
+            reactions: [{ emoji: '👍', count: 12, userIds: ['1', '2', '3', '4', '5', '6', '7', '8', 'bot-ai', '9', '10', '11'] }],
+            isEdited: false,
+            isPinned: true
+          },
+          {
+            id: '2',
+            channelId,
+            userId: '1',
+            userName: 'Yudhishthira',
+            userAvatar: '',
+            type: 'text',
+            content: 'Quick question - how do I export my infrastructure blueprint?',
+            timestamp: new Date(Date.now() - 3000000).toISOString(),
+            reactions: [],
+            isEdited: false,
+            isPinned: false
+          },
+          {
+            id: '3',
+            channelId,
+            userId: 'bot-help',
+            userName: '❓ Application Help',
+            userAvatar: '',
+            type: 'text',
+            content: 'Great question! To export your blueprint:\n\n1. Go to Enterprise Architecture (Krishna) from the sidebar\n2. Select your blueprint\n3. Click the Export button (download icon)\n4. Choose your format: Terraform, CloudFormation, or ARM templates\n\nYou can also use the CLI: `dharma-iac export --blueprint <name> --format terraform`',
+            timestamp: new Date(Date.now() - 2400000).toISOString(),
+            reactions: [{ emoji: '🎯', count: 5, userIds: ['1', '2', '3', '5', '7'] }],
+            isEdited: false,
+            isPinned: false
+          },
+          {
+            id: '4',
+            channelId,
+            userId: '1',
+            userName: 'Yudhishthira',
+            userAvatar: '',
+            type: 'text',
+            content: 'Perfect! That worked. Thanks! 🙏',
+            timestamp: new Date(Date.now() - 1800000).toISOString(),
+            reactions: [{ emoji: '✅', count: 2, userIds: ['bot-help', '3'] }],
+            isEdited: false,
+            isPinned: false
+          }
+        ];
+      }
+      // Default messages for other channels
+      else {
+        defaultMessages = [
+          {
+            id: '1',
+            channelId,
+            userId: '3',
+            userName: 'Krishna',
+            userAvatar: '',
+            type: 'text',
+            content: `Welcome to the #${channelName} channel! 🎉 This is where the Dharma IaC team collaborates.`,
+            timestamp: new Date(Date.now() - 3600000).toISOString(),
+            reactions: [{ emoji: '👍', count: 5, userIds: ['1', '2', '4', '5', '6'] }],
+            isEdited: false,
+            isPinned: false
+          },
+          {
+            id: '2',
+            channelId,
+            userId: '1',
+            userName: 'Yudhishthira',
+            userAvatar: '',
+            type: 'text',
+            content: 'Great to see everyone here! Let\'s build amazing infrastructure together.',
+            timestamp: new Date(Date.now() - 1800000).toISOString(),
+            reactions: [{ emoji: '🎉', count: 3, userIds: ['2', '3', '7'] }],
+            isEdited: false,
+            isPinned: false
+          },
+          {
+            id: '3',
+            channelId,
+            userId: '8',
+            userName: 'Vidura',
+            userAvatar: '',
+            type: 'text',
+            content: 'Feel free to share your questions and ideas here. We\'re all here to help! 🚀',
+            timestamp: new Date(Date.now() - 900000).toISOString(),
+            reactions: [{ emoji: '🔥', count: 4, userIds: ['1', '3', '5', '7'] }],
+            isEdited: false,
+            isPinned: false
+          }
+        ];
+      }
       
       setChannelMessages(prev => ({
         ...prev,
@@ -262,6 +373,70 @@ export default function Collaboration() {
     setMessages(updatedMessages);
     setMessageInput('');
     setIsTyping(false);
+    
+    // Auto-reply from bots in bot channels
+    if (selectedChannel.name === 'ai-bot' || selectedChannel.name === 'application-help') {
+      setTimeout(() => {
+        const botId = selectedChannel.name === 'ai-bot' ? 'bot-ai' : 'bot-help';
+        const botName = selectedChannel.name === 'ai-bot' ? '🤖 AI Bot' : '❓ Application Help';
+        
+        let botReply = '';
+        const userMsg = messageInput.toLowerCase();
+        
+        if (selectedChannel.name === 'ai-bot') {
+          // AI Bot responses
+          if (userMsg.includes('cost') || userMsg.includes('price') || userMsg.includes('expensive')) {
+            botReply = '💰 I can help with cost optimization! Based on your current usage patterns, I recommend:\n\n• Right-sizing over-provisioned instances (save ~30%)\n• Implementing auto-scaling policies\n• Using reserved instances for predictable workloads\n• Enabling spot instances for non-critical tasks\n\nWould you like a detailed cost analysis report?';
+          } else if (userMsg.includes('terraform') || userMsg.includes('tf')) {
+            botReply = '🔧 Terraform best practices:\n\n• Use remote state with locking\n• Organize code with modules\n• Implement proper variable validation\n• Use workspaces for environments\n• Enable detailed logging\n\nI can review your terraform code if you share it!';
+          } else if (userMsg.includes('deploy') || userMsg.includes('deployment')) {
+            botReply = '🚀 For smooth deployments:\n\n• Use blue-green deployment strategy\n• Implement health checks\n• Enable rollback mechanisms\n• Monitor deployment metrics\n• Use canary releases for critical changes\n\nNeed help troubleshooting a specific deployment?';
+          } else if (userMsg.includes('security') || userMsg.includes('secure')) {
+            botReply = '🔒 Security recommendations:\n\n• Enable encryption at rest and in transit\n• Implement least-privilege access\n• Regular security audits\n• Use secrets management (Vault/AWS Secrets)\n• Enable MFA for all users\n\nI can perform a security audit of your infrastructure!';
+          } else if (userMsg.includes('kubernetes') || userMsg.includes('k8s')) {
+            botReply = '☸️ Kubernetes optimization tips:\n\n• Set resource limits and requests\n• Use HPA for auto-scaling\n• Implement pod disruption budgets\n• Enable monitoring with Prometheus\n• Use namespaces for isolation\n\nWhat specific K8s issue are you facing?';
+          } else {\n            botReply = `✨ I understand you\'re asking about: "${messageInput}"\n\nI can help you with:\n• Infrastructure optimization\n• Cost analysis\n• Security recommendations\n• Deployment strategies\n• Best practices\n\nCould you provide more details about what you need?`;
+          }
+        } else {
+          // Application Help responses
+          if (userMsg.includes('export') || userMsg.includes('download')) {
+            botReply = '📥 To export your work:\n\n**Blueprints:** Enterprise Architecture (Krishna) → Select blueprint → Export button\n\n**Templates:** IaC Generator (Vyasa) → Templates tab → Download icon\n\n**Reports:** Analytics (Narada) → Generate report → Export as PDF/CSV\n\nWhich type of export do you need?';
+          } else if (userMsg.includes('deploy') || userMsg.includes('deployment')) {
+            botReply = '🚀 To deploy infrastructure:\n\n1. Go to Project Dashboard (Yudhishthira)\n2. Select your project\n3. Click "Deploy" button\n4. Choose target environment\n5. Review changes\n6. Confirm deployment\n\nOr use CLI: `dharma-iac deploy --project <name> --env <environment>`';
+          } else if (userMsg.includes('create') || userMsg.includes('new')) {
+            botReply = '➕ Creating new resources:\n\n**Project:** Quick Access (Arjuna) → New Project\n**Blueprint:** Enterprise Architecture (Krishna) → Create Blueprint\n**Template:** IaC Generator (Vyasa) → New Template\n\nWhat would you like to create?';
+          } else if (userMsg.includes('monitor') || userMsg.includes('status')) {
+            botReply = '📊 Monitoring options:\n\n• **Real-time:** Cloud Provider Service (Garuda)\n• **Metrics:** Analytics Dashboard (Narada)\n• **Logs:** Monitoring Service (Garuda)\n• **Alerts:** Set up in Compliance (Bhishma)\n\nWhich monitoring view do you need?';
+          } else if (userMsg.includes('error') || userMsg.includes('problem') || userMsg.includes('issue')) {
+            botReply = '🔧 Troubleshooting help:\n\n1. Check the error message in notifications\n2. View detailed logs in Monitoring (Garuda)\n3. Verify permissions in SSO Service\n4. Check resource availability\n\nCan you share the specific error message you\'re seeing?';
+          } else if (userMsg.includes('sidebar') || userMsg.includes('menu') || userMsg.includes('navigate')) {
+            botReply = '🧭 Navigation guide:\n\n**Quick Access** - Favorites & Recent items\n**Collaboration** - Team chat & Projects\n**Architecture** - EA, Repository, Solutions\n**Operations** - CMDB, Monitoring, Guardrails\n**Governance** - Analytics, Security, FinOps\n\nEach menu item has a Mahabharat character name for easy reference!';
+          } else {\n            botReply = `👋 Thanks for reaching out!\n\nI can help you with:\n• Using platform features\n• Navigation and workflows\n• Troubleshooting issues\n• Configuration settings\n\nYour question: "${messageInput}"\n\nCould you be more specific about what you need help with?`;
+          }
+        }
+        
+        const botMessage: Message = {
+          id: `bot-${Date.now()}`,
+          channelId: selectedChannel.id,
+          userId: botId,
+          userName: botName,
+          userAvatar: '',
+          type: 'text',
+          content: botReply,
+          timestamp: new Date().toISOString(),
+          reactions: [],
+          isEdited: false,
+          isPinned: false
+        };
+        
+        const withBotReply = [...updatedMessages, botMessage];
+        setChannelMessages(prev => ({
+          ...prev,
+          [selectedChannel.id]: withBotReply
+        }));
+        setMessages(withBotReply);
+      }, 1500); // Bot replies after 1.5 seconds
+    }
     
     // Try to send to backend in background
     try {
