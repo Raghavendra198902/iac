@@ -24,6 +24,31 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Error boundary caught:', error, errorInfo);
+
+    // Log to backend error tracking service in production
+    if (process.env.NODE_ENV === 'production') {
+      this.logErrorToService(error, errorInfo);
+    }
+  }
+
+  private logErrorToService(error: Error, errorInfo: ErrorInfo) {
+    const errorData = {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+
+    // Send to backend error logging endpoint
+    fetch('/api/errors/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(errorData)
+    }).catch(err => {
+      console.error('Failed to log error:', err);
+    });
   }
 
   handleReset = () => {
