@@ -135,56 +135,56 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
               icon={Shield}
-              title="Enterprise Governance"
+              title="Enterprise Governance [Bhishma]"
               description="Built-in compliance, policy enforcement, and guardrails for secure infrastructure provisioning with real-time audit trails"
               gradient="from-blue-500 to-cyan-500"
               delay={0}
             />
             <FeatureCard
               icon={Cloud}
-              title="Multi-Cloud Support"
+              title="Multi-Cloud Support [Arjuna]"
               description="Seamlessly manage AWS, Azure, and Google Cloud resources from a unified platform with intelligent cost optimization"
               gradient="from-purple-500 to-pink-500"
               delay={0.1}
             />
             <FeatureCard
               icon={Server}
-              title="In-House Datacenter"
+              title="In-House Datacenter [Yudhishthira]"
               description="Manage your private datacenter infrastructure alongside cloud resources with unified orchestration and monitoring"
               gradient="from-slate-500 to-gray-700"
               delay={0.15}
             />
             <FeatureCard
               icon={Zap}
-              title="AI-Powered Automation"
+              title="AI-Powered Automation [Krishna]"
               description="Smart recommendations, pattern detection, and automated optimization powered by advanced machine learning algorithms"
               gradient="from-orange-500 to-red-500"
               delay={0.2}
             />
             <FeatureCard
               icon={GitBranch}
-              title="Architecture Blueprints"
+              title="Architecture Blueprints [Vidura]"
               description="Reusable templates and industry-standard patterns for rapid infrastructure deployment across environments"
               gradient="from-green-500 to-teal-500"
               delay={0.3}
             />
             <FeatureCard
               icon={Lock}
-              title="Security First"
+              title="Security First [Drona]"
               description="Advanced security controls, end-to-end encryption, and comprehensive audit logging built into every layer"
               gradient="from-indigo-500 to-purple-500"
               delay={0.4}
             />
             <FeatureCard
               icon={TrendingUp}
-              title="Cost Optimization"
+              title="Cost Optimization [Karna]"
               description="Real-time cost tracking, predictive forecasting, and AI-driven optimization recommendations to reduce cloud spend"
               gradient="from-yellow-500 to-orange-500"
               delay={0.5}
             />
             <FeatureCard
               icon={Network}
-              title="Hybrid Cloud Orchestration"
+              title="Hybrid Cloud Orchestration [Bhima]"
               description="Seamlessly bridge on-premises datacenters with cloud environments for true hybrid infrastructure management"
               gradient="from-cyan-500 to-blue-600"
               delay={0.55}
