@@ -327,6 +327,10 @@ class MultiCloudDiscovery:
             self.discover_gcp(),
             self.discover_azure(),
             self.discover_kubernetes(),
+            self.discover_on_premise(),  # Added on-premise discovery
+            self.discover_vmware(),       # Added VMware
+            self.discover_openstack(),    # Added OpenStack
+            self.discover_bare_metal(),   # Added bare metal servers
         ]
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -522,6 +526,532 @@ class MultiCloudDiscovery:
                     'namespace': pod.metadata.namespace,
                     'containers': [c.name for c in pod.spec.containers],
                     'restart_count': sum(cs.restart_count for cs in pod.status.container_statuses or []),
+                }
+            )
+            cis.append(ci)
+        
+        return cis
+    
+    async def discover_on_premise(self) -> List[ConfigurationItem]:
+        """Discover on-premise infrastructure"""
+        cis = []
+        
+        # Use multiple discovery methods for on-premise
+        discovery_methods = [
+            self._discover_via_ssh(),
+            self._discover_via_snmp(),
+            self._discover_via_ipmi(),
+            self._discover_via_agent(),
+            self._discover_network_scan(),
+        ]
+        
+        results = await asyncio.gather(*discovery_methods, return_exceptions=True)
+        for result in results:
+            if isinstance(result, list):
+                cis.extend(result)
+        
+        return cis
+    
+    async def _discover_via_ssh(self) -> List[ConfigurationItem]:
+        """Discover servers via SSH"""
+        cis = []
+        
+        # Get list of servers from inventory
+        servers = await self._get_ssh_inventory()
+        
+        for server_info in servers:
+            try:
+                # Connect via SSH
+                ssh_client = await self._ssh_connect(
+                    host=server_info['host'],
+                    username=server_info['username'],
+                    key_file=server_info.get('key_file')
+                )
+                
+                # Collect system information
+                hostname = await self._ssh_exec(ssh_client, "hostname")
+                os_info = await self._ssh_exec(ssh_client, "cat /etc/os-release")
+                cpu_info = await self._ssh_exec(ssh_client, "lscpu")
+                mem_info = await self._ssh_exec(ssh_client, "free -g")
+                disk_info = await self._ssh_exec(ssh_client, "df -h")
+                network_info = await self._ssh_exec(ssh_client, "ip addr")
+                
+                # Parse information
+                ci = ServerCI(
+                    ci_type=CIType.SERVER,
+                    name=hostname.strip(),
+                    display_name=hostname.strip(),
+                    status=CIStatus.ACTIVE,
+                    environment=self._detect_environment_from_name(hostname),
+                    provider="on-premise",
+                    hostname=hostname.strip(),
+                    ip_address=server_info['host'],
+                    os_type=self._parse_os_type(os_info),
+                    os_version=self._parse_os_version(os_info),
+                    cpu_cores=self._parse_cpu_cores(cpu_info),
+                    memory_gb=self._parse_memory_gb(mem_info),
+                    disk_gb=self._parse_disk_gb(disk_info),
+                    network_interfaces=self._parse_network_interfaces(network_info),
+                    attributes={
+                        'datacenter': server_info.get('datacenter', 'unknown'),
+                        'rack': server_info.get('rack', 'unknown'),
+                        'management_type': 'ssh',
+                        'ssh_port': server_info.get('port', 22),
+                    },
+                    tags={
+                        'location': server_info.get('location', 'unknown'),
+                        'owner': server_info.get('owner', 'unknown'),
+                    }
+                )
+                
+                # Get installed packages
+                if 'ubuntu' in os_info.lower() or 'debian' in os_info.lower():
+                    packages = await self._ssh_exec(ssh_client, "dpkg -l | grep '^ii' | awk '{print $2}'")
+                    ci.installed_packages = packages.strip().split('\n')[:100]  # Limit to 100
+                elif 'centos' in os_info.lower() or 'rhel' in os_info.lower():
+                    packages = await self._ssh_exec(ssh_client, "rpm -qa")
+                    ci.installed_packages = packages.strip().split('\n')[:100]
+                
+                # Get running services
+                services = await self._ssh_exec(ssh_client, "systemctl list-units --type=service --state=running --no-pager | grep '.service' | awk '{print $1}'")
+                ci.running_services = services.strip().split('\n')[:50]  # Limit to 50
+                
+                cis.append(ci)
+                await ssh_client.close()
+                
+            except Exception as e:
+                logger.error(f"Failed to discover {server_info['host']}: {e}")
+        
+        return cis
+    
+    async def _discover_via_snmp(self) -> List[ConfigurationItem]:
+        """Discover network devices via SNMP"""
+        cis = []
+        
+        from pysnmp.hlapi.asyncio import *
+        
+        # Get list of SNMP-enabled devices
+        devices = await self._get_snmp_inventory()
+        
+        for device in devices:
+            try:
+                # SNMP queries
+                iterator = getCmd(
+                    SnmpEngine(),
+                    CommunityData(device.get('community', 'public')),
+                    UdpTransportTarget((device['host'], device.get('port', 161))),
+                    ContextData(),
+                    ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysDescr', 0)),
+                    ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysName', 0)),
+                    ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysUpTime', 0)),
+                )
+                
+                errorIndication, errorStatus, errorIndex, varBinds = await iterator
+                
+                if not errorIndication and not errorStatus:
+                    sys_desc = str(varBinds[0][1])
+                    sys_name = str(varBinds[1][1])
+                    sys_uptime = str(varBinds[2][1])
+                    
+                    # Determine device type from sysDescr
+                    if 'switch' in sys_desc.lower():
+                        ci_type = CIType.NETWORK_INTERFACE
+                    elif 'router' in sys_desc.lower():
+                        ci_type = CIType.LOAD_BALANCER
+                    elif 'firewall' in sys_desc.lower():
+                        ci_type = CIType.FIREWALL
+                    else:
+                        ci_type = CIType.SERVER
+                    
+                    ci = ConfigurationItem(
+                        ci_type=ci_type,
+                        name=sys_name,
+                        display_name=sys_name,
+                        status=CIStatus.ACTIVE,
+                        environment=self._detect_environment_from_name(sys_name),
+                        provider="on-premise",
+                        hostname=sys_name,
+                        ip_address=device['host'],
+                        attributes={
+                            'system_description': sys_desc,
+                            'uptime': sys_uptime,
+                            'snmp_version': device.get('version', 'v2c'),
+                            'management_type': 'snmp',
+                            'datacenter': device.get('datacenter', 'unknown'),
+                        }
+                    )
+                    cis.append(ci)
+                    
+            except Exception as e:
+                logger.error(f"Failed SNMP discovery for {device['host']}: {e}")
+        
+        return cis
+    
+    async def _discover_via_ipmi(self) -> List[ConfigurationItem]:
+        """Discover bare metal servers via IPMI"""
+        cis = []
+        
+        import pyipmi
+        import pyipmi.interfaces
+        
+        # Get IPMI-enabled servers
+        servers = await self._get_ipmi_inventory()
+        
+        for server in servers:
+            try:
+                # Connect to BMC
+                interface = pyipmi.interfaces.create_interface('ipmitool', interface_type='lanplus')
+                ipmi = pyipmi.create_connection(interface)
+                ipmi.target = pyipmi.Target(
+                    ipmb_address=server.get('ipmb_address', 0x20)
+                )
+                ipmi.session.set_session_type_rmcp(
+                    host=server['bmc_ip'],
+                    port=server.get('bmc_port', 623)
+                )
+                ipmi.session.set_auth_type_user(
+                    username=server['username'],
+                    password=server['password']
+                )
+                ipmi.session.establish()
+                
+                # Get system information
+                fru_info = ipmi.get_fru_inventory()
+                sensor_data = ipmi.get_sensor_data_repository()
+                
+                ci = ServerCI(
+                    ci_type=CIType.SERVER,
+                    name=fru_info.get('product_name', server['bmc_ip']),
+                    display_name=fru_info.get('product_name', server['bmc_ip']),
+                    status=CIStatus.ACTIVE,
+                    environment=self._detect_environment_from_name(server.get('name', '')),
+                    provider="on-premise",
+                    ip_address=server.get('host_ip'),
+                    attributes={
+                        'bmc_ip': server['bmc_ip'],
+                        'manufacturer': fru_info.get('manufacturer', 'unknown'),
+                        'product_name': fru_info.get('product_name', 'unknown'),
+                        'serial_number': fru_info.get('serial_number', 'unknown'),
+                        'management_type': 'ipmi',
+                        'datacenter': server.get('datacenter', 'unknown'),
+                        'rack': server.get('rack', 'unknown'),
+                        'rack_position': server.get('rack_position', 'unknown'),
+                    },
+                    tags={
+                        'hardware_type': 'bare_metal',
+                        'location': server.get('location', 'unknown'),
+                    }
+                )
+                
+                cis.append(ci)
+                ipmi.session.close()
+                
+            except Exception as e:
+                logger.error(f"Failed IPMI discovery for {server['bmc_ip']}: {e}")
+        
+        return cis
+    
+    async def _discover_via_agent(self) -> List[ConfigurationItem]:
+        """Discover servers via CMDB agent installed on hosts"""
+        cis = []
+        
+        # Query agent registry
+        agents = await self._get_registered_agents()
+        
+        for agent in agents:
+            try:
+                # Call agent API
+                response = await self._http_get(
+                    f"http://{agent['host']}:{agent.get('port', 8201)}/api/v1/system-info"
+                )
+                
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    ci = ServerCI(
+                        ci_type=CIType.SERVER,
+                        name=data['hostname'],
+                        display_name=data['hostname'],
+                        status=CIStatus.ACTIVE,
+                        environment=CIEnvironment(data.get('environment', 'development')),
+                        provider="on-premise",
+                        hostname=data['hostname'],
+                        ip_address=data.get('ip_address'),
+                        fqdn=data.get('fqdn'),
+                        os_type=data['os']['type'],
+                        os_version=data['os']['version'],
+                        kernel_version=data['os'].get('kernel_version'),
+                        cpu_cores=data['cpu']['cores'],
+                        cpu_model=data['cpu'].get('model'),
+                        memory_gb=data['memory']['total_gb'],
+                        disk_gb=data['disk']['total_gb'],
+                        network_interfaces=data.get('network_interfaces', []),
+                        installed_packages=data.get('packages', [])[:100],
+                        running_services=data.get('services', [])[:50],
+                        attributes={
+                            'agent_version': data.get('agent_version'),
+                            'management_type': 'agent',
+                            'datacenter': data.get('datacenter', 'unknown'),
+                            'rack': data.get('rack', 'unknown'),
+                            'uptime_seconds': data.get('uptime'),
+                        },
+                        tags=data.get('tags', {})
+                    )
+                    
+                    cis.append(ci)
+                    
+            except Exception as e:
+                logger.error(f"Failed agent discovery for {agent['host']}: {e}")
+        
+        return cis
+    
+    async def _discover_network_scan(self) -> List[ConfigurationItem]:
+        """Discover devices via network scanning (nmap)"""
+        cis = []
+        
+        import nmap
+        
+        # Get network ranges to scan
+        network_ranges = await self._get_network_ranges()
+        
+        nm = nmap.PortScanner()
+        
+        for network_range in network_ranges:
+            try:
+                # Scan network
+                nm.scan(
+                    hosts=network_range['cidr'],
+                    arguments='-sn -PE -PP -PS22,80,443 -PA80,443'  # Ping scan
+                )
+                
+                for host in nm.all_hosts():
+                    if nm[host].state() == 'up':
+                        # Try to identify device type
+                        device_type = CIType.SERVER
+                        
+                        # Additional port scan for identification
+                        nm.scan(host, arguments='-sV -p 22,80,443,3389,161')
+                        
+                        open_ports = []
+                        for proto in nm[host].all_protocols():
+                            ports = nm[host][proto].keys()
+                            open_ports.extend(ports)
+                        
+                        ci = ConfigurationItem(
+                            ci_type=device_type,
+                            name=host,
+                            display_name=nm[host].hostname() or host,
+                            status=CIStatus.ACTIVE,
+                            environment=CIEnvironment.PRODUCTION,  # Default
+                            provider="on-premise",
+                            hostname=nm[host].hostname(),
+                            ip_address=host,
+                            attributes={
+                                'discovery_method': 'network_scan',
+                                'open_ports': open_ports,
+                                'mac_address': nm[host].get('addresses', {}).get('mac'),
+                                'vendor': nm[host].get('vendor', {}).get(nm[host].get('addresses', {}).get('mac', ''), 'unknown'),
+                                'datacenter': network_range.get('datacenter', 'unknown'),
+                            }
+                        )
+                        
+                        cis.append(ci)
+                        
+            except Exception as e:
+                logger.error(f"Failed network scan for {network_range['cidr']}: {e}")
+        
+        return cis
+    
+    async def discover_vmware(self) -> List[ConfigurationItem]:
+        """Discover VMware vSphere infrastructure"""
+        cis = []
+        
+        from pyVim.connect import SmartConnect
+        from pyVmomi import vim
+        
+        # Get vCenter credentials
+        vcenters = await self._get_vmware_inventory()
+        
+        for vcenter in vcenters:
+            try:
+                # Connect to vCenter
+                si = SmartConnect(
+                    host=vcenter['host'],
+                    user=vcenter['username'],
+                    pwd=vcenter['password'],
+                    port=vcenter.get('port', 443)
+                )
+                
+                content = si.RetrieveContent()
+                
+                # Discover VMs
+                container = content.viewManager.CreateContainerView(
+                    content.rootFolder,
+                    [vim.VirtualMachine],
+                    True
+                )
+                
+                for vm in container.view:
+                    if vm.runtime.powerState == "poweredOn":
+                        status = CIStatus.ACTIVE
+                    elif vm.runtime.powerState == "poweredOff":
+                        status = CIStatus.INACTIVE
+                    else:
+                        status = CIStatus.UNDER_MAINTENANCE
+                    
+                    ci = ServerCI(
+                        ci_type=CIType.VIRTUAL_MACHINE,
+                        name=vm.name,
+                        display_name=vm.name,
+                        status=status,
+                        environment=self._detect_environment_from_name(vm.name),
+                        provider="vmware",
+                        hostname=vm.guest.hostName if vm.guest else None,
+                        ip_address=vm.guest.ipAddress if vm.guest else None,
+                        cpu_cores=vm.config.hardware.numCPU,
+                        memory_gb=vm.config.hardware.memoryMB / 1024,
+                        disk_gb=sum(device.capacityInKB / 1024 / 1024 
+                                   for device in vm.config.hardware.device 
+                                   if isinstance(device, vim.vm.device.VirtualDisk)),
+                        os_type=vm.guest.guestFamily if vm.guest else None,
+                        os_version=vm.guest.guestFullName if vm.guest else None,
+                        attributes={
+                            'vm_id': vm._moId,
+                            'vcenter': vcenter['host'],
+                            'datacenter': vm.runtime.host.parent.parent.parent.name if vm.runtime.host else 'unknown',
+                            'cluster': vm.runtime.host.parent.name if vm.runtime.host else 'unknown',
+                            'host': vm.runtime.host.name if vm.runtime.host else 'unknown',
+                            'power_state': vm.runtime.powerState,
+                            'tools_status': vm.guest.toolsStatus if vm.guest else 'unknown',
+                            'vm_path': vm.config.files.vmPathName,
+                        }
+                    )
+                    
+                    cis.append(ci)
+                
+                # Discover ESXi hosts
+                host_container = content.viewManager.CreateContainerView(
+                    content.rootFolder,
+                    [vim.HostSystem],
+                    True
+                )
+                
+                for host in host_container.view:
+                    ci = ServerCI(
+                        ci_type=CIType.SERVER,
+                        name=host.name,
+                        display_name=host.name,
+                        status=CIStatus.ACTIVE if host.runtime.connectionState == "connected" else CIStatus.INACTIVE,
+                        environment=CIEnvironment.PRODUCTION,
+                        provider="vmware-esxi",
+                        hostname=host.name,
+                        cpu_cores=host.hardware.cpuInfo.numCpuCores,
+                        memory_gb=host.hardware.memorySize / 1024 / 1024 / 1024,
+                        attributes={
+                            'host_id': host._moId,
+                            'vcenter': vcenter['host'],
+                            'version': host.config.product.version,
+                            'build': host.config.product.build,
+                            'cpu_model': host.hardware.cpuPkg[0].description if host.hardware.cpuPkg else None,
+                            'vendor': host.hardware.systemInfo.vendor,
+                            'model': host.hardware.systemInfo.model,
+                        }
+                    )
+                    cis.append(ci)
+                
+            except Exception as e:
+                logger.error(f"Failed VMware discovery for {vcenter['host']}: {e}")
+        
+        return cis
+    
+    async def discover_openstack(self) -> List[ConfigurationItem]:
+        """Discover OpenStack infrastructure"""
+        cis = []
+        
+        from openstack import connection
+        
+        # Get OpenStack credentials
+        clouds = await self._get_openstack_inventory()
+        
+        for cloud_config in clouds:
+            try:
+                conn = connection.Connection(
+                    auth_url=cloud_config['auth_url'],
+                    project_name=cloud_config['project_name'],
+                    username=cloud_config['username'],
+                    password=cloud_config['password'],
+                    region_name=cloud_config.get('region_name'),
+                    user_domain_name=cloud_config.get('user_domain_name', 'Default'),
+                    project_domain_name=cloud_config.get('project_domain_name', 'Default'),
+                )
+                
+                # Discover compute instances
+                for server in conn.compute.servers():
+                    ci = ServerCI(
+                        ci_type=CIType.VIRTUAL_MACHINE,
+                        name=server.name,
+                        display_name=server.name,
+                        status=self._map_openstack_status(server.status),
+                        environment=self._detect_environment_from_name(server.name),
+                        provider="openstack",
+                        external_id=server.id,
+                        hostname=server.name,
+                        ip_address=self._get_openstack_ip(server),
+                        attributes={
+                            'flavor': server.flavor['id'],
+                            'image': server.image['id'],
+                            'availability_zone': server.availability_zone,
+                            'project_id': server.project_id,
+                            'created_at': server.created_at,
+                            'cloud_name': cloud_config['name'],
+                        }
+                    )
+                    cis.append(ci)
+                
+            except Exception as e:
+                logger.error(f"Failed OpenStack discovery for {cloud_config['name']}: {e}")
+        
+        return cis
+    
+    async def discover_bare_metal(self) -> List[ConfigurationItem]:
+        """Discover bare metal servers from datacenter inventory"""
+        cis = []
+        
+        # Get physical server inventory (from DCIM/asset management)
+        servers = await self._get_bare_metal_inventory()
+        
+        for server in servers:
+            ci = ServerCI(
+                ci_type=CIType.SERVER,
+                name=server['asset_tag'],
+                display_name=server['name'],
+                status=CIStatus(server.get('status', 'active')),
+                environment=CIEnvironment(server.get('environment', 'production')),
+                provider="on-premise",
+                hostname=server.get('hostname'),
+                ip_address=server.get('ip_address'),
+                cpu_cores=server.get('cpu_cores'),
+                cpu_model=server.get('cpu_model'),
+                memory_gb=server.get('memory_gb'),
+                disk_gb=server.get('disk_gb'),
+                attributes={
+                    'asset_tag': server['asset_tag'],
+                    'serial_number': server.get('serial_number'),
+                    'manufacturer': server.get('manufacturer'),
+                    'model': server.get('model'),
+                    'datacenter': server.get('datacenter'),
+                    'rack': server.get('rack'),
+                    'rack_position': server.get('rack_position'),
+                    'power_supply_count': server.get('power_supply_count'),
+                    'nic_count': server.get('nic_count'),
+                    'warranty_expiry': server.get('warranty_expiry'),
+                    'purchase_date': server.get('purchase_date'),
+                    'bmc_ip': server.get('bmc_ip'),
+                },
+                tags={
+                    'hardware_type': 'bare_metal',
+                    'owner': server.get('owner'),
+                    'cost_center': server.get('cost_center'),
                 }
             )
             cis.append(ci)
