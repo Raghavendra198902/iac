@@ -98,24 +98,24 @@ const quickActions: QuickAction[] = [
 
 export default function QuickActionsPanel() {
   return (
-    <div className=\"space-y-4\">
+    <div className="space-y-4">
       {/* Header */}
-      <div className=\"flex items-center justify-between\">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className=\"text-xl font-bold text-gray-900 dark:text-white\">Quick Actions</h2>
-          <p className=\"text-sm text-gray-600 dark:text-gray-400 mt-0.5\">Get started with common tasks</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Quick Actions</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Get started with common tasks</p>
         </div>
         <Link
-          to=\"/help\"
-          className=\"text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1\"
+          to="/help"
+          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
         >
           <span>Need help?</span>
-          <ArrowRight className=\"w-3.5 h-3.5\" />
+          <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
       {/* Actions Grid */}
-      <div className=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4\">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {quickActions.map((action, index) => {
           const Icon = action.icon;
           
@@ -128,39 +128,39 @@ export default function QuickActionsPanel() {
             >
               <Link
                 to={action.href}
-                className=\"group relative block p-5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-transparent hover:shadow-xl transition-all duration-300 overflow-hidden\"
+                className="group relative block p-5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-transparent hover:shadow-xl transition-all duration-300 overflow-hidden"
               >
                 {/* Gradient overlay on hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
                 
                 {/* Popular badge */}
                 {action.popular && (
-                  <div className=\"absolute top-3 right-3 px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-bold animate-pulse\">
+                  <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-bold animate-pulse">
                     ⭐ {action.badge}
                   </div>
                 )}
 
                 {/* Content */}
-                <div className=\"relative z-10\">
+                <div className="relative z-10">
                   {/* Icon */}
                   <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${action.gradient} mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                    <Icon className=\"w-6 h-6 text-white\" />
+                    <Icon className="w-6 h-6 text-white" />
                   </div>
 
                   {/* Title */}
-                  <h3 className=\"text-base font-bold text-gray-900 dark:text-white mb-1.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors\">
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {action.title}
                   </h3>
 
                   {/* Description */}
-                  <p className=\"text-sm text-gray-600 dark:text-gray-400 leading-relaxed\">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                     {action.description}
                   </p>
 
                   {/* Arrow indicator */}
-                  <div className=\"flex items-center gap-2 mt-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors\">
-                    <span className=\"text-xs font-medium\">Get started</span>
-                    <ArrowRight className=\"w-3.5 h-3.5 group-hover:translate-x-1 transition-transform\" />
+                  <div className="flex items-center gap-2 mt-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <span className="text-xs font-medium">Get started</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </Link>
@@ -170,13 +170,13 @@ export default function QuickActionsPanel() {
       </div>
 
       {/* Help Text */}
-      <div className=\"flex items-start gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800\">
-        <Zap className=\"w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5\" />
+      <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
         <div>
-          <p className=\"text-sm font-medium text-blue-900 dark:text-blue-100\">
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
             Pro Tip: Start with the AI Designer for the fastest way to create infrastructure
           </p>
-          <p className=\"text-xs text-blue-700 dark:text-blue-300 mt-1\">
+          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
             Simply describe what you need, and our AI will generate a complete architecture in seconds.
           </p>
         </div>

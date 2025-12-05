@@ -86,6 +86,7 @@ export default function SADashboard() {
   }, []);
 
   return (
+    <MainLayout>
     <PageTransition>
       <div className="space-y-6">
         {/* Hero Section */}

@@ -94,7 +94,6 @@ export default function RiskDashboard() {
               >
                 <factor.icon className={`h-5 w-5 text-${factor.color}-600`} />
               </motion.div>
-              </div>
             </div>
             <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{factor.count}</p>
             <div className="flex items-center gap-2">
@@ -222,7 +221,7 @@ export default function RiskDashboard() {
         </div>
       </motion.div>
       </div>
+      </div>
     </MainLayout>
-    </div>
   );
 }

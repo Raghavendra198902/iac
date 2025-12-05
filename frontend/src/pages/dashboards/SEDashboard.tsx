@@ -653,5 +653,6 @@ export default function SEDashboard() {
         </div>
       </div>
     </PageTransition>
+    </MainLayout>
   );
 }

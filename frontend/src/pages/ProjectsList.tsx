@@ -279,7 +279,6 @@ const ProjectsList = () => {
             Try adjusting your search or filters
           </p>
         </motion.div>
-            </div>
           </MainLayout>
       )}
     </div>

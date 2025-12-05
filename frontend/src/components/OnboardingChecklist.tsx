@@ -115,50 +115,50 @@ export default function OnboardingChecklist() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className=\"relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border-2 border-blue-200 dark:border-gray-700 shadow-lg\"
+        className="relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border-2 border-blue-200 dark:border-gray-700 shadow-lg"
       >
         {/* Animated background pattern */}
-        <div className=\"absolute inset-0 opacity-10 dark:opacity-5\">
-          <div className=\"absolute inset-0\" style={{
+        <div className="absolute inset-0 opacity-10 dark:opacity-5">
+          <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)',
             backgroundSize: '32px 32px',
           }}></div>
         </div>
 
         {/* Header */}
-        <div className=\"relative z-10 p-5 border-b border-blue-200 dark:border-gray-700\">
-          <div className=\"flex items-start justify-between gap-4\">
-            <div className=\"flex items-start gap-4 flex-1\">
+        <div className="relative z-10 p-5 border-b border-blue-200 dark:border-gray-700">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4 flex-1">
               {/* Icon */}
-              <div className=\"w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg\">
-                <Sparkles className=\"w-6 h-6 text-white\" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
 
               {/* Content */}
-              <div className=\"flex-1\">
-                <h3 className=\"text-lg font-bold text-gray-900 dark:text-white mb-1\">
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
                   🚀 Get Started with IAC Dharma
                 </h3>
-                <p className=\"text-sm text-gray-600 dark:text-gray-400\">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Complete these steps to unlock the full power of the platform
                 </p>
 
                 {/* Progress bar */}
-                <div className=\"mt-3\">
-                  <div className=\"flex items-center justify-between mb-2\">
-                    <span className=\"text-xs font-semibold text-gray-700 dark:text-gray-300\">
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                       {completedCount} of {items.length} completed
                     </span>
-                    <span className=\"text-xs font-bold text-blue-600 dark:text-blue-400\">
+                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
                       {Math.round(progress)}%
                     </span>
                   </div>
-                  <div className=\"w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden\">
+                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.5, ease: 'easeOut' }}
-                      className=\"h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-full\"
+                      className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-full"
                     />
                   </div>
                 </div>
@@ -166,24 +166,24 @@ export default function OnboardingChecklist() {
             </div>
 
             {/* Actions */}
-            <div className=\"flex items-center gap-2\">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className=\"p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-colors\"
+                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-colors"
                 aria-label={isExpanded ? 'Collapse' : 'Expand'}
               >
                 {isExpanded ? (
-                  <ChevronDown className=\"w-5 h-5 text-gray-600 dark:text-gray-400\" />
+                  <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 ) : (
-                  <ChevronRight className=\"w-5 h-5 text-gray-600 dark:text-gray-400\" />
+                  <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 )}
               </button>
               <button
                 onClick={handleDismiss}
-                className=\"p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-colors\"
-                aria-label=\"Dismiss\"
+                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Dismiss"
               >
-                <X className=\"w-5 h-5 text-gray-600 dark:text-gray-400\" />
+                <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
           </div>
@@ -197,9 +197,9 @@ export default function OnboardingChecklist() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className=\"relative z-10\"
+              className="relative z-10"
             >
-              <div className=\"p-5 space-y-3\">
+              <div className="p-5 space-y-3">
                 {items.map((item, index) => {
                   const Icon = item.icon;
                   
@@ -209,7 +209,7 @@ export default function OnboardingChecklist() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className=\"group\"
+                      className="group"
                     >
                       <div className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-200 ${
                         item.completed
@@ -219,12 +219,12 @@ export default function OnboardingChecklist() {
                         {/* Checkbox */}
                         <button
                           onClick={() => toggleItem(item.id)}
-                          className=\"flex-shrink-0 mt-0.5 hover:scale-110 transition-transform\"
+                          className="flex-shrink-0 mt-0.5 hover:scale-110 transition-transform"
                         >
                           {item.completed ? (
-                            <CheckCircle2 className=\"w-6 h-6 text-green-600 dark:text-green-400\" />
+                            <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
                           ) : (
-                            <Circle className=\"w-6 h-6 text-gray-400 dark:text-gray-600 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors\" />
+                            <Circle className="w-6 h-6 text-gray-400 dark:text-gray-600 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                           )}
                         </button>
 
@@ -242,7 +242,7 @@ export default function OnboardingChecklist() {
                         </div>
 
                         {/* Content */}
-                        <div className=\"flex-1 min-w-0\">
+                        <div className="flex-1 min-w-0">
                           <h4 className={`font-semibold mb-1 ${
                             item.completed
                               ? 'text-gray-500 dark:text-gray-400 line-through'
@@ -250,11 +250,11 @@ export default function OnboardingChecklist() {
                           }`}>
                             {item.title}
                           </h4>
-                          <p className=\"text-sm text-gray-600 dark:text-gray-400 mb-2\">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                             {item.description}
                           </p>
                           {item.estimatedTime && !item.completed && (
-                            <span className=\"inline-flex items-center px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium\">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
                               ⏱️ {item.estimatedTime}
                             </span>
                           )}
@@ -264,10 +264,10 @@ export default function OnboardingChecklist() {
                         {!item.completed && item.href && (
                           <a
                             href={item.href}
-                            className=\"flex-shrink-0 flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors opacity-0 group-hover:opacity-100\"
+                            className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                           >
                             <span>Start</span>
-                            <ArrowRight className=\"w-3.5 h-3.5\" />
+                            <ArrowRight className="w-3.5 h-3.5" />
                           </a>
                         )}
                       </div>
@@ -277,11 +277,11 @@ export default function OnboardingChecklist() {
               </div>
 
               {/* Footer */}
-              <div className=\"p-5 border-t border-blue-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50\">
-                <div className=\"flex items-center gap-3\">
-                  <Trophy className=\"w-5 h-5 text-yellow-500\" />
-                  <p className=\"text-sm text-gray-700 dark:text-gray-300\">
-                    <span className=\"font-semibold\">Complete all tasks</span> to unlock advanced features and best practices guide!
+              <div className="p-5 border-t border-blue-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50">
+                <div className="flex items-center gap-3">
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Complete all tasks</span> to unlock advanced features and best practices guide!
                   </p>
                 </div>
               </div>

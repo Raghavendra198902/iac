@@ -556,5 +556,6 @@ export default function PMDashboard() {
         </div>
       </div>
     </PageTransition>
+    </MainLayout>
   );
 }
