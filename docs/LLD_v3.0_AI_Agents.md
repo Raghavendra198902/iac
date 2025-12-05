@@ -28,9 +28,9 @@
 
 ## 3. Core Agents
 
-### 3.1 Command Interpreter Agent
+### 3.1 Enhanced Command Interpreter Agent
 
-Translates natural language to structured actions:
+Advanced NLP agent with context awareness, intent classification, and multi-turn conversation:
 
 ```python
 # src/agents/command_interpreter.py
@@ -38,8 +38,32 @@ Translates natural language to structured actions:
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from langchain.memory import ConversationBufferWindowMemory
+from langchain.embeddings import OpenAIEmbeddings
+from pydantic import BaseModel, Field, validator
+from typing import List, Dict, Any, Optional
+import re
+from datetime import datetime
+from enum import Enum
+
+class IntentType(str, Enum):
+    """Command intent classification"""
+    CREATE = "create"
+    READ = "read"
+    UPDATE = "update"
+    DELETE = "delete"
+    SCALE = "scale"
+    MONITOR = "monitor"
+    OPTIMIZE = "optimize"
+    TROUBLESHOOT = "troubleshoot"
+    QUERY = "query"
+
+class ConfidenceLevel(str, Enum):
+    """Interpretation confidence"""
+    HIGH = "high"        # 90-100%
+    MEDIUM = "medium"    # 70-89%
+    LOW = "low"          # 50-69%
+    UNCLEAR = "unclear"  # <50%
 
 class Action(BaseModel):
     """Structured action from natural language"""
@@ -47,81 +71,329 @@ class Action(BaseModel):
     resource: str = Field(description="Resource type: infrastructure, deployment, etc.")
     parameters: Dict[str, Any] = Field(description="Action parameters")
     description: str = Field(description="Human-readable action description")
+    estimated_duration: Optional[str] = Field(default=None, description="Estimated completion time")
+    estimated_cost: Optional[float] = Field(default=None, description="Estimated cost in USD")
+    dependencies: List[str] = Field(default_factory=list, description="Dependent action IDs")
+    prerequisites: List[str] = Field(default_factory=list, description="Required conditions")
+    rollback_strategy: Optional[str] = Field(default=None, description="How to rollback if fails")
 
 class ActionPlan(BaseModel):
-    """Complete action plan"""
+    """Complete action plan with enhanced metadata"""
     interpretation: str = Field(description="How the agent understood the command")
+    intent: IntentType = Field(description="Primary intent of the command")
+    confidence: ConfidenceLevel = Field(description="Confidence in interpretation")
     actions: List[Action] = Field(description="List of actions to execute")
     confirmation_required: bool = Field(description="Whether user confirmation is needed")
     risk_level: str = Field(description="low, medium, high, critical")
+    total_estimated_cost: float = Field(default=0.0, description="Total estimated cost")
+    total_estimated_duration: str = Field(default="unknown", description="Total duration")
+    affected_resources: List[str] = Field(default_factory=list, description="Resources that will be affected")
+    warnings: List[str] = Field(default_factory=list, description="Warnings or concerns")
+    clarifying_questions: List[str] = Field(default_factory=list, description="Questions if unclear")
+    suggested_alternatives: List[str] = Field(default_factory=list, description="Alternative approaches")
+    
+    @validator('actions')
+    def validate_actions_not_empty(cls, v):
+        if not v:
+            raise ValueError("Action plan must contain at least one action")
+        return v
 
 class CommandInterpreterAgent:
-    """Agent that interprets natural language commands"""
+    """Enhanced agent with context, learning, and clarification"""
     
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, user_context: Optional[Dict] = None):
         self.llm = ChatOpenAI(
-            model="gpt-4",
+            model="gpt-4-turbo",
             temperature=0.1,
             api_key=api_key
         )
-        self.parser = PydanticOutputParser(pydantic_object=ActionPlan)
         
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are an expert infrastructure management assistant.
-            
-You interpret natural language commands and convert them to structured actions.
-
-Available resource types:
-- infrastructure: Cloud infrastructure (VMs, clusters, networks)
-- deployment: Kubernetes deployments
-- database: Database instances
-- storage: Storage volumes and buckets
-- monitoring: Alerts and dashboards
-- security: Firewall rules, IAM policies
-
-Available action types:
-- create: Create new resources
-- update: Modify existing resources
-- delete: Remove resources
-- scale: Scale up/down resources
-- restart: Restart services
-- backup: Create backups
-- monitor: Set up monitoring
-
-Risk Assessment:
-- low: Read operations, monitoring setup
-- medium: Create/update non-production resources
-- high: Scale production resources, delete non-critical resources
-- critical: Delete production resources, security changes
-
-{format_instructions}
-            """),
-            ("user", "{command}")
-        ])
-    
-    async def interpret(self, command: str) -> ActionPlan:
-        """Interpret natural language command"""
-        
-        # Format prompt
-        messages = self.prompt.format_messages(
-            command=command,
-            format_instructions=self.parser.get_format_instructions()
+        # Memory for context tracking
+        self.memory = ConversationBufferWindowMemory(
+            k=10,  # Remember last 10 interactions
+            return_messages=True,
+            memory_key="chat_history"
         )
         
+        # Embeddings for semantic search
+        self.embeddings = OpenAIEmbeddings(api_key=api_key)
+        
+        # User context (permissions, preferences, history)
+        self.user_context = user_context or {}
+        
+        self.parser = PydanticOutputParser(pydantic_object=ActionPlan)
+        
+        self.system_prompt = """You are an expert AI infrastructure management assistant with deep knowledge of:
+- Cloud providers (AWS, GCP, Azure, DigitalOcean)
+- Kubernetes and container orchestration
+- Infrastructure as Code (Terraform, CloudFormation, Pulumi)
+- CI/CD pipelines and DevOps best practices
+- Cost optimization strategies
+- Security and compliance (SOC2, HIPAA, PCI-DSS)
+- Monitoring and observability (Prometheus, Grafana, ELK)
+
+## Your Capabilities:
+
+1. **Intent Recognition**: Accurately identify what the user wants to accomplish
+2. **Context Awareness**: Use conversation history and user context
+3. **Intelligent Clarification**: Ask specific questions when command is ambiguous
+4. **Risk Assessment**: Evaluate potential impact and risks
+5. **Cost Estimation**: Provide cost estimates before execution
+6. **Alternative Suggestions**: Propose better or cheaper alternatives
+7. **Dependency Analysis**: Identify dependencies between actions
+8. **Rollback Planning**: Always plan for failure scenarios
+
+## Resource Types:
+- infrastructure: VMs, clusters, networks, VPCs
+- deployment: Kubernetes deployments, services, pods
+- database: RDS, Aurora, MongoDB, PostgreSQL
+- storage: S3, EBS, persistent volumes
+- monitoring: CloudWatch, Prometheus, alerts
+- security: IAM, security groups, policies
+- networking: Load balancers, VPNs, DNS
+
+## Action Types:
+- create: Provision new resources
+- read/query: Retrieve information
+- update: Modify existing resources
+- delete: Remove resources
+- scale: Adjust capacity (horizontal/vertical)
+- restart: Restart services
+- backup: Create backups
+- monitor: Set up monitoring/alerts
+- optimize: Improve performance/cost
+
+## Risk Assessment Guidelines:
+- **low**: Read operations, monitoring, non-critical dev resources
+- **medium**: Create/update dev/staging, scale non-production
+- **high**: Scale production, update production configs, delete non-critical prod
+- **critical**: Delete production databases, security changes, VPC modifications
+
+## Confidence Levels:
+- **high** (90-100%): Clear, unambiguous command with all details
+- **medium** (70-89%): Mostly clear, minor assumptions needed
+- **low** (50-69%): Significant assumptions required
+- **unclear** (<50%): Need clarification from user
+
+## User Context:
+{user_context}
+
+## Instructions:
+1. Parse the command carefully
+2. Identify the primary intent
+3. Check if you have all required information
+4. If unclear, add specific clarifying_questions
+5. Assess risk level accurately
+6. Estimate costs when possible
+7. Suggest alternatives if there's a better way
+8. Plan rollback strategy for risky operations
+9. Check user permissions against action requirements
+
+{format_instructions}"""
+    
+    async def interpret(
+        self, 
+        command: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> ActionPlan:
+        """Interpret natural language command with enhanced context"""
+        
+        # Merge additional context
+        full_context = {**self.user_context, **(context or {})}
+        
+        # Add conversation history to context
+        chat_history = self.memory.load_memory_variables({})
+        
+        # Format prompt with context
+        messages = [
+            ("system", self.system_prompt.format(
+                user_context=self._format_user_context(full_context),
+                format_instructions=self.parser.get_format_instructions()
+            )),
+        ]
+        
+        # Add chat history if exists
+        if chat_history.get("chat_history"):
+            messages.extend([
+                ("system", "Previous conversation context:"),
+                *[(msg.type, msg.content) for msg in chat_history["chat_history"][-6:]]
+            ])
+        
+        # Add current command
+        messages.append(("user", self._enhance_command(command, full_context)))
+        
         # Call LLM
-        response = await self.llm.agenerate([messages])
+        prompt = ChatPromptTemplate.from_messages(messages)
+        response = await self.llm.agenerate([prompt.format_messages()])
         text = response.generations[0][0].text
         
         # Parse response
-        action_plan = self.parser.parse(text)
+        try:
+            action_plan = self.parser.parse(text)
+        except Exception as e:
+            # Fallback: ask for clarification
+            return ActionPlan(
+                interpretation=f"Failed to parse command: {str(e)}",
+                intent=IntentType.QUERY,
+                confidence=ConfidenceLevel.UNCLEAR,
+                actions=[],
+                confirmation_required=True,
+                risk_level="unknown",
+                clarifying_questions=[
+                    "Could you please rephrase your request?",
+                    "What specific resource or action did you want to perform?",
+                    "Which environment (dev/staging/production)?"
+                ]
+            )
+        
+        # Enhance action plan with calculated fields
+        action_plan = self._enhance_action_plan(action_plan, full_context)
+        
+        # Save to memory
+        self.memory.save_context(
+            {"input": command},
+            {"output": action_plan.interpretation}
+        )
         
         return action_plan
-
-# Example Usage
-async def main():
-    agent = CommandInterpreterAgent(api_key="sk-...")
     
-    command = """
+    def _enhance_command(self, command: str, context: Dict) -> str:
+        """Enhance command with implicit context"""
+        enhancements = []
+        
+        # Add timestamp
+        enhancements.append(f"Current time: {datetime.now().isoformat()}")
+        
+        # Add implicit environment if mentioned
+        if context.get("default_environment"):
+            enhancements.append(f"Default environment: {context['default_environment']}")
+        
+        # Add user's recent activity context
+        if context.get("recent_resources"):
+            enhancements.append(f"Recently worked with: {', '.join(context['recent_resources'][:3])}")
+        
+        enhanced = command
+        if enhancements:
+            enhanced = f"{command}\n\nContext: {'; '.join(enhancements)}"
+        
+        return enhanced
+    
+    def _format_user_context(self, context: Dict) -> str:
+        """Format user context for prompt"""
+        lines = []
+        
+        if context.get("role"):
+            lines.append(f"User role: {context['role']}")
+        
+        if context.get("permissions"):
+            lines.append(f"Permissions: {', '.join(context['permissions'])}")
+        
+        if context.get("budget_limit"):
+            lines.append(f"Budget limit: ${context['budget_limit']}/month")
+        
+        if context.get("preferred_provider"):
+            lines.append(f"Preferred cloud provider: {context['preferred_provider']}")
+        
+        if context.get("compliance_requirements"):
+            lines.append(f"Compliance: {', '.join(context['compliance_requirements'])}")
+        
+        return "\n".join(lines) if lines else "No specific context available"
+    
+    def _enhance_action_plan(self, plan: ActionPlan, context: Dict) -> ActionPlan:
+        """Enhance action plan with calculated fields"""
+        
+        # Calculate total cost
+        total_cost = sum(a.estimated_cost or 0 for a in plan.actions)
+        plan.total_estimated_cost = total_cost
+        
+        # Check budget limits
+        if context.get("budget_limit") and total_cost > context["budget_limit"]:
+            plan.warnings.append(
+                f"Estimated cost ${total_cost:.2f} exceeds budget limit ${context['budget_limit']}"
+            )
+            plan.risk_level = "high"
+        
+        # Calculate total duration
+        durations = [a.estimated_duration for a in plan.actions if a.estimated_duration]
+        if durations:
+            plan.total_estimated_duration = self._sum_durations(durations)
+        
+        # Collect affected resources
+        plan.affected_resources = list(set(
+            a.parameters.get("resource_id", a.resource) 
+            for a in plan.actions
+        ))
+        
+        # Check permissions
+        if context.get("permissions"):
+            for action in plan.actions:
+                required_perm = f"{action.type}_{action.resource}"
+                if required_perm not in context["permissions"]:
+                    plan.warnings.append(
+                        f"Action '{action.type} {action.resource}' may require additional permissions"
+                    )
+                    plan.confirmation_required = True
+        
+        return plan
+    
+    def _sum_durations(self, durations: List[str]) -> str:
+        """Sum duration strings (e.g., '5m', '2h')"""
+        total_minutes = 0
+        
+        for duration in durations:
+            match = re.match(r'(\d+)([mh])', duration)
+            if match:
+                value, unit = int(match.group(1)), match.group(2)
+                if unit == 'h':
+                    total_minutes += value * 60
+                else:
+                    total_minutes += value
+        
+        if total_minutes < 60:
+            return f"{total_minutes}m"
+        else:
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+            return f"{hours}h {minutes}m" if minutes > 0 else f"{hours}h"
+    
+    async def clarify(self, user_response: str) -> ActionPlan:
+        """Handle clarification responses"""
+        return await self.interpret(
+            f"Based on previous discussion: {user_response}",
+            context={"is_clarification": True}
+        )
+    
+    async def suggest_similar_commands(self, command: str, limit: int = 5) -> List[str]:
+        """Suggest similar commands based on history"""
+        # This would query a vector database of past commands
+        # For now, return common patterns
+        suggestions = [
+            f"Create {command} in production with autoscaling",
+            f"Scale {command} to handle more traffic",
+            f"Set up monitoring for {command}",
+            f"Optimize {command} for cost",
+            f"Backup {command} daily",
+        ]
+        return suggestions[:limit]
+
+# Example Usage with Enhanced Features
+async def example_usage():
+    # Initialize with user context
+    agent = CommandInterpreterAgent(
+        api_key="sk-...",
+        user_context={
+            "role": "DevOps Engineer",
+            "permissions": ["create_infrastructure", "update_deployment", "scale_deployment"],
+            "budget_limit": 5000,
+            "preferred_provider": "aws",
+            "default_environment": "staging",
+            "compliance_requirements": ["SOC2", "HIPAA"],
+            "recent_resources": ["api-service", "database-cluster", "redis-cache"]
+        }
+    )
+    
+    # Example 1: Clear command
+    command1 = """
     Create a production Kubernetes cluster on AWS in us-east-1 with:
     - 5 worker nodes (t3.large)
     - Autoscaling enabled (min: 3, max: 10)
@@ -129,16 +401,35 @@ async def main():
     - Set up monitoring alerts for CPU > 80%
     """
     
-    plan = await agent.interpret(command)
+    plan1 = await agent.interpret(command1)
+    print(f"Intent: {plan1.intent}")
+    print(f"Confidence: {plan1.confidence}")
+    print(f"Risk: {plan1.risk_level}")
+    print(f"Total Cost: ${plan1.total_estimated_cost}")
+    print(f"Duration: {plan1.total_estimated_duration}")
     
-    print(f"Interpretation: {plan.interpretation}")
-    print(f"Risk Level: {plan.risk_level}")
-    print(f"Confirmation Required: {plan.confirmation_required}")
-    print(f"\nActions:")
-    for i, action in enumerate(plan.actions, 1):
-        print(f"{i}. {action.type} {action.resource}")
-        print(f"   {action.description}")
-        print(f"   Parameters: {action.parameters}")
+    if plan1.warnings:
+        print(f"Warnings: {plan1.warnings}")
+    
+    if plan1.clarifying_questions:
+        print(f"Questions: {plan1.clarifying_questions}")
+    
+    # Example 2: Ambiguous command requiring clarification
+    command2 = "Scale up the API"
+    
+    plan2 = await agent.interpret(command2)
+    if plan2.clarifying_questions:
+        print("Agent needs clarification:")
+        for q in plan2.clarifying_questions:
+            print(f"  - {q}")
+        
+        # User responds
+        clarification = await agent.clarify("I meant the production API service to 10 replicas")
+        print(f"Clarified plan: {clarification.interpretation}")
+    
+    # Example 3: Suggest similar commands
+    suggestions = await agent.suggest_similar_commands("deploy")
+    print(f"Similar commands: {suggestions}")
 ```
 
 ### 3.2 Planning Agent
@@ -637,9 +928,444 @@ class AgentOrchestrator:
         }
 ```
 
-## 6. Learning & Improvement
+## 6. Advanced Agent Features
 
-### 6.1 Feedback Loop
+### 6.1 Conversation Manager
+
+```python
+# src/agents/conversation_manager.py
+
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
+from datetime import datetime
+import uuid
+
+@dataclass
+class ConversationTurn:
+    """Single conversation turn"""
+    id: str
+    user_id: str
+    timestamp: datetime
+    user_message: str
+    agent_response: ActionPlan
+    execution_result: Optional[Dict] = None
+    user_feedback: Optional[str] = None
+    sentiment: Optional[str] = None  # positive, negative, neutral
+
+class ConversationManager:
+    """Manages multi-turn conversations with context"""
+    
+    def __init__(self, agent: CommandInterpreterAgent):
+        self.agent = agent
+        self.conversations: Dict[str, List[ConversationTurn]] = {}
+        
+    async def process_message(
+        self,
+        user_id: str,
+        message: str,
+        session_id: Optional[str] = None
+    ) -> tuple[ActionPlan, str]:
+        """Process message with conversation context"""
+        
+        # Get or create session
+        if not session_id:
+            session_id = str(uuid.uuid4())
+        
+        if session_id not in self.conversations:
+            self.conversations[session_id] = []
+        
+        # Get conversation history
+        history = self.conversations[session_id]
+        
+        # Build context from history
+        context = self._build_context_from_history(history)
+        context["user_id"] = user_id
+        
+        # Interpret with context
+        plan = await self.agent.interpret(message, context=context)
+        
+        # Save turn
+        turn = ConversationTurn(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            timestamp=datetime.now(),
+            user_message=message,
+            agent_response=plan
+        )
+        history.append(turn)
+        
+        return plan, session_id
+    
+    def _build_context_from_history(self, history: List[ConversationTurn]) -> Dict:
+        """Extract context from conversation history"""
+        context = {
+            "recent_resources": [],
+            "recent_actions": [],
+            "mentioned_environments": set(),
+            "mentioned_providers": set(),
+        }
+        
+        # Analyze recent turns
+        for turn in history[-5:]:  # Last 5 turns
+            plan = turn.agent_response
+            
+            # Extract mentioned resources
+            context["recent_resources"].extend(plan.affected_resources)
+            
+            # Extract actions
+            for action in plan.actions:
+                context["recent_actions"].append(action.type)
+                
+                # Extract environment mentions
+                env = action.parameters.get("environment")
+                if env:
+                    context["mentioned_environments"].add(env)
+                
+                # Extract provider mentions
+                provider = action.parameters.get("provider")
+                if provider:
+                    context["mentioned_providers"].add(provider)
+        
+        # Deduplicate and limit
+        context["recent_resources"] = list(set(context["recent_resources"]))[:5]
+        context["recent_actions"] = list(set(context["recent_actions"]))[:5]
+        context["mentioned_environments"] = list(context["mentioned_environments"])
+        context["mentioned_providers"] = list(context["mentioned_providers"])
+        
+        return context
+    
+    async def handle_follow_up(
+        self,
+        user_id: str,
+        session_id: str,
+        follow_up: str
+    ) -> ActionPlan:
+        """Handle follow-up questions or modifications"""
+        
+        if session_id not in self.conversations:
+            raise ValueError("Session not found")
+        
+        history = self.conversations[session_id]
+        last_turn = history[-1] if history else None
+        
+        # Build context with last action
+        context = {
+            "is_follow_up": True,
+            "last_action": last_turn.agent_response if last_turn else None
+        }
+        
+        return await self.agent.interpret(follow_up, context=context)
+    
+    def record_feedback(
+        self,
+        session_id: str,
+        turn_id: str,
+        feedback: str,
+        sentiment: str
+    ):
+        """Record user feedback for learning"""
+        if session_id in self.conversations:
+            for turn in self.conversations[session_id]:
+                if turn.id == turn_id:
+                    turn.user_feedback = feedback
+                    turn.sentiment = sentiment
+                    break
+    
+    def get_conversation_summary(self, session_id: str) -> Dict:
+        """Get conversation summary"""
+        if session_id not in self.conversations:
+            return {"error": "Session not found"}
+        
+        history = self.conversations[session_id]
+        
+        return {
+            "session_id": session_id,
+            "total_turns": len(history),
+            "start_time": history[0].timestamp if history else None,
+            "last_activity": history[-1].timestamp if history else None,
+            "actions_executed": sum(
+                len(turn.agent_response.actions) 
+                for turn in history
+            ),
+            "user_satisfaction": self._calculate_satisfaction(history)
+        }
+    
+    def _calculate_satisfaction(self, history: List[ConversationTurn]) -> float:
+        """Calculate user satisfaction score"""
+        sentiments = [turn.sentiment for turn in history if turn.sentiment]
+        if not sentiments:
+            return 0.0
+        
+        positive = sentiments.count("positive")
+        total = len(sentiments)
+        return (positive / total) * 100 if total > 0 else 0.0
+```
+
+### 6.2 Pattern Learning System
+
+```python
+# src/agents/pattern_learning.py
+
+from sentence_transformers import SentenceTransformer
+import numpy as np
+from typing import List, Dict, Tuple
+import pickle
+
+class PatternLearningSystem:
+    """Learn from successful command patterns"""
+    
+    def __init__(self):
+        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.successful_patterns: List[Dict] = []
+        self.failure_patterns: List[Dict] = []
+        
+    def record_execution(
+        self,
+        command: str,
+        plan: ActionPlan,
+        result: Dict,
+        success: bool,
+        execution_time: float,
+        cost: float
+    ):
+        """Record execution outcome"""
+        
+        # Encode command
+        embedding = self.model.encode(command)
+        
+        pattern = {
+            "command": command,
+            "embedding": embedding,
+            "plan": plan.dict(),
+            "result": result,
+            "success": success,
+            "execution_time": execution_time,
+            "cost": cost,
+            "timestamp": datetime.now().isoformat(),
+            "intent": plan.intent.value,
+            "risk_level": plan.risk_level,
+        }
+        
+        if success:
+            self.successful_patterns.append(pattern)
+        else:
+            self.failure_patterns.append(pattern)
+    
+    def find_similar_successful_patterns(
+        self,
+        command: str,
+        limit: int = 5,
+        min_similarity: float = 0.7
+    ) -> List[Dict]:
+        """Find similar successful command patterns"""
+        
+        if not self.successful_patterns:
+            return []
+        
+        # Encode query command
+        query_embedding = self.model.encode(command)
+        
+        # Calculate similarities
+        similarities = []
+        for pattern in self.successful_patterns:
+            similarity = self._cosine_similarity(
+                query_embedding,
+                pattern["embedding"]
+            )
+            if similarity >= min_similarity:
+                similarities.append((pattern, similarity))
+        
+        # Sort by similarity
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        
+        return [
+            {
+                **pattern,
+                "similarity": similarity
+            }
+            for pattern, similarity in similarities[:limit]
+        ]
+    
+    def get_optimization_suggestions(
+        self,
+        command: str,
+        current_plan: ActionPlan
+    ) -> List[str]:
+        """Get optimization suggestions based on patterns"""
+        
+        similar = self.find_similar_successful_patterns(command)
+        suggestions = []
+        
+        for pattern in similar:
+            past_cost = pattern["cost"]
+            past_time = pattern["execution_time"]
+            
+            # Cost optimization
+            if current_plan.total_estimated_cost > past_cost * 1.2:
+                suggestions.append(
+                    f"Similar command was executed for ${past_cost:.2f} "
+                    f"(20% cheaper). Consider optimizing resource sizes."
+                )
+            
+            # Time optimization
+            if past_time < 300:  # Less than 5 minutes
+                suggestions.append(
+                    f"Similar command completed in {past_time/60:.1f} minutes. "
+                    f"Expected quick execution."
+                )
+            
+            # Alternative approaches
+            past_actions = pattern["plan"]["actions"]
+            if len(past_actions) < len(current_plan.actions):
+                suggestions.append(
+                    f"Similar task was completed with fewer steps ({len(past_actions)} vs {len(current_plan.actions)}). "
+                    f"Review if all actions are necessary."
+                )
+        
+        return suggestions[:3]  # Top 3 suggestions
+    
+    def detect_potential_failures(
+        self,
+        command: str,
+        plan: ActionPlan
+    ) -> List[str]:
+        """Detect potential failures based on past failures"""
+        
+        if not self.failure_patterns:
+            return []
+        
+        query_embedding = self.model.encode(command)
+        warnings = []
+        
+        for failure in self.failure_patterns:
+            similarity = self._cosine_similarity(
+                query_embedding,
+                failure["embedding"]
+            )
+            
+            if similarity >= 0.8:  # High similarity to past failure
+                error_msg = failure["result"].get("error", "Unknown error")
+                warnings.append(
+                    f"Warning: Similar command failed previously with: {error_msg}. "
+                    f"Recommend extra validation."
+                )
+        
+        return warnings
+    
+    def _cosine_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
+        """Calculate cosine similarity"""
+        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    
+    def save_patterns(self, filepath: str):
+        """Save learned patterns"""
+        with open(filepath, 'wb') as f:
+            pickle.dump({
+                "successful": self.successful_patterns,
+                "failures": self.failure_patterns
+            }, f)
+    
+    def load_patterns(self, filepath: str):
+        """Load learned patterns"""
+        with open(filepath, 'rb') as f:
+            data = pickle.load(f)
+            self.successful_patterns = data["successful"]
+            self.failure_patterns = data["failures"]
+```
+
+### 6.3 Multi-Language Support
+
+```python
+# src/agents/multi_language.py
+
+from deep_translator import GoogleTranslator
+from langdetect import detect
+
+class MultiLanguageAgent:
+    """Support for multiple languages"""
+    
+    SUPPORTED_LANGUAGES = {
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "zh": "Chinese",
+        "ja": "Japanese",
+        "hi": "Hindi",
+        "pt": "Portuguese",
+        "ru": "Russian",
+        "ar": "Arabic"
+    }
+    
+    def __init__(self, agent: CommandInterpreterAgent):
+        self.agent = agent
+        self.translator = GoogleTranslator()
+    
+    async def interpret_any_language(
+        self,
+        command: str,
+        target_language: Optional[str] = None
+    ) -> Tuple[ActionPlan, str]:
+        """Interpret command in any language"""
+        
+        # Detect language
+        detected_lang = detect(command)
+        
+        # Translate to English if needed
+        if detected_lang != "en":
+            translated = self.translator.translate(
+                text=command,
+                source=detected_lang,
+                target="en"
+            )
+            print(f"Translated from {detected_lang}: {command} -> {translated}")
+        else:
+            translated = command
+        
+        # Interpret in English
+        plan = await self.agent.interpret(translated)
+        
+        # Translate response back if needed
+        response_lang = target_language or detected_lang
+        if response_lang != "en":
+            plan.interpretation = self.translator.translate(
+                text=plan.interpretation,
+                source="en",
+                target=response_lang
+            )
+            
+            # Translate action descriptions
+            for action in plan.actions:
+                action.description = self.translator.translate(
+                    text=action.description,
+                    source="en",
+                    target=response_lang
+                )
+        
+        return plan, detected_lang
+    
+    def get_localized_examples(self, language: str) -> List[str]:
+        """Get example commands in user's language"""
+        
+        examples_en = [
+            "Create 3 AWS EC2 instances in us-east-1",
+            "Scale production API to 10 replicas",
+            "Set up monitoring for CPU usage > 80%",
+            "Create database backup",
+            "Show me cost analysis for this month"
+        ]
+        
+        if language == "en":
+            return examples_en
+        
+        return [
+            self.translator.translate(ex, source="en", target=language)
+            for ex in examples_en
+        ]
+```
+
+## 7. Learning & Improvement
+
+### 7.1 Integrated Learning System
 
 ```python
 # src/agents/learning.py
