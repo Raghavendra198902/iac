@@ -170,6 +170,7 @@ type User {
   permissions: [String!]!
   lastLogin: DateTime
   createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type AuditLog {

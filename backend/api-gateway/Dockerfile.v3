@@ -32,7 +32,9 @@ RUN npm ci --only=production
 
 # Copy built application
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/graphql ./graphql
+
+# Copy graphql schemas to dist folder (server.ts expects them in dist/graphql)
+COPY --from=builder /app/graphql ./dist/graphql
 
 # Create logs directory
 RUN mkdir -p logs

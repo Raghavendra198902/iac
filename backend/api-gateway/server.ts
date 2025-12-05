@@ -85,6 +85,7 @@ async function startServer() {
   // Apollo Server
   const server = new ApolloServer<Context>({
     schema,
+    introspection: true, // Enable introspection for testing/development
     plugins: [
       // Proper shutdown for HTTP server
       ApolloServerPluginDrainHttpServer({ httpServer }),
