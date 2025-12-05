@@ -1,13 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { ProjectRepository } from '../repositories/project-repository';
 import { Pool } from 'pg';
+import { cacheMiddleware, invalidateCache } from '../../../shared/cache.middleware';
 
 export function createProjectRoutes(pool: Pool): Router {
   const router = Router();
   const projectRepo = new ProjectRepository(pool);
 
-  // Get all projects
-  router.get('/projects', async (req: Request, res: Response) => {
+  // Get all projects (cached for 3 minutes)
+  router.get('/projects', cacheMiddleware({ ttl: 180 }), async (req: Request, res: Response) => {
     try {
       const projects = await projectRepo.getAllProjects();
       res.json(projects);
@@ -17,8 +18,8 @@ export function createProjectRoutes(pool: Pool): Router {
     }
   });
 
-  // Get project by ID
-  router.get('/projects/:id', async (req: Request, res: Response) => {
+  // Get project by ID (cached for 3 minutes)
+  router.get('/projects/:id', cacheMiddleware({ ttl: 180, key: (req) => `projects:${req.params.id}` }), async (req: Request, res: Response) => {
     try {
       const project = await projectRepo.getProjectById(req.params.id);
       if (!project) {
@@ -31,8 +32,8 @@ export function createProjectRoutes(pool: Pool): Router {
     }
   });
 
-  // Get project stats
-  router.get('/projects/stats/summary', async (req: Request, res: Response) => {
+  // Get project stats (cached for 1 minute)
+  router.get('/projects/stats/summary', cacheMiddleware({ ttl: 60 }), async (req: Request, res: Response) => {
     try {
       const stats = await projectRepo.getProjectStats();
       res.json(stats);
@@ -67,6 +68,8 @@ export function createProjectRoutes(pool: Pool): Router {
       };
 
       const project = await projectRepo.createProject(newProject);
+      // Invalidate cache after creating
+      await invalidateCache('cache:*/projects*');
       res.status(201).json(project);
     } catch (error) {
       console.error('Error creating project:', error);
@@ -84,6 +87,8 @@ export function createProjectRoutes(pool: Pool): Router {
       }
 
       await projectRepo.updateProjectProgress(req.params.id, progress);
+      // Invalidate cache after updating
+      await invalidateCache('cache:*/projects*');
       res.json({ success: true });
     } catch (error) {
       console.error('Error updating project progress:', error);
@@ -101,6 +106,8 @@ export function createProjectRoutes(pool: Pool): Router {
       }
 
       await projectRepo.updateProjectStatus(req.params.id, status);
+      // Invalidate cache after updating
+      await invalidateCache('cache:*/projects*');
       res.json({ success: true });
     } catch (error) {
       console.error('Error updating project status:', error);
@@ -131,6 +138,8 @@ export function createProjectRoutes(pool: Pool): Router {
         await projectRepo.updateProjectProgress(projectId, newProgress);
       }
 
+      // Invalidate cache after updating
+      await invalidateCache('cache:*/projects*');
       res.json({ success: true });
     } catch (error) {
       console.error('Error updating workflow step:', error);

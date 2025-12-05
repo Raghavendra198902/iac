@@ -21,12 +21,37 @@ services:
       retries: 5
       start_period: 30s
 
+  # PgBouncer - Connection Pooling
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: dharma-pgbouncer
+    ports:
+      - "6432:5432"
+    environment:
+      - DATABASE_URL=postgres://dharma_admin:dharma_pass_dev@postgres:5432/iac_dharma
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=1000
+      - DEFAULT_POOL_SIZE=25
+      - MAX_DB_CONNECTIONS=100
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dharma-network
+    healthcheck:
+      test: ["CMD-SHELL", "psql postgres://dharma_admin:dharma_pass_dev@localhost:5432/iac_dharma -c 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: dharma-redis
     ports:
       - "6379:6379"
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes
     volumes:
       - redis-data:/data
     networks:
@@ -48,7 +73,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
       - REDIS_HOST=redis
       - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SERVICE_NAME=api-gateway
@@ -80,10 +106,11 @@ services:
       dockerfile: Dockerfile
     container_name: dharma-blueprint-service
     ports:
-      - "3001:3001"
+      - "3002:3002"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
       - REDIS_HOST=redis
       - JWT_SECRET=development_secret_key_change_in_production_12345678
     depends_on:
@@ -102,7 +129,8 @@ services:
       - "3002:3002"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
       - JWT_SECRET=development_secret_key_change_in_production_12345678
     depends_on:
       - postgres
@@ -125,7 +153,8 @@ services:
       - "8000:8000"
     environment:
       - PYTHON_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
     depends_on:
       - postgres
     networks:
@@ -149,7 +178,8 @@ services:
       - "3003:3003"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
       - JWT_SECRET=development_secret_key_change_in_production_12345678
     depends_on:
       - postgres
@@ -167,12 +197,14 @@ services:
     build:
       context: ./backend/costing-service
       dockerfile: Dockerfile
-    container_name: dharma-costing-service
+    container_name: dharma-cost-optimizer
     ports:
-      - "3004:3004"
+      - "3006:3006"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
+      - REDIS_HOST=redis
       - REDIS_HOST=redis
       - JWT_SECRET=development_secret_key_change_in_production_12345678
       - PORT=3004
@@ -193,12 +225,15 @@ services:
     build:
       context: ./backend/orchestrator-service
       dockerfile: Dockerfile
-    container_name: dharma-orchestrator
+    container_name: dharma-drift-detector
     ports:
-      - "3005:3005"
+      - "3007:3007"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
+      - REDIS_HOST=redis
+      - REDIS_HOST=redis
       - REDIS_HOST=redis
       - JWT_SECRET=development_secret_key_change_in_production_12345678
       - PORT=3005
@@ -254,7 +289,8 @@ services:
       - "3007:3007"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
       - REDIS_HOST=redis
       - JWT_SECRET=development_secret_key_change_in_production_12345678
       - ORCHESTRATOR_URL=http://orchestrator-service:3005
