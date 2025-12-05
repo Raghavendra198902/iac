@@ -1,8 +1,3 @@
-version: '3.9'
-
-# IAC Dharma v3.0 - Development Infrastructure
-# Services: PostgreSQL, Neo4j, Redis, Kafka, Prometheus, Grafana, Jaeger, MLflow
-
 services:
   # PostgreSQL 16 with TimescaleDB
   postgres-v3:
@@ -131,6 +126,172 @@ services:
     networks:
       - iac-v3-network
 
+  # MLflow (Port 5000)
+  mlflow-v3:
+    image: ghcr.io/mlflow/mlflow:v2.9.2
+    container_name: iac-mlflow-v3
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=sqlite:////mlflow/mlflow.db
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    volumes:
+      - mlflow-v3-data:/mlflow
+    networks:
+      - iac-v3-network
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
+
+  # AIOps Engine (Port 8100)
+  aiops-engine-v3:
+    build:
+      context: ./backend/aiops-engine
+      dockerfile: Dockerfile
+    image: iac-aiops-engine:v3
+    container_name: iac-aiops-engine-v3
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-v3:5000
+      - TIMESCALEDB_HOST=postgres-v3
+      - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_DB=aiops
+      - TIMESCALEDB_USER=aiops_user
+      - TIMESCALEDB_PASSWORD=aiops_password
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-v3:9092
+    networks:
+      - iac-v3-network
+    depends_on:
+      - postgres-v3
+      - kafka-v3
+      - mlflow-v3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/api/v3/aiops/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # CMDB Agent (Port 8200)
+  cmdb-agent-v3:
+    build:
+      context: ./backend/cmdb-agent
+      dockerfile: Dockerfile.v3
+    image: iac-cmdb-agent:v3
+    container_name: iac-cmdb-agent-v3
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      - NEO4J_URI=bolt://neo4j-v3:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=neo4jpassword
+      - TIMESCALEDB_HOST=postgres-v3
+      - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_DB=iac_v3
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-v3:9092
+    networks:
+      - iac-v3-network
+    depends_on:
+      - neo4j-v3
+      - postgres-v3
+      - kafka-v3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # AI Orchestrator (Port 8300)
+  ai-orchestrator-v3:
+    build:
+      context: ./backend/ai-orchestrator
+      dockerfile: Dockerfile
+    image: iac-ai-orchestrator:v3
+    container_name: iac-ai-orchestrator-v3
+    restart: unless-stopped
+    ports:
+      - "8300:8300"
+    environment:
+      - GRAPHQL_URL=http://api-gateway-v3:4000/graphql
+      - AIOPS_URL=http://aiops-engine-v3:8100/api/v3/aiops
+      - CMDB_URL=http://cmdb-agent-v3:8200/api/v3/cmdb
+      - REDIS_HOST=redis-v3
+      - REDIS_PORT=6379
+    networks:
+      - iac-v3-network
+    depends_on:
+      - aiops-engine-v3
+      - cmdb-agent-v3
+      - redis-v3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8300/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # GraphQL API Gateway
+  api-gateway-v3:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile.v3
+    image: iac-api-gateway:v3
+    container_name: iac-api-gateway-v3
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      POSTGRES_HOST: postgres-v3
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: iac_v3
+      POSTGRES_USER: iacadmin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iacadmin123}
+      AIOPS_ENGINE_URL: http://aiops-engine-v3:8100
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      CORS_ORIGIN: http://localhost:3000
+    depends_on:
+      - postgres-v3
+      - aiops-engine-v3
+    networks:
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000/.well-known/apollo/server-health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Frontend UI
+  frontend-v3:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.v3
+    image: iac-frontend:v3
+    container_name: iac-frontend-v3
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:4000/graphql
+      VITE_WS_URL: ws://localhost:4000/graphql
+    depends_on:
+      - api-gateway-v3
+    networks:
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
 networks:
   iac-v3-network:
     name: iac-v3-network
@@ -144,3 +305,4 @@ volumes:
   kafka-v3-data:
   prometheus-v3-data:
   grafana-v3-data:
+  mlflow-v3-data:

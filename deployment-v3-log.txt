@@ -1,0 +1,111 @@
+╔═══════════════════════════════════════════════════════╗
+║   IAC DHARMA v3.0 - COMPLETE DEPLOYMENT              ║
+╚═══════════════════════════════════════════════════════╝
+
+🚀 Step 1/6: Building GraphQL API Gateway
+────────────────────────────────────────────────────────
+#1 [internal] load local bake definitions
+#1 reading from stdin 981B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile.v3
+#2 transferring dockerfile: 1.09kB done
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/node:18-alpine
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context:
+#4 transferring context: 2B 0.0s done
+#4 DONE 0.2s
+
+#5 [builder 1/9] FROM docker.io/library/node:18-alpine
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 7.30kB done
+#6 DONE 0.1s
+
+#7 [builder 3/9] COPY package.v3.json package.json
+#7 CACHED
+
+#8 [builder 4/9] COPY package-lock.json ./
+#8 CACHED
+
+#9 [builder 5/9] RUN npm install
+#9 CACHED
+
+#10 [builder 2/9] WORKDIR /app
+#10 CACHED
+
+#11 [builder 6/9] COPY tsconfig.v3.json tsconfig.json
+#11 CACHED
+
+#12 [builder 7/9] COPY server.ts ./
+#12 DONE 1.7s
+
+#13 [builder 8/9] COPY graphql ./graphql/
+#13 DONE 0.5s
+
+#14 [builder 9/9] RUN npm run build
+#14 1.037 
+#14 1.037 > iac-api-gateway-v3@3.0.0 build
+#14 1.037 > tsc
+#14 1.037 
+#14 DONE 5.1s
+
+#10 [builder 2/9] WORKDIR /app
+#10 CACHED
+
+#15 [stage-1 3/7] COPY --from=builder /app/package*.json ./
+#15 DONE 1.0s
+
+#16 [stage-1 4/7] RUN npm ci --only=production
+#16 0.905 npm warn config only Use `--omit=dev` to omit dev dependencies from the install.
+#16 3.683 npm warn deprecated apollo-datasource@3.3.2: The `apollo-datasource` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
+#16 3.874 npm warn deprecated apollo-server-env@4.2.1: The `apollo-server-env` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/utils.fetcher` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
+#16 4.033 npm warn deprecated @apollo/server-gateway-interface@1.1.1: @apollo/server-gateway-interface v1 is part of Apollo Server v4, which is deprecated and will transition to end-of-life on January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v2 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
+#16 4.817 npm warn deprecated @apollo/server@4.12.2: Apollo Server v4 is deprecated and will transition to end-of-life on January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
+#16 5.093 
+#16 5.093 added 205 packages, and audited 206 packages in 4s
+#16 5.093 
+#16 5.093 28 packages are looking for funding
+#16 5.093   run `npm fund` for details
+#16 5.094 
+#16 5.094 found 0 vulnerabilities
+#16 5.096 npm notice
+#16 5.096 npm notice New major version of npm available! 10.8.2 -> 11.6.4
+#16 5.096 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.4
+#16 5.096 npm notice To update run: npm install -g npm@11.6.4
+#16 5.096 npm notice
+#16 DONE 6.8s
+
+#17 [stage-1 5/7] COPY --from=builder /app/dist ./dist
+#17 DONE 0.6s
+
+#18 [stage-1 6/7] COPY --from=builder /app/graphql ./graphql
+#18 DONE 0.7s
+
+#19 [stage-1 7/7] RUN mkdir -p logs
+#19 DONE 1.2s
+
+#20 exporting to image
+#20 exporting layers
+#20 exporting layers 1.8s done
+#20 writing image sha256:8ca2c511094b32b996ef2cbb3104611b37cdad4b6e900a0ef3ef4d6d84aab713 0.0s done
+#20 naming to docker.io/library/iac-api-gateway:v3 0.0s done
+#20 DONE 1.9s
+
+#21 resolving provenance for metadata file
+#21 DONE 0.0s
+ iac-api-gateway:v3  Built
+ Volume "iac_mlflow-v3-data"  Creating
+ Volume "iac_mlflow-v3-data"  Created
+time="2025-12-05T18:27:22+05:30" level=warning msg="Found orphan containers ([dharma-pgbouncer dharma-opa dharma-promtail dharma-prometheus dharma-redis dharma-postgres dharma-jaeger dharma-frontend dharma-ai-engine dharma-guardrails dharma-orchestrator dharma-costing-service dharma-iac-generator dharma-api-gateway dharma-monitoring-service dharma-ai-recommendations dharma-automation-engine dharma-sso dharma-blueprint-service dharma-cloud-provider dharma-loki dharma-grafana dharma-rabbitmq]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container iac-postgres-v3  Running
+ Container iac-zookeeper-v3  Running
+ Container iac-kafka-v3  Running
+ Container iac-mlflow-v3  Creating
+ Container iac-mlflow-v3  Error response from daemon: Conflict. The container name "/iac-mlflow-v3" is already in use by container "74102ab8dd95ebd020dcdcc44c61d097f1c42d9f85d62bfc41a1d36cebcc700f". You have to remove (or rename) that container to be able to reuse that name.
+Error response from daemon: Conflict. The container name "/iac-mlflow-v3" is already in use by container "74102ab8dd95ebd020dcdcc44c61d097f1c42d9f85d62bfc41a1d36cebcc700f". You have to remove (or rename) that container to be able to reuse that name.

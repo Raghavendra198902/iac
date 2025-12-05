@@ -1,0 +1,52 @@
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy v3 package files
+COPY package.v3.json package.json
+COPY package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy TypeScript config
+COPY tsconfig.v3.json tsconfig.json
+
+# Copy source code
+COPY server.ts ./
+COPY graphql ./graphql/
+
+# Build TypeScript
+RUN npm run build
+
+# Production stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY --from=builder /app/package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production
+
+# Copy built application
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/graphql ./graphql
+
+# Create logs directory
+RUN mkdir -p logs
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=4000
+
+# Expose GraphQL port
+EXPOSE 4000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:4000/.well-known/apollo/server-health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start Apollo Server
+CMD ["node", "dist/server.js"]

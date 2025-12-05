@@ -32,7 +32,6 @@ interface Context {
     aiops: AIOpsDataSource;
   };
   user?: any;
-  req: Request;
 }
 
 async function startServer() {
@@ -126,14 +125,13 @@ async function startServer() {
             aiops: aiopsDataSource,
           },
           user,
-          req,
         };
       },
     })
   );
 
   // Health check endpoint
-  app.get('/health', async (req: Request, res: Response) => {
+  app.get('/health', async (_req: Request, res: Response) => {
     try {
       // Check PostgreSQL
       const pgHealth = await postgresDataSource.getInfrastructure('test')
@@ -164,7 +162,7 @@ async function startServer() {
   });
 
   // Root endpoint
-  app.get('/', (req: Request, res: Response) => {
+  app.get('/', (_req, res: Response) => {
     res.json({
       service: 'IAC Dharma v3.0 - GraphQL API Gateway',
       version: '3.0.0',
