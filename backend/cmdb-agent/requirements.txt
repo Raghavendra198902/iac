@@ -1,0 +1,28 @@
+# CMDB Agent v3.0 - Python Dependencies
+
+# FastAPI and server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+python-multipart==0.0.6
+
+# AWS SDK
+boto3==1.34.20
+botocore==1.34.20
+
+# Azure SDK (for future Azure discovery)
+# azure-mgmt-compute==30.5.0
+# azure-mgmt-network==25.2.0
+# azure-mgmt-storage==21.1.0
+# azure-identity==1.15.0
+
+# GCP SDK (for future GCP discovery)
+# google-cloud-compute==1.15.0
+# google-cloud-storage==2.14.0
+
+# Neo4j
+neo4j==5.15.0
+
+# Utilities
+python-dotenv==1.0.0
+httpx==0.26.0
