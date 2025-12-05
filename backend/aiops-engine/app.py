@@ -18,6 +18,13 @@ from datetime import datetime, timedelta
 import asyncio
 import logging
 from enum import Enum
+import uuid
+
+# Import ML models
+from models.failure_predictor import FailurePredictor
+from models.threat_detector import ThreatDetector
+from models.capacity_forecaster import CapacityForecaster
+from models.anomaly_detector import AnomalyDetector
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -43,6 +50,26 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# ============================================================================
+# Initialize ML Models
+# ============================================================================
+
+# Global model instances
+failure_predictor = FailurePredictor()
+threat_detector = ThreatDetector()
+capacity_forecaster = CapacityForecaster()
+anomaly_detector = AnomalyDetector()
+
+# Service statistics
+service_stats = {
+    "start_time": datetime.now(),
+    "predictions_count": 0,
+    "anomalies_detected": 0,
+    "remediations_executed": 0
+}
+
+logger.info("AIOps Engine initialized with 4 ML models")
 
 # ============================================================================
 # Data Models
