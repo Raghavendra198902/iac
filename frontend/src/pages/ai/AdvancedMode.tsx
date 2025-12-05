@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, ArrowRight, Check, Save, Download, 
+  ArrowLeft, ArrowRight, Check, Save,
   Sparkles, Target, Map, Layout, Code, Shield, Calendar
 } from 'lucide-react';
 

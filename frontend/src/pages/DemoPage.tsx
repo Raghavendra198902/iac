@@ -271,49 +271,6 @@ export default function DemoPage() {
         </motion.div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Projects List - 2/3 width */}
-        <div className="lg:col-span-2 space-y-4">
-                🌙 Dark
-              </button>
-              <button 
-                onClick={() => setTheme('blue')}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-                  theme === 'blue' ? 'bg-white text-blue-600 shadow-lg shadow-white/30 scale-105' : 'bg-white/20 hover:bg-white/30 hover-lift'
-                }`}
-              >
-                🌊 Blue Ocean
-              </button>
-              <button 
-                onClick={() => setTheme('purple')}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-                  theme === 'purple' ? 'bg-white text-purple-600 shadow-lg shadow-white/30 scale-105' : 'bg-white/20 hover:bg-white/30 hover-lift'
-                }`}
-              >
-                💜 Purple Dream
-              </button>
-              <button 
-                onClick={() => setTheme('green')}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
-                  theme === 'green' ? 'bg-white text-green-600 shadow-lg shadow-white/30 scale-105' : 'bg-white/20 hover:bg-white/30 hover-lift'
-                }`}
-              >
-                🌲 Green Forest
-              </button>
-            </div>
-          </div>
-          
-          <div className="flex gap-3 mt-4">
-            <div className="px-4 py-2 bg-blue-700 rounded-lg font-semibold hover-lift cursor-pointer transform hover:scale-105 transition-all duration-300">Primary</div>
-            <div className="px-4 py-2 bg-blue-800 rounded-lg hover-lift cursor-pointer transform hover:scale-105 transition-all duration-300">Secondary</div>
-            <div className="px-4 py-2 border-2 border-blue-400 rounded-lg hover-lift cursor-pointer transform hover:scale-105 transition-all duration-300">Outlined</div>
-            <div className="px-4 py-2 bg-white/20 backdrop-blur rounded-lg hover-lift cursor-pointer transform hover:scale-105 transition-all duration-300">Glass</div>
-          </div>
-        </div>
-      </div>
-
       {/* Buttons Section */}
       <div className="mb-8 animate-slideUp">
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">

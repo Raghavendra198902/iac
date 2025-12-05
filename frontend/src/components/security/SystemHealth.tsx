@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from '../../config/api';
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
 import { Activity, Database, Wifi, Server, Clock, Zap, AlertTriangle } from 'lucide-react';
@@ -56,8 +57,8 @@ export function SystemHealth() {
   const fetchHealthData = async () => {
     try {
       const [healthRes, metricsRes] = await Promise.all([
-        fetch('http://localhost:3000/health'),
-        fetch('http://localhost:3000/metrics')
+        fetch(`${API_URL}/health`),
+        fetch(`${API_URL}/metrics`)
       ]);
 
       if (healthRes.ok) {

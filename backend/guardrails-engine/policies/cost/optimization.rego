@@ -13,21 +13,21 @@ metadata := {
 default allow = true
 
 # Unused resources should be removed
-warnings[msg] {
+warnings contains msg if {
     input.type == "compute"
     input.properties.utilizationPercent < 10
     msg := sprintf("Compute resource '%s' has low utilization (<10%%) - consider downsizing or removing", [input.name])
 }
 
 # Oversized instances
-warnings[msg] {
+warnings contains msg if {
     input.type == "compute"
     is_oversized_instance
     msg := sprintf("Compute resource '%s' may be oversized for workload - consider using instance type '%s'", [input.name, recommended_instance_size])
 }
 
 # Reserved instances for predictable workloads
-warnings[msg] {
+warnings contains msg if {
     input.type == "compute"
     input.properties.pricingModel == "on-demand"
     input.properties.runningHours >= 720  # Running 24/7
@@ -35,7 +35,7 @@ warnings[msg] {
 }
 
 # Spot instances for fault-tolerant workloads
-warnings[msg] {
+warnings contains msg if {
     input.type == "compute"
     input.properties.pricingModel == "on-demand"
     input.tags.faultTolerant == "true"
@@ -43,7 +43,7 @@ warnings[msg] {
 }
 
 # Storage optimization
-warnings[msg] {
+warnings contains msg if {
     input.type == "storage"
     input.properties.accessFrequency == "infrequent"
     input.properties.storageClass == "standard"
@@ -51,7 +51,7 @@ warnings[msg] {
 }
 
 # Unattached volumes
-violations[msg] {
+violations contains msg if {
     input.type == "volume"
     not input.properties.attachedTo
     input.properties.ageInDays > 30
@@ -59,33 +59,33 @@ violations[msg] {
 }
 
 # Old snapshots
-warnings[msg] {
+warnings contains msg if {
     input.type == "snapshot"
     input.properties.ageInDays > 90
     msg := sprintf("Snapshot '%s' is over 90 days old - review retention policy and delete if no longer needed", [input.name])
 }
 
 # Right-sizing recommendations
-is_oversized_instance {
+is_oversized_instance if {
     input.type == "compute"
     input.properties.cpuUtilization < 30
     input.properties.memoryUtilization < 30
 }
 
-recommended_instance_size = size {
+recommended_instance_size = size if {
     input.properties.instanceSize == "xlarge"
     is_oversized_instance
     size := "large"
 }
 
-recommended_instance_size = size {
+recommended_instance_size = size if {
     input.properties.instanceSize == "large"
     is_oversized_instance
     size := "medium"
 }
 
 # Public IP addresses that aren't needed
-warnings[msg] {
+warnings contains msg if {
     input.type == "compute"
     input.properties.hasPublicIP == true
     not input.tags.requiresPublicAccess == "true"
@@ -93,7 +93,7 @@ warnings[msg] {
 }
 
 # Data transfer optimization
-warnings[msg] {
+warnings contains msg if {
     input.type == "load-balancer"
     input.properties.crossRegionTraffic == true
     msg := sprintf("Load balancer '%s' routes cross-region traffic - consider regional endpoints to reduce data transfer costs", [input.name])

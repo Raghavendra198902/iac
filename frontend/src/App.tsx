@@ -39,6 +39,7 @@ const IntegrationStrategy = lazy(() => import('./pages/ea/IntegrationStrategy'))
 const ComplianceGovernance = lazy(() => import('./pages/ea/ComplianceGovernance'));
 const Roadmap = lazy(() => import('./pages/ea/Roadmap'));
 const AnalyticsKPIs = lazy(() => import('./pages/ea/AnalyticsKPIs'));
+const AnalyticsDashboard = lazy(() => import('./pages/ea/AnalyticsDashboard'));
 const ArchitectureRepository = lazy(() => import('./pages/ea/ArchitectureRepository'));
 const StakeholderManagement = lazy(() => import('./pages/ea/StakeholderManagement'));
 
@@ -157,6 +158,7 @@ function App() {
                   <Route path="/ea/compliance" element={<ComplianceGovernance />} />
                   <Route path="/ea/roadmap" element={<Roadmap />} />
                   <Route path="/ea/analytics" element={<AnalyticsKPIs />} />
+                  <Route path="/ea/analytics-dashboard" element={<AnalyticsDashboard />} />
                   <Route path="/ea/repository" element={<ArchitectureRepository />} />
                   <Route path="/ea/stakeholders" element={<StakeholderManagement />} />
                   

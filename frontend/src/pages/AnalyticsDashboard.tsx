@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Brain, Cloud, TrendingUp, Zap, Activity, DollarSign } from 'lucide-react';
+import { API_URL } from '../config/api';
 import AIRecommendationsPanel from '../components/AIRecommendationsPanel';
 import FadeIn from '../components/ui/FadeIn';
 import {
@@ -54,7 +55,7 @@ export const AnalyticsDashboard: React.FC = () => {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3011/api/ai/analytics/predict-costs', {
+      const response = await axios.post(`${API_URL}/ai/analytics/predict-costs`, {
         historicalData: [4200, 4350, 4500, 4650, 4800],
         timeframe: 'next_month'
       });

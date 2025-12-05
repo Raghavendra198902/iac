@@ -32,7 +32,7 @@ export const useWorkflowCollaboration = (projectId: string) => {
   }, [projectId, isConnected]);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !isConnected) return;
 
     // Listen for step update notifications
     const handleStepUpdate = (data: any) => {
@@ -113,10 +113,10 @@ export const useWorkflowCollaboration = (projectId: string) => {
     socket.on('user-viewing-step', handleUserViewingStep);
 
     return () => {
-      socket.off('step-update-notification', handleStepUpdate);
-      socket.off('step-completed-notification', handleStepCompleted);
-      socket.off('progress-update-notification', handleProgressUpdate);
-      socket.off('user-viewing-step', handleUserViewingStep);
+      socket?.off('step-update-notification', handleStepUpdate);
+      socket?.off('step-completed-notification', handleStepCompleted);
+      socket?.off('progress-update-notification', handleProgressUpdate);
+      socket?.off('user-viewing-step', handleUserViewingStep);
     };
   }, [socket]);
 

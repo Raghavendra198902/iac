@@ -16,8 +16,8 @@
     "declaration": false,
     "declarationMap": false,
     "sourceMap": true,
-    "moduleResolution": "node",
-    "types": [],
+    "moduleResolution": "bundler",
+    "types": ["node"],
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": ["src/**/*", "src/types/**/*"],

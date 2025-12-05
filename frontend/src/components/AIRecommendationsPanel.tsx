@@ -32,7 +32,7 @@ export const AIRecommendationsPanel: React.FC<AIRecommendationsPanelProps> = ({
   const fetchRecommendations = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3011/api/ai/recommendations/cost-optimization', {
+      const response = await axios.post(`${API_URL}/ai/recommendations/cost-optimization`, {
         resources: [],
         usage: {}
       });

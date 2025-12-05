@@ -13,7 +13,7 @@ metadata := {
 default allow = false
 
 # SSH should not be open to 0.0.0.0/0
-violations[msg] {
+violations contains msg if {
     input.type == "security-group"
     rule := input.properties.ingressRules[_]
     rule.port == 22
@@ -22,7 +22,7 @@ violations[msg] {
 }
 
 # RDP should not be open to 0.0.0.0/0
-violations[msg] {
+violations contains msg if {
     input.type == "security-group"
     rule := input.properties.ingressRules[_]
     rule.port == 3389
@@ -31,7 +31,7 @@ violations[msg] {
 }
 
 # Database ports should not be open to internet
-violations[msg] {
+violations contains msg if {
     input.type == "security-group"
     rule := input.properties.ingressRules[_]
     is_database_port(rule.port)
@@ -40,13 +40,13 @@ violations[msg] {
 }
 
 # Helper: Check if port is a common database port
-is_database_port(port) {
+is_database_port(port) if {
     database_ports := [3306, 5432, 1433, 27017, 6379]
     port == database_ports[_]
 }
 
 # All traffic should not be allowed from 0.0.0.0/0
-violations[msg] {
+violations contains msg if {
     input.type == "security-group"
     rule := input.properties.ingressRules[_]
     rule.port == 0
@@ -55,20 +55,20 @@ violations[msg] {
 }
 
 # VPCs should have flow logs enabled
-violations[msg] {
+violations contains msg if {
     input.type == "vpc"
     not input.properties.flowLogsEnabled
     msg := sprintf("VPC '%s' should have flow logs enabled for security monitoring", [input.name])
 }
 
 # Subnets should not auto-assign public IPs unless explicitly needed
-warnings[msg] {
+warnings contains msg if {
     input.type == "subnet"
     input.properties.mapPublicIpOnLaunch == true
     not input.tags.public == "true"
     msg := sprintf("Subnet '%s' auto-assigns public IPs but is not tagged as public", [input.name])
 }
 
-allow {
+allow if {
     count(violations) == 0
 }

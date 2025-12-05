@@ -7,6 +7,7 @@ import aiRoutes from './ai';
 import pmRoutes from './pm';
 import seRoutes from './se';
 import eaStrategyRoutes from './ea-strategy';
+import eaResponsibilitiesRoutes from './ea-responsibilities';
 import taRoutes from './ta';
 import saRoutes from './sa';
 import performanceRoutes from './performance';
@@ -43,6 +44,7 @@ router.get('/', (req, res) => {
       pm: '/api/pm',
       se: '/api/se',
       ea: '/api/ea',
+      eaResponsibilities: '/api/ea/responsibilities',
       ta: '/api/ta',
       sa: '/api/sa',
       performance: '/api/performance',
@@ -77,6 +79,7 @@ router.use('/ai', aiRoutes);
 router.use('/pm', pmRoutes);
 router.use('/se', seRoutes);
 router.use('/ea', eaStrategyRoutes);
+router.use('/ea/responsibilities', eaResponsibilitiesRoutes);
 router.use('/ta', taRoutes);
 router.use('/sa', saRoutes);
 router.use('/performance', performanceRoutes);

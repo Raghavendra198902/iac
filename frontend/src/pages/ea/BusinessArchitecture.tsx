@@ -6,7 +6,7 @@ import {
   Clock, DollarSign, Activity, Users, Target, Zap
 } from 'lucide-react';
 
-const API_BASE = API_URL';
+const API_BASE = API_URL;
 
 export default function BusinessArchitecture() {
   const [activeTab, setActiveTab] = useState('capabilities');

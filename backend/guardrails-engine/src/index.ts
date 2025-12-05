@@ -3,6 +3,7 @@ import cors from 'cors';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { PolicyEngine } from './policy-engine';
+import { ProGuardrailsEngine } from './ProGuardrailsEngine';
 import { EvaluationRequest, EvaluationResult } from './types';
 
 const logger = {
@@ -22,6 +23,11 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 const policyEngine = new PolicyEngine();
+const proGuardrails = new ProGuardrailsEngine();
+
+// Setup Pro Guardrails event listeners
+proGuardrails.on('evaluation:completed', (data) => logger.info('✅ Pro Evaluation Complete', { evaluationId: data.evaluationId }));
+proGuardrails.on('remediation:completed', (data) => logger.info('🔧 Remediation Complete', data));
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
@@ -184,6 +190,68 @@ app.get('/api/compliance/:blueprintId', async (req: Request, res: Response) => {
   }
 });
 
+// ========== PRO GUARDRAILS ENGINE ROUTES ==========
+
+// Pro evaluation with AI-powered analysis
+app.post('/api/pro/evaluate', async (req: Request, res: Response) => {
+  try {
+    const { blueprintId, iacCode, format, environment } = req.body;
+
+    logger.info('Starting Pro policy evaluation with AI', { blueprintId, format });
+
+    const evaluation = await proGuardrails.evaluateWithAI({
+      blueprintId,
+      iacCode,
+      format,
+      environment
+    });
+
+    res.json(evaluation);
+  } catch (error: any) {
+    logger.error('Pro evaluation failed', { error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Execute auto-remediation
+app.post('/api/pro/remediate/:actionId', async (req: Request, res: Response) => {
+  try {
+    const { actionId } = req.params;
+
+    logger.info('Executing auto-remediation', { actionId });
+
+    const result = await proGuardrails.executeAutoRemediation(actionId);
+
+    res.json(result);
+  } catch (error: any) {
+    logger.error('Remediation failed', { error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Drift detection
+app.post('/api/pro/drift/:resourceId', async (req: Request, res: Response) => {
+  try {
+    const { resourceId } = req.params;
+    const { currentState } = req.body;
+
+    logger.info('Detecting drift', { resourceId });
+
+    const driftAnalysis = await proGuardrails.detectDrift(resourceId, currentState);
+
+    res.json(driftAnalysis);
+  } catch (error: any) {
+    logger.error('Drift detection failed', { error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get Pro features and capabilities
+app.get('/api/pro/features', (req: Request, res: Response) => {
+  const features = proGuardrails.getProFeatures();
+  res.json(features);
+});
+
 // Error handler
 app.use((err: any, req: Request, res: Response, next: any) => {
   logger.error('Unhandled error', { error: err.message, stack: err.stack });
@@ -192,8 +260,9 @@ app.use((err: any, req: Request, res: Response, next: any) => {
 
 // Start server
 app.listen(PORT, () => {
-  logger.info(`Guardrails Engine listening on port ${PORT}`);
-  logger.info(`Loaded ${policyEngine.getPolicies().length} policies`);
+  logger.info(`🛡️ Guardrails Engine (Pro) listening on port ${PORT}`);
+  logger.info(`Loaded ${policyEngine.getPolicies().length} standard policies`);
+  logger.info(`✨ Pro features enabled: AI Predictions, Auto-Remediation, Drift Detection`);
 });
 
 // Graceful shutdown

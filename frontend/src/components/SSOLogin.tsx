@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
 interface SSOLoginButtonProps {
   provider?: 'saml' | 'google' | 'azuread';
@@ -19,13 +20,13 @@ export const SSOLoginButton: React.FC<SSOLoginButtonProps> = ({
     try {
       if (provider === 'saml') {
         // Redirect to SAML login
-        window.location.href = 'http://localhost:3012/api/auth/saml/login';
+        window.location.href = `${API_URL}/auth/saml/login`;
       } else if (provider === 'google') {
         // Redirect to Google OAuth
-        window.location.href = 'http://localhost:3012/api/auth/oauth2/google/login';
+        window.location.href = `${API_URL}/auth/oauth2/google/login`;
       } else if (provider === 'azuread') {
         // Redirect to Azure AD OAuth
-        window.location.href = 'http://localhost:3012/api/auth/oauth2/azuread/login';
+        window.location.href = `${API_URL}/auth/oauth2/azuread/login`;
       }
     } catch (error) {
       console.error('SSO login failed:', error);
@@ -84,7 +85,7 @@ export const LocalLoginForm: React.FC<LocalLoginFormProps> = ({
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3012/api/auth/login', {
+      const response = await axios.post(`${API_URL}/auth/login`, {
         email,
         password
       });

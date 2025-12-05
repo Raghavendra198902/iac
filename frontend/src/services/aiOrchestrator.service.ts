@@ -1,5 +1,5 @@
 import { API_CONFIG, API_ENDPOINTS } from './api.config';
-import {
+import type {
   AIProject,
   GenerationRequest,
   OneClickInput,
@@ -23,7 +23,7 @@ class AIOrchestratorService {
     mode: 'oneclick' | 'advanced';
   }): Promise<AIProject> {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AI_PROJECT}`,
+      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AI_PROJECTS}`,
       {
         method: 'POST',
         headers: this.getAuthHeaders(),
@@ -139,7 +139,7 @@ class AIOrchestratorService {
   // List projects
   async listProjects(): Promise<AIProject[]> {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AI_PROJECT}`,
+      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AI_PROJECTS}`,
       {
         headers: this.getAuthHeaders(),
       }
@@ -155,7 +155,7 @@ class AIOrchestratorService {
   // Get project
   async getProject(projectId: string): Promise<AIProject> {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AI_PROJECT}/${projectId}`,
+      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AI_PROJECTS}/${projectId}`,
       {
         headers: this.getAuthHeaders(),
       }

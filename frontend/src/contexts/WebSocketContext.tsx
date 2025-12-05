@@ -44,12 +44,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     });
 
     newSocket.on('connect', () => {
-      console.log('✅ WebSocket connected');
       setIsConnected(true);
     });
 
     newSocket.on('disconnect', () => {
-      console.log('❌ WebSocket disconnected');
       setIsConnected(false);
     });
 

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -16,6 +14,12 @@ services:
       - ./database/schemas:/docker-entrypoint-initdb.d
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dharma_admin -d iac_dharma"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Redis Cache
   redis:
@@ -27,6 +31,12 @@ services:
       - redis-data:/data
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   # API Gateway
   api-gateway:
@@ -53,6 +63,12 @@ services:
     volumes:
       - ./backend/cmdb-agent:/cmdb-agent:ro
       - ./backend/api-gateway/public:/app/public:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     # volumes:
     #   - ./backend/api-gateway:/app
     #   - /app/node_modules
@@ -92,6 +108,12 @@ services:
       - postgres
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # AI Engine
   ai-engine:
@@ -110,6 +132,12 @@ services:
       - dharma-network
     volumes:
       - ./ml-models:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
 
   # Guardrails Engine
   guardrails-engine:
@@ -127,6 +155,12 @@ services:
       - postgres
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Costing Service
   costing-service:
@@ -147,6 +181,12 @@ services:
       - redis
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Orchestrator Service
   orchestrator-service:
@@ -167,6 +207,12 @@ services:
       - redis
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Automation Engine
   automation-engine:
@@ -224,6 +270,12 @@ services:
       - orchestrator-service
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3007/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Frontend
   frontend:
@@ -241,6 +293,12 @@ services:
       - /app/node_modules
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 5173 | grep LISTEN"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   # Prometheus
   prometheus:
@@ -253,6 +311,12 @@ services:
       - prometheus-data:/prometheus
     networks:
       - dharma-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # Grafana
   grafana:
@@ -293,6 +357,12 @@ services:
     environment:
       - COLLECTOR_ZIPKIN_HOST_PORT=:9411
       - COLLECTOR_OTLP_ENABLED=true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:14269"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - dharma-network
 
@@ -373,12 +443,6 @@ services:
       - "--log-level"
       - "info"
       - "/policies"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8181/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     networks:
       - dharma-network
     restart: unless-stopped
@@ -429,7 +493,6 @@ services:
     volumes:
       - ./monitoring/loki/promtail-config.yml:/etc/promtail/config.yml
       - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki

@@ -14,43 +14,43 @@ metadata := {
 default allow = false
 
 # Allow if resource has encryption enabled
-allow {
+allow if {
     input.type == "storage"
     input.properties.encryption == true
 }
 
-allow {
+allow if {
     input.type == "database"
     input.properties.encrypted == true
 }
 
-allow {
+allow if {
     # Resource doesn't require encryption
     not requires_encryption
 }
 
 # Detect violations
-violations[msg] {
+violations contains msg if {
     requires_encryption
     not has_encryption
     msg := sprintf("Resource '%s' of type '%s' must have encryption enabled", [input.name, input.type])
 }
 
 # Helper: Check if resource requires encryption
-requires_encryption {
+requires_encryption if {
     resource_types := ["storage", "database", "s3", "rds", "storage-account", "sql-database", "storage-bucket", "cloud-sql"]
     input.type == resource_types[_]
 }
 
 # Helper: Check if encryption is enabled
-has_encryption {
+has_encryption if {
     input.properties.encryption == true
 }
 
-has_encryption {
+has_encryption if {
     input.properties.encrypted == true
 }
 
-has_encryption {
+has_encryption if {
     input.properties.encryptionAtRest == "enabled"
 }

@@ -15,30 +15,30 @@ required_tags := ["environment", "owner", "project"]
 default allow = false
 
 # Allow if all required tags are present
-allow {
+allow if {
     has_all_required_tags
 }
 
 # Detect violations
-violations[msg] {
+violations contains msg if {
     missing := missing_tags
     count(missing) > 0
     msg := sprintf("Resource '%s' is missing required tags: %v", [input.name, missing])
 }
 
 # Helper: Check if all required tags exist
-has_all_required_tags {
+has_all_required_tags if {
     count(missing_tags) == 0
 }
 
 # Helper: Get missing tags
-missing_tags[tag] {
+missing_tags contains tag if {
     tag := required_tags[_]
     not input.tags[tag]
 }
 
 # Warnings for empty tag values
-warnings[msg] {
+warnings contains msg if {
     tag := required_tags[_]
     input.tags[tag]
     input.tags[tag] == ""

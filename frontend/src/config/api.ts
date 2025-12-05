@@ -31,10 +31,3 @@ export const API_URL = `${API_BASE_URL}/api`;
 
 // WebSocket URL
 export const WS_BASE_URL = API_BASE_URL.replace(/^http/, 'ws');
-
-console.log('API Configuration:', {
-  baseUrl: API_BASE_URL,
-  apiUrl: API_URL,
-  wsUrl: WS_BASE_URL,
-  hostname: typeof window !== 'undefined' ? window.location.hostname : 'N/A'
-});

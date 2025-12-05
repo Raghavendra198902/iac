@@ -70,16 +70,13 @@ export default function Collaboration() {
     try {
       setLoading(true);
       const url = `${API_URL}/collaboration/channels`;
-      console.log('Fetching channels from:', url);
       const response = await fetch(url);
-      console.log('Channels response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Channels error response:', errorText);
         throw new Error(`Failed to fetch channels: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Channels loaded:', data.length);
       setChannels(data);
       if (data.length > 0) {
         setSelectedChannel(data[0]);
@@ -174,16 +171,13 @@ export default function Collaboration() {
   const loadMessages = async (channelId: string) => {
     try {
       const url = `${API_URL}/collaboration/channels/${channelId}/messages`;
-      console.log('Fetching messages from:', url);
       const response = await fetch(url);
-      console.log('Messages response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Messages error response:', errorText);
         throw new Error(`Failed to fetch messages: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Messages loaded:', data.length);
       
       setChannelMessages(prev => ({
         ...prev,
@@ -473,7 +467,6 @@ export default function Collaboration() {
     try {
       const url = `${API_URL}/collaboration/channels/${selectedChannel.id}/messages`;
       const payload = { userId, userName, type: 'text', content: newMessage.content };
-      console.log('Sending message to:', url, payload);
       
       const response = await fetch(url, {
         method: 'POST',

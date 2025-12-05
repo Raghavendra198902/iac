@@ -20,14 +20,14 @@ large_aws_instances := [
 default allow = false
 
 # Allow if instance is not large
-allow {
+allow if {
     input.cloudProvider == "aws"
     input.type == "ec2"
     not is_large_instance
 }
 
 # Allow if large instance has cost approval
-allow {
+allow if {
     input.cloudProvider == "aws"
     input.type == "ec2"
     is_large_instance
@@ -35,14 +35,14 @@ allow {
 }
 
 # Allow non-compute resources
-allow {
+allow if {
     input.type != "ec2"
     input.type != "vm"
     input.type != "compute-instance"
 }
 
 # Detect violations
-violations[msg] {
+violations contains msg if {
     input.cloudProvider == "aws"
     input.type == "ec2"
     is_large_instance
@@ -51,7 +51,7 @@ violations[msg] {
 }
 
 # Helper: Check if instance type is large
-is_large_instance {
+is_large_instance if {
     instanceType := input.properties.instanceType
     instanceType == large_aws_instances[_]
 }

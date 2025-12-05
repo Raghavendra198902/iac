@@ -13,32 +13,32 @@ metadata := {
 default allow = false
 
 # Allow if resource is explicitly marked for public access with approval
-allow {
+allow if {
     input.properties.public == true
     input.properties.publicAccessApproved == true
 }
 
 # Allow if resource is not public
-allow {
+allow if {
     not is_public
 }
 
 # Detect violations
-violations[msg] {
+violations contains msg if {
     is_public
     not input.properties.publicAccessApproved
     msg := sprintf("Resource '%s' is configured for public access without approval", [input.name])
 }
 
 # Helper: Check if resource is public
-is_public {
+is_public if {
     input.properties.public == true
 }
 
-is_public {
+is_public if {
     input.properties.publicAccess == "enabled"
 }
 
-is_public {
+is_public if {
     input.properties.accessibility == "public"
 }

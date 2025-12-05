@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../config/api';
 import { 
   Server, 
   Database, 
@@ -369,7 +370,7 @@ export default function CMDB() {
 
   // Generate agent installation command
   const getInstallCommand = () => {
-    const apiUrl = 'http://localhost:3000';
+    const apiUrl = API_URL;
     const apiKeyPlaceholder = '${CMDB_API_KEY}';
 
     switch (selectedOS) {
@@ -619,9 +620,9 @@ docker run -d \\
   // Download agent package
   const handleDownloadAgent = () => {
     const downloadUrls = {
-      linux: 'http://localhost:3000/api/downloads/cmdb-agent-linux.tar.gz',
-      windows: 'http://localhost:3000/api/downloads/cmdb-agent-windows.zip',
-      docker: 'http://localhost:3000/api/downloads/docker-compose.yml',
+      linux: `${API_URL}/downloads/cmdb-agent-linux.tar.gz`,
+      windows: `${API_URL}/downloads/cmdb-agent-windows.zip`,
+      docker: `${API_URL}/downloads/docker-compose.yml`,
     };
     
     toast.success(`Downloading CMDB Agent for ${selectedOS}...`);
