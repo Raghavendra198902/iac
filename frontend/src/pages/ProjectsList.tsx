@@ -127,6 +127,7 @@ const ProjectsList = () => {
               </p>
             </div>
           </div>
+        </div>
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -279,6 +280,8 @@ const ProjectsList = () => {
           </p>
         </motion.div>
       )}
+      </div>
+      </div>
     </MainLayout>
   );
 };
