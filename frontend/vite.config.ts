@@ -8,20 +8,13 @@ export default defineConfig(({ mode }) => ({
   // Production optimizations
   build: {
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-        pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : [],
-      },
-    },
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@headlessui/react', '@heroicons/react'],
-          'utils': ['axios', 'date-fns', 'zustand'],
+          'ui-vendor': ['@headlessui/react', 'lucide-react'],
+          'utils': ['axios', 'date-fns'],
         },
       },
     },
