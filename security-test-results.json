@@ -1,0 +1,67 @@
+{
+  "total": 12,
+  "passed": 10,
+  "failed": 2,
+  "results": [
+    {
+      "name": "SQL Injection Protection",
+      "passed": true,
+      "reason": "All SQL injection attempts blocked"
+    },
+    {
+      "name": "XSS Protection",
+      "passed": true,
+      "reason": "XSS payloads properly sanitized"
+    },
+    {
+      "name": "CSRF Protection",
+      "passed": true,
+      "reason": "CSRF protection active"
+    },
+    {
+      "name": "Rate Limiting",
+      "passed": false,
+      "reason": "No rate limiting detected"
+    },
+    {
+      "name": "Authentication Enforcement",
+      "passed": false,
+      "reason": "Endpoint accessible without auth: /api/projects"
+    },
+    {
+      "name": "Authorization Checks",
+      "passed": true,
+      "reason": "Manual testing required"
+    },
+    {
+      "name": "Input Validation",
+      "passed": true,
+      "reason": "Input validation working"
+    },
+    {
+      "name": "Security Headers",
+      "passed": true,
+      "reason": "All security headers present"
+    },
+    {
+      "name": "Sensitive Data Exposure",
+      "passed": true,
+      "reason": "No sensitive data exposed"
+    },
+    {
+      "name": "Access Control",
+      "passed": true,
+      "reason": "Manual testing required"
+    },
+    {
+      "name": "Security Misconfiguration",
+      "passed": true,
+      "reason": "No security misconfigurations detected"
+    },
+    {
+      "name": "Insecure Deserialization",
+      "passed": true,
+      "reason": "Deserialization appears secure"
+    }
+  ]
+}
