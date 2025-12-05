@@ -202,20 +202,7 @@ app.use('/api/stakeholders', eaStakeholdersRouter);
 import eaAnalyticsRouter from './routes/ea-analytics';
 app.use('/api/analytics', eaAnalyticsRouter);
 
-// Project Workflow routes (no auth for development)
-import { createProjectRoutes } from './routes/project-routes';
-import { pool } from './utils/database';
-app.use('/api', createProjectRoutes(pool));
-
-// Project Assets routes (no auth for development)
-import { createAssetRoutes } from './routes/asset-routes';
-app.use('/api', createAssetRoutes(pool));
-
-// Collaboration routes (no auth for development)
-import { createCollaborationRoutes } from './routes/collaboration';
-app.use('/api/collaboration', createCollaborationRoutes(pool));
-
-// Authentication middleware for protected routes
+// Authentication middleware for protected routes (MOVED BEFORE PROJECT ROUTES)
 app.use('/api', authMiddleware);
 
 // Add user context after auth
@@ -227,6 +214,16 @@ app.use('/api', featureFlagMiddleware);
 // Enhanced rate limiting (after auth, so we have user info)
 app.use('/api', userRateLimit());
 app.use('/api', ipRateLimit());
+
+// Protected project and collaboration routes (now behind auth)
+import { createProjectRoutes } from './routes/project-routes';
+import { createAssetRoutes } from './routes/asset-routes';
+import { createCollaborationRoutes } from './routes/collaboration';
+import { pool } from './utils/database';
+
+app.use('/api', createProjectRoutes(pool));
+app.use('/api', createAssetRoutes(pool));
+app.use('/api/collaboration', createCollaborationRoutes(pool));
 
 // Routes
 app.use('/api', routes);
