@@ -1,0 +1,546 @@
+openapi: 3.0.3
+info:
+  title: IAC Dharma API
+  description: |
+    Enterprise Infrastructure as Code Automation Platform
+    
+    ## Features
+    - AI-powered infrastructure recommendations
+    - Multi-cloud IaC generation (Terraform, CloudFormation, ARM)
+    - Cost estimation and optimization
+    - Drift detection and remediation
+    - Multi-tenancy with quota management
+    - Real-time monitoring and analytics
+    
+  version: 2.0.0
+  contact:
+    name: IAC Dharma Team
+    email: support@iacdharma.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.iacdharma.com
+    description: Production server
+  - url: https://staging-api.iacdharma.com
+    description: Staging server
+  - url: http://localhost:3000
+    description: Local development
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Blueprints
+    description: Infrastructure blueprint management
+  - name: IAC Generation
+    description: Generate IaC code from blueprints
+  - name: Cost Estimation
+    description: Estimate infrastructure costs
+  - name: AI Recommendations
+    description: AI-powered optimization recommendations
+  - name: Deployments
+    description: Infrastructure deployment management
+  - name: Monitoring
+    description: System health and metrics
+  - name: Tenants
+    description: Multi-tenancy management
+  - name: Integrations
+    description: External system integrations
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate user
+      description: Authenticate with username/password and receive JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: SecurePassword123!
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT access token
+                  refreshToken:
+                    type: string
+                    description: Refresh token
+                  expiresIn:
+                    type: integer
+                    description: Token expiration in seconds
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /api/blueprints:
+    get:
+      tags:
+        - Blueprints
+      summary: List all blueprints
+      description: Retrieve list of infrastructure blueprints
+      operationId: listBlueprints
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: provider
+          in: query
+          schema:
+            type: string
+            enum: [aws, azure, gcp]
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            X-Cache:
+              schema:
+                type: string
+                enum: [HIT, MISS]
+              description: Cache hit status
+            X-Total-Count:
+              schema:
+                type: integer
+              description: Total number of blueprints
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Blueprint'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+    post:
+      tags:
+        - Blueprints
+      summary: Create new blueprint
+      description: Create a new infrastructure blueprint
+      operationId: createBlueprint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlueprintInput'
+      responses:
+        '201':
+          description: Blueprint created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blueprint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/QuotaExceeded'
+
+  /api/blueprints/{id}:
+    get:
+      tags:
+        - Blueprints
+      summary: Get blueprint by ID
+      operationId: getBlueprintById
+      parameters:
+        - $ref: '#/components/parameters/BlueprintIdParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blueprint'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Blueprints
+      summary: Update blueprint
+      operationId: updateBlueprint
+      parameters:
+        - $ref: '#/components/parameters/BlueprintIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlueprintInput'
+      responses:
+        '200':
+          description: Blueprint updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blueprint'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Blueprints
+      summary: Delete blueprint
+      operationId: deleteBlueprint
+      parameters:
+        - $ref: '#/components/parameters/BlueprintIdParam'
+      responses:
+        '204':
+          description: Blueprint deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/iac/generate:
+    post:
+      tags:
+        - IAC Generation
+      summary: Generate IaC code
+      description: Generate Infrastructure as Code from blueprint
+      operationId: generateIAC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - blueprintId
+                - provider
+                - format
+              properties:
+                blueprintId:
+                  type: string
+                  format: uuid
+                provider:
+                  type: string
+                  enum: [aws, azure, gcp]
+                format:
+                  type: string
+                  enum: [terraform, cloudformation, arm, pulumi]
+      responses:
+        '200':
+          description: IaC code generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Generated IaC code
+                  format:
+                    type: string
+                  provider:
+                    type: string
+
+  /api/cost/estimate:
+    post:
+      tags:
+        - Cost Estimation
+      summary: Estimate infrastructure costs
+      operationId: estimateCost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - blueprintId
+                - provider
+                - region
+              properties:
+                blueprintId:
+                  type: string
+                  format: uuid
+                provider:
+                  type: string
+                  enum: [aws, azure, gcp]
+                region:
+                  type: string
+      responses:
+        '200':
+          description: Cost estimation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostEstimate'
+
+  /api/ai/recommendations/{blueprintId}:
+    get:
+      tags:
+        - AI Recommendations
+      summary: Get AI recommendations
+      description: Get AI-powered optimization recommendations
+      operationId: getRecommendations
+      parameters:
+        - name: blueprintId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recommendations retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommendation'
+
+  /health/live:
+    get:
+      tags:
+        - Monitoring
+      summary: Liveness probe
+      description: Check if service is alive
+      operationId: healthLive
+      security: []
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /metrics:
+    get:
+      tags:
+        - Monitoring
+      summary: Prometheus metrics
+      description: Expose metrics in Prometheus format
+      operationId: metrics
+      security: []
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    BlueprintIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Blueprint:
+      type: object
+      required:
+        - id
+        - name
+        - provider
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        provider:
+          type: string
+          enum: [aws, azure, gcp]
+        config:
+          type: object
+          additionalProperties: true
+        tenantId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+
+    BlueprintInput:
+      type: object
+      required:
+        - name
+        - provider
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        provider:
+          type: string
+          enum: [aws, azure, gcp]
+        config:
+          type: object
+          additionalProperties: true
+
+    CostEstimate:
+      type: object
+      properties:
+        totalCost:
+          type: number
+          format: double
+          description: Total estimated cost in USD
+        currency:
+          type: string
+          example: USD
+        period:
+          type: string
+          enum: [hourly, daily, monthly, yearly]
+        breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              resource:
+                type: string
+              cost:
+                type: number
+              unit:
+                type: string
+
+    Recommendation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [cost_optimization, security, performance, compliance]
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        recommendation:
+          type: string
+        expectedSavings:
+          type: number
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    QuotaExceeded:
+      description: Tenant quota exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
