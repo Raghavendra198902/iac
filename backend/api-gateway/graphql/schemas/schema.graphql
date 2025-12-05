@@ -1,0 +1,415 @@
+# GraphQL Schema for IAC Dharma v3.0
+
+type Query {
+  # Infrastructure
+  infrastructure(id: ID!): Infrastructure
+  listInfrastructures(
+    provider: String
+    status: String
+    limit: Int = 20
+    offset: Int = 0
+  ): InfrastructureConnection!
+  
+  # Compute Resources
+  computeResources(infrastructureId: ID!): [ComputeResource!]!
+  computeResource(id: ID!): ComputeResource
+  
+  # Deployments
+  deployment(id: ID!): Deployment
+  listDeployments(
+    infrastructureId: ID
+    status: String
+    limit: Int = 20
+    offset: Int = 0
+  ): DeploymentConnection!
+  
+  # AIOps Predictions
+  predictions(
+    serviceId: ID
+    predictionType: PredictionType
+    limit: Int = 10
+  ): [Prediction!]!
+  
+  # Metrics
+  metrics(
+    serviceId: ID!
+    metricNames: [String!]
+    timeRange: String = "1h"
+  ): [Metric!]!
+  
+  # Users
+  me: User
+  user(id: ID!): User
+  
+  # Audit Logs
+  auditLogs(
+    userId: ID
+    resourceType: String
+    limit: Int = 50
+  ): [AuditLog!]!
+}
+
+type Mutation {
+  # Infrastructure Management
+  createInfrastructure(input: CreateInfrastructureInput!): Infrastructure!
+  updateInfrastructure(id: ID!, input: UpdateInfrastructureInput!): Infrastructure!
+  deleteInfrastructure(id: ID!): Boolean!
+  
+  # Deployment Management
+  createDeployment(input: CreateDeploymentInput!): Deployment!
+  scaleDeployment(id: ID!, replicas: Int!): Deployment!
+  deleteDeployment(id: ID!): Boolean!
+  
+  # AI Predictions
+  predictFailure(serviceId: ID!, metrics: MetricsInput!): Prediction!
+  predictCapacity(serviceId: ID!, forecastDays: Int = 30): Prediction!
+  detectThreat(serviceId: ID!, events: [EventInput!]!): ThreatDetection!
+  
+  # Authentication
+  login(email: String!, password: String!): AuthPayload!
+  signup(input: SignupInput!): AuthPayload!
+  refreshToken(token: String!): AuthPayload!
+}
+
+type Subscription {
+  # Real-time status updates
+  infrastructureStatus(id: ID!): InfrastructureStatusUpdate!
+  deploymentStatus(id: ID!): DeploymentStatusUpdate!
+  
+  # Real-time anomaly alerts
+  anomalyDetected(serviceId: ID): AnomalyEvent!
+  
+  # Real-time metrics stream
+  metricsStream(serviceId: ID!, metricNames: [String!]!): MetricUpdate!
+}
+
+# ============================================================================
+# Types
+# ============================================================================
+
+type Infrastructure {
+  id: ID!
+  name: String!
+  provider: Provider!
+  region: String!
+  status: InfrastructureStatus!
+  templateId: String
+  config: JSON!
+  tags: [String!]!
+  computeResources: [ComputeResource!]!
+  deployments: [Deployment!]!
+  createdBy: User
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ComputeResource {
+  id: ID!
+  infrastructureId: ID!
+  instanceType: String!
+  instanceId: String
+  cpuCores: Int!
+  memoryGb: Int!
+  diskGb: Int!
+  status: ResourceStatus!
+  ipAddress: String
+  privateIp: String
+  availabilityZone: String
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Deployment {
+  id: ID!
+  infrastructureId: ID!
+  name: String!
+  namespace: String!
+  replicas: Int!
+  desiredReplicas: Int!
+  availableReplicas: Int!
+  status: DeploymentStatus!
+  image: String!
+  imageTag: String!
+  envVars: JSON
+  resources: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Prediction {
+  id: ID!
+  predictionType: PredictionType!
+  serviceId: ID!
+  serviceName: String!
+  timestamp: DateTime!
+  predictedTime: DateTime
+  probability: Float!
+  confidence: Float!
+  severity: Severity!
+  affectedComponents: [String!]!
+  recommendedActions: [String!]!
+  details: JSON!
+}
+
+type Metric {
+  time: DateTime!
+  serviceId: ID!
+  serviceName: String!
+  metricName: String!
+  value: Float!
+  unit: String
+  labels: JSON
+}
+
+type User {
+  id: ID!
+  email: String!
+  username: String!
+  role: UserRole!
+  permissions: [String!]!
+  lastLogin: DateTime
+  createdAt: DateTime!
+}
+
+type AuditLog {
+  id: ID!
+  userId: ID
+  user: User
+  action: String!
+  resourceType: String!
+  resourceId: ID
+  details: JSON
+  ipAddress: String
+  userAgent: String
+  timestamp: DateTime!
+}
+
+type ThreatDetection {
+  id: ID!
+  serviceId: ID!
+  threatsDetected: Int!
+  riskLevel: String!
+  threats: [Threat!]!
+  recommendedActions: [Action!]!
+  timestamp: DateTime!
+}
+
+type Threat {
+  threatType: String!
+  severity: Severity!
+  confidence: Float!
+  description: String!
+}
+
+type Action {
+  action: String!
+  priority: String!
+  description: String!
+  automated: Boolean!
+}
+
+type AuthPayload {
+  token: String!
+  refreshToken: String!
+  user: User!
+  expiresAt: DateTime!
+}
+
+# ============================================================================
+# Connections (Pagination)
+# ============================================================================
+
+type InfrastructureConnection {
+  edges: [InfrastructureEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type InfrastructureEdge {
+  node: Infrastructure!
+  cursor: String!
+}
+
+type DeploymentConnection {
+  edges: [DeploymentEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DeploymentEdge {
+  node: Deployment!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# ============================================================================
+# Subscriptions
+# ============================================================================
+
+type InfrastructureStatusUpdate {
+  infrastructureId: ID!
+  status: InfrastructureStatus!
+  message: String
+  timestamp: DateTime!
+}
+
+type DeploymentStatusUpdate {
+  deploymentId: ID!
+  status: DeploymentStatus!
+  replicas: Int!
+  availableReplicas: Int!
+  timestamp: DateTime!
+}
+
+type AnomalyEvent {
+  id: ID!
+  serviceId: ID!
+  anomalyScore: Float!
+  affectedMetrics: [String!]!
+  severity: Severity!
+  message: String!
+  timestamp: DateTime!
+}
+
+type MetricUpdate {
+  time: DateTime!
+  serviceId: ID!
+  metricName: String!
+  value: Float!
+}
+
+# ============================================================================
+# Inputs
+# ============================================================================
+
+input CreateInfrastructureInput {
+  name: String!
+  provider: Provider!
+  region: String!
+  templateId: String
+  config: JSON!
+  tags: [String!]
+}
+
+input UpdateInfrastructureInput {
+  name: String
+  region: String
+  config: JSON
+  tags: [String!]
+  status: InfrastructureStatus
+}
+
+input CreateDeploymentInput {
+  infrastructureId: ID!
+  name: String!
+  namespace: String = "default"
+  replicas: Int = 1
+  image: String!
+  imageTag: String = "latest"
+  envVars: JSON
+  resources: JSON
+}
+
+input MetricsInput {
+  cpuUsage: Float
+  memoryUsage: Float
+  diskIo: Float
+  errorRate: Float
+  responseTimeMs: Float
+}
+
+input EventInput {
+  type: String!
+  severity: String!
+  message: String!
+  timestamp: DateTime!
+}
+
+input SignupInput {
+  email: String!
+  username: String!
+  password: String!
+  role: UserRole = user
+}
+
+# ============================================================================
+# Enums
+# ============================================================================
+
+enum Provider {
+  aws
+  azure
+  gcp
+  digitalocean
+  alibaba
+  ibm
+  oracle
+  vmware
+  kubernetes
+  edge
+}
+
+enum InfrastructureStatus {
+  pending
+  creating
+  running
+  stopped
+  error
+  terminating
+  terminated
+}
+
+enum ResourceStatus {
+  pending
+  running
+  stopped
+  terminated
+  error
+}
+
+enum DeploymentStatus {
+  pending
+  deploying
+  running
+  scaling
+  failed
+  terminated
+}
+
+enum PredictionType {
+  failure
+  capacity
+  cost
+  churn
+  threat
+}
+
+enum Severity {
+  critical
+  high
+  medium
+  low
+  info
+}
+
+enum UserRole {
+  admin
+  developer
+  operator
+  viewer
+  user
+}
+
+# ============================================================================
+# Scalars
+# ============================================================================
+
+scalar DateTime
+scalar JSON
