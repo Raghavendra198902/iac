@@ -1,214 +1,146 @@
 version: '3.9'
 
+# IAC Dharma v3.0 - Development Infrastructure
+# Services: PostgreSQL, Neo4j, Redis, Kafka, Prometheus, Grafana, Jaeger, MLflow
+
 services:
-  # ============================================================================
-  # Infrastructure Services
-  # ============================================================================
-  
-  # TimescaleDB - Time-series database
-  timescaledb:
+  # PostgreSQL 16 with TimescaleDB
+  postgres-v3:
     image: timescale/timescaledb:latest-pg16
-    container_name: iac-timescaledb
-    environment:
-      POSTGRES_DB: iac_timeseries
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${TIMESCALE_PASSWORD:-postgres}
+    container_name: iac-postgres-v3
+    restart: unless-stopped
     ports:
       - "5433:5432"
+    environment:
+      POSTGRES_DB: iac_v3
+      POSTGRES_USER: iacadmin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iacadmin123}
     volumes:
-      - timescaledb-data:/var/lib/postgresql/data
+      - postgres-v3-data:/var/lib/postgresql/data
+    networks:
+      - iac-v3-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U iacadmin -d iac_v3"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Neo4j 5.x for CMDB
+  neo4j-v3:
+    image: neo4j:5.15-community
+    container_name: iac-neo4j-v3
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-neo4jpassword}
+      NEO4J_dbms_memory_heap_max__size: 2g
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j-v3-data:/data
     networks:
-      - iac-network
-  
-  # Kafka - Message streaming platform
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: iac-zookeeper
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:7474"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # Redis 7.x
+  redis-v3:
+    image: redis:7-alpine
+    container_name: iac-redis-v3
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-v3-data:/data
+    networks:
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Zookeeper
+  zookeeper-v3:
+    image: confluentinc/cp-zookeeper:7.5.3
+    container_name: iac-zookeeper-v3
+    restart: unless-stopped
+    ports:
+      - "2182:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
+    volumes:
+      - zookeeper-v3-data:/var/lib/zookeeper/data
     networks:
-      - iac-network
-  
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: iac-kafka
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kafka
+  kafka-v3:
+    image: confluentinc/cp-kafka:7.5.3
+    container_name: iac-kafka-v3
+    restart: unless-stopped
     depends_on:
-      - zookeeper
+      - zookeeper-v3
     ports:
-      - "9092:9092"
-      - "9093:9093"
+      - "9093:9092"
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-v3:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     volumes:
-      - kafka-data:/var/lib/kafka/data
-    healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
+      - kafka-v3-data:/var/lib/kafka/data
     networks:
-      - iac-network
-  
-  # Kafka UI - Web interface for Kafka
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: iac-kafka-ui
-    depends_on:
-      - kafka
-    ports:
-      - "8080:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: iac-cluster
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-    networks:
-      - iac-network
-  
-  # Elasticsearch - Log storage and search
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-    container_name: iac-elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    networks:
-      - iac-network
-  
-  # Kibana - Elasticsearch UI
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.0
-    container_name: iac-kibana
-    depends_on:
-      - elasticsearch
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-    networks:
-      - iac-network
-  
-  # MLflow - ML model tracking
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.10.0
-    container_name: iac-mlflow
-    ports:
-      - "5000:5000"
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://postgres:postgres@postgres:5432/mlflow --default-artifact-root /mlflow/artifacts
-    depends_on:
-      - postgres
-    volumes:
-      - mlflow-artifacts:/mlflow/artifacts
-    networks:
-      - iac-network
-  
-  # ============================================================================
-  # v3.0 Microservices
-  # ============================================================================
-  
-  # AIOps Engine - Predictive analytics & auto-remediation
-  aiops-engine:
-    build:
-      context: ./backend/aiops-engine
-      dockerfile: Dockerfile
-    container_name: iac-aiops-engine
-    ports:
-      - "8100:8100"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iac_dharma
-      TIMESCALE_URL: postgresql://postgres:postgres@timescaledb:5432/iac_timeseries
-      REDIS_URL: redis://redis:6379/0
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
-      PROMETHEUS_URL: http://prometheus:9090
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-      AUTO_REMEDIATION_ENABLED: "true"
-      LOG_LEVEL: info
-    depends_on:
-      - postgres
-      - redis
-      - timescaledb
-      - kafka
-      - mlflow
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - iac-network
+      - iac-v3-network
+
+  # Prometheus
+  prometheus-v3:
+    image: prom/prometheus:latest
+    container_name: iac-prometheus-v3
     restart: unless-stopped
-  
-  # API Gateway - GraphQL API (Enhanced)
-  api-gateway-v3:
-    build:
-      context: ./backend/api-gateway
-      dockerfile: Dockerfile
-    container_name: iac-api-gateway-v3
     ports:
-      - "3000:3000"
-      - "4000:4000"  # GraphQL
-    environment:
-      NODE_ENV: development
-      PORT: 3000
-      GRAPHQL_PORT: 4000
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iac_dharma
-      REDIS_URL: redis://redis:6379/0
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
-      AIOPS_ENGINE_URL: http://aiops-engine:8100
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key}
-    depends_on:
-      - postgres
-      - redis
-      - kafka
-      - aiops-engine
+      - "9091:9090"
+    volumes:
+      - prometheus-v3-data:/prometheus
     networks:
-      - iac-network
+      - iac-v3-network
+
+  # Grafana
+  grafana-v3:
+    image: grafana/grafana:latest
+    container_name: iac-grafana-v3
     restart: unless-stopped
-
-# ============================================================================
-# Volumes
-# ============================================================================
-
-volumes:
-  timescaledb-data:
-    driver: local
-  kafka-data:
-    driver: local
-  elasticsearch-data:
-    driver: local
-  mlflow-artifacts:
-    driver: local
-
-# ============================================================================
-# Networks
-# ============================================================================
+    ports:
+      - "3002:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana-v3-data:/var/lib/grafana
+    networks:
+      - iac-v3-network
 
 networks:
-  iac-network:
+  iac-v3-network:
+    name: iac-v3-network
     driver: bridge
-    name: iac-network
+
+volumes:
+  postgres-v3-data:
+  neo4j-v3-data:
+  redis-v3-data:
+  zookeeper-v3-data:
+  kafka-v3-data:
+  prometheus-v3-data:
+  grafana-v3-data:
