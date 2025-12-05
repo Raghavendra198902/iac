@@ -1,0 +1,214 @@
+version: '3.9'
+
+services:
+  # ============================================================================
+  # Infrastructure Services
+  # ============================================================================
+  
+  # TimescaleDB - Time-series database
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: iac-timescaledb
+    environment:
+      POSTGRES_DB: iac_timeseries
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${TIMESCALE_PASSWORD:-postgres}
+    ports:
+      - "5433:5432"
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iac-network
+  
+  # Kafka - Message streaming platform
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: iac-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - iac-network
+  
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: iac-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - iac-network
+  
+  # Kafka UI - Web interface for Kafka
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: iac-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: iac-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - iac-network
+  
+  # Elasticsearch - Log storage and search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: iac-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - iac-network
+  
+  # Kibana - Elasticsearch UI
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: iac-kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    networks:
+      - iac-network
+  
+  # MLflow - ML model tracking
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.10.0
+    container_name: iac-mlflow
+    ports:
+      - "5000:5000"
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://postgres:postgres@postgres:5432/mlflow --default-artifact-root /mlflow/artifacts
+    depends_on:
+      - postgres
+    volumes:
+      - mlflow-artifacts:/mlflow/artifacts
+    networks:
+      - iac-network
+  
+  # ============================================================================
+  # v3.0 Microservices
+  # ============================================================================
+  
+  # AIOps Engine - Predictive analytics & auto-remediation
+  aiops-engine:
+    build:
+      context: ./backend/aiops-engine
+      dockerfile: Dockerfile
+    container_name: iac-aiops-engine
+    ports:
+      - "8100:8100"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iac_dharma
+      TIMESCALE_URL: postgresql://postgres:postgres@timescaledb:5432/iac_timeseries
+      REDIS_URL: redis://redis:6379/0
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      PROMETHEUS_URL: http://prometheus:9090
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      AUTO_REMEDIATION_ENABLED: "true"
+      LOG_LEVEL: info
+    depends_on:
+      - postgres
+      - redis
+      - timescaledb
+      - kafka
+      - mlflow
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - iac-network
+    restart: unless-stopped
+  
+  # API Gateway - GraphQL API (Enhanced)
+  api-gateway-v3:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: iac-api-gateway-v3
+    ports:
+      - "3000:3000"
+      - "4000:4000"  # GraphQL
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      GRAPHQL_PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iac_dharma
+      REDIS_URL: redis://redis:6379/0
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      AIOPS_ENGINE_URL: http://aiops-engine:8100
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key}
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+      - aiops-engine
+    networks:
+      - iac-network
+    restart: unless-stopped
+
+# ============================================================================
+# Volumes
+# ============================================================================
+
+volumes:
+  timescaledb-data:
+    driver: local
+  kafka-data:
+    driver: local
+  elasticsearch-data:
+    driver: local
+  mlflow-artifacts:
+    driver: local
+
+# ============================================================================
+# Networks
+# ============================================================================
+
+networks:
+  iac-network:
+    driver: bridge
+    name: iac-network
