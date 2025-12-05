@@ -16,6 +16,17 @@ from models.threat_detector import ThreatDetector
 from models.capacity_forecaster import CapacityForecaster
 from models.anomaly_detector import AnomalyDetector
 
+# Import new enhanced models
+from models.lstm_failure_predictor import LSTMFailurePredictor
+from models.rf_threat_detector import RFThreatDetector
+from models.xgb_capacity_forecaster import XGBoostCapacityForecaster
+
+# Import training pipeline
+from services.mlflow_training_pipeline import (
+    MLflowTrainingPipeline,
+    generate_synthetic_training_data
+)
+
 # Initialize FastAPI app
 app = FastAPI(
     title="IAC Dharma AIOps Engine v3.0",
@@ -43,6 +54,14 @@ failure_predictor = FailurePredictor()
 threat_detector = ThreatDetector()
 capacity_forecaster = CapacityForecaster()
 anomaly_detector = AnomalyDetector()
+
+# Initialize enhanced ML models
+lstm_failure_predictor = LSTMFailurePredictor()
+rf_threat_detector = RFThreatDetector()
+xgb_capacity_forecaster = XGBoostCapacityForecaster()
+
+# Initialize MLflow training pipeline
+mlflow_pipeline = MLflowTrainingPipeline()
 
 # Service statistics
 service_stats = {
@@ -262,6 +281,260 @@ aiops_uptime_seconds {uptime}
 
 
 # ============================================================================
+# Model Training Endpoints
+# ============================================================================
+
+@app.post("/api/v3/aiops/models/train", tags=["Training"])
+async def train_models(request: Dict[str, Any]):
+    """
+    Train AI/ML models with provided or synthetic data.
+    
+    Request body:
+    {
+        "models": ["failure_predictor", "threat_detector", "capacity_forecaster"],
+        "use_synthetic_data": true,
+        "n_samples": 10000,
+        "hyperparameters": {
+            "failure_predictor": {"epochs": 50, "batch_size": 32},
+            "threat_detector": {"n_estimators": 200},
+            "capacity_forecaster": {"n_estimators": 500}
+        }
+    }
+    """
+    try:
+        models_to_train = request.get('models', ['failure_predictor', 'threat_detector', 'capacity_forecaster'])
+        use_synthetic = request.get('use_synthetic_data', True)
+        n_samples = request.get('n_samples', 10000)
+        
+        logger.info(f"🚀 Starting training for models: {models_to_train}")
+        
+        # Generate or use provided training data
+        if use_synthetic:
+            logger.info(f"📊 Generating {n_samples} synthetic training samples")
+            training_data = generate_synthetic_training_data(n_samples, "all")
+        else:
+            training_data = request.get('training_data', {})
+        
+        # Filter training data based on models to train
+        filtered_data = {
+            model: data for model, data in training_data.items()
+            if model in models_to_train
+        }
+        
+        # Train models
+        results = await mlflow_pipeline.train_all_models(filtered_data)
+        
+        logger.info(f"✅ Training completed for {results['models_trained']} models")
+        
+        return {
+            "status": "success",
+            "message": f"Successfully trained {results['models_trained']} models",
+            "results": results,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Model training error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v3/aiops/models/status", tags=["Training"])
+async def get_models_status():
+    """Get status of all ML models"""
+    return {
+        "models": {
+            "lstm_failure_predictor": {
+                "version": lstm_failure_predictor.model_version,
+                "trained": lstm_failure_predictor.is_trained,
+                "type": "LSTM",
+                "framework": "Keras/TensorFlow"
+            },
+            "rf_threat_detector": {
+                "version": rf_threat_detector.model_version,
+                "trained": rf_threat_detector.is_trained,
+                "type": "RandomForest",
+                "framework": "scikit-learn"
+            },
+            "xgb_capacity_forecaster": {
+                "version": xgb_capacity_forecaster.model_version,
+                "trained": xgb_capacity_forecaster.is_trained,
+                "type": "XGBoost",
+                "framework": "XGBoost"
+            },
+            "legacy_failure_predictor": {
+                "version": failure_predictor.model_version,
+                "trained": failure_predictor.is_trained,
+                "type": "Mock",
+                "framework": "Python"
+            },
+            "anomaly_detector": {
+                "version": anomaly_detector.model_version,
+                "trained": anomaly_detector.is_trained,
+                "type": "Mock",
+                "framework": "Python"
+            }
+        },
+        "mlflow": {
+            "tracking_uri": mlflow_pipeline.mlflow_tracking_uri,
+            "experiment_name": mlflow_pipeline.experiment_name
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.post("/api/v3/aiops/models/register", tags=["Training"])
+async def register_model(request: Dict[str, Any]):
+    """
+    Register a trained model in MLflow Model Registry.
+    
+    Request body:
+    {
+        "run_id": "abc123...",
+        "model_name": "lstm_failure_predictor_v1",
+        "tags": {
+            "environment": "production",
+            "version": "1.0.0"
+        }
+    }
+    """
+    try:
+        run_id = request.get('run_id')
+        model_name = request.get('model_name')
+        tags = request.get('tags', {})
+        
+        if not run_id or not model_name:
+            raise HTTPException(
+                status_code=400,
+                detail="run_id and model_name are required"
+            )
+        
+        version = mlflow_pipeline.register_model(run_id, model_name, tags)
+        
+        return {
+            "status": "success",
+            "model_name": model_name,
+            "version": version,
+            "message": f"Model registered successfully as {model_name} v{version}"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Model registration error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# Enhanced Prediction Endpoints (using new models when trained)
+# ============================================================================
+
+@app.post("/api/v3/aiops/predict/failure/enhanced", tags=["Predictions"])
+async def predict_failure_enhanced(request: Dict[str, Any]):
+    """
+    Enhanced failure prediction using LSTM model.
+    Falls back to legacy predictor if LSTM model not trained.
+    
+    Request body:
+    {
+        "service_name": "api-gateway",
+        "time_series": [
+            {"cpu_usage": 75, "memory_usage": 80, "disk_io": 300, ...},
+            ...  // 24 data points (hourly for 24 hours)
+        ]
+    }
+    """
+    try:
+        logger.info(f"Enhanced failure prediction for {request.get('service_name')}")
+        
+        # Use LSTM model if trained, otherwise fall back
+        if lstm_failure_predictor.is_trained:
+            result = await lstm_failure_predictor.predict(request)
+        else:
+            result = await failure_predictor.predict(request)
+            result['note'] = "Using legacy predictor - LSTM model not yet trained"
+        
+        service_stats["predictions_count"] += 1
+        return result
+        
+    except Exception as e:
+        logger.error(f"Enhanced failure prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/aiops/predict/threat/enhanced", tags=["Security"])
+async def detect_threat_enhanced(request: Dict[str, Any]):
+    """
+    Enhanced threat detection using Random Forest model.
+    Falls back to legacy detector if RF model not trained.
+    
+    Request body:
+    {
+        "service_name": "web-server",
+        "metrics": {
+            "request_rate": 1500,
+            "failed_auth_count": 25,
+            "unique_ips": 150,
+            ...
+        }
+    }
+    """
+    try:
+        logger.info(f"Enhanced threat detection for {request.get('service_name')}")
+        
+        # Use RF model if trained, otherwise fall back
+        if rf_threat_detector.is_trained:
+            result = await rf_threat_detector.detect(request)
+        else:
+            result = await threat_detector.detect(request)
+            result['note'] = "Using legacy detector - RF model not yet trained"
+        
+        service_stats["predictions_count"] += 1
+        return result
+        
+    except Exception as e:
+        logger.error(f"Enhanced threat detection error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/aiops/predict/capacity/enhanced", tags=["Predictions"])
+async def forecast_capacity_enhanced(request: Dict[str, Any]):
+    """
+    Enhanced capacity forecasting using XGBoost model.
+    Falls back to legacy forecaster if XGBoost model not trained.
+    
+    Request body:
+    {
+        "service_name": "database",
+        "current_metrics": {
+            "cpu_usage": 65,
+            "memory_usage": 70,
+            "storage_usage": 75,
+            "request_rate": 500,
+            "user_count": 1000,
+            "transaction_count": 50000,
+            "growth_rate_7d": 0.05,
+            "growth_rate_30d": 0.10
+        },
+        "forecast_days": 30
+    }
+    """
+    try:
+        logger.info(f"Enhanced capacity forecast for {request.get('service_name')}")
+        
+        # Use XGBoost model if trained, otherwise fall back
+        if xgb_capacity_forecaster.is_trained:
+            result = await xgb_capacity_forecaster.forecast(request)
+        else:
+            result = await capacity_forecaster.forecast(request)
+            result['note'] = "Using legacy forecaster - XGBoost model not yet trained"
+        
+        service_stats["predictions_count"] += 1
+        return result
+        
+    except Exception as e:
+        logger.error(f"Enhanced capacity forecast error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
 # Startup Event
 # ============================================================================
 
@@ -271,10 +544,13 @@ async def startup_event():
     logger.info("=" * 60)
     logger.info("IAC Dharma AIOps Engine v3.0 - Starting...")
     logger.info("=" * 60)
-    logger.info(f"✓ Failure Predictor loaded (v{failure_predictor.model_version})")
-    logger.info(f"✓ Threat Detector loaded (v{threat_detector.model_version})")
-    logger.info(f"✓ Capacity Forecaster loaded (v{capacity_forecaster.model_version})")
-    logger.info(f"✓ Anomaly Detector loaded (v{anomaly_detector.model_version})")
+    logger.info("🤖 ML Models:")
+    logger.info(f"  ✓ LSTM Failure Predictor (v{lstm_failure_predictor.model_version}) - {'Trained' if lstm_failure_predictor.is_trained else 'Not Trained'}")
+    logger.info(f"  ✓ RF Threat Detector (v{rf_threat_detector.model_version}) - {'Trained' if rf_threat_detector.is_trained else 'Not Trained'}")
+    logger.info(f"  ✓ XGBoost Capacity Forecaster (v{xgb_capacity_forecaster.model_version}) - {'Trained' if xgb_capacity_forecaster.is_trained else 'Not Trained'}")
+    logger.info(f"  ✓ Anomaly Detector (v{anomaly_detector.model_version})")
+    logger.info("=" * 60)
+    logger.info(f"📊 MLflow: {mlflow_pipeline.mlflow_tracking_uri}")
     logger.info("=" * 60)
     logger.info("🚀 AIOps Engine ready on port 8100")
     logger.info("📚 API docs: http://localhost:8100/docs")

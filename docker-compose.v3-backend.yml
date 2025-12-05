@@ -1,0 +1,190 @@
+version: '3.9'
+
+# IAC Dharma v3.0 - Backend Services
+# New services: AIOps Engine, AI Orchestrator, GraphQL API, CMDB Agent
+
+services:
+  # AIOps Engine (Port 8100)
+  aiops-engine:
+    build:
+      context: ./backend/aiops-engine
+      dockerfile: Dockerfile
+    container_name: iac-aiops-engine-v3
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-v3:5000
+      - TIMESCALEDB_HOST=postgres-v3
+      - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_DB=aiops
+      - TIMESCALEDB_USER=aiops_user
+      - TIMESCALEDB_PASSWORD=aiops_password
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-v3:9092
+    networks:
+      - iac-v3-network
+    depends_on:
+      - postgres-v3
+      - kafka-v3
+      - mlflow-v3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/api/v3/aiops/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MLflow (Port 5000)
+  mlflow-v3:
+    image: ghcr.io/mlflow/mlflow:v2.9.2
+    container_name: iac-mlflow-v3
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql://iacadmin:iacadmin123@postgres-v3:5432/iac_v3
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    volumes:
+      - mlflow-v3-data:/mlflow
+    networks:
+      - iac-v3-network
+    depends_on:
+      - postgres-v3
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://iacadmin:iacadmin123@postgres-v3:5432/iac_v3
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
+
+  # AI Orchestrator (Port 8300)
+  ai-orchestrator:
+    build:
+      context: ./backend/ai-orchestrator
+      dockerfile: Dockerfile
+    container_name: iac-ai-orchestrator-v3
+    restart: unless-stopped
+    ports:
+      - "8300:8300"
+    environment:
+      - GRAPHQL_URL=http://api-gateway:4000/graphql
+      - AIOPS_URL=http://aiops-engine:8100/api/v3/aiops
+      - CMDB_URL=http://cmdb-agent:8200/api/v3/cmdb
+      - REDIS_HOST=redis-v3
+      - REDIS_PORT=6379
+    networks:
+      - iac-v3-network
+    depends_on:
+      - aiops-engine
+      - redis-v3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8300/api/v3/orchestrator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway with GraphQL (Port 4000)
+  api-gateway-graphql:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: iac-api-gateway-graphql-v3
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_HOST=postgres-v3
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=iac_v3
+      - POSTGRES_USER=iacadmin
+      - POSTGRES_PASSWORD=iacadmin123
+      - NEO4J_URI=bolt://neo4j-v3:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=neo4jpassword
+      - REDIS_HOST=redis-v3
+      - REDIS_PORT=6379
+      - KAFKA_BROKERS=kafka-v3:9092
+    networks:
+      - iac-v3-network
+    depends_on:
+      - postgres-v3
+      - neo4j-v3
+      - redis-v3
+      - kafka-v3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # CMDB Agent (Port 8200)
+  cmdb-agent-v3:
+    build:
+      context: ./backend/cmdb-agent
+      dockerfile: Dockerfile
+    container_name: iac-cmdb-agent-v3
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      - NEO4J_URI=bolt://neo4j-v3:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=neo4jpassword
+      - TIMESCALEDB_HOST=postgres-v3
+      - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_DB=iac_v3
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-v3:9092
+    networks:
+      - iac-v3-network
+    depends_on:
+      - neo4j-v3
+      - postgres-v3
+      - kafka-v3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/api/v3/cmdb/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Elasticsearch (for logs)
+  elasticsearch-v3:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: iac-elasticsearch-v3
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-v3-data:/usr/share/elasticsearch/data
+    networks:
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Kibana (for log visualization)
+  kibana-v3:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: iac-kibana-v3
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch-v3:9200
+    networks:
+      - iac-v3-network
+    depends_on:
+      - elasticsearch-v3
+
+networks:
+  iac-v3-network:
+    external: true
+
+volumes:
+  mlflow-v3-data:
+  elasticsearch-v3-data:

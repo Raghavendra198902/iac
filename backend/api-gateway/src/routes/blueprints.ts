@@ -2,7 +2,11 @@ import { Router } from 'express';
 import axios from 'axios';
 import { AuthRequest, requireRole } from '../middleware/auth';
 import { operationRateLimit } from '../middleware/rateLimit';
-import { cacheMiddleware, invalidateCache } from '../../../shared/cache.middleware';
+// import { cacheMiddleware, invalidateCache } from '../../../shared/cache.middleware';
+
+// Stub functions for cache middleware (TODO: implement proper caching)
+const cacheMiddleware = (opts: any) => (req: any, res: any, next: any) => next();
+const invalidateCache = async (key: string) => {};
 
 const router = Router();
 const BLUEPRINT_SERVICE_URL = process.env.BLUEPRINT_SERVICE_URL || 'http://blueprint-service:3001';

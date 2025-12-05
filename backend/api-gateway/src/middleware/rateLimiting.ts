@@ -146,7 +146,7 @@ export const adminLimiter = rateLimit({
   legacyHeaders: false,
   skip: (req) => {
     // Only apply to admin users
-    return !req.user || req.user.role !== 'admin';
+    return !req.user || !req.user.roles?.includes('admin');
   }
 });
 

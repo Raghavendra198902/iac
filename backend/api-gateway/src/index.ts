@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import { logger, stream } from './utils/logger';
 import { runMigrations } from './utils/migrations';
+import { createGraphQLServer } from './graphql-server';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
 import { dbMiddleware } from './middleware/database';
@@ -374,9 +375,13 @@ export { io };
 async function startServer() {
   try {
     // Run database migrations
-    logger.info('🔄 Running database migrations...');
-    await runMigrations();
-    logger.info('✅ Database migrations completed');
+    if (process.env.SKIP_MIGRATIONS !== 'true') {
+      logger.info('🔄 Running database migrations...');
+      await runMigrations();
+      logger.info('✅ Database migrations completed');
+    } else {
+      logger.info('⚠️  Skipping database migrations (SKIP_MIGRATIONS=true)');
+    }
 
     // Initialize Prometheus metrics collectors
     logger.info('🔄 Initializing metrics collectors...');
@@ -391,6 +396,15 @@ async function startServer() {
       logger.info('✅ Feature flags initialized');
     } catch (error) {
       logger.warn('⚠️  Feature flags initialization failed, continuing without feature flags', { error });
+    }
+
+    // Initialize GraphQL Server
+    logger.info('🔄 Initializing GraphQL server...');
+    try {
+      await createGraphQLServer(app, httpServer);
+      logger.info('✅ GraphQL server initialized at /graphql');
+    } catch (error) {
+      logger.error('⚠️  GraphQL server initialization failed', { error });
     }
 
     // Mark app as initialized for startup probe

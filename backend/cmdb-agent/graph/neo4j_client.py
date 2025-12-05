@@ -8,7 +8,7 @@ from typing import List, Dict, Optional, Any
 import logging
 from datetime import datetime
 
-from ..models.infrastructure import (
+from models.infrastructure import (
     InfrastructureResource, Relationship,
     Provider, ResourceType, ResourceStatus
 )

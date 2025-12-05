@@ -4,8 +4,12 @@ uvicorn[standard]==0.27.0
 pydantic==2.5.3
 python-multipart==0.0.6
 
+# Database
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+
 # HTTP client
-httpx==0.26.0
+httpx==0.25.2
 
 # WebSocket support
 websockets==12.0
@@ -14,8 +18,7 @@ websockets==12.0
 python-dotenv==1.0.0
 
 # Optional: Advanced NLP (uncomment if using OpenAI/Anthropic)
-# openai==1.6.1
-# anthropic==0.8.0
+openai==1.6.1
 anthropic==0.7.7
 langchain==0.0.340
 langgraph==0.0.20
@@ -53,3 +56,6 @@ black==23.11.0
 isort==5.12.0
 mypy==1.7.1
 pylint==3.0.3
+celery==5.3.4
+redis==5.0.1
+pydantic-settings==2.1.0

@@ -138,6 +138,7 @@ async def root():
     }
 
 
+@app.get("/health")
 @app.get("/api/v3/cmdb/health")
 async def health_check():
     """Health check endpoint"""

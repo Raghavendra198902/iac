@@ -1,7 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { ProjectRepository } from '../repositories/project-repository';
 import { Pool } from 'pg';
-import { cacheMiddleware, invalidateCache } from '../../../shared/cache.middleware';
+// import { cacheMiddleware, invalidateCache } from '../../../shared/cache.middleware';
+
+// Stub functions for cache middleware (TODO: implement proper caching)
+const cacheMiddleware = (opts: any) => (req: any, res: any, next: any) => next();
+const invalidateCache = async (key: string) => {};
 
 export function createProjectRoutes(pool: Pool): Router {
   const router = Router();

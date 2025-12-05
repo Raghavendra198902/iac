@@ -9,7 +9,7 @@ from datetime import datetime
 import time
 from botocore.exceptions import ClientError, BotoCoreError
 
-from ..models.infrastructure import (
+from models.infrastructure import (
     Provider, ResourceType, ResourceStatus,
     ComputeInstance, StorageVolume, DatabaseInstance,
     NetworkInterface, LoadBalancer, Relationship,
