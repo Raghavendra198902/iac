@@ -15,7 +15,7 @@ MLFLOW_URL="http://localhost:5000"
 
 # Check if services are running
 echo "📋 Checking services..."
-if ! curl -s -f "$AIOPS_URL/api/v3/aiops/health" > /dev/null; then
+if ! curl -s -f "$AIOPS_URL/health" > /dev/null; then
     echo "❌ AIOps Engine is not running on $AIOPS_URL"
     exit 1
 fi

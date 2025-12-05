@@ -62,7 +62,7 @@ echo ""
 echo "📋 Service Health Tests"
 echo "────────────────────────────────────────────────────────"
 run_test "AIOps Engine health check" \
-    "curl -s -f $AIOPS_URL/api/v3/aiops/health"
+    "curl -s -f $AIOPS_URL/health"
 run_test "CMDB Agent health check" \
     "curl -s -f $CMDB_URL/health"
 run_test "AI Orchestrator health check" \
