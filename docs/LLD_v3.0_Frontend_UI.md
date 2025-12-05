@@ -8,6 +8,626 @@
 **Real-time**: GraphQL Subscriptions + WebSocket  
 **Port**: 3001
 
+**User-Friendly Design Principles:**
+- **Intuitive Navigation**: Clear, consistent menu structure
+- **Accessibility First**: WCAG 2.1 AAA compliant
+- **Responsive Design**: Mobile, tablet, desktop optimized
+- **Dark Mode Support**: Automatic theme switching
+- **Keyboard Navigation**: Full keyboard support
+- **Screen Reader Friendly**: Semantic HTML + ARIA labels
+- **Progressive Disclosure**: Show complexity only when needed
+- **Instant Feedback**: Loading states, success/error messages
+- **Undo/Redo**: Reversible actions for confidence
+- **Contextual Help**: Inline tooltips and guided tours
+
+## 2. User Experience Enhancements
+
+### 2.1 Onboarding & First-Time User Experience
+
+```typescript
+// src/features/onboarding/OnboardingWizard.tsx
+
+'use client';
+
+import { useState } from 'react';
+import { CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+
+const ONBOARDING_STEPS = [
+  {
+    title: 'Welcome to IAC Dharma',
+    description: 'Manage your entire infrastructure from one place',
+    content: 'WelcomeStep',
+  },
+  {
+    title: 'Connect Your Cloud',
+    description: 'Link AWS, GCP, Azure, or on-premise infrastructure',
+    content: 'CloudConnectionStep',
+  },
+  {
+    title: 'Set Up Monitoring',
+    description: 'Get alerts and insights automatically',
+    content: 'MonitoringStep',
+  },
+  {
+    title: 'You\'re All Set!',
+    description: 'Start managing your infrastructure',
+    content: 'CompletionStep',
+  },
+];
+
+export function OnboardingWizard() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  
+  const progress = ((currentStep + 1) / ONBOARDING_STEPS.length) * 100;
+  
+  const handleNext = () => {
+    setCompletedSteps([...completedSteps, currentStep]);
+    setCurrentStep(Math.min(currentStep + 1, ONBOARDING_STEPS.length - 1));
+  };
+  
+  const handleBack = () => {
+    setCurrentStep(Math.max(currentStep - 1, 0));
+  };
+  
+  const handleSkip = () => {
+    // Save preference and close
+    localStorage.setItem('onboarding_skipped', 'true');
+  };
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <Card className="max-w-2xl w-full p-8">
+        {/* Progress Bar */}
+        <div className="mb-6">
+          <div className="flex justify-between mb-2">
+            <span className="text-sm font-medium">
+              Step {currentStep + 1} of {ONBOARDING_STEPS.length}
+            </span>
+            <span className="text-sm text-gray-500">{Math.round(progress)}%</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </div>
+        
+        {/* Step Indicators */}
+        <div className="flex justify-center gap-2 mb-8">
+          {ONBOARDING_STEPS.map((_, index) => (
+            <div
+              key={index}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                index === currentStep
+                  ? 'bg-purple-600'
+                  : completedSteps.includes(index)
+                  ? 'bg-green-500'
+                  : 'bg-gray-300'
+              }`}
+              aria-label={`Step ${index + 1}`}
+            />
+          ))}
+        </div>
+        
+        {/* Current Step Content */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold mb-2">
+            {ONBOARDING_STEPS[currentStep].title}
+          </h2>
+          <p className="text-gray-600 text-lg mb-6">
+            {ONBOARDING_STEPS[currentStep].description}
+          </p>
+          
+          {/* Dynamic step content would go here */}
+          <StepContent step={currentStep} />
+        </div>
+        
+        {/* Navigation */}
+        <div className="flex justify-between items-center">
+          <Button
+            variant="ghost"
+            onClick={handleSkip}
+            className="text-gray-500"
+          >
+            Skip for now
+          </Button>
+          
+          <div className="flex gap-2">
+            {currentStep > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                className="gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
+            )}
+            
+            <Button
+              onClick={handleNext}
+              className="gap-2 bg-purple-600 hover:bg-purple-700"
+            >
+              {currentStep === ONBOARDING_STEPS.length - 1 ? (
+                <>
+                  Get Started
+                  <CheckCircle2 className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  Next
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+```
+
+### 2.2 Intuitive Dashboard with Quick Actions
+
+```typescript
+// src/features/dashboard/QuickActionsDashboard.tsx
+
+'use client';
+
+import { 
+  Plus, 
+  Upload, 
+  Search, 
+  Settings, 
+  HelpCircle,
+  Sparkles,
+  BarChart3,
+  Shield,
+  DollarSign
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+export function QuickActionsDashboard() {
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Hero Search Bar */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-8 text-white">
+        <h1 className="text-4xl font-bold mb-4">
+          What would you like to do today?
+        </h1>
+        <div className="relative max-w-2xl">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Try: 'Create 3 AWS instances' or 'Show me cost breakdown'..."
+            className="pl-10 pr-12 py-6 text-lg bg-white text-gray-900"
+          />
+          <Button
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700"
+          >
+            <Sparkles className="w-5 h-5" />
+          </Button>
+        </div>
+        <p className="text-purple-100 mt-3">
+          Use natural language to manage your infrastructure
+        </p>
+      </div>
+      
+      {/* Quick Actions Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <QuickActionCard
+          icon={<Plus className="w-6 h-6" />}
+          title="Create Infrastructure"
+          description="Deploy new resources"
+          color="blue"
+          onClick={() => {}}
+        />
+        
+        <QuickActionCard
+          icon={<BarChart3 className="w-6 h-6" />}
+          title="View Analytics"
+          description="Monitor performance"
+          color="green"
+          onClick={() => {}}
+        />
+        
+        <QuickActionCard
+          icon={<DollarSign className="w-6 h-6" />}
+          title="Cost Optimization"
+          description="Reduce spending"
+          color="yellow"
+          onClick={() => {}}
+        />
+        
+        <QuickActionCard
+          icon={<Shield className="w-6 h-6" />}
+          title="Security Scan"
+          description="Check vulnerabilities"
+          color="red"
+          onClick={() => {}}
+        />
+      </div>
+      
+      {/* Recent Activity */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <ActivityItem
+              action="Created"
+              resource="AWS EC2 Instance (i-abc123)"
+              time="2 minutes ago"
+              status="success"
+            />
+            <ActivityItem
+              action="Updated"
+              resource="Kubernetes Deployment (api-service)"
+              time="15 minutes ago"
+              status="success"
+            />
+            <ActivityItem
+              action="Failed"
+              resource="Database Backup (prod-db)"
+              time="1 hour ago"
+              status="error"
+            />
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Help & Resources */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3">
+        <Button
+          size="lg"
+          className="rounded-full shadow-lg bg-purple-600 hover:bg-purple-700"
+          onClick={() => {}}
+        >
+          <HelpCircle className="w-5 h-5 mr-2" />
+          Need Help?
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function QuickActionCard({ icon, title, description, color, onClick }: any) {
+  const colorClasses = {
+    blue: 'bg-blue-500 hover:bg-blue-600',
+    green: 'bg-green-500 hover:bg-green-600',
+    yellow: 'bg-yellow-500 hover:bg-yellow-600',
+    red: 'bg-red-500 hover:bg-red-600',
+  };
+  
+  return (
+    <Card 
+      className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
+      onClick={onClick}
+    >
+      <CardContent className="p-6">
+        <div className={`w-12 h-12 rounded-lg ${colorClasses[color]} flex items-center justify-center text-white mb-4`}>
+          {icon}
+        </div>
+        <h3 className="font-semibold text-lg mb-1">{title}</h3>
+        <p className="text-sm text-gray-600">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### 2.3 Simplified Navigation with Breadcrumbs
+
+```typescript
+// src/components/navigation/SimplifiedNav.tsx
+
+'use client';
+
+import { Home, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export function SimplifiedNav() {
+  const pathname = usePathname();
+  const segments = pathname.split('/').filter(Boolean);
+  
+  return (
+    <div className="bg-white border-b sticky top-0 z-40">
+      <div className="container mx-auto px-6">
+        {/* Main Navigation */}
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="text-2xl font-bold text-purple-600">
+              IAC Dharma
+            </Link>
+            
+            <nav className="hidden md:flex items-center gap-6">
+              <NavLink href="/dashboard" active>Dashboard</NavLink>
+              <NavLink href="/infrastructure">Infrastructure</NavLink>
+              <NavLink href="/deployments">Deployments</NavLink>
+              <NavLink href="/monitoring">Monitoring</NavLink>
+              <NavLink href="/costs">Costs</NavLink>
+            </nav>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon">
+              <Bell className="w-5 h-5" />
+            </Button>
+            <UserMenu />
+          </div>
+        </div>
+        
+        {/* Breadcrumbs */}
+        {segments.length > 0 && (
+          <div className="flex items-center gap-2 py-3 text-sm">
+            <Link href="/" className="text-gray-500 hover:text-gray-700">
+              <Home className="w-4 h-4" />
+            </Link>
+            {segments.map((segment, index) => (
+              <div key={segment} className="flex items-center gap-2">
+                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <Link
+                  href={`/${segments.slice(0, index + 1).join('/')}`}
+                  className={`${
+                    index === segments.length - 1
+                      ? 'text-gray-900 font-medium'
+                      : 'text-gray-500 hover:text-gray-700'
+                  } capitalize`}
+                >
+                  {segment.replace(/-/g, ' ')}
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NavLink({ href, children, active }: any) {
+  return (
+    <Link
+      href={href}
+      className={`text-sm font-medium transition-colors ${
+        active
+          ? 'text-purple-600 border-b-2 border-purple-600'
+          : 'text-gray-600 hover:text-gray-900'
+      } pb-1`}
+    >
+      {children}
+    </Link>
+  );
+}
+```
+
+### 2.4 Accessibility Features
+
+```typescript
+// src/components/accessibility/AccessibilityProvider.tsx
+
+'use client';
+
+import { createContext, useContext, useState, useEffect } from 'react';
+
+interface AccessibilitySettings {
+  highContrast: boolean;
+  fontSize: 'small' | 'medium' | 'large';
+  reduceMotion: boolean;
+  screenReaderMode: boolean;
+}
+
+const AccessibilityContext = createContext<any>(null);
+
+export function AccessibilityProvider({ children }: any) {
+  const [settings, setSettings] = useState<AccessibilitySettings>({
+    highContrast: false,
+    fontSize: 'medium',
+    reduceMotion: false,
+    screenReaderMode: false,
+  });
+  
+  useEffect(() => {
+    // Load saved preferences
+    const saved = localStorage.getItem('accessibility_settings');
+    if (saved) {
+      setSettings(JSON.parse(saved));
+    }
+    
+    // Detect system preferences
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      setSettings(prev => ({ ...prev, reduceMotion: true }));
+    }
+  }, []);
+  
+  useEffect(() => {
+    // Apply settings to document
+    document.documentElement.classList.toggle('high-contrast', settings.highContrast);
+    document.documentElement.classList.toggle('reduce-motion', settings.reduceMotion);
+    document.documentElement.setAttribute('data-font-size', settings.fontSize);
+    
+    // Save preferences
+    localStorage.setItem('accessibility_settings', JSON.stringify(settings));
+  }, [settings]);
+  
+  return (
+    <AccessibilityContext.Provider value={{ settings, setSettings }}>
+      {children}
+    </AccessibilityContext.Provider>
+  );
+}
+
+// Accessibility Settings Panel
+export function AccessibilitySettings() {
+  const { settings, setSettings } = useContext(AccessibilityContext);
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Accessibility Settings</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">High Contrast</label>
+          <Switch
+            checked={settings.highContrast}
+            onCheckedChange={(checked) =>
+              setSettings({ ...settings, highContrast: checked })
+            }
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Font Size</label>
+          <div className="flex gap-2">
+            {(['small', 'medium', 'large'] as const).map((size) => (
+              <Button
+                key={size}
+                variant={settings.fontSize === size ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSettings({ ...settings, fontSize: size })}
+              >
+                {size.charAt(0).toUpperCase() + size.slice(1)}
+              </Button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Reduce Motion</label>
+          <Switch
+            checked={settings.reduceMotion}
+            onCheckedChange={(checked) =>
+              setSettings({ ...settings, reduceMotion: checked })
+            }
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### 2.5 Contextual Help & Tooltips
+
+```typescript
+// src/components/help/ContextualHelp.tsx
+
+'use client';
+
+import { HelpCircle, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+
+export function HelpTooltip({ title, content, learnMoreUrl }: any) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-5 w-5 rounded-full hover:bg-gray-100"
+        >
+          <HelpCircle className="w-4 h-4 text-gray-400" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="space-y-2">
+          <h4 className="font-semibold">{title}</h4>
+          <p className="text-sm text-gray-600">{content}</p>
+          {learnMoreUrl && (
+            <a
+              href={learnMoreUrl}
+              className="text-sm text-purple-600 hover:underline inline-flex items-center"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Learn more →
+            </a>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// Guided Tour
+export function GuidedTour() {
+  const [step, setStep] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  
+  const tours = [
+    {
+      target: '[data-tour="search"]',
+      title: 'AI-Powered Search',
+      content: 'Use natural language to find and manage your infrastructure',
+    },
+    {
+      target: '[data-tour="create"]',
+      title: 'Quick Create',
+      content: 'Deploy new resources with just a few clicks',
+    },
+    // More tour steps...
+  ];
+  
+  if (!isActive) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+      <Card className="max-w-md">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="font-semibold text-lg">{tours[step].title}</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Step {step + 1} of {tours.length}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsActive(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <p className="text-gray-700 mb-4">{tours[step].content}</p>
+          
+          <div className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setStep(Math.max(0, step - 1))}
+              disabled={step === 0}
+            >
+              Previous
+            </Button>
+            <Button
+              onClick={() => {
+                if (step === tours.length - 1) {
+                  setIsActive(false);
+                } else {
+                  setStep(step + 1);
+                }
+              }}
+            >
+              {step === tours.length - 1 ? 'Finish' : 'Next'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+```
+
 ## 2. Architecture
 
 ```
@@ -958,6 +1578,66 @@ describe('AICommandInterface', () => {
 
 ---
 
-**Document Version**: 1.0  
+## 7. User-Friendly Features Summary
+
+### 7.1 Ease of Use
+- **Onboarding Wizard**: Step-by-step setup for new users
+- **Quick Actions Dashboard**: One-click access to common tasks
+- **Natural Language Interface**: Speak or type commands in plain English
+- **Smart Suggestions**: Context-aware autocomplete and recommendations
+- **Command History**: Quick access to recent commands
+- **Undo/Redo**: Reversible actions for user confidence
+
+### 7.2 Accessibility (WCAG 2.1 AAA)
+- **Keyboard Navigation**: Full keyboard support with shortcuts
+- **Screen Reader Support**: Semantic HTML + ARIA labels
+- **High Contrast Mode**: Better visibility for visual impairments
+- **Adjustable Font Size**: Small, medium, large options
+- **Reduced Motion**: Respects user preferences
+- **Focus Indicators**: Clear visual focus states
+
+### 7.3 Mobile & Responsive
+- **Mobile-First Design**: Optimized for all screen sizes
+- **Touch-Friendly**: 44px minimum touch targets (iOS guidelines)
+- **Swipe Gestures**: Natural mobile interactions
+- **Hamburger Menu**: Clean mobile navigation
+- **Responsive Grid**: Adapts to screen size automatically
+- **Fast Loading**: Optimized images and code splitting
+
+### 7.4 Contextual Help
+- **Inline Tooltips**: Help text next to complex features
+- **Guided Tours**: Interactive walkthroughs for new features
+- **Example Commands**: Pre-filled templates to get started
+- **Learn More Links**: Detailed documentation when needed
+- **Video Tutorials**: Visual learning resources
+- **Search Help**: Searchable knowledge base
+
+### 7.5 User Feedback
+- **Toast Notifications**: Success, error, info messages
+- **Loading States**: Clear progress indicators
+- **Error Messages**: Human-readable error explanations
+- **Confirmation Dialogs**: Prevent accidental actions
+- **Success Animations**: Positive reinforcement
+- **Progress Bars**: Show task completion status
+
+### 7.6 Visual Design
+- **Consistent UI**: Uniform design language throughout
+- **Color Coding**: Intuitive status colors (green=success, red=error, etc.)
+- **Icons**: Visual cues for faster recognition
+- **White Space**: Clean, uncluttered interface
+- **Dark Mode**: Automatic or manual theme switching
+- **Beautiful Typography**: Readable fonts and sizes
+
+### 7.7 Performance
+- **Instant Feedback**: <100ms response for UI interactions
+- **Skeleton Screens**: Show content structure while loading
+- **Lazy Loading**: Load components only when needed
+- **Caching**: Smart caching for faster repeated access
+- **Optimistic Updates**: Show changes immediately
+- **Background Sync**: Non-blocking data updates
+
+---
+
+**Document Version**: 1.1  
 **Last Updated**: December 5, 2025  
-**Status**: Ready for Implementation
+**Status**: Enhanced for User-Friendliness
