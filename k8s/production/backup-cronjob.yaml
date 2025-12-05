@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backup-pvc
+  namespace: iac-dharma-prod
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: iac-dharma-prod
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: postgres:15-alpine
+            env:
+            - name: PGHOST
+              value: "postgres"
+            - name: PGPORT
+              value: "5432"
+            - name: PGDATABASE
+              value: "iac_dharma"
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: dharma-secrets
+                  key: DB_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dharma-secrets
+                  key: DB_PASSWORD
+            command:
+            - /bin/sh
+            - -c
+            - |
+              BACKUP_FILE="/backup/dharma_$(date +%Y%m%d_%H%M%S).sql.gz"
+              echo "Starting backup to $BACKUP_FILE"
+              pg_dump | gzip > $BACKUP_FILE
+              
+              # Keep only last 30 days of backups
+              find /backup -name "dharma_*.sql.gz" -mtime +30 -delete
+              
+              echo "Backup completed: $BACKUP_FILE"
+              ls -lh /backup
+            volumeMounts:
+            - name: backup
+              mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup
+            persistentVolumeClaim:
+              claimName: postgres-backup-pvc
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redis-backup
+  namespace: iac-dharma-prod
+spec:
+  schedule: "0 3 * * *"  # Daily at 3 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: redis:7-alpine
+            command:
+            - /bin/sh
+            - -c
+            - |
+              BACKUP_FILE="/backup/redis_$(date +%Y%m%d_%H%M%S).rdb"
+              echo "Starting Redis backup"
+              redis-cli -h redis --rdb $BACKUP_FILE
+              echo "Backup completed: $BACKUP_FILE"
+            volumeMounts:
+            - name: backup
+              mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup
+            persistentVolumeClaim:
+              claimName: postgres-backup-pvc
