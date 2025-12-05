@@ -317,6 +317,7 @@ export default function NotificationsCenter() {
           ))
         )}
       </div>
+      </div>
     </MainLayout>
   );
 }

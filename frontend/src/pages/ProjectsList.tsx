@@ -127,7 +127,6 @@ const ProjectsList = () => {
               </p>
             </div>
           </div>
-          </p>
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -279,9 +278,8 @@ const ProjectsList = () => {
             Try adjusting your search or filters
           </p>
         </motion.div>
-          </MainLayout>
       )}
-    </div>
+    </MainLayout>
   );
 };
 

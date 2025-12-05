@@ -1009,6 +1009,7 @@ export default function BlueprintDetail() {
           </Button>
         </div>
       </div>
+      </div>
     </MainLayout>
   );
 }

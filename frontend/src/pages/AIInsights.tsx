@@ -479,9 +479,6 @@ const AIInsights = () => {
               </div>
             </motion.div>
           </div>
-            </div>
-            <Brain className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-          </div>
         </div>
       </div>
 
@@ -845,8 +842,6 @@ const AIInsights = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
-        </div>
       </div>
     </MainLayout>
   );

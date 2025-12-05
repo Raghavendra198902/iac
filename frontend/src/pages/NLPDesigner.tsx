@@ -670,6 +670,7 @@ output "infrastructure_summary" {
           </div>
         </div>
       </div>
+      </div>
     </MainLayout>
   );
 }

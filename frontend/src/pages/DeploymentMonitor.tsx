@@ -198,6 +198,7 @@ export default function DeploymentMonitor() {
         </div>
       </motion.div>
       </div>
+      </div>
     </MainLayout>
   );
 }
