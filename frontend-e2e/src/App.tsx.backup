@@ -1,0 +1,242 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
+import { AuthProvider } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
+import ErrorBoundary from './components/ErrorBoundary'
+import LoadingScreen from './components/LoadingScreen'
+import ProtectedRoute from './components/ProtectedRoute'
+
+// Lazy load pages for better performance
+const Layout = lazy(() => import('./components/Layout'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const Home = lazy(() => import('./pages/Home'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+
+// User Management
+const UserManagement = lazy(() => import('./pages/UserManagement'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Settings = lazy(() => import('./pages/Settings'))
+
+// Infrastructure & Cloud
+const InfrastructureDashboard = lazy(() => import('./pages/Infrastructure/Dashboard'))
+const CloudResources = lazy(() => import('./pages/Infrastructure/CloudResources'))
+const ResourceTemplates = lazy(() => import('./pages/Infrastructure/ResourceTemplates'))
+const IACGenerator = lazy(() => import('./pages/Infrastructure/IACGenerator'))
+
+// Monitoring & Analytics
+const MonitoringDashboard = lazy(() => import('./pages/Monitoring/Dashboard'))
+const PerformanceAnalytics = lazy(() => import('./pages/Monitoring/PerformanceAnalytics'))
+const SystemHealth = lazy(() => import('./pages/Monitoring/SystemHealth'))
+const AlertsNotifications = lazy(() => import('./pages/Monitoring/AlertsNotifications'))
+
+// Security & Compliance
+const SecurityDashboard = lazy(() => import('./pages/Security/Dashboard'))
+const ComplianceCenter = lazy(() => import('./pages/Security/ComplianceCenter'))
+const AuditLogs = lazy(() => import('./pages/Security/AuditLogs'))
+const AccessControl = lazy(() => import('./pages/Security/AccessControl'))
+
+// Cost Management
+const CostDashboard = lazy(() => import('./pages/Cost/Dashboard'))
+const CostAnalytics = lazy(() => import('./pages/Cost/Analytics'))
+const BudgetManagement = lazy(() => import('./pages/Cost/BudgetManagement'))
+const CostOptimization = lazy(() => import('./pages/Cost/Optimization'))
+
+// DevOps & Deployment
+const DeploymentCenter = lazy(() => import('./pages/DevOps/DeploymentCenter'))
+const CICDPipelines = lazy(() => import('./pages/DevOps/CICDPipelines'))
+const ContainerRegistry = lazy(() => import('./pages/DevOps/ContainerRegistry'))
+const GitOperations = lazy(() => import('./pages/DevOps/GitOperations'))
+
+// Enterprise Architecture
+const EADashboard = lazy(() => import('./pages/EA/Dashboard'))
+const BusinessArchitecture = lazy(() => import('./pages/EA/BusinessArchitecture'))
+const ApplicationArchitecture = lazy(() => import('./pages/EA/ApplicationArchitecture'))
+const DataArchitecture = lazy(() => import('./pages/EA/DataArchitecture'))
+const TechnologyArchitecture = lazy(() => import('./pages/EA/TechnologyArchitecture'))
+const SecurityArchitecture = lazy(() => import('./pages/EA/SecurityArchitecture'))
+const IntegrationStrategy = lazy(() => import('./pages/EA/IntegrationStrategy'))
+
+// Project Management
+const ProjectsDashboard = lazy(() => import('./pages/Projects/Dashboard'))
+const ProjectsList = lazy(() => import('./pages/Projects/ProjectsList'))
+const ProjectDetails = lazy(() => import('./pages/Projects/ProjectDetails'))
+const TeamCollaboration = lazy(() => import('./pages/Projects/TeamCollaboration'))
+
+// CMDB
+const CMDBDashboard = lazy(() => import('./pages/CMDB/Dashboard'))
+const AssetInventory = lazy(() => import('./pages/CMDB/AssetInventory'))
+const ConfigurationItems = lazy(() => import('./pages/CMDB/ConfigurationItems'))
+const RelationshipMapping = lazy(() => import('./pages/CMDB/RelationshipMapping'))
+
+// AI & Automation
+const AIInsights = lazy(() => import('./pages/AI/Insights'))
+const MLModels = lazy(() => import('./pages/AI/MLModels'))
+const AutomationEngine = lazy(() => import('./pages/AI/AutomationEngine'))
+const PredictiveAnalytics = lazy(() => import('./pages/AI/PredictiveAnalytics'))
+
+// Integrations
+const IntegrationsDashboard = lazy(() => import('./pages/Integrations/Dashboard'))
+const APIManagement = lazy(() => import('./pages/Integrations/APIManagement'))
+const Webhooks = lazy(() => import('./pages/Integrations/Webhooks'))
+const ThirdPartyServices = lazy(() => import('./pages/Integrations/ThirdPartyServices'))
+
+// Reports & Analytics
+const ReportsDashboard = lazy(() => import('./pages/Reports/Dashboard'))
+const ReportBuilder = lazy(() => import('./pages/Reports/ReportBuilder'))
+const ScheduledReports = lazy(() => import('./pages/Reports/ScheduledReports'))
+const DataExport = lazy(() => import('./pages/Reports/DataExport'))
+
+// Admin
+const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard'))
+const SystemConfiguration = lazy(() => import('./pages/Admin/SystemConfiguration'))
+const LicenseManagement = lazy(() => import('./pages/Admin/LicenseManagement'))
+const BackupRestore = lazy(() => import('./pages/Admin/BackupRestore'))
+
+// Misc
+const NotFound = lazy(() => import('./pages/NotFound'))
+const Unauthorized = lazy(() => import('./pages/Unauthorized'))
+const GlobalSearch = lazy(() => import('./pages/GlobalSearch'))
+const Notifications = lazy(() => import('./pages/Notifications'))
+const HelpSupport = lazy(() => import('./pages/HelpSupport'))
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <ThemeProvider>
+          <BrowserRouter>
+            <Suspense fallback={<LoadingScreen />}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
+
+                {/* Protected Routes with Layout */}
+                <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                  <Route index element={<Home />} />
+                  <Route path="dashboard" element={<Dashboard />} />
+
+                  {/* User & Settings */}
+                  <Route path="users" element={<UserManagement />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
+
+                  {/* Infrastructure */}
+                  <Route path="infrastructure">
+                    <Route index element={<InfrastructureDashboard />} />
+                    <Route path="resources" element={<CloudResources />} />
+                    <Route path="templates" element={<ResourceTemplates />} />
+                    <Route path="generator" element={<IACGenerator />} />
+                  </Route>
+
+                  {/* Monitoring */}
+                  <Route path="monitoring">
+                    <Route index element={<MonitoringDashboard />} />
+                    <Route path="performance" element={<PerformanceAnalytics />} />
+                    <Route path="health" element={<SystemHealth />} />
+                    <Route path="alerts" element={<AlertsNotifications />} />
+                  </Route>
+
+                  {/* Security */}
+                  <Route path="security">
+                    <Route index element={<SecurityDashboard />} />
+                    <Route path="compliance" element={<ComplianceCenter />} />
+                    <Route path="audit" element={<AuditLogs />} />
+                    <Route path="access" element={<AccessControl />} />
+                  </Route>
+
+                  {/* Cost Management */}
+                  <Route path="cost">
+                    <Route index element={<CostDashboard />} />
+                    <Route path="analytics" element={<CostAnalytics />} />
+                    <Route path="budget" element={<BudgetManagement />} />
+                    <Route path="optimization" element={<CostOptimization />} />
+                  </Route>
+
+                  {/* DevOps */}
+                  <Route path="devops">
+                    <Route index element={<DeploymentCenter />} />
+                    <Route path="pipelines" element={<CICDPipelines />} />
+                    <Route path="containers" element={<ContainerRegistry />} />
+                    <Route path="git" element={<GitOperations />} />
+                  </Route>
+
+                  {/* Enterprise Architecture */}
+                  <Route path="ea">
+                    <Route index element={<EADashboard />} />
+                    <Route path="business" element={<BusinessArchitecture />} />
+                    <Route path="application" element={<ApplicationArchitecture />} />
+                    <Route path="data" element={<DataArchitecture />} />
+                    <Route path="technology" element={<TechnologyArchitecture />} />
+                    <Route path="security" element={<SecurityArchitecture />} />
+                    <Route path="integration" element={<IntegrationStrategy />} />
+                  </Route>
+
+                  {/* Projects */}
+                  <Route path="projects">
+                    <Route index element={<ProjectsDashboard />} />
+                    <Route path="list" element={<ProjectsList />} />
+                    <Route path=":id" element={<ProjectDetails />} />
+                    <Route path="collaboration" element={<TeamCollaboration />} />
+                  </Route>
+
+                  {/* CMDB */}
+                  <Route path="cmdb">
+                    <Route index element={<CMDBDashboard />} />
+                    <Route path="assets" element={<AssetInventory />} />
+                    <Route path="config-items" element={<ConfigurationItems />} />
+                    <Route path="relationships" element={<RelationshipMapping />} />
+                  </Route>
+
+                  {/* AI & Automation */}
+                  <Route path="ai">
+                    <Route index element={<AIInsights />} />
+                    <Route path="models" element={<MLModels />} />
+                    <Route path="automation" element={<AutomationEngine />} />
+                    <Route path="predictive" element={<PredictiveAnalytics />} />
+                  </Route>
+
+                  {/* Integrations */}
+                  <Route path="integrations">
+                    <Route index element={<IntegrationsDashboard />} />
+                    <Route path="api" element={<APIManagement />} />
+                    <Route path="webhooks" element={<Webhooks />} />
+                    <Route path="services" element={<ThirdPartyServices />} />
+                  </Route>
+
+                  {/* Reports */}
+                  <Route path="reports">
+                    <Route index element={<ReportsDashboard />} />
+                    <Route path="builder" element={<ReportBuilder />} />
+                    <Route path="scheduled" element={<ScheduledReports />} />
+                    <Route path="export" element={<DataExport />} />
+                  </Route>
+
+                  {/* Admin */}
+                  <Route path="admin">
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="system" element={<SystemConfiguration />} />
+                    <Route path="license" element={<LicenseManagement />} />
+                    <Route path="backup" element={<BackupRestore />} />
+                  </Route>
+
+                  {/* Utilities */}
+                  <Route path="search" element={<GlobalSearch />} />
+                  <Route path="notifications" element={<Notifications />} />
+                  <Route path="help" element={<HelpSupport />} />
+                </Route>
+
+                {/* Catch all */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </ThemeProvider>
+      </AuthProvider>
+    </ErrorBoundary>
+  )
+}
+
+export default App
