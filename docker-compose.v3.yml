@@ -172,10 +172,11 @@ services:
       - kafka-v3
       - mlflow-v3
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8100/api/v3/aiops/health"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8100/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
 
   # CMDB Agent (Port 8200)
   cmdb-agent-v3:
@@ -262,7 +263,7 @@ services:
     networks:
       - iac-v3-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000/.well-known/apollo/server-health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:4000/health"]
       interval: 30s
       timeout: 5s
       retries: 3
