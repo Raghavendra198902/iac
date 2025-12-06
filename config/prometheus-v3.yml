@@ -1,0 +1,95 @@
+# Prometheus Configuration for IAC Dharma v3.0
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'iac-v3'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load alerting rules
+rule_files:
+  - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # PostgreSQL v3 Database
+  - job_name: 'postgres-v3'
+    static_configs:
+      - targets: ['postgres-v3:5432']
+        labels:
+          service: 'postgres'
+          tier: 'database'
+
+  # AIOps Engine v3
+  - job_name: 'aiops-engine-v3'
+    metrics_path: '/api/v3/aiops/metrics'
+    static_configs:
+      - targets: ['aiops-engine-v3:8100']
+        labels:
+          service: 'aiops'
+          tier: 'ml'
+
+  # User Management Service
+  - job_name: 'user-management-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['user-management-v3:3025']
+        labels:
+          service: 'user-management'
+          tier: 'backend'
+
+  # API Gateway v3
+  - job_name: 'api-gateway-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api-gateway-v3:3000']
+        labels:
+          service: 'api-gateway'
+          tier: 'gateway'
+
+  # Frontend v3
+  - job_name: 'frontend-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['frontend-v3:80']
+        labels:
+          service: 'frontend'
+          tier: 'ui'
+
+  # Kafka v3
+  - job_name: 'kafka-v3'
+    static_configs:
+      - targets: ['kafka-v3:9092']
+        labels:
+          service: 'kafka'
+          tier: 'messaging'
+
+  # MLflow
+  - job_name: 'mlflow-v3'
+    static_configs:
+      - targets: ['mlflow-v3:5000']
+        labels:
+          service: 'mlflow'
+          tier: 'ml'
+
+  # Grafana
+  - job_name: 'grafana-v3'
+    static_configs:
+      - targets: ['grafana-v3:3000']
+        labels:
+          service: 'grafana'
+          tier: 'monitoring'

@@ -5,10 +5,12 @@ Enhanced with Real ML Models
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 from typing import Dict, Any
 from datetime import datetime
 import logging
 import uuid
+import os
 
 # Import ML models
 from models.failure_predictor import FailurePredictor
@@ -60,8 +62,9 @@ lstm_failure_predictor = LSTMFailurePredictor()
 rf_threat_detector = RFThreatDetector()
 xgb_capacity_forecaster = XGBoostCapacityForecaster()
 
-# Initialize MLflow training pipeline
-mlflow_pipeline = MLflowTrainingPipeline()
+# Initialize MLflow training pipeline with correct URI from environment
+mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow-v3:5000")
+mlflow_pipeline = MLflowTrainingPipeline(mlflow_tracking_uri=mlflow_tracking_uri)
 
 # Service statistics
 service_stats = {
@@ -257,10 +260,11 @@ async def detect_anomaly(request: Dict[str, Any]):
 @app.get("/api/v3/aiops/metrics", tags=["Metrics"])
 async def get_metrics():
     """Get Prometheus-compatible metrics"""
+    from fastapi.responses import Response
+    
     uptime = (datetime.now() - service_stats["start_time"]).total_seconds()
     
-    metrics = f"""
-# HELP aiops_predictions_total Total number of predictions made
+    metrics = f"""# HELP aiops_predictions_total Total number of predictions made
 # TYPE aiops_predictions_total counter
 aiops_predictions_total {service_stats["predictions_count"]}
 
@@ -277,7 +281,7 @@ aiops_remediations_executed_total {service_stats["remediations_executed"]}
 aiops_uptime_seconds {uptime}
 """
     
-    return metrics
+    return Response(content=metrics, media_type="text/plain; version=0.0.4")
 
 
 # ============================================================================

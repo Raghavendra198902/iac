@@ -18,10 +18,15 @@ const loginValidation = [
   body('password').notEmpty(),
 ];
 
+const refreshTokenValidation = [
+  body('refreshToken').notEmpty().withMessage('Refresh token is required'),
+];
+
 // Routes
 router.post('/register', registerValidation, authController.register);
 router.post('/login', loginValidation, authController.login);
 router.post('/logout', authenticate, authController.logout);
+router.post('/refresh', refreshTokenValidation, authController.refreshAccessToken);
 router.post('/2fa/setup', authenticate, authController.setupTwoFactor);
 router.post('/2fa/enable', authenticate, authController.enableTwoFactor);
 

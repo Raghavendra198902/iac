@@ -10,6 +10,7 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 import logging
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from models.infrastructure import (
@@ -41,10 +42,14 @@ async def lifespan(app: FastAPI):
     
     # Initialize Neo4j
     try:
+        neo4j_uri = os.getenv("NEO4J_URI", "bolt://neo4j-v3:7687")
+        neo4j_user = os.getenv("NEO4J_USER", "neo4j")
+        neo4j_password = os.getenv("NEO4J_PASSWORD", "neo4jpassword")
+        
         neo4j_client = Neo4jClient(
-            uri="bolt://localhost:7687",
-            username="neo4j",
-            password="neo4j123"
+            uri=neo4j_uri,
+            username=neo4j_user,
+            password=neo4j_password
         )
         
         if neo4j_client.verify_connectivity():
@@ -160,6 +165,113 @@ async def health_check():
 # Discovery Endpoints
 # ============================================================================
 
+@app.post("/api/v3/cmdb/discover/local")
+async def discover_local(background_tasks: BackgroundTasks):
+    """
+    Discover local Docker infrastructure
+    
+    Discovers running containers, networks, and volumes
+    """
+    task_id = f"local-{datetime.utcnow().timestamp()}"
+    
+    # Initialize task status
+    discovery_tasks[task_id] = {
+        "task_id": task_id,
+        "provider": "local",
+        "status": "running",
+        "started_at": datetime.utcnow(),
+        "completed_at": None,
+        "resources_discovered": 0,
+        "errors": []
+    }
+    
+    # Run discovery in background
+    background_tasks.add_task(_run_local_discovery, task_id)
+    
+    return {
+        "task_id": task_id,
+        "status": "started",
+        "message": "Local Docker infrastructure discovery started",
+        "check_status": f"/api/v3/cmdb/discovery/{task_id}"
+    }
+
+
+async def _run_local_discovery(task_id: str):
+    """Background task for local Docker discovery"""
+    import docker
+    
+    try:
+        # Connect to Docker daemon via Unix socket
+        client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
+        resources = []
+        
+        # Discover containers
+        containers = client.containers.list(all=True)
+        for container in containers:
+            resources.append({
+                "id": container.id[:12],
+                "name": container.name,
+                "type": "container",
+                "status": container.status,
+                "image": container.image.tags[0] if container.image.tags else "unknown",
+                "created": container.attrs['Created'],
+                "labels": container.labels,
+                "ports": container.ports,
+                "networks": list(container.attrs['NetworkSettings']['Networks'].keys())
+            })
+        
+        # Discover networks
+        networks = client.networks.list()
+        for network in networks:
+            resources.append({
+                "id": network.id[:12],
+                "name": network.name,
+                "type": "network",
+                "driver": network.attrs['Driver'],
+                "scope": network.attrs['Scope'],
+                "containers": len(network.attrs['Containers'])
+            })
+        
+        # Discover volumes
+        volumes = client.volumes.list()
+        for volume in volumes:
+            resources.append({
+                "id": volume.id[:12] if len(volume.id) > 12 else volume.id,
+                "name": volume.name,
+                "type": "volume",
+                "driver": volume.attrs['Driver'],
+                "mountpoint": volume.attrs['Mountpoint']
+            })
+        
+        # Store in Neo4j if available
+        if neo4j_client:
+            logger.info(f"Storing {len(resources)} local resources in Neo4j")
+            for resource in resources:
+                neo4j_client.create_node(
+                    "DockerResource",
+                    resource['id'],
+                    resource
+                )
+        
+        # Update task status
+        discovery_tasks[task_id].update({
+            "status": "completed",
+            "completed_at": datetime.utcnow(),
+            "resources_discovered": len(resources),
+            "resources": resources
+        })
+        
+        logger.info(f"Local discovery completed: {len(resources)} resources discovered")
+        
+    except Exception as e:
+        logger.error(f"Local discovery failed: {e}")
+        discovery_tasks[task_id].update({
+            "status": "failed",
+            "completed_at": datetime.utcnow(),
+            "errors": [str(e)]
+        })
+
+
 @app.post("/api/v3/cmdb/discover/aws")
 async def discover_aws(
     credentials: AWSCredentials,
@@ -260,6 +372,114 @@ async def list_discovery_tasks():
         "tasks": list(discovery_tasks.values()),
         "total": len(discovery_tasks)
     }
+
+
+# ============================================================================
+# Graph Visualization Endpoints
+# ============================================================================
+
+@app.get("/api/v3/cmdb/graph/topology")
+async def get_topology():
+    """Get full infrastructure topology graph."""
+    if not neo4j_client:
+        raise HTTPException(status_code=503, detail="Neo4j not available")
+    
+    try:
+        with neo4j_client.driver.session() as session:
+            # Get all nodes
+            logger.info("Querying nodes...")
+            nodes_result = session.run("""
+                MATCH (n:Resource)
+                RETURN n.id as id, n.name as name, n.type as type, 
+                       n.status as status, n.provider as provider, n.port as port
+            """)
+            nodes = [dict(record) for record in nodes_result]
+            logger.info(f"Found {len(nodes)} nodes")
+            
+            # Get all relationships
+            logger.info("Querying relationships...")
+            edges_result = session.run("""
+                MATCH (a:Resource)-[r]->(b:Resource)
+                RETURN a.id as source, b.id as target, type(r) as relationship
+            """)
+            edges = [dict(record) for record in edges_result]
+            logger.info(f"Found {len(edges)} edges")
+            
+            result = {
+                "nodes": nodes,
+                "edges": edges,
+                "count": {"nodes": len(nodes), "edges": len(edges)}
+            }
+            logger.info(f"Returning topology: {result}")
+            return result
+    except Exception as e:
+        logger.error(f"Topology query failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Graph query failed: {str(e)}")
+
+@app.get("/api/v3/cmdb/graph/service/{service_id}")
+async def get_service_dependencies(service_id: str):
+    """Get dependency graph for a specific service."""
+    if not neo4j_client:
+        raise HTTPException(status_code=503, detail="Neo4j not available")
+    
+    try:
+        with neo4j_client.driver.session() as session:
+            result = session.run("""
+                MATCH (s:Resource {id: $service_id})
+                OPTIONAL MATCH (s)-[r1]->(dep:Resource)
+                OPTIONAL MATCH (consumer:Resource)-[r2]->(s)
+                RETURN s, 
+                       collect(DISTINCT {node: dep, relationship: type(r1)}) as dependencies,
+                       collect(DISTINCT {node: consumer, relationship: type(r2)}) as consumers
+            """, service_id=service_id)
+            
+            record = result.single()
+            if not record:
+                raise HTTPException(status_code=404, detail=f"Service {service_id} not found")
+            
+            service = dict(record["s"])
+            dependencies = [{"id": d["node"]["id"], "name": d["node"]["name"], 
+                           "relationship": d["relationship"]} 
+                          for d in record["dependencies"] if d["node"]]
+            consumers = [{"id": c["node"]["id"], "name": c["node"]["name"], 
+                         "relationship": c["relationship"]} 
+                        for c in record["consumers"] if c["node"]]
+            
+            return {
+                "service": service,
+                "dependencies": dependencies,
+                "consumers": consumers
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Service dependency query failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Graph query failed: {str(e)}")
+
+@app.post("/api/v3/cmdb/graph/query")
+async def custom_graph_query(query: dict):
+    """Execute custom Cypher query (read-only)."""
+    if not neo4j_client:
+        raise HTTPException(status_code=503, detail="Neo4j not available")
+    
+    cypher = query.get("cypher", "")
+    params = query.get("params", {})
+    
+    if not cypher:
+        raise HTTPException(status_code=400, detail="Cypher query required")
+    
+    # Basic security: only allow read queries
+    if any(keyword in cypher.upper() for keyword in ["CREATE", "DELETE", "SET", "REMOVE", "MERGE"]):
+        raise HTTPException(status_code=403, detail="Only read queries allowed")
+    
+    try:
+        with neo4j_client.driver.session() as session:
+            result = session.run(cypher, params)
+            records = [dict(record) for record in result]
+            return {"results": records, "count": len(records)}
+    except Exception as e:
+        logger.error(f"Custom query failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Query failed: {str(e)}")
 
 
 # ============================================================================

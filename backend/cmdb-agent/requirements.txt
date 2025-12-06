@@ -23,6 +23,9 @@ botocore==1.34.20
 # Neo4j
 neo4j==5.15.0
 
+# Docker SDK
+docker==7.0.0
+
 # Utilities
 python-dotenv==1.0.0
 httpx==0.26.0

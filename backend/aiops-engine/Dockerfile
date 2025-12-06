@@ -30,5 +30,5 @@ EXPOSE 8100
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8100/health || exit 1
 
-# Run application
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8100", "--workers", "4"]
+# Run application with app_v3 which has training endpoints
+CMD ["uvicorn", "app_v3:app", "--host", "0.0.0.0", "--port", "8100", "--workers", "4"]

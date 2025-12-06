@@ -1,0 +1,159 @@
+# IAC Dharma v3.0 - Alerting Rules
+groups:
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      # High CPU Usage Alert
+      - alert: HighCPUUsage
+        expr: node_cpu_usage > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+
+      # High Memory Usage Alert
+      - alert: HighMemoryUsage
+        expr: node_memory_usage > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% on {{ $labels.instance }}"
+
+      # Disk Space Low Alert
+      - alert: DiskSpaceLow
+        expr: node_disk_usage > 80
+        for: 10m
+        labels:
+          severity: critical
+          component: storage
+        annotations:
+          summary: "Disk space running low"
+          description: "Disk usage is above 80% on {{ $labels.instance }}"
+
+  - name: service_alerts
+    interval: 30s
+    rules:
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: service
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.job }} service is not responding"
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for {{ $labels.service }}"
+
+      # Slow Response Time
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "Slow response time detected"
+          description: "95th percentile response time is above 1 second for {{ $labels.service }}"
+
+  - name: aiops_alerts
+    interval: 30s
+    rules:
+      # AIOps Prediction Failure
+      - alert: AIOpsHighFailurePrediction
+        expr: aiops_failure_probability > 0.8
+        for: 2m
+        labels:
+          severity: critical
+          component: aiops
+        annotations:
+          summary: "High failure probability predicted"
+          description: "AIOps predicts {{ $value }}% failure probability for {{ $labels.resource }}"
+
+      # Security Threat Detected
+      - alert: SecurityThreatDetected
+        expr: aiops_threat_level > 0.7
+        for: 1m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Security threat detected"
+          description: "AIOps detected security threat with level {{ $value }}"
+
+      # Capacity Warning
+      - alert: CapacityWarning
+        expr: aiops_capacity_forecast > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: capacity
+        annotations:
+          summary: "Capacity threshold approaching"
+          description: "Predicted capacity usage will reach {{ $value }}% soon"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # Database Connection Pool Exhausted
+      - alert: DatabaseConnectionPoolExhausted
+        expr: pg_connections_active / pg_connections_max > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "PostgreSQL connection pool is at {{ $value }}% capacity"
+
+      # Slow Queries
+      - alert: SlowDatabaseQueries
+        expr: pg_slow_queries > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "{{ $value }} slow queries detected in the last 5 minutes"
+
+  - name: ml_model_alerts
+    interval: 60s
+    rules:
+      # Model Drift Detected
+      - alert: ModelDriftDetected
+        expr: ml_model_drift_score > 0.3
+        for: 10m
+        labels:
+          severity: warning
+          component: ml
+        annotations:
+          summary: "ML model drift detected"
+          description: "Model {{ $labels.model_name }} shows drift score of {{ $value }}"
+
+      # Low Model Accuracy
+      - alert: LowModelAccuracy
+        expr: ml_model_accuracy < 0.7
+        for: 5m
+        labels:
+          severity: warning
+          component: ml
+        annotations:
+          summary: "ML model accuracy degraded"
+          description: "Model {{ $labels.model_name }} accuracy dropped to {{ $value }}"

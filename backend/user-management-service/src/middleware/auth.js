@@ -36,16 +36,22 @@ const authenticate = async (req, res, next) => {
       [rows[0].id]
     );
 
+    // Attach user info with roles and permissions from token
     req.user = {
       id: decoded.userId,
-      username: rows[0].username,
-      email: rows[0].email,
+      username: decoded.username || rows[0].username,
+      email: decoded.email || rows[0].email,
+      roles: decoded.roles || [],
+      permissions: decoded.permissions || [],
       sessionId: rows[0].id
     };
 
     next();
   } catch (error) {
     console.error('Authentication error:', error);
+    if (error.message === 'Token expired') {
+      return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
+    }
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
@@ -53,6 +59,12 @@ const authenticate = async (req, res, next) => {
 const checkPermission = (requiredPermission) => {
   return async (req, res, next) => {
     try {
+      // First check permissions in JWT token (faster)
+      if (req.user.permissions && req.user.permissions.includes(requiredPermission)) {
+        return next();
+      }
+
+      // Fallback to database check (in case token is stale)
       const query = `
         SELECT p.name
         FROM permissions p
@@ -66,7 +78,11 @@ const checkPermission = (requiredPermission) => {
       const { rows } = await pool.query(query, [req.user.id, requiredPermission]);
       
       if (rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient permissions' });
+        return res.status(403).json({ 
+          error: 'Insufficient permissions',
+          required: requiredPermission,
+          message: `You need '${requiredPermission}' permission to access this resource`
+        });
       }
 
       next();
@@ -82,6 +98,15 @@ const checkRole = (requiredRoles) => {
     try {
       const rolesArray = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
       
+      // First check roles in JWT token (faster)
+      if (req.user.roles) {
+        const hasRole = rolesArray.some(role => req.user.roles.includes(role));
+        if (hasRole) {
+          return next();
+        }
+      }
+
+      // Fallback to database check (in case token is stale)
       const query = `
         SELECT r.name
         FROM roles r
@@ -94,7 +119,11 @@ const checkRole = (requiredRoles) => {
       const { rows } = await pool.query(query, [req.user.id, rolesArray]);
       
       if (rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient role privileges' });
+        return res.status(403).json({ 
+          error: 'Insufficient role privileges',
+          required: rolesArray,
+          message: `You need one of these roles: ${rolesArray.join(', ')}`
+        });
       }
 
       next();
@@ -105,8 +134,37 @@ const checkRole = (requiredRoles) => {
   };
 };
 
+/**
+ * Check if user has any of the specified permissions
+ */
+const checkAnyPermission = (requiredPermissions) => {
+  return async (req, res, next) => {
+    try {
+      const permissionsArray = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
+      
+      // Check permissions in JWT token
+      if (req.user.permissions) {
+        const hasPermission = permissionsArray.some(perm => req.user.permissions.includes(perm));
+        if (hasPermission) {
+          return next();
+        }
+      }
+
+      return res.status(403).json({ 
+        error: 'Insufficient permissions',
+        required: permissionsArray,
+        message: `You need one of these permissions: ${permissionsArray.join(', ')}`
+      });
+    } catch (error) {
+      console.error('Permission check error:', error);
+      return res.status(500).json({ error: 'Permission verification failed' });
+    }
+  };
+};
+
 module.exports = {
   authenticate,
   checkPermission,
   checkRole,
+  checkAnyPermission,
 };

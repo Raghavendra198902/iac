@@ -108,7 +108,15 @@ services:
     ports:
       - "9091:9090"
     volumes:
+      - ./config/prometheus-v3.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus/alerts:/etc/prometheus/alerts
       - prometheus-v3-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
     networks:
       - iac-v3-network
 
@@ -121,10 +129,17 @@ services:
       - "3020:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SERVER_ROOT_URL: http://localhost:3020
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
     volumes:
       - grafana-v3-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/etc/grafana/dashboards
     networks:
       - iac-v3-network
+    depends_on:
+      - prometheus-v3
 
   # MLflow (Port 5000)
   mlflow-v3:
@@ -196,6 +211,8 @@ services:
       - TIMESCALEDB_PORT=5432
       - TIMESCALEDB_DB=iac_v3
       - KAFKA_BOOTSTRAP_SERVERS=kafka-v3:9092
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - iac-v3-network
     depends_on:
