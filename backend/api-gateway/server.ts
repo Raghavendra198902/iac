@@ -12,11 +12,56 @@ import bodyParser from 'body-parser';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import jwt from 'jsonwebtoken';
+import { createClient } from 'redis';
 
 import { resolvers } from './graphql/resolvers';
 import { PostgresDataSource } from './graphql/datasources/PostgresDataSource';
 import { AIOpsDataSource } from './graphql/datasources/AIOpsDataSource';
 import { verifyToken } from './graphql/resolvers/auth';
+
+// Redis client setup
+const redisClient = createClient({
+  url: process.env.REDIS_URL || 'redis://iac-redis-v3:6379'
+});
+
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.on('connect', () => console.log('✓ Redis connected successfully'));
+
+// Connect to Redis
+redisClient.connect().catch(console.error);
+
+// Cache middleware
+const cacheMiddleware = (duration: number) => {
+  return async (req: Request, res: Response, next: any) => {
+    if (req.method !== 'GET') {
+      return next();
+    }
+
+    const key = `cache:${req.originalUrl}`;
+    
+    try {
+      const cachedData = await redisClient.get(key);
+      if (cachedData) {
+        console.log(`✓ Cache hit: ${key}`);
+        return res.json(JSON.parse(cachedData));
+      }
+    } catch (error) {
+      console.error('Cache read error:', error);
+    }
+
+    // Store original json method
+    const originalJson = res.json.bind(res);
+    
+    // Override json method to cache response
+    res.json = (body: any) => {
+      redisClient.setEx(key, duration, JSON.stringify(body)).catch(console.error);
+      console.log(`✓ Cache set: ${key} (TTL: ${duration}s)`);
+      return originalJson(body);
+    };
+
+    next();
+  };
+};
 
 // Load GraphQL schema
 const typeDefs = readFileSync(
@@ -436,8 +481,8 @@ async function startServer() {
     }
   });
 
-  // Monitoring overview endpoint
-  app.get('/api/monitoring/overview', async (req: Request, res: Response) => {
+  // Monitoring overview endpoint (cached for 5 seconds)
+  app.get('/api/monitoring/overview', cacheMiddleware(5), async (req: Request, res: Response) => {
     try {
       const { execSync } = require('child_process');
       
@@ -581,7 +626,7 @@ async function startServer() {
   });
 
   // Security overview endpoint
-  app.get('/api/security/overview', async (req: Request, res: Response) => {
+  app.get('/api/security/overview', cacheMiddleware(30), async (req: Request, res: Response) => {
     try {
       // Generate realistic security metrics
       const failedLogins = Math.floor(Math.random() * 20) + 5;
@@ -642,7 +687,7 @@ async function startServer() {
   });
 
   // Cost Optimization API
-  app.get('/api/cost/overview', async (req: Request, res: Response) => {
+  app.get('/api/cost/overview', cacheMiddleware(60), async (req: Request, res: Response) => {
     try {
       const currentMonth = Math.floor(Math.random() * 2000) + 3000;
       const lastMonth = Math.floor(Math.random() * 1800) + 3200;
@@ -687,7 +732,7 @@ async function startServer() {
   });
 
   // Deployment History API
-  app.get('/api/deployments/history', async (req: Request, res: Response) => {
+  app.get('/api/deployments/history', cacheMiddleware(30), async (req: Request, res: Response) => {
     try {
       const deployments = [
         {
@@ -768,7 +813,7 @@ async function startServer() {
   });
 
   // User Management API
-  app.get('/api/users', async (req: Request, res: Response) => {
+  app.get('/api/users', cacheMiddleware(60), async (req: Request, res: Response) => {
     try {
       const users = [
         {
@@ -816,7 +861,7 @@ async function startServer() {
   });
 
   // Performance Optimization API
-  app.get('/api/performance/recommendations', async (req: Request, res: Response) => {
+  app.get('/api/performance/recommendations', cacheMiddleware(120), async (req: Request, res: Response) => {
     try {
       const recommendations = [
         {
@@ -1070,8 +1115,8 @@ async function startServer() {
     }
   });
 
-  // Infrastructure Topology API
-  app.get('/api/topology', (req: Request, res: Response) => {
+  // Infrastructure Topology API (cached for 30 seconds)
+  app.get('/api/topology', cacheMiddleware(30), (req: Request, res: Response) => {
     try {
       const nodes = [
         {
@@ -1183,8 +1228,8 @@ async function startServer() {
     }
   });
 
-  // Backup & Disaster Recovery API
-  app.get('/api/backups', (req: Request, res: Response) => {
+  // Backup & Disaster Recovery API (cached for 30 seconds)
+  app.get('/api/backups', cacheMiddleware(30), (req: Request, res: Response) => {
     try {
       const types = ['full', 'incremental', 'differential'];
       const statuses = ['completed', 'completed', 'completed', 'in-progress'];
