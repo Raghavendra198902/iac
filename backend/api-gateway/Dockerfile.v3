@@ -15,6 +15,7 @@ COPY tsconfig.v3.json tsconfig.json
 # Copy source code
 COPY server.ts ./
 COPY graphql ./graphql/
+COPY services ./services/
 
 # Build TypeScript
 RUN npm run build

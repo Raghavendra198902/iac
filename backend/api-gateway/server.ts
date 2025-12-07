@@ -18,6 +18,7 @@ import { resolvers } from './graphql/resolvers';
 import { PostgresDataSource } from './graphql/datasources/PostgresDataSource';
 import { AIOpsDataSource } from './graphql/datasources/AIOpsDataSource';
 import { verifyToken } from './graphql/resolvers/auth';
+import { NLIEngine } from './services/NLIEngine';
 
 // Redis client setup
 const redisClient = createClient({
@@ -1596,6 +1597,74 @@ async function startServer() {
         added: 0
       });
     }
+  });
+
+  // Natural Language Infrastructure (NLI) API
+  const nliEngine = new NLIEngine();
+
+  app.post('/api/nli/parse', async (req: Request, res: Response) => {
+    try {
+      const { command, context } = req.body;
+
+      if (!command) {
+        return res.status(400).json({
+          error: 'Missing required field: command',
+          example: {
+            command: 'Create a Kubernetes cluster with 3 nodes',
+            context: {
+              provider: 'aws',
+              environment: 'production',
+            },
+          },
+        });
+      }
+
+      console.log(`🤖 NLI Request: "${command}"`);
+      const response = await nliEngine.parseCommand({ command, context });
+      console.log(`✓ NLI Response: ${response.understood ? 'Understood' : 'Not understood'} - Intent: ${response.intent}`);
+
+      res.json(response);
+    } catch (error: any) {
+      console.error('❌ NLI Error:', error);
+      res.status(500).json({
+        error: 'Failed to process NLI command',
+        message: error.message,
+      });
+    }
+  });
+
+  // NLI Examples endpoint
+  app.get('/api/nli/examples', async (_req: Request, res: Response) => {
+    res.json({
+      examples: [
+        {
+          category: 'Kubernetes Cluster',
+          commands: [
+            'Create a Kubernetes cluster with 3 nodes',
+            'Setup an EKS cluster with high availability',
+            'Deploy a production-grade k8s cluster with auto-scaling',
+          ],
+        },
+        {
+          category: 'Database',
+          commands: [
+            'Create a PostgreSQL database with high availability',
+            'Setup a MySQL database with 100GB storage',
+            'Deploy a highly available RDS instance for production',
+          ],
+        },
+        {
+          category: 'Web Application',
+          commands: [
+            'Create a web application with auto-scaling',
+            'Deploy a highly available web app',
+            'Setup a production web application with 3 replicas',
+          ],
+        },
+      ],
+      supportedProviders: ['aws', 'azure', 'gcp', 'kubernetes'],
+      supportedEnvironments: ['dev', 'staging', 'production'],
+    });
   });
 
   // GraphQL endpoint with middleware

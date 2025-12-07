@@ -61,6 +61,7 @@ const AI = lazy(() => import('./pages/AI'));
 const AIModels = lazy(() => import('./pages/AI/AIModels'));
 const AIAutomation = lazy(() => import('./pages/AI/AIAutomation'));
 const AIPredictive = lazy(() => import('./pages/AI/AIPredictive'));
+const NaturalLanguageInfrastructure = lazy(() => import('./pages/NaturalLanguageInfrastructure'));
 const Integrations = lazy(() => import('./pages/Integrations'));
 const IntegrationsAPI = lazy(() => import('./pages/Integrations/IntegrationsAPI'));
 const IntegrationsWebhooks = lazy(() => import('./pages/Integrations/IntegrationsWebhooks'));
@@ -141,6 +142,7 @@ function App() {
                   <Route path="/ai/models" element={<AIModels />} />
                   <Route path="/ai/automation" element={<AIAutomation />} />
                   <Route path="/ai/predictive" element={<AIPredictive />} />
+                  <Route path="/ai/nli" element={<NaturalLanguageInfrastructure />} />
                   <Route path="/integrations" element={<Integrations />} />
                   <Route path="/integrations/api" element={<IntegrationsAPI />} />
                   <Route path="/integrations/webhooks" element={<IntegrationsWebhooks />} />

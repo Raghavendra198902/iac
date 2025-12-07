@@ -25,6 +25,7 @@ import {
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   CloudIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -150,6 +151,7 @@ const navigation: NavItem[] = [
       { name: 'Models', path: '/ai/models', icon: CpuChipIcon },
       { name: 'Automation', path: '/ai/automation', icon: CodeBracketIcon },
       { name: 'Predictive', path: '/ai/predictive', icon: ChartBarIcon },
+      { name: 'Natural Language', path: '/ai/nli', icon: ChatBubbleLeftRightIcon },
     ],
   },
   {
