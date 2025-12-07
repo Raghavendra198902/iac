@@ -1738,6 +1738,98 @@ async function startServer() {
     }
   });
 
+  // Chaos Engineering API endpoints (proxy to chaos engineering service)
+  const CHAOS_URL = process.env.CHAOS_URL || 'http://chaos-engineering:8700';
+
+  app.post('/api/chaos/experiment', async (req: Request, res: Response) => {
+    try {
+      const { type, name, target_resource, severity, duration_seconds, auto_rollback } = req.body;
+      const params = new URLSearchParams({
+        type,
+        name,
+        target_resource,
+        severity,
+        duration_seconds: duration_seconds?.toString() || '60',
+        auto_rollback: auto_rollback?.toString() || 'true'
+      });
+      const response = await fetch(`${CHAOS_URL}/api/v3/chaos/experiment?${params}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to create chaos experiment', message: error.message });
+    }
+  });
+
+  app.get('/api/chaos/experiments', async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit || 20;
+      const response = await fetch(`${CHAOS_URL}/api/v3/chaos/experiments?limit=${limit}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch experiments', message: error.message });
+    }
+  });
+
+  app.get('/api/chaos/experiment/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const response = await fetch(`${CHAOS_URL}/api/v3/chaos/experiment/${id}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch experiment', message: error.message });
+    }
+  });
+
+  app.get('/api/chaos/resilience-score', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${CHAOS_URL}/api/v3/chaos/resilience-score`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch resilience score', message: error.message });
+    }
+  });
+
+  app.get('/api/chaos/statistics', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${CHAOS_URL}/api/v3/chaos/statistics`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch chaos statistics', message: error.message });
+    }
+  });
+
+  app.post('/api/chaos/continuous/toggle', async (req: Request, res: Response) => {
+    try {
+      const { enabled } = req.body;
+      const response = await fetch(`${CHAOS_URL}/api/v3/chaos/continuous/toggle?enabled=${enabled}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to toggle continuous chaos', message: error.message });
+    }
+  });
+
+  app.delete('/api/chaos/experiment/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const response = await fetch(`${CHAOS_URL}/api/v3/chaos/experiment/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to abort experiment', message: error.message });
+    }
+  });
+
   // GraphQL endpoint with middleware
   app.use(
     '/graphql',

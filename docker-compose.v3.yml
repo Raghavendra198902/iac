@@ -333,6 +333,30 @@ services:
       timeout: 10s
       retries: 3
 
+  # Chaos Engineering Suite
+  chaos-engineering:
+    build:
+      context: ./backend/chaos-engineering
+      dockerfile: Dockerfile
+    image: iac-chaos-engineering:v3
+    container_name: iac-chaos-engineering-v3
+    restart: unless-stopped
+    ports:
+      - "8700:8700"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SELF_HEALING_URL=http://self-healing-engine:8400
+      - KUBERNETES_ENABLED=false
+    networks:
+      - iac-v3-network
+    depends_on:
+      - self-healing-engine
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8700/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   iac-v3-network:
     name: iac-v3-network
