@@ -1830,6 +1830,102 @@ async function startServer() {
     }
   });
 
+  // Observability API endpoints (proxy to observability suite)
+  const OBSERVABILITY_URL = process.env.OBSERVABILITY_URL || 'http://observability-suite:8800';
+
+  app.post('/api/observability/trace', async (req: Request, res: Response) => {
+    try {
+      const { service_name, operation } = req.body;
+      const params = new URLSearchParams({ service_name, operation });
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/trace?${params}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to create trace', message: error.message });
+    }
+  });
+
+  app.get('/api/observability/traces', async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit || 20;
+      const service = req.query.service || '';
+      const params = new URLSearchParams({ limit: limit.toString(), service: service.toString() });
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/traces?${params}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch traces', message: error.message });
+    }
+  });
+
+  app.get('/api/observability/trace/:trace_id', async (req: Request, res: Response) => {
+    try {
+      const { trace_id } = req.params;
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/trace/${trace_id}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch trace', message: error.message });
+    }
+  });
+
+  app.get('/api/observability/slos', async (req: Request, res: Response) => {
+    try {
+      const service = req.query.service || '';
+      const params = service ? new URLSearchParams({ service: service.toString() }) : '';
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/slos${params ? '?' + params : ''}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch SLOs', message: error.message });
+    }
+  });
+
+  app.get('/api/observability/slo/:slo_id', async (req: Request, res: Response) => {
+    try {
+      const { slo_id } = req.params;
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/slo/${slo_id}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch SLO', message: error.message });
+    }
+  });
+
+  app.get('/api/observability/correlate', async (req: Request, res: Response) => {
+    try {
+      const time_window = req.query.time_window || 60;
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/correlate?time_window_minutes=${time_window}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to correlate events', message: error.message });
+    }
+  });
+
+  app.get('/api/observability/service/:service_name/health', async (req: Request, res: Response) => {
+    try {
+      const { service_name } = req.params;
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/service/${service_name}/health`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch service health', message: error.message });
+    }
+  });
+
+  app.get('/api/observability/dashboard', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${OBSERVABILITY_URL}/api/v3/observability/dashboard`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch dashboard data', message: error.message });
+    }
+  });
+
   // GraphQL endpoint with middleware
   app.use(
     '/graphql',
