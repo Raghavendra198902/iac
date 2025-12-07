@@ -16,35 +16,22 @@ const MonitoringDashboard: React.FC = () => {
         const result = await response.json();
         setData(result);
       } catch (err) {
-        console.log('No API data available, showing zeros');
-        setData({
-          metrics: [
-            { name: 'CPU Usage', value: '0%', status: 'unknown', icon: CpuChipIcon, color: 'gray' },
-            { name: 'Memory', value: '0%', status: 'unknown', icon: CircleStackIcon, color: 'gray' },
-            { name: 'Network', value: '0%', status: 'unknown', icon: SignalIcon, color: 'gray' },
-            { name: 'Disk I/O', value: '0%', status: 'unknown', icon: ChartBarIcon, color: 'gray' }
-          ],
-          chartData: [
-            { time: '00:00', cpu: 0, memory: 0, network: 0 },
-            { time: '04:00', cpu: 0, memory: 0, network: 0 },
-            { time: '08:00', cpu: 0, memory: 0, network: 0 },
-            { time: '12:00', cpu: 0, memory: 0, network: 0 },
-            { time: '16:00', cpu: 0, memory: 0, network: 0 },
-            { time: '20:00', cpu: 0, memory: 0, network: 0 }
-          ],
-          services: [
-            { name: 'API Gateway', status: 'unknown', uptime: '0%', responseTime: '0ms' },
-            { name: 'Database', status: 'unknown', uptime: '0%', responseTime: '0ms' },
-            { name: 'Cache Layer', status: 'unknown', uptime: '0%', responseTime: '0ms' },
-            { name: 'Auth Service', status: 'unknown', uptime: '0%', responseTime: '0ms' }
-          ],
-        });
+        console.error('Failed to fetch monitoring data:', err);
       } finally {
         setLoading(false);
       }
     };
 
+    // Initial fetch
     fetchData();
+
+    // Auto-refresh every 0.1 seconds for live data
+    const interval = setInterval(() => {
+      fetchData();
+    }, 100);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   const metrics = data.metrics;
@@ -87,10 +74,18 @@ const MonitoringDashboard: React.FC = () => {
       <div className="relative z-10 p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent mb-2">
-            Monitoring Dashboard
-          </h1>
-          <p className="text-gray-300">Real-time system metrics and performance monitoring</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent mb-2">
+                Monitoring Dashboard
+              </h1>
+              <p className="text-gray-300">Real-time system metrics and performance monitoring</p>
+            </div>
+            <div className="flex items-center space-x-2 bg-green-500/20 border border-green-500/30 rounded-full px-4 py-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-green-400 text-sm font-semibold">LIVE</span>
+            </div>
+          </div>
         </div>
 
         {/* Metrics Cards */}

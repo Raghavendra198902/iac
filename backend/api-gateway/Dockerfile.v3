@@ -22,6 +22,9 @@ RUN npm run build
 # Production stage
 FROM node:18-alpine
 
+# Install Docker CLI for container stats
+RUN apk add --no-cache docker-cli
+
 WORKDIR /app
 
 # Copy package files

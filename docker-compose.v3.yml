@@ -274,6 +274,8 @@ services:
       AIOPS_ENGINE_URL: http://aiops-engine-v3:8100
       JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
       CORS_ORIGIN: http://localhost:3000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - postgres-v3
       - aiops-engine-v3
