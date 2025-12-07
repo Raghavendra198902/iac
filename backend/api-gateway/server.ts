@@ -870,6 +870,319 @@ async function startServer() {
     }
   });
 
+  // API Documentation Endpoint
+  app.get('/api/docs', (req: Request, res: Response) => {
+    const docs = {
+      title: 'IAC Platform API Documentation',
+      version: '3.0.0',
+      description: 'Complete API reference for IAC Infrastructure Management Platform',
+      baseUrl: `http://localhost:${process.env.PORT || 4000}`,
+      endpoints: [
+        {
+          path: '/api/monitoring/overview',
+          method: 'GET',
+          description: 'Get system monitoring metrics including CPU, memory, network, and disk usage',
+          response: {
+            metrics: 'Array of metric objects with name, value, status, icon, color',
+            chartData: 'Array of time-series data points',
+            services: 'Array of service health status'
+          }
+        },
+        {
+          path: '/api/security/overview',
+          method: 'GET',
+          description: 'Get security dashboard data including threats, compliance, and events',
+          response: {
+            securityScore: 'Number (0-100)',
+            threats: 'Array of threat objects with type, count, severity, trend',
+            compliance: 'Array of compliance frameworks with scores',
+            recentEvents: 'Array of recent security events'
+          }
+        },
+        {
+          path: '/api/cost/overview',
+          method: 'GET',
+          description: 'Get cost optimization data and recommendations',
+          response: {
+            currentMonth: 'String (formatted currency)',
+            lastMonth: 'String (formatted currency)',
+            forecast: 'String (formatted currency)',
+            trend: 'String (up/down)',
+            percentChange: 'String (percentage)',
+            breakdown: 'Array of service cost breakdown',
+            recommendations: 'Array of cost saving recommendations'
+          }
+        },
+        {
+          path: '/api/deployments/history',
+          method: 'GET',
+          description: 'Get deployment history with version tracking',
+          response: {
+            deployments: 'Array of deployment objects with id, environment, version, status, duration, timestamp, author, changes'
+          }
+        },
+        {
+          path: '/api/alerts',
+          method: 'GET',
+          description: 'Get system alerts',
+          response: {
+            alerts: 'Array of alert objects with id, type, title, message, timestamp, acknowledged, source'
+          }
+        },
+        {
+          path: '/api/users',
+          method: 'GET',
+          description: 'Get user list with roles and status',
+          response: {
+            users: 'Array of user objects with id, username, email, role, status, lastLogin, created'
+          }
+        },
+        {
+          path: '/api/performance/recommendations',
+          method: 'GET',
+          description: 'Get performance optimization recommendations',
+          response: {
+            recommendations: 'Array of recommendation objects with category, title, impact, description, effort',
+            metrics: 'Object with avgResponseTime, throughput, errorRate, availability'
+          }
+        },
+        {
+          path: '/api/auth/me',
+          method: 'GET',
+          description: 'Get current authenticated user info',
+          headers: {
+            Authorization: 'Bearer <token>'
+          },
+          response: {
+            user: 'User object with id, username, email'
+          }
+        },
+        {
+          path: '/api/infrastructure/scan',
+          method: 'POST',
+          description: 'Trigger infrastructure scan',
+          body: {
+            provider: 'String (optional - cloud provider to scan)'
+          },
+          response: {
+            resources: 'Array of discovered resources'
+          }
+        },
+        {
+          path: '/api/settings/cloud-providers',
+          method: 'GET',
+          description: 'Get list of configured cloud providers',
+          response: {
+            providers: 'Array of cloud provider configurations'
+          }
+        },
+        {
+          path: '/api/settings/cloud-providers/:id',
+          method: 'PUT',
+          description: 'Update cloud provider configuration',
+          body: {
+            enabled: 'Boolean',
+            credentials: 'Object (provider-specific)'
+          },
+          response: {
+            provider: 'Updated provider object'
+          }
+        },
+        {
+          path: '/graphql',
+          method: 'POST',
+          description: 'GraphQL endpoint for advanced queries',
+          body: {
+            query: 'String (GraphQL query)',
+            variables: 'Object (optional)'
+          }
+        }
+      ]
+    };
+    
+    res.json(docs);
+  });
+
+  // Deployment Workflows API
+  app.get('/api/workflows', (req: Request, res: Response) => {
+    try {
+      const workflows = [
+        {
+          id: 'wf-1',
+          name: 'Production Infrastructure Deployment',
+          description: 'Deploy core infrastructure to production environment',
+          status: Math.random() > 0.5 ? 'running' : 'completed',
+          progress: Math.floor(Math.random() * 100),
+          startTime: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+          duration: `${Math.floor(Math.random() * 10) + 1}m ${Math.floor(Math.random() * 60)}s`,
+          steps: [
+            { id: 's1', name: 'Validate Configuration', status: 'completed', duration: '12s' },
+            { id: 's2', name: 'Provision Network', status: 'completed', duration: '45s' },
+            { id: 's3', name: 'Deploy Database', status: Math.random() > 0.3 ? 'completed' : 'running', duration: '2m 15s' },
+            { id: 's4', name: 'Deploy API Services', status: Math.random() > 0.6 ? 'running' : 'pending' },
+            { id: 's5', name: 'Configure Load Balancer', status: 'pending' },
+            { id: 's6', name: 'Run Health Checks', status: 'pending' }
+          ]
+        },
+        {
+          id: 'wf-2',
+          name: 'Application Update Pipeline',
+          description: 'Rolling update of application containers',
+          status: Math.random() > 0.7 ? 'running' : 'completed',
+          progress: Math.floor(Math.random() * 100),
+          startTime: new Date(Date.now() - Math.random() * 7200000).toISOString(),
+          duration: `${Math.floor(Math.random() * 5) + 1}m ${Math.floor(Math.random() * 60)}s`,
+          steps: [
+            { id: 's1', name: 'Pull Latest Images', status: 'completed', duration: '1m 5s' },
+            { id: 's2', name: 'Stop Old Containers', status: 'completed', duration: '8s' },
+            { id: 's3', name: 'Start New Containers', status: Math.random() > 0.5 ? 'completed' : 'running', duration: '22s' },
+            { id: 's4', name: 'Verify Health', status: Math.random() > 0.7 ? 'running' : 'pending' }
+          ]
+        }
+      ];
+
+      res.json({ workflows });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch workflows', message: error.message });
+    }
+  });
+
+  app.post('/api/workflows/trigger', (req: Request, res: Response) => {
+    try {
+      const { type } = req.body;
+      const workflow = {
+        id: `wf-${Date.now()}`,
+        name: type === 'infrastructure' ? 'Infrastructure Deployment' : 'Application Deployment',
+        description: `Triggered ${type} deployment workflow`,
+        status: 'running',
+        progress: 5,
+        startTime: new Date().toISOString(),
+        steps: [
+          { id: 's1', name: 'Initialize', status: 'running' },
+          { id: 's2', name: 'Execute', status: 'pending' },
+          { id: 's3', name: 'Verify', status: 'pending' }
+        ]
+      };
+
+      res.json({ workflow });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to trigger workflow', message: error.message });
+    }
+  });
+
+  // Infrastructure Topology API
+  app.get('/api/topology', (req: Request, res: Response) => {
+    try {
+      const nodes = [
+        {
+          id: 'n1',
+          type: 'cloud',
+          label: 'AWS Cloud',
+          status: 'healthy',
+          x: 400,
+          y: 100,
+          connections: ['n2', 'n3']
+        },
+        {
+          id: 'n2',
+          type: 'server',
+          label: 'API Gateway',
+          status: Math.random() > 0.8 ? 'warning' : 'healthy',
+          x: 250,
+          y: 250,
+          connections: ['n4', 'n5']
+        },
+        {
+          id: 'n3',
+          type: 'server',
+          label: 'Web Server',
+          status: 'healthy',
+          x: 550,
+          y: 250,
+          connections: ['n2']
+        },
+        {
+          id: 'n4',
+          type: 'database',
+          label: 'PostgreSQL',
+          status: 'healthy',
+          x: 150,
+          y: 400,
+          connections: []
+        },
+        {
+          id: 'n5',
+          type: 'container',
+          label: 'Redis Cache',
+          status: 'healthy',
+          x: 350,
+          y: 400,
+          connections: []
+        },
+        {
+          id: 'n6',
+          type: 'container',
+          label: 'Docker Swarm',
+          status: Math.random() > 0.9 ? 'error' : 'healthy',
+          x: 550,
+          y: 400,
+          connections: ['n3']
+        },
+        {
+          id: 'n7',
+          type: 'service',
+          label: 'Monitoring',
+          status: 'healthy',
+          x: 700,
+          y: 250,
+          connections: ['n3', 'n6']
+        }
+      ];
+
+      res.json({ nodes });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch topology', message: error.message });
+    }
+  });
+
+  // Log Aggregation API
+  app.get('/api/logs', (req: Request, res: Response) => {
+    try {
+      const levels = ['info', 'warning', 'error', 'debug'];
+      const services = ['API Gateway', 'Database', 'Frontend', 'Auth Service', 'Cache'];
+      const messages = [
+        'Request processed successfully',
+        'Database connection established',
+        'Authentication token validated',
+        'Cache miss for key: user_session',
+        'High memory usage detected',
+        'Failed to connect to external service',
+        'Rate limit exceeded for IP',
+        'Disk space running low',
+        'New user registration completed',
+        'Backup completed successfully',
+        'SSL certificate expiring in 30 days',
+        'API response time: 245ms',
+        'Container restarted: frontend-1',
+        'Configuration file reloaded',
+        'Health check failed for service-xyz'
+      ];
+
+      const logs = Array.from({ length: 50 }, (_, i) => ({
+        id: `log-${Date.now()}-${i}`,
+        timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+        level: levels[Math.floor(Math.random() * levels.length)] as 'info' | 'warning' | 'error' | 'debug',
+        service: services[Math.floor(Math.random() * services.length)],
+        message: messages[Math.floor(Math.random() * messages.length)],
+        source: `${services[Math.floor(Math.random() * services.length)]}.log`
+      })).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      res.json({ logs });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch logs', message: error.message });
+    }
+  });
+
   // Cloud provider settings storage (in-memory for now, should be persisted to database)
   let cloudProviders = [
     {

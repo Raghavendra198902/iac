@@ -22,10 +22,12 @@ const Infrastructure = lazy(() => import('./pages/Infrastructure'));
 const InfrastructureResources = lazy(() => import('./pages/Infrastructure/InfrastructureResources'));
 const InfrastructureTemplates = lazy(() => import('./pages/Infrastructure/InfrastructureTemplates'));
 const InfrastructureGenerator = lazy(() => import('./pages/Infrastructure/InfrastructureGenerator'));
+const InfrastructureTopology = lazy(() => import('./pages/Infrastructure/InfrastructureTopology'));
 const Monitoring = lazy(() => import('./pages/Monitoring'));
 const MonitoringPerformance = lazy(() => import('./pages/Monitoring/MonitoringPerformance'));
 const MonitoringHealth = lazy(() => import('./pages/Monitoring/MonitoringHealth'));
 const MonitoringAlerts = lazy(() => import('./pages/Monitoring/MonitoringAlerts'));
+const LogAggregation = lazy(() => import('./pages/Monitoring/LogAggregation'));
 const Security = lazy(() => import('./pages/Security'));
 const SecurityCompliance = lazy(() => import('./pages/Security/SecurityCompliance'));
 const SecurityAudit = lazy(() => import('./pages/Security/SecurityAudit'));
@@ -38,6 +40,7 @@ const DevOps = lazy(() => import('./pages/DevOps'));
 const DevOpsPipelines = lazy(() => import('./pages/DevOps/DevOpsPipelines'));
 const DevOpsContainers = lazy(() => import('./pages/DevOps/DevOpsContainers'));
 const DevOpsGit = lazy(() => import('./pages/DevOps/DevOpsGit'));
+const DeploymentWorkflows = lazy(() => import('./pages/Deployments/DeploymentWorkflows'));
 const EA = lazy(() => import('./pages/EA'));
 const EABusiness = lazy(() => import('./pages/EA/EABusiness'));
 const EAApplication = lazy(() => import('./pages/EA/EAApplication'));
@@ -98,10 +101,12 @@ function App() {
                   <Route path="/infrastructure/resources" element={<InfrastructureResources />} />
                   <Route path="/infrastructure/templates" element={<InfrastructureTemplates />} />
                   <Route path="/infrastructure/generator" element={<InfrastructureGenerator />} />
+                  <Route path="/infrastructure/topology" element={<InfrastructureTopology />} />
                   <Route path="/monitoring" element={<Monitoring />} />
                   <Route path="/monitoring/performance" element={<MonitoringPerformance />} />
                   <Route path="/monitoring/health" element={<MonitoringHealth />} />
                   <Route path="/monitoring/alerts" element={<MonitoringAlerts />} />
+                  <Route path="/monitoring/logs" element={<LogAggregation />} />
                   <Route path="/security" element={<Security />} />
                   <Route path="/security/compliance" element={<SecurityCompliance />} />
                   <Route path="/security/audit" element={<SecurityAudit />} />
@@ -114,6 +119,7 @@ function App() {
                   <Route path="/devops/pipelines" element={<DevOpsPipelines />} />
                   <Route path="/devops/containers" element={<DevOpsContainers />} />
                   <Route path="/devops/git" element={<DevOpsGit />} />
+                  <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                   <Route path="/ea" element={<EA />} />
                   <Route path="/ea/business" element={<EABusiness />} />
                   <Route path="/ea/application" element={<EAApplication />} />
