@@ -1926,6 +1926,103 @@ async function startServer() {
     }
   });
 
+  // Multi-Cloud Cost Optimizer API endpoints (proxy to cost optimizer service)
+  const COST_OPTIMIZER_URL = process.env.COST_OPTIMIZER_URL || 'http://multi-cloud-optimizer:8900';
+
+  app.get('/api/cost-optimizer/analysis', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/analysis`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch cost analysis', message: error.message });
+    }
+  });
+
+  app.get('/api/cost-optimizer/recommendations', async (req: Request, res: Response) => {
+    try {
+      const min_savings = req.query.min_savings || 50;
+      const strategy = req.query.strategy || '';
+      const provider = req.query.provider || '';
+      const queryParams = new URLSearchParams({
+        min_savings: min_savings.toString(),
+        ...(strategy && { strategy: strategy.toString() }),
+        ...(provider && { provider: provider.toString() })
+      });
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/recommendations?${queryParams}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch recommendations', message: error.message });
+    }
+  });
+
+  app.post('/api/cost-optimizer/workload-placement', async (req: Request, res: Response) => {
+    try {
+      const { workload_name, workload_type } = req.query;
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/workload-placement?workload_name=${workload_name}&workload_type=${workload_type || 'web-app'}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to optimize workload placement', message: error.message });
+    }
+  });
+
+  app.get('/api/cost-optimizer/spot-opportunities', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/spot-opportunities`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch spot opportunities', message: error.message });
+    }
+  });
+
+  app.get('/api/cost-optimizer/carbon-footprint', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/carbon-footprint`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch carbon footprint', message: error.message });
+    }
+  });
+
+  app.get('/api/cost-optimizer/savings-report', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/savings-report`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch savings report', message: error.message });
+    }
+  });
+
+  app.post('/api/cost-optimizer/implement-recommendation', async (req: Request, res: Response) => {
+    try {
+      const { recommendation_id } = req.query;
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/implement-recommendation?recommendation_id=${recommendation_id}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to implement recommendation', message: error.message });
+    }
+  });
+
+  app.get('/api/cost-optimizer/arbitrage-opportunities', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${COST_OPTIMIZER_URL}/api/v3/cost-optimizer/arbitrage-opportunities`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch arbitrage opportunities', message: error.message });
+    }
+  });
+
   // GraphQL endpoint with middleware
   app.use(
     '/graphql',

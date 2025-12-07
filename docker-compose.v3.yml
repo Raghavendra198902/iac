@@ -382,6 +382,26 @@ services:
       timeout: 10s
       retries: 3
 
+  # Multi-Cloud Cost Optimizer
+  multi-cloud-optimizer:
+    build:
+      context: ./backend/multi-cloud-optimizer
+      dockerfile: Dockerfile
+    image: iac-multi-cloud-optimizer:v3
+    container_name: iac-multi-cloud-optimizer-v3
+    restart: unless-stopped
+    ports:
+      - "8900:8900"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8900/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   iac-v3-network:
     name: iac-v3-network
