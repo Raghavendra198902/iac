@@ -1667,6 +1667,77 @@ async function startServer() {
     });
   });
 
+  // Self-Healing API endpoints (proxy to self-healing service)
+  const SELF_HEALING_URL = process.env.SELF_HEALING_URL || 'http://self-healing-engine:8400';
+
+  app.get('/api/self-healing/health-score', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${SELF_HEALING_URL}/api/v3/self-healing/health-score`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch health score', message: error.message });
+    }
+  });
+
+  app.get('/api/self-healing/issues', async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit || 50;
+      const response = await fetch(`${SELF_HEALING_URL}/api/v3/self-healing/issues?limit=${limit}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch issues', message: error.message });
+    }
+  });
+
+  app.get('/api/self-healing/remediations', async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit || 50;
+      const response = await fetch(`${SELF_HEALING_URL}/api/v3/self-healing/remediations?limit=${limit}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch remediations', message: error.message });
+    }
+  });
+
+  app.get('/api/self-healing/statistics', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${SELF_HEALING_URL}/api/v3/self-healing/statistics`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch statistics', message: error.message });
+    }
+  });
+
+  app.post('/api/self-healing/toggle-auto-remediation', async (req: Request, res: Response) => {
+    try {
+      const { enabled } = req.body;
+      const response = await fetch(`${SELF_HEALING_URL}/api/v3/self-healing/toggle-auto-remediation?enabled=${enabled}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to toggle auto-remediation', message: error.message });
+    }
+  });
+
+  app.post('/api/self-healing/manual-remediate/:issue_id', async (req: Request, res: Response) => {
+    try {
+      const { issue_id } = req.params;
+      const response = await fetch(`${SELF_HEALING_URL}/api/v3/self-healing/manual-remediate/${issue_id}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to trigger remediation', message: error.message });
+    }
+  });
+
   // GraphQL endpoint with middleware
   app.use(
     '/graphql',

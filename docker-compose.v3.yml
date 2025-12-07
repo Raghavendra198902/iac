@@ -313,6 +313,26 @@ services:
       retries: 3
       start_period: 5s
 
+  # Self-Healing Engine
+  self-healing-engine:
+    build:
+      context: ./backend/self-healing-engine
+      dockerfile: Dockerfile
+    image: iac-self-healing-engine:v3
+    container_name: iac-self-healing-engine-v3
+    restart: unless-stopped
+    ports:
+      - "8400:8400"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - iac-v3-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8400/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   iac-v3-network:
     name: iac-v3-network
