@@ -138,6 +138,7 @@ app.use('/', healthRouter);
 app.set('io', io); // Make io available to health routes
 
 // Public routes (no authentication required)
+import authRouter from './routes/auth';
 import downloadsRoutes from './routes/downloads';
 import telemetryRoutes from './routes/telemetry';
 import agentsRoutes from './routes/agents';
@@ -147,6 +148,9 @@ import securityRoutes from './routes/security';
 
 // Inject Socket.IO into enforcement routes
 setSocketIO(io);
+
+// Mount auth routes BEFORE authentication middleware
+app.use('/api/auth', authRouter);
 
 app.use('/api/downloads', downloadsRoutes);
 app.use('/api/telemetry', telemetryRoutes);

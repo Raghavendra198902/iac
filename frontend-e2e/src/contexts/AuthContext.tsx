@@ -53,10 +53,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const login = async (username: string, password: string) => {
-    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, { username, password })
-    const { accessToken, refreshToken, user } = response.data
+    // Backend expects 'email' field, but we receive 'username' from login form
+    // Use username as email since they're the same for our demo
+    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, { 
+      email: username,  // Map username to email
+      password 
+    })
     
-    localStorage.setItem('accessToken', accessToken)
+    // Backend returns 'token' and 'refreshToken', map to expected field names
+    const { token, refreshToken, user } = response.data
+    
+    localStorage.setItem('accessToken', token)  // Store as accessToken for consistency
     localStorage.setItem('refreshToken', refreshToken)
     
     setUser(user)

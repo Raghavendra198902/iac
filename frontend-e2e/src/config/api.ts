@@ -3,20 +3,11 @@
  * Centralized configuration for backend API endpoints
  */
 
-// Determine the API base URL based on environment
-const getApiBaseUrl = (): string => {
-  // Check if running in Docker container
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:4000';
-  }
-  
-  // Use the same host as frontend but port 4000 for API Gateway
-  return `http://${window.location.hostname}:4000`;
-};
-
-export const API_BASE_URL = getApiBaseUrl();
-export const GRAPHQL_ENDPOINT = `${API_BASE_URL}/graphql`;
-export const WS_ENDPOINT = `ws://${window.location.hostname}:4000/graphql`;
+// Use relative URLs for nginx proxy (avoids CORS and mixed content issues)
+// Nginx will proxy /api/* and /graphql to the API Gateway
+export const API_BASE_URL = '';  // Empty string means relative to current origin
+export const GRAPHQL_ENDPOINT = '/graphql';
+export const WS_ENDPOINT = `ws${window.location.protocol === 'https:' ? 's' : ''}://${window.location.host}/graphql`;
 
 // REST API endpoints (proxied through nginx)
 export const API_ENDPOINTS = {

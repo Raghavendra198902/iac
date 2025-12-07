@@ -450,4 +450,9 @@ export class PostgresDataSource extends DataSource {
   async close(): Promise<void> {
     await this.pool.end();
   }
+
+  // Public query method for direct SQL execution
+  async query(text: string, params?: any[]): Promise<any> {
+    return await this.pool.query(text, params);
+  }
 }

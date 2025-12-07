@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS infrastructures (
     name VARCHAR(255) NOT NULL,
     provider VARCHAR(50) NOT NULL CHECK (provider IN (
         'aws', 'azure', 'gcp', 'digitalocean', 'alibaba', 
-        'ibm', 'oracle', 'vmware', 'kubernetes', 'edge'
+        'ibm', 'oracle', 'vmware', 'kubernetes', 'on-premise', 'edge'
     )),
     region VARCHAR(100) NOT NULL,
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN (

@@ -1,29 +1,66 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChartBarIcon, CpuChipIcon, CircleStackIcon, SignalIcon } from '@heroicons/react/24/outline';
 
 const MonitoringDashboard: React.FC = () => {
-  const metrics = [
-    { name: 'CPU Usage', value: '68%', status: 'normal', icon: CpuChipIcon, color: 'blue' },
-    { name: 'Memory', value: '72%', status: 'warning', icon: CircleStackIcon, color: 'yellow' },
-    { name: 'Network', value: '45%', status: 'normal', icon: SignalIcon, color: 'green' },
-    { name: 'Disk I/O', value: '23%', status: 'normal', icon: ChartBarIcon, color: 'purple' }
-  ];
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    metrics: [] as any[],
+    chartData: [] as any[],
+    services: [] as any[],
+  });
 
-  const chartData = [
-    { time: '00:00', cpu: 45, memory: 62, network: 30 },
-    { time: '04:00', cpu: 52, memory: 68, network: 35 },
-    { time: '08:00', cpu: 68, memory: 72, network: 45 },
-    { time: '12:00', cpu: 75, memory: 78, network: 52 },
-    { time: '16:00', cpu: 82, memory: 85, network: 60 },
-    { time: '20:00', cpu: 70, memory: 75, network: 48 }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/monitoring/overview');
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        console.log('No API data available, showing zeros');
+        setData({
+          metrics: [
+            { name: 'CPU Usage', value: '0%', status: 'unknown', icon: CpuChipIcon, color: 'gray' },
+            { name: 'Memory', value: '0%', status: 'unknown', icon: CircleStackIcon, color: 'gray' },
+            { name: 'Network', value: '0%', status: 'unknown', icon: SignalIcon, color: 'gray' },
+            { name: 'Disk I/O', value: '0%', status: 'unknown', icon: ChartBarIcon, color: 'gray' }
+          ],
+          chartData: [
+            { time: '00:00', cpu: 0, memory: 0, network: 0 },
+            { time: '04:00', cpu: 0, memory: 0, network: 0 },
+            { time: '08:00', cpu: 0, memory: 0, network: 0 },
+            { time: '12:00', cpu: 0, memory: 0, network: 0 },
+            { time: '16:00', cpu: 0, memory: 0, network: 0 },
+            { time: '20:00', cpu: 0, memory: 0, network: 0 }
+          ],
+          services: [
+            { name: 'API Gateway', status: 'unknown', uptime: '0%', responseTime: '0ms' },
+            { name: 'Database', status: 'unknown', uptime: '0%', responseTime: '0ms' },
+            { name: 'Cache Layer', status: 'unknown', uptime: '0%', responseTime: '0ms' },
+            { name: 'Auth Service', status: 'unknown', uptime: '0%', responseTime: '0ms' }
+          ],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const services = [
-    { name: 'API Gateway', status: 'healthy', uptime: '99.99%', responseTime: '45ms' },
-    { name: 'Database', status: 'healthy', uptime: '99.98%', responseTime: '12ms' },
-    { name: 'Cache Layer', status: 'degraded', uptime: '99.85%', responseTime: '8ms' },
-    { name: 'Auth Service', status: 'healthy', uptime: '100%', responseTime: '23ms' }
-  ];
+    fetchData();
+  }, []);
+
+  const metrics = data.metrics;
+  const chartData = data.chartData;
+  const services = data.services;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-400 border-t-transparent"></div>
+          <p className="mt-4 text-gray-300">Loading monitoring data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 relative overflow-hidden">

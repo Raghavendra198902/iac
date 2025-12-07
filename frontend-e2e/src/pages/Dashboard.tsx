@@ -40,6 +40,15 @@ ChartJS.register(
 
 const Dashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState('24h');
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState({
+    resources: 0,
+    cpu: 0,
+    alerts: 0,
+    cost: 0,
+    activities: [] as any[],
+    cloudServices: [] as any[],
+  });
   const [animatedMetrics, setAnimatedMetrics] = useState({
     resources: 0,
     cpu: 0,
@@ -48,16 +57,47 @@ const Dashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    // Animate counters
+    // No mock data - show zeros
+    const loadData = async () => {
+      setLoading(true);
+      
+      try {
+        // Try to fetch real data from API
+        const response = await fetch('/api/dashboard/metrics');
+        const data = await response.json();
+        setDashboardData(data);
+      } catch (err) {
+        console.log('No API data available, showing zeros');
+        // Set all values to zero when no data available
+        setDashboardData({
+          resources: 0,
+          cpu: 0,
+          alerts: 0,
+          cost: 0,
+          activities: [],
+          cloudServices: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [timeRange]);
+
+  useEffect(() => {
+    // Animate counters only after data is loaded
+    if (loading) return;
+
     const duration = 2000;
     const steps = 60;
     const interval = duration / steps;
 
     const targets = {
-      resources: 2547,
-      cpu: 67,
-      alerts: 8,
-      cost: 12.4,
+      resources: dashboardData.resources || 0,
+      cpu: dashboardData.cpu || 0,
+      alerts: dashboardData.alerts || 0,
+      cost: dashboardData.cost || 0,
     };
 
     let step = 0;
@@ -76,7 +116,7 @@ const Dashboard: React.FC = () => {
     }, interval);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [dashboardData, loading]);
 
   const metrics = [
     {
@@ -192,13 +232,23 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  const recentActivities = [
-    { action: 'EC2 instance deployed', resource: 'prod-web-server-01', time: '5 min ago', status: 'success' },
-    { action: 'Security scan completed', resource: 'all-resources', time: '15 min ago', status: 'warning' },
-    { action: 'Backup created', resource: 'database-cluster', time: '1 hour ago', status: 'success' },
-    { action: 'Pipeline executed', resource: 'api-service', time: '2 hours ago', status: 'success' },
-    { action: 'Alert triggered', resource: 'monitoring-agent', time: '3 hours ago', status: 'error' },
-  ];
+  const recentActivities = dashboardData.activities.length > 0 
+    ? dashboardData.activities 
+    : [
+        { action: 'No data available', resource: 'N/A', time: 'N/A', status: 'info' }
+      ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
+          <p className="mt-4 text-slate-600 dark:text-slate-300">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -260,7 +310,9 @@ const Dashboard: React.FC = () => {
                 +12.5%
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1 gradient-text">{animatedMetrics.resources.toLocaleString()}</div>
+            <div className="text-3xl font-bold mb-1 gradient-text">
+              {animatedMetrics.resources > 0 ? animatedMetrics.resources.toLocaleString() : '0'}
+            </div>
             <div className="text-sm text-slate-500 dark:text-slate-400">Total Resources</div>
           </div>
         </div>
@@ -277,7 +329,9 @@ const Dashboard: React.FC = () => {
                 -3.2%
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1 gradient-text">{animatedMetrics.cpu}%</div>
+            <div className="text-3xl font-bold mb-1 gradient-text">
+              {animatedMetrics.cpu > 0 ? `${animatedMetrics.cpu}%` : '0%'}
+            </div>
             <div className="text-sm text-slate-500 dark:text-slate-400">CPU Usage</div>
           </div>
         </div>
@@ -294,7 +348,9 @@ const Dashboard: React.FC = () => {
                 +4
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1 gradient-text">{animatedMetrics.alerts}</div>
+            <div className="text-3xl font-bold mb-1 gradient-text">
+              {animatedMetrics.alerts || 0}
+            </div>
             <div className="text-sm text-slate-500 dark:text-slate-400">Active Alerts</div>
           </div>
         </div>
@@ -311,7 +367,9 @@ const Dashboard: React.FC = () => {
                 -8.1%
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1 gradient-text">${animatedMetrics.cost}K</div>
+            <div className="text-3xl font-bold mb-1 gradient-text">
+              ${animatedMetrics.cost > 0 ? `${animatedMetrics.cost}K` : '0'}
+            </div>
             <div className="text-sm text-slate-500 dark:text-slate-400">Monthly Cost</div>
           </div>
         </div>

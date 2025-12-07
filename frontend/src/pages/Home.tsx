@@ -1,10 +1,40 @@
 import { Link } from 'react-router-dom';
-import { Shield, Cloud, Zap, GitBranch, Lock, TrendingUp, CheckCircle2, ArrowRight, PlayCircle, Users, Award, Globe, Server, Database, Cpu, HardDrive, Network } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { Shield, Cloud, Zap, GitBranch, Lock, TrendingUp, CheckCircle2, ArrowRight, PlayCircle, Users, Award, Globe, Server, Database, Cpu, HardDrive, Network, Activity, Code, Terminal, Layers, Sparkles, BarChart3, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [email, setEmail] = useState('');
+  const [activeMetric, setActiveMetric] = useState(0);
+  const [liveStats, setLiveStats] = useState({
+    deploymentsToday: 1247,
+    resourcesActive: 98432,
+    costSaved: 142580,
+    uptime: 99.97
+  });
+
+  // Simulate live metrics updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveStats(prev => ({
+        deploymentsToday: prev.deploymentsToday + Math.floor(Math.random() * 3),
+        resourcesActive: prev.resourcesActive + Math.floor(Math.random() * 10) - 5,
+        costSaved: prev.costSaved + Math.floor(Math.random() * 100),
+        uptime: 99.97 + (Math.random() * 0.02)
+      }));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Rotate active metric
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveMetric(prev => (prev + 1) % 4);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleWaitlist = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,28 +89,154 @@ export default function Home() {
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-full mb-8 shadow-lg"
           >
-            <Award className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-              Trusted by 500+ Enterprise Teams
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </motion.div>
+            <span className="text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Trusted by 500+ Enterprise Teams Worldwide
             </span>
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-2 h-2 bg-green-500 rounded-full"
+            />
           </motion.div>
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight">
-            <span className="bg-gradient-to-r from-gray-900 via-blue-800 to-blue-600 dark:from-white dark:via-blue-200 dark:to-blue-400 bg-clip-text text-transparent">
-              Transform Your Cloud Infrastructure
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <motion.span 
+              className="block bg-gradient-to-r from-gray-900 via-blue-800 to-blue-600 dark:from-white dark:via-blue-200 dark:to-blue-400 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              Transform Your Infrastructure
+            </motion.span>
+            <motion.span 
+              className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mt-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
               with AI-Powered Automation
-            </span>
+            </motion.span>
           </h1>
           
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Enterprise Infrastructure as Code platform that combines <span className="font-bold text-blue-600 dark:text-blue-400">intelligent automation</span>, 
-            governance, and <span className="font-bold text-purple-600 dark:text-purple-400">multi-cloud orchestration</span> in one unified solution
-          </p>
+          <motion.p 
+            className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            Enterprise Infrastructure as Code platform that combines{' '}
+            <span className="font-bold text-blue-600 dark:text-blue-400">intelligent automation</span>, 
+            governance, and{' '}
+            <span className="font-bold text-purple-600 dark:text-purple-400">multi-cloud orchestration</span>{' '}
+            in one unified solution
+          </motion.p>
+          
+          {/* Live Metrics Bar */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mb-10 max-w-4xl mx-auto"
+          >
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key="deployments"
+                    className={`text-center p-4 rounded-xl transition-all ${activeMetric === 0 ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500' : ''}`}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <Zap className="w-5 h-5 text-blue-600" />
+                      <motion.span
+                        key={liveStats.deploymentsToday}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-2xl font-black text-gray-900 dark:text-white"
+                      >
+                        {liveStats.deploymentsToday.toLocaleString()}
+                      </motion.span>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Deployments Today</p>
+                  </motion.div>
+                </AnimatePresence>
+
+                <motion.div
+                  className={`text-center p-4 rounded-xl transition-all ${activeMetric === 1 ? 'bg-purple-50 dark:bg-purple-900/20 ring-2 ring-purple-500' : ''}`}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Activity className="w-5 h-5 text-purple-600" />
+                    <motion.span
+                      key={liveStats.resourcesActive}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-2xl font-black text-gray-900 dark:text-white"
+                    >
+                      {liveStats.resourcesActive.toLocaleString()}
+                    </motion.span>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Active Resources</p>
+                </motion.div>
+
+                <motion.div
+                  className={`text-center p-4 rounded-xl transition-all ${activeMetric === 2 ? 'bg-green-50 dark:bg-green-900/20 ring-2 ring-green-500' : ''}`}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                    <motion.span
+                      key={liveStats.costSaved}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-2xl font-black text-gray-900 dark:text-white"
+                    >
+                      ${(liveStats.costSaved / 1000).toFixed(0)}K
+                    </motion.span>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Cost Saved (MTD)</p>
+                </motion.div>
+
+                <motion.div
+                  className={`text-center p-4 rounded-xl transition-all ${activeMetric === 3 ? 'bg-orange-50 dark:bg-orange-900/20 ring-2 ring-orange-500' : ''}`}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Shield className="w-5 h-5 text-orange-600" />
+                    <motion.span
+                      key={liveStats.uptime.toFixed(2)}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-2xl font-black text-gray-900 dark:text-white"
+                    >
+                      {liveStats.uptime.toFixed(2)}%
+                    </motion.span>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Platform Uptime</p>
+                </motion.div>
+              </div>
+              <motion.div
+                className="mt-4 text-center text-xs text-gray-500 dark:text-gray-500 flex items-center justify-center gap-2"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="w-2 h-2 bg-green-500 rounded-full"
+                />
+                <span>Live metrics updating in real-time</span>
+              </motion.div>
+            </div>
+          </motion.div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
             <Link
@@ -116,6 +272,129 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Interactive Demo Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.8 }}
+          className="mb-20 relative"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 rounded-3xl blur-3xl"></div>
+          <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-700">
+            {/* Terminal Header */}
+            <div className="bg-gray-800 px-6 py-3 flex items-center gap-2 border-b border-gray-700">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <div className="flex-1 text-center">
+                <span className="text-sm text-gray-400 font-mono">iac-dharma-cli</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Terminal className="w-4 h-4 text-gray-500" />
+                <Eye className="w-4 h-4 text-gray-500" />
+              </div>
+            </div>
+
+            {/* Terminal Content */}
+            <div className="p-8 font-mono text-sm">
+              <div className="space-y-3">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.2 }}
+                  className="flex items-start gap-2"
+                >
+                  <span className="text-green-400">$</span>
+                  <span className="text-gray-300">iac deploy --env production --blueprint webapp-ha</span>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.4 }}
+                  className="pl-4 space-y-2"
+                >
+                  <div className="text-blue-400">🔍 Analyzing infrastructure requirements...</div>
+                  <div className="text-purple-400">✨ AI optimization: Detected 3 cost savings opportunities</div>
+                  <div className="text-green-400">✓ Security scan passed - All policies compliant</div>
+                  <div className="text-cyan-400">📦 Provisioning resources across AWS, Azure, GCP...</div>
+                  
+                  <div className="mt-4 bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                    <div className="grid grid-cols-3 gap-4 text-xs">
+                      <div>
+                        <div className="text-gray-500 mb-1">Resources Created</div>
+                        <div className="text-2xl font-bold text-white">24</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 mb-1">Est. Monthly Cost</div>
+                        <div className="text-2xl font-bold text-green-400">$1,247</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 mb-1">Deployment Time</div>
+                        <div className="text-2xl font-bold text-blue-400">3m 42s</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <motion.div
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-yellow-400 flex items-center gap-2"
+                  >
+                    <Layers className="w-4 h-4" />
+                    <span>Deployment complete! Infrastructure ready at https://app.yourcompany.com</span>
+                  </motion.div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 2 }}
+                  className="flex items-start gap-2 mt-4"
+                >
+                  <span className="text-green-400">$</span>
+                  <motion.span
+                    animate={{ opacity: [0.5, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                    className="text-gray-300"
+                  >
+                    _
+                  </motion.span>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Bottom Info Bar */}
+            <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-t border-gray-700">
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Code className="w-4 h-4 text-blue-400" />
+                    <span>Multi-Cloud Supported</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-green-400" />
+                    <span>Security Validated</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span>AI-Optimized</span>
+                  </div>
+                </div>
+                <Link
+                  to="/demo"
+                  className="text-blue-400 hover:text-blue-300 flex items-center gap-2 font-semibold transition-colors"
+                >
+                  <span>Try Interactive Demo</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Features Grid */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -124,11 +403,25 @@ export default function Home() {
           className="mb-20"
         >
           <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-full mb-6"
+            >
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                Platform Capabilities
+              </span>
+            </motion.div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-              Everything You Need. <span className="text-blue-600 dark:text-blue-400">Nothing You Don't.</span>
+              Everything You Need.{' '}
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Nothing You Don't.
+              </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Powerful features designed for modern enterprises
+              Powerful features designed for modern enterprises seeking infrastructure excellence
             </p>
           </div>
           
@@ -475,43 +768,103 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mb-20 text-center bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-3xl p-12 text-white relative overflow-hidden"
+          className="mb-20 relative"
         >
-          <div className="absolute inset-0 bg-grid-white/10"></div>
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Transform Your Infrastructure?</h2>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join thousands of teams already using IAC Dharma Platform to modernize their cloud operations
-            </p>
-            <form onSubmit={handleWaitlist} className="max-w-md mx-auto flex gap-3 mb-6">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
-                required
-              />
-              <button
-                type="submit"
-                className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+          {/* Animated background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-3xl"></div>
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)',
+              backgroundSize: '40px 40px'
+            }}></div>
+          </div>
+          
+          <div className="relative z-10 rounded-3xl p-12 text-white overflow-hidden">
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{
+                scale: [1.2, 1, 1.2],
+                opacity: [0.2, 0.4, 0.2],
+              }}
+              transition={{ duration: 5, repeat: Infinity }}
+              className="absolute bottom-0 left-0 w-96 h-96 bg-purple-300 rounded-full blur-3xl"
+            />
+
+            <div className="relative z-10">
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", duration: 0.8 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6"
               >
-                Get Started
-              </button>
-            </form>
-            <div className="flex items-center justify-center gap-6 text-sm opacity-90">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Free 14-day trial</span>
+                <Sparkles className="w-4 h-4" />
+                <span className="text-sm font-semibold">Limited Time Offer</span>
+              </motion.div>
+
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                Ready to Transform Your Infrastructure?
+              </h2>
+              <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+                Join thousands of teams already using IAC Dharma to modernize their cloud operations.
+                Start your <span className="font-bold">free 14-day trial</span> today!
+              </p>
+              
+              <form onSubmit={handleWaitlist} className="max-w-md mx-auto flex flex-col sm:flex-row gap-3 mb-6">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your work email"
+                  className="flex-1 px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/50 transition-all"
+                  required
+                />
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-white text-blue-600 rounded-xl font-bold hover:bg-gray-100 transition-colors shadow-xl flex items-center justify-center gap-2"
+                >
+                  <span>Get Started Free</span>
+                  <ArrowRight className="w-5 h-5" />
+                </motion.button>
+              </form>
+              
+              <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Free 14-day trial</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>No credit card required</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Cancel anytime</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <Users className="w-4 h-4" />
+                  <span>24/7 support included</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>No credit card</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Cancel anytime</span>
-              </div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 }}
+                className="mt-8 text-center text-sm opacity-75"
+              >
+                <p>Trusted by leading enterprises worldwide</p>
+              </motion.div>
             </div>
           </div>
         </motion.div>
@@ -529,6 +882,8 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ icon: Icon, title, description, gradient, delay }: FeatureCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -536,18 +891,88 @@ function FeatureCard({ icon: Icon, title, description, gradient, delay }: Featur
       viewport={{ once: true }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ y: -8, transition: { duration: 0.2 } }}
-      className="group bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 relative overflow-hidden"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className="group bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 relative overflow-hidden cursor-pointer"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      {/* Animated gradient background on hover */}
+      <motion.div
+        className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+        animate={isHovered ? { 
+          scale: [1, 1.2, 1],
+          rotate: [0, 5, 0]
+        } : {}}
+        transition={{ duration: 3, repeat: Infinity }}
+      />
+      
+      {/* Sparkle effect on hover */}
+      <AnimatePresence>
+        {isHovered && (
+          <>
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  scale: [0, 1, 0],
+                  x: [0, (Math.random() - 0.5) * 100],
+                  y: [0, (Math.random() - 0.5) * 100],
+                }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1, delay: i * 0.2, repeat: Infinity, repeatDelay: 1 }}
+                className="absolute w-2 h-2 bg-blue-400 rounded-full"
+                style={{ 
+                  left: `${20 + i * 30}%`,
+                  top: `${20 + i * 20}%`
+                }}
+              />
+            ))}
+          </>
+        )}
+      </AnimatePresence>
+
       <div className="relative z-10">
-        <div className={`w-16 h-16 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+        <motion.div 
+          className={`w-16 h-16 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center mb-6 shadow-lg relative`}
+          animate={isHovered ? { 
+            scale: [1, 1.1, 1],
+            rotate: [0, 5, -5, 0]
+          } : { scale: 1, rotate: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <Icon className="w-9 h-9 text-white" />
-        </div>
+          {isHovered && (
+            <motion.div
+              className="absolute inset-0 bg-white rounded-xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.3, 0] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+          )}
+        </motion.div>
+        
         <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
           {title}
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{description}</p>
+        
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          {description}
+        </p>
+
+        {/* Learn More indicator on hover */}
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={isHovered ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
+          className="mt-4 flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm"
+        >
+          <span>Learn more</span>
+          <ArrowRight className="w-4 h-4" />
+        </motion.div>
       </div>
+
+      {/* Corner accent */}
+      <div className={`absolute -bottom-8 -right-8 w-32 h-32 bg-gradient-to-br ${gradient} opacity-5 rounded-full group-hover:opacity-10 transition-opacity blur-2xl`}></div>
     </motion.div>
   );
 }

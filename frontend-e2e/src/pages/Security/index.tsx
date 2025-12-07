@@ -1,29 +1,64 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShieldCheckIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const SecurityDashboard: React.FC = () => {
-  const securityScore = 87;
-  
-  const threats = [
-    { type: 'Failed Login Attempts', count: 23, severity: 'medium', trend: 'down' },
-    { type: 'Suspicious API Calls', count: 5, severity: 'high', trend: 'stable' },
-    { type: 'Unauthorized Access', count: 2, severity: 'critical', trend: 'down' },
-    { type: 'DDoS Attempts', count: 0, severity: 'low', trend: 'stable' }
-  ];
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    securityScore: 0,
+    threats: [] as any[],
+    compliance: [] as any[],
+    recentEvents: [] as any[],
+  });
 
-  const compliance = [
-    { framework: 'SOC 2', score: 92, status: 'compliant' },
-    { framework: 'HIPAA', score: 88, status: 'compliant' },
-    { framework: 'PCI-DSS', score: 85, status: 'compliant' },
-    { framework: 'GDPR', score: 90, status: 'compliant' }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/security/overview');
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        console.log('No API data available, showing zeros');
+        setData({
+          securityScore: 0,
+          threats: [
+            { type: 'Failed Login Attempts', count: 0, severity: 'low', trend: 'stable' },
+            { type: 'Suspicious API Calls', count: 0, severity: 'low', trend: 'stable' },
+            { type: 'Unauthorized Access', count: 0, severity: 'low', trend: 'stable' },
+            { type: 'DDoS Attempts', count: 0, severity: 'low', trend: 'stable' }
+          ],
+          compliance: [
+            { framework: 'SOC 2', score: 0, status: 'unknown' },
+            { framework: 'HIPAA', score: 0, status: 'unknown' },
+            { framework: 'PCI-DSS', score: 0, status: 'unknown' },
+            { framework: 'GDPR', score: 0, status: 'unknown' }
+          ],
+          recentEvents: [
+            { event: 'No security events', severity: 'info', time: 'N/A' }
+          ],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const recentEvents = [
-    { event: 'New vulnerability detected in nginx', severity: 'high', time: '10 mins ago' },
-    { event: 'Security patch applied successfully', severity: 'info', time: '1 hour ago' },
-    { event: 'Failed SSH login from unknown IP', severity: 'medium', time: '2 hours ago' },
-    { event: 'SSL certificate renewed', severity: 'info', time: '5 hours ago' }
-  ];
+    fetchData();
+  }, []);
+
+  const securityScore = data.securityScore;
+  const threats = data.threats;
+  const compliance = data.compliance;
+  const recentEvents = data.recentEvents;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-400 border-t-transparent"></div>
+          <p className="mt-4 text-gray-300">Loading security data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 relative overflow-hidden">

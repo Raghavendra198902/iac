@@ -1,5 +1,6 @@
 import React from 'react';
-import { ChartBarIcon, CubeIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
+import { ChartBarIcon, CubeIcon, Cog6ToothIcon, CloudIcon } from '@heroicons/react/24/outline';
 
 const Settings: React.FC = () => {
   return (
@@ -50,7 +51,15 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Content Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Link to="/settings/cloud" className="block group">
+            <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 group-hover:border-purple-500/50">
+              <CloudIcon className="w-12 h-12 text-purple-400 mb-4 group-hover:scale-110 transition-transform" />
+              <h3 className="text-2xl font-bold text-white mb-2">Cloud Providers</h3>
+              <p className="text-gray-300">Configure cloud provider connections</p>
+            </div>
+          </Link>
+
           <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
             <ChartBarIcon className="w-12 h-12 text-blue-400 mb-4" />
             <h3 className="text-2xl font-bold text-white mb-2">Analytics</h3>
@@ -58,7 +67,7 @@ const Settings: React.FC = () => {
           </div>
 
           <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-            <CubeIcon className="w-12 h-12 text-purple-400 mb-4" />
+            <CubeIcon className="w-12 h-12 text-emerald-400 mb-4" />
             <h3 className="text-2xl font-bold text-white mb-2">Resources</h3>
             <p className="text-gray-300">Manage your resources efficiently</p>
           </div>
@@ -74,16 +83,16 @@ const Settings: React.FC = () => {
         <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-8 border border-white/20">
           <h2 className="text-2xl font-bold text-white mb-6">Overview</h2>
           <p className="text-gray-300 mb-4">
-            This is the Settings page. Add your content and functionality here.
+            Manage your system settings and configurations.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-              <h4 className="text-white font-semibold mb-2">Feature 1</h4>
-              <p className="text-gray-400 text-sm">Description of feature</p>
+              <h4 className="text-white font-semibold mb-2">Cloud Integration</h4>
+              <p className="text-gray-400 text-sm">Connect to AWS, Azure, GCP, and other cloud providers for automated infrastructure discovery</p>
             </div>
             <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-              <h4 className="text-white font-semibold mb-2">Feature 2</h4>
-              <p className="text-gray-400 text-sm">Description of feature</p>
+              <h4 className="text-white font-semibold mb-2">Security</h4>
+              <p className="text-gray-400 text-sm">All credentials are encrypted and securely stored</p>
             </div>
           </div>
         </div>

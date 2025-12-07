@@ -24,6 +24,7 @@ import {
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
+  CloudIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -183,6 +184,15 @@ const navigation: NavItem[] = [
       { name: 'Backup', path: '/admin/backup', icon: ServerIcon },
     ],
   },
+  {
+    name: 'Settings',
+    path: '/settings',
+    icon: Cog6ToothIcon,
+    children: [
+      { name: 'General', path: '/settings', icon: Cog6ToothIcon },
+      { name: 'Cloud Providers', path: '/settings/cloud', icon: CloudIcon },
+    ],
+  },
   { name: 'Users', path: '/users', icon: UsersIcon },
 ];
 
@@ -255,7 +265,7 @@ const Layout: React.FC = () => {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <item.icon className="w-5 h-5 flex-shrink-0" />
+                        {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" />}
                         {sidebarOpen && (
                           <span className="text-sm font-medium">{item.name}</span>
                         )}
@@ -270,20 +280,23 @@ const Layout: React.FC = () => {
                     </button>
                     {sidebarOpen && expandedMenus.includes(item.name) && (
                       <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary-300/50 dark:border-primary-700/50 pl-2">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.path}
-                            to={child.path}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all ${
-                              isActive(child.path)
-                                ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
-                                : 'hover:bg-white/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300'
-                            }`}
-                          >
-                            <child.icon className="w-4 h-4" />
-                            {child.name}
-                          </Link>
-                        ))}
+                        {item.children.map((child) => {
+                          const ChildIcon = child.icon;
+                          return (
+                            <Link
+                              key={child.path}
+                              to={child.path}
+                              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all ${
+                                isActive(child.path)
+                                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
+                                  : 'hover:bg-white/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300'
+                              }`}
+                            >
+                              {ChildIcon && <ChildIcon className="w-4 h-4" />}
+                              {child.name}
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </>
@@ -296,7 +309,7 @@ const Layout: React.FC = () => {
                         : 'hover:bg-white/50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-200'
                     }`}
                   >
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" />}
                     {sidebarOpen && (
                       <span className="text-sm font-medium">{item.name}</span>
                     )}
@@ -398,7 +411,7 @@ const Layout: React.FC = () => {
         </main>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default Layout;

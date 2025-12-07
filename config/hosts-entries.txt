@@ -1,0 +1,35 @@
+# IAC Platform Local Domain Configuration
+# Add these entries to your /etc/hosts file (Linux/Mac) or C:\Windows\System32\drivers\etc\hosts (Windows)
+
+# Localhost entries
+127.0.0.1       iac.local
+127.0.0.1       www.iac.local
+127.0.0.1       api.iac.local
+127.0.0.1       grafana.iac.local
+127.0.0.1       prometheus.iac.local
+127.0.0.1       neo4j.iac.local
+127.0.0.1       mlflow.iac.local
+
+# Network IP entries (replace 192.168.0.103 with your actual IP)
+192.168.0.103   iac.local
+192.168.0.103   www.iac.local
+192.168.0.103   api.iac.local
+192.168.0.103   grafana.iac.local
+192.168.0.103   prometheus.iac.local
+192.168.0.103   neo4j.iac.local
+192.168.0.103   mlflow.iac.local
+
+# Installation Instructions:
+# 
+# Linux/Mac:
+#   sudo nano /etc/hosts
+#   (paste the entries above, save and exit)
+#
+# Windows:
+#   1. Open Notepad as Administrator
+#   2. Open C:\Windows\System32\drivers\etc\hosts
+#   3. Paste the entries above
+#   4. Save and close
+#
+# Verify:
+#   ping iac.local

@@ -1,26 +1,60 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ServerIcon, CloudIcon, RocketLaunchIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 const InfrastructureDashboard: React.FC = () => {
-  const resources = [
-    { name: 'EC2 Instances', count: 45, status: 'healthy', change: '+5' },
-    { name: 'S3 Buckets', count: 23, status: 'healthy', change: '+2' },
-    { name: 'RDS Databases', count: 12, status: 'warning', change: '0' },
-    { name: 'Lambda Functions', count: 78, status: 'healthy', change: '+12' }
-  ];
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    resources: [] as any[],
+    cloudStatus: [] as any[],
+    recentDeployments: [] as any[],
+  });
 
-  const cloudStatus = [
-    { provider: 'AWS', regions: 5, resources: 234, health: 98 },
-    { provider: 'Azure', regions: 3, resources: 156, health: 95 },
-    { provider: 'GCP', regions: 2, resources: 89, health: 99 }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/infrastructure/overview');
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        console.log('No API data available, showing zeros');
+        setData({
+          resources: [
+            { name: 'EC2 Instances', count: 0, status: 'unknown', change: '0' },
+            { name: 'S3 Buckets', count: 0, status: 'unknown', change: '0' },
+            { name: 'RDS Databases', count: 0, status: 'unknown', change: '0' },
+            { name: 'Lambda Functions', count: 0, status: 'unknown', change: '0' }
+          ],
+          cloudStatus: [
+            { provider: 'AWS', regions: 0, resources: 0, health: 0 },
+            { provider: 'Azure', regions: 0, resources: 0, health: 0 },
+            { provider: 'GCP', regions: 0, resources: 0, health: 0 }
+          ],
+          recentDeployments: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const recentDeployments = [
-    { id: 1, name: 'Web App Stack', status: 'success', time: '5 mins ago', region: 'us-east-1' },
-    { id: 2, name: 'Database Cluster', status: 'in-progress', time: '12 mins ago', region: 'eu-west-1' },
-    { id: 3, name: 'API Gateway', status: 'success', time: '1 hour ago', region: 'ap-south-1' },
-    { id: 4, name: 'CDN Setup', status: 'failed', time: '2 hours ago', region: 'us-west-2' }
-  ];
+    fetchData();
+  }, []);
+
+  const resources = data.resources;
+  const cloudStatus = data.cloudStatus;
+  const recentDeployments = data.recentDeployments.length > 0 
+    ? data.recentDeployments 
+    : [{ id: 0, name: 'No deployments', status: 'info', time: 'N/A', region: 'N/A' }];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-400 border-t-transparent"></div>
+          <p className="mt-4 text-gray-300">Loading infrastructure...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -62,14 +96,18 @@ const InfrastructureDashboard: React.FC = () => {
             >
               <div className="flex items-center justify-between mb-4">
                 <ServerIcon className="w-8 h-8 text-blue-400" />
-                <span className={`text-sm font-semibold ${resource.change.startsWith('+') ? 'text-green-400' : 'text-gray-400'}`}>
+                <span className={`text-sm font-semibold ${resource.change.startsWith('+') ? 'text-green-400' : resource.change === '0' ? 'text-gray-400' : 'text-red-400'}`}>
                   {resource.change}
                 </span>
               </div>
               <h3 className="text-2xl font-bold text-white mb-1">{resource.count}</h3>
               <p className="text-gray-300 text-sm">{resource.name}</p>
               <div className="mt-4 flex items-center">
-                <div className={`w-2 h-2 rounded-full mr-2 ${resource.status === 'healthy' ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
+                <div className={`w-2 h-2 rounded-full mr-2 ${
+                  resource.status === 'healthy' ? 'bg-green-400' : 
+                  resource.status === 'warning' ? 'bg-yellow-400' : 
+                  'bg-gray-400'
+                }`}></div>
                 <span className="text-xs text-gray-400 capitalize">{resource.status}</span>
               </div>
             </div>
@@ -103,7 +141,10 @@ const InfrastructureDashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="mt-4 bg-gray-700/50 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-green-400 to-blue-400 h-2 rounded-full" style={{ width: `${cloud.health}%` }}></div>
+                  <div 
+                    className={`${cloud.health > 0 ? 'bg-gradient-to-r from-green-400 to-blue-400' : 'bg-gray-600'} h-2 rounded-full`} 
+                    style={{ width: `${cloud.health}%` }}
+                  ></div>
                 </div>
               </div>
             ))}
@@ -123,7 +164,8 @@ const InfrastructureDashboard: React.FC = () => {
                   <div className={`w-3 h-3 rounded-full ${
                     deployment.status === 'success' ? 'bg-green-400' :
                     deployment.status === 'in-progress' ? 'bg-yellow-400 animate-pulse' :
-                    'bg-red-400'
+                    deployment.status === 'failed' ? 'bg-red-400' :
+                    'bg-gray-400'
                   }`}></div>
                   <div>
                     <h4 className="text-white font-semibold">{deployment.name}</h4>
@@ -134,7 +176,8 @@ const InfrastructureDashboard: React.FC = () => {
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     deployment.status === 'success' ? 'bg-green-400/20 text-green-400' :
                     deployment.status === 'in-progress' ? 'bg-yellow-400/20 text-yellow-400' :
-                    'bg-red-400/20 text-red-400'
+                    deployment.status === 'failed' ? 'bg-red-400/20 text-red-400' :
+                    'bg-gray-400/20 text-gray-400'
                   }`}>
                     {deployment.status}
                   </span>

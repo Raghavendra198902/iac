@@ -92,6 +92,17 @@ async def root():
     }
 
 
+@app.get("/health", tags=["Health"])
+async def health_check_simple():
+    """Simple health check endpoint"""
+    return {
+        "status": "healthy",
+        "service": "IAC Dharma AIOps Engine",
+        "version": "3.0.0",
+        "timestamp": datetime.now().isoformat()
+    }
+
+
 @app.get("/api/v3/aiops/health", tags=["Health"])
 async def health_check():
     """Health check endpoint"""

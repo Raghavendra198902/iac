@@ -61,7 +61,7 @@ server {
 
     # Proxy API requests
     location /api {
-        proxy_pass http://host.docker.internal:4000;
+        proxy_pass http://iac-api-gateway-v3:4000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -70,7 +70,7 @@ server {
 
     # Proxy GraphQL requests
     location /graphql {
-        proxy_pass http://host.docker.internal:4000;
+        proxy_pass http://iac-api-gateway-v3:4000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -79,7 +79,7 @@ server {
 
     # Proxy WebSocket connections
     location /ws {
-        proxy_pass http://host.docker.internal:4000;
+        proxy_pass http://iac-api-gateway-v3:4000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -91,8 +91,15 @@ EOF
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Create SSL directory
-RUN mkdir -p /etc/nginx/ssl
+# Create SSL directory and generate self-signed certificates
+RUN mkdir -p /etc/nginx/ssl && \
+    apk add --no-cache openssl && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/nginx/ssl/private.key \
+    -out /etc/nginx/ssl/certificate.crt \
+    -subj "/C=US/ST=State/L=City/O=IAC-DHARMA/CN=localhost" && \
+    chmod 600 /etc/nginx/ssl/private.key && \
+    chmod 644 /etc/nginx/ssl/certificate.crt
 
 # Health check - use 127.0.0.1 instead of localhost to force IPv4
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
