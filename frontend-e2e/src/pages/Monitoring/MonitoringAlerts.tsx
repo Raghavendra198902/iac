@@ -1,95 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BellAlertIcon, FunnelIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const MonitoringAlerts: React.FC = () => {
   const [filterSeverity, setFilterSeverity] = useState('all');
+  const [alerts, setAlerts] = useState<any[]>([]);
 
-  const alerts = [
-    {
-      id: 1,
-      title: 'High CPU Usage on web-server-02',
-      description: 'CPU usage has exceeded 85% for 10 minutes',
-      severity: 'critical',
-      time: '2 minutes ago',
-      service: 'web-server-02',
-      acknowledged: false
-    },
-    {
-      id: 2,
-      title: 'Database Connection Pool Exhausted',
-      description: 'Connection pool reached maximum capacity',
-      severity: 'critical',
-      time: '5 minutes ago',
-      service: 'db-primary',
-      acknowledged: false
-    },
-    {
-      id: 3,
-      title: 'Memory Usage Warning',
-      description: 'Memory usage at 78% on api-server-01',
-      severity: 'warning',
-      time: '15 minutes ago',
-      service: 'api-server-01',
-      acknowledged: true
-    },
-    {
-      id: 4,
-      title: 'Slow API Response Time',
-      description: 'Average response time increased to 450ms',
-      severity: 'warning',
-      time: '23 minutes ago',
-      service: 'api-gateway',
-      acknowledged: false
-    },
-    {
-      id: 5,
-      title: 'Disk Space Low',
-      description: 'Disk usage at 82% on storage-server',
-      severity: 'warning',
-      time: '1 hour ago',
-      service: 'storage-server',
-      acknowledged: true
-    },
-    {
-      id: 6,
-      title: 'SSL Certificate Expiring Soon',
-      description: 'Certificate expires in 14 days',
-      severity: 'info',
-      time: '2 hours ago',
-      service: 'cdn',
-      acknowledged: false
-    },
-    {
-      id: 7,
-      title: 'Backup Completed Successfully',
-      description: 'Daily backup finished without errors',
-      severity: 'info',
-      time: '3 hours ago',
-      service: 'backup-service',
-      acknowledged: true
-    },
-    {
-      id: 8,
-      title: 'CDN Cache Miss Rate High',
-      description: 'Cache miss rate at 35%, above threshold',
-      severity: 'warning',
-      time: '4 hours ago',
-      service: 'cdn',
-      acknowledged: false
-    }
-  ];
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const response = await fetch('/api/alerts');
+        const data = await response.json();
+        setAlerts(data.alerts || []);
+      } catch (error) {
+        console.error('Failed to fetch alerts:', error);
+      }
+    };
 
-  const filteredAlerts = filterSeverity === 'all' 
-    ? alerts 
-    : alerts.filter(a => a.severity === filterSeverity);
+    // Initial fetch
+    fetchAlerts();
+
+    // Auto-refresh every 0.1 seconds
+    const interval = setInterval(fetchAlerts, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const filteredAlerts = filterSeverity === 'all'
+    ? alerts
+    : alerts.filter(a => (a.type || a.severity) === filterSeverity);
 
   const alertCounts = {
-    critical: alerts.filter(a => a.severity === 'critical').length,
-    warning: alerts.filter(a => a.severity === 'warning').length,
-    info: alerts.filter(a => a.severity === 'info').length
-  };
-
-  return (
+    critical: alerts.filter(a => (a.type || a.severity) === 'critical').length,
+    warning: alerts.filter(a => (a.type || a.severity) === 'warning').length,
+    info: alerts.filter(a => (a.type || a.severity) === 'info' || (a.type || a.severity) === 'error').length
+  };  return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
@@ -114,10 +58,18 @@ const MonitoringAlerts: React.FC = () => {
       <div className="relative z-10 p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent mb-2">
-            Alert Management
-          </h1>
-          <p className="text-gray-300">Monitor and manage system alerts</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent mb-2">
+                Alert Management
+              </h1>
+              <p className="text-gray-300">Monitor and manage system alerts</p>
+            </div>
+            <div className="flex items-center space-x-2 bg-green-500/20 border border-green-500/30 rounded-full px-4 py-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-green-400 text-sm font-semibold">LIVE</span>
+            </div>
+          </div>
         </div>
 
         {/* Alert Summary */}

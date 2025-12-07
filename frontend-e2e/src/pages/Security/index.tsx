@@ -17,31 +17,22 @@ const SecurityDashboard: React.FC = () => {
         const result = await response.json();
         setData(result);
       } catch (err) {
-        console.log('No API data available, showing zeros');
-        setData({
-          securityScore: 0,
-          threats: [
-            { type: 'Failed Login Attempts', count: 0, severity: 'low', trend: 'stable' },
-            { type: 'Suspicious API Calls', count: 0, severity: 'low', trend: 'stable' },
-            { type: 'Unauthorized Access', count: 0, severity: 'low', trend: 'stable' },
-            { type: 'DDoS Attempts', count: 0, severity: 'low', trend: 'stable' }
-          ],
-          compliance: [
-            { framework: 'SOC 2', score: 0, status: 'unknown' },
-            { framework: 'HIPAA', score: 0, status: 'unknown' },
-            { framework: 'PCI-DSS', score: 0, status: 'unknown' },
-            { framework: 'GDPR', score: 0, status: 'unknown' }
-          ],
-          recentEvents: [
-            { event: 'No security events', severity: 'info', time: 'N/A' }
-          ],
-        });
+        console.error('Failed to fetch security data:', err);
       } finally {
         setLoading(false);
       }
     };
 
+    // Initial fetch
     fetchData();
+
+    // Auto-refresh every 0.1 seconds for live data
+    const interval = setInterval(() => {
+      fetchData();
+    }, 100);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   const securityScore = data.securityScore;
@@ -97,10 +88,18 @@ const SecurityDashboard: React.FC = () => {
 
       <div className="relative z-10 p-8">
         <div className="mb-8">
-          <h1 className="text-5xl font-bold gradient-text animate-fade-in bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent mb-2">
-            Security Dashboard
-          </h1>
-          <p className="text-gray-300">Monitor security threats and compliance status</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-5xl font-bold gradient-text animate-fade-in bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent mb-2">
+                Security Dashboard
+              </h1>
+              <p className="text-gray-300">Monitor security threats and compliance status</p>
+            </div>
+            <div className="flex items-center space-x-2 bg-green-500/20 border border-green-500/30 rounded-full px-4 py-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-green-400 text-sm font-semibold">LIVE</span>
+            </div>
+          </div>
         </div>
 
         {/* Security Score */}
