@@ -1183,6 +1183,67 @@ async function startServer() {
     }
   });
 
+  // Backup & Disaster Recovery API
+  app.get('/api/backups', (req: Request, res: Response) => {
+    try {
+      const types = ['full', 'incremental', 'differential'];
+      const statuses = ['completed', 'completed', 'completed', 'in-progress'];
+      
+      const backups = Array.from({ length: 8 }, (_, i) => ({
+        id: `backup-${i + 1}`,
+        name: `${types[i % 3]}-backup-${String(i + 1).padStart(3, '0')}`,
+        type: types[i % 3] as 'full' | 'incremental' | 'differential',
+        size: (Math.random() * 10 + 2).toFixed(2),
+        status: statuses[i % 4] as 'completed' | 'in-progress' | 'failed',
+        timestamp: new Date(Date.now() - i * 86400000).toISOString(),
+        location: 's3://iac-backups/prod/',
+        retention: i === 0 ? '30 days' : i === 1 ? '7 days' : '90 days'
+      })).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      res.json({ backups });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch backups', message: error.message });
+    }
+  });
+
+  app.post('/api/backups/create', (req: Request, res: Response) => {
+    try {
+      const { type } = req.body;
+      const backup = {
+        id: `backup-${Date.now()}`,
+        name: `${type}-backup-${new Date().toISOString().split('T')[0]}`,
+        type,
+        size: '0.0',
+        status: 'in-progress',
+        timestamp: new Date().toISOString(),
+        location: 's3://iac-backups/prod/',
+        retention: '30 days'
+      };
+
+      res.json({ backup, message: 'Backup creation initiated' });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to create backup', message: error.message });
+    }
+  });
+
+  app.post('/api/backups/:id/restore', (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      res.json({ message: `Backup ${id} restoration initiated`, estimatedTime: '15-30 minutes' });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to restore backup', message: error.message });
+    }
+  });
+
+  app.delete('/api/backups/:id', (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      res.json({ message: `Backup ${id} deleted successfully` });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to delete backup', message: error.message });
+    }
+  });
+
   // Cloud provider settings storage (in-memory for now, should be persisted to database)
   let cloudProviders = [
     {

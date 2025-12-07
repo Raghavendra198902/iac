@@ -7,6 +7,9 @@ import {
   TrashIcon,
   ShieldCheckIcon,
   KeyIcon,
+  ArrowDownTrayIcon,
+  FunnelIcon,
+  ArrowsUpDownIcon,
 } from '@heroicons/react/24/outline';
 
 interface User {
@@ -22,6 +25,9 @@ interface User {
   createdAt: string;
 }
 
+type SortField = 'username' | 'email' | 'status' | 'lastLogin' | 'createdAt';
+type SortDirection = 'asc' | 'desc';
+
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +35,8 @@ const UserManagement: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterRole, setFilterRole] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [sortField, setSortField] = useState<SortField>('username');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   useEffect(() => {
     fetchUsers();
@@ -54,6 +62,75 @@ const UserManagement: React.FC = () => {
   const handleSearch = () => {
     fetchUsers();
   };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const exportToCSV = () => {
+    const headers = ['Username', 'Email', 'First Name', 'Last Name', 'Roles', 'Status', '2FA', 'Last Login', 'Created At'];
+    const csvData = sortedUsers.map(user => [
+      user.username,
+      user.email,
+      user.firstName,
+      user.lastName,
+      user.roles.join('; '),
+      user.status,
+      user.twoFactorEnabled ? 'Yes' : 'No',
+      new Date(user.lastLogin).toLocaleString(),
+      new Date(user.createdAt).toLocaleString()
+    ]);
+
+    const csv = [
+      headers.join(','),
+      ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = searchTerm === '' || 
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
+    const matchesRole = filterRole === 'all' || user.roles.includes(filterRole);
+    
+    return matchesSearch && matchesStatus && matchesRole;
+  });
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aVal: any = a[sortField];
+    let bVal: any = b[sortField];
+
+    if (sortField === 'lastLogin' || sortField === 'createdAt') {
+      aVal = new Date(aVal).getTime();
+      bVal = new Date(bVal).getTime();
+    } else if (typeof aVal === 'string') {
+      aVal = aVal.toLowerCase();
+      bVal = bVal.toLowerCase();
+    }
+
+    if (sortDirection === 'asc') {
+      return aVal > bVal ? 1 : -1;
+    } else {
+      return aVal < bVal ? 1 : -1;
+    }
+  });
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -102,54 +179,64 @@ const UserManagement: React.FC = () => {
               <p className="text-gray-600 dark:text-gray-400">Manage users, roles, and permissions</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gradient-primary text-white rounded-lg hover:shadow-glow transition-all"
-          >
-            <PlusIcon className="w-5 h-5" />
-            <span>Add User</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={exportToCSV}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <ArrowDownTrayIcon className="w-5 h-5" />
+              <span>Export CSV</span>
+            </button>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-primary text-white rounded-lg hover:shadow-glow transition-all"
+            >
+              <PlusIcon className="w-5 h-5" />
+              <span>Add User</span>
+            </button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-10 pr-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
+        {/* Search and Filters */}
+        <div className="flex items-center space-x-4">
+          <div className="flex-1 relative">
+            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
           </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="suspended">Suspended</option>
-            <option value="pending">Pending</option>
-          </select>
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="all">All Roles</option>
-            <option value="super_admin">Super Admin</option>
-            <option value="admin">Admin</option>
-            <option value="operator">Operator</option>
-            <option value="developer">Developer</option>
-            <option value="auditor">Auditor</option>
-            <option value="viewer">Viewer</option>
-          </select>
+          <div className="flex items-center space-x-2">
+            <FunnelIcon className="w-5 h-5 text-gray-400" />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option>
+            </select>
+            <select
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              <option value="all">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+              <option value="viewer">Viewer</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+          Showing {sortedUsers.length} of {users.length} users
         </div>
       </div>
 
@@ -165,23 +252,47 @@ const UserManagement: React.FC = () => {
             <table className="w-full">
               <thead className="bg-white/50 dark:bg-gray-800/50 border-b border-white/20 dark:border-gray-700/50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    User
+                  <th 
+                    onClick={() => handleSort('username')}
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>User</span>
+                      <ArrowsUpDownIcon className="w-4 h-4" />
+                    </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Email
+                  <th 
+                    onClick={() => handleSort('email')}
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Email</span>
+                      <ArrowsUpDownIcon className="w-4 h-4" />
+                    </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Roles
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Status
+                  <th 
+                    onClick={() => handleSort('status')}
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Status</span>
+                      <ArrowsUpDownIcon className="w-4 h-4" />
+                    </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     2FA
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Last Login
+                  <th 
+                    onClick={() => handleSort('lastLogin')}
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Last Login</span>
+                      <ArrowsUpDownIcon className="w-4 h-4" />
+                    </div>
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Actions
@@ -189,7 +300,7 @@ const UserManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/20 dark:divide-gray-700/50">
-                {users.map((user) => (
+                {sortedUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-white/30 dark:hover:bg-gray-800/30 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">

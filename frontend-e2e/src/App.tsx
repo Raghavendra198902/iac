@@ -18,6 +18,7 @@ const UserManagement = lazy(() => import('./pages/UserManagement'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
 const CloudSettings = lazy(() => import('./pages/Settings/CloudSettings').then(module => ({ default: module.CloudSettings })));
+const BackupRecovery = lazy(() => import('./pages/Settings/BackupRecovery'));
 const Infrastructure = lazy(() => import('./pages/Infrastructure'));
 const InfrastructureResources = lazy(() => import('./pages/Infrastructure/InfrastructureResources'));
 const InfrastructureTemplates = lazy(() => import('./pages/Infrastructure/InfrastructureTemplates'));
@@ -97,6 +98,7 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/settings/cloud" element={<CloudSettings />} />
+                  <Route path="/settings/backup" element={<BackupRecovery />} />
                   <Route path="/infrastructure" element={<Infrastructure />} />
                   <Route path="/infrastructure/resources" element={<InfrastructureResources />} />
                   <Route path="/infrastructure/templates" element={<InfrastructureTemplates />} />
