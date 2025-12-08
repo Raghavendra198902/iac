@@ -13,6 +13,7 @@ import asyncio
 import random
 import uuid
 import logging
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +24,9 @@ app = FastAPI(
     description="Automated chaos testing and resilience validation",
     version="3.0.0"
 )
+
+# Initialize Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # CORS middleware
 app.add_middleware(
@@ -616,4 +620,4 @@ async def abort_experiment(experiment_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8700)
+    uvicorn.run(app, host="0.0.0.0", port=8600)

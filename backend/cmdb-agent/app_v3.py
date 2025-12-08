@@ -12,6 +12,7 @@ import logging
 import asyncio
 import os
 from contextlib import asynccontextmanager
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from models.infrastructure import (
     Provider, ResourceType, ResourceStatus,
@@ -78,6 +79,9 @@ app = FastAPI(
     description="Multi-cloud infrastructure discovery and configuration management database",
     lifespan=lifespan
 )
+
+# Initialize Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # CORS middleware
 app.add_middleware(

@@ -10,12 +10,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 
 # Expose port
-EXPOSE 8700
+EXPOSE 8600
 
 # Health check
 RUN pip install requests
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8700/health')"
+    CMD python -c "import requests; requests.get('http://localhost:8600/health')"
 
 # Run application
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8700"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8600"]

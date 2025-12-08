@@ -112,7 +112,7 @@ scrape_configs:
   - job_name: 'cmdb-agent-v3'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['iac-cmdb-agent-v3:8700']
+      - targets: ['iac-cmdb-agent-v3:8200']
         labels:
           service: 'cmdb-agent'
           tier: 'discovery'

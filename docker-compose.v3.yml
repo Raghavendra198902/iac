@@ -235,7 +235,7 @@ services:
     container_name: iac-cmdb-agent-v3
     restart: unless-stopped
     ports:
-      - "8200:8200"
+      - "8700:8200"
     environment:
       - NEO4J_URI=bolt://neo4j-v3:7687
       - NEO4J_USER=neo4j
@@ -375,7 +375,7 @@ services:
     container_name: iac-chaos-engineering-v3
     restart: unless-stopped
     ports:
-      - "8700:8700"
+      - "8600:8600"
     environment:
       - PYTHONUNBUFFERED=1
       - SELF_HEALING_URL=http://self-healing-engine:8400
@@ -385,7 +385,7 @@ services:
     depends_on:
       - self-healing-engine
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8700/health')"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8600/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
