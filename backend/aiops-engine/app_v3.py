@@ -23,6 +23,16 @@ from models.lstm_failure_predictor import LSTMFailurePredictor
 from models.rf_threat_detector import RFThreatDetector
 from models.xgb_capacity_forecaster import XGBoostCapacityForecaster
 
+# Import Enhanced ML Models Suite (8 new models)
+from models.enhanced_cost_predictor import EnhancedCostPredictor
+from models.enhanced_drift_predictor import EnhancedDriftPredictor
+from models.enhanced_resource_optimizer import EnhancedResourceOptimizer
+from models.performance_optimizer import PerformanceOptimizer
+from models.compliance_predictor import CompliancePredictor
+from models.incident_classifier import IncidentClassifier
+from models.root_cause_analyzer import RootCauseAnalyzer
+from models.churn_predictor import ChurnPredictor
+
 # Import training pipeline
 from services.mlflow_training_pipeline import (
     MLflowTrainingPipeline,
@@ -61,6 +71,16 @@ anomaly_detector = AnomalyDetector()
 lstm_failure_predictor = LSTMFailurePredictor()
 rf_threat_detector = RFThreatDetector()
 xgb_capacity_forecaster = XGBoostCapacityForecaster()
+
+# Initialize Enhanced ML Models Suite (8 new models)
+enhanced_cost_predictor = EnhancedCostPredictor()
+enhanced_drift_predictor = EnhancedDriftPredictor()
+enhanced_resource_optimizer = EnhancedResourceOptimizer()
+performance_optimizer = PerformanceOptimizer()
+compliance_predictor = CompliancePredictor()
+incident_classifier = IncidentClassifier()
+root_cause_analyzer = RootCauseAnalyzer()
+churn_predictor = ChurnPredictor()
 
 # Initialize MLflow training pipeline with correct URI from environment
 mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow-v3:5000")
@@ -549,6 +569,243 @@ async def forecast_capacity_enhanced(request: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+
+# ============================================================================
+# Enhanced ML Models Suite - 8 New Endpoints
+# ============================================================================
+
+@app.post("/api/v3/ml/cost/predict", tags=["Enhanced ML"])
+async def predict_cost(request: Dict[str, Any]):
+    """
+    Predict future costs using deep learning.
+    
+    Request body:
+    {
+        "historical_costs": [100, 105, 110, 115],
+        "resource_usage": {
+            "compute_hours": 720,
+            "storage_gb": 500,
+            "network_gb": 100,
+            "database_hours": 500,
+            "api_calls": 1000000
+        },
+        "horizon_days": 7
+    }
+    """
+    try:
+        logger.info("Enhanced cost prediction")
+        result = enhanced_cost_predictor.predict(
+            request.get('historical_costs', []),
+            request.get('resource_usage', {}),
+            request.get('horizon_days', 7)
+        )
+        service_stats["predictions_count"] += 1
+        return result
+    except Exception as e:
+        logger.error(f"Cost prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/ml/drift/detect", tags=["Enhanced ML"])
+async def detect_drift(request: Dict[str, Any]):
+    """
+    Detect configuration drift with auto-fix recommendations.
+    
+    Request body:
+    {
+        "desired_state": {...},
+        "actual_state": {...},
+        "resource_type": "ec2"
+    }
+    """
+    try:
+        logger.info("Configuration drift detection")
+        result = enhanced_drift_predictor.detect_drift(
+            request.get('desired_state', {}),
+            request.get('actual_state', {}),
+            request.get('resource_type', 'unknown')
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Drift detection error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/ml/resource/optimize", tags=["Enhanced ML"])
+async def optimize_resource(request: Dict[str, Any]):
+    """
+    Optimize resource allocation using RL.
+    
+    Request body:
+    {
+        "current_size": "medium",
+        "cpu_utilization": [65, 70, 68],
+        "memory_utilization": [75, 80, 78],
+        "objectives": {"cost": 0.4, "performance": 0.4, "reliability": 0.2}
+    }
+    """
+    try:
+        logger.info("Resource optimization")
+        result = enhanced_resource_optimizer.optimize(
+            request.get('current_size'),
+            request.get('cpu_utilization', []),
+            request.get('memory_utilization', []),
+            request.get('objectives', {'cost': 0.4, 'performance': 0.4, 'reliability': 0.2})
+        )
+        service_stats["predictions_count"] += 1
+        return result
+    except Exception as e:
+        logger.error(f"Resource optimization error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/ml/performance/optimize", tags=["Enhanced ML"])
+async def optimize_performance(request: Dict[str, Any]):
+    """
+    Analyze performance and generate optimization recommendations.
+    
+    Request body:
+    {
+        "metrics": {
+            "api_response_times": [100, 150, 200],
+            "database_query_times": [50, 75, 100],
+            "cache_hit_rate": [0.8, 0.85, 0.9]
+        },
+        "resource_type": "application"
+    }
+    """
+    try:
+        logger.info("Performance optimization")
+        result = performance_optimizer.optimize(
+            request.get('metrics', {}),
+            request.get('resource_type', 'application')
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Performance optimization error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/ml/compliance/predict", tags=["Enhanced ML"])
+async def predict_compliance_violations(request: Dict[str, Any]):
+    """
+    Predict potential compliance violations.
+    
+    Request body:
+    {
+        "infrastructure_config": {
+            "mfa_enabled": true,
+            "encryption_at_rest": true,
+            ...
+        },
+        "framework": "SOC2"
+    }
+    """
+    try:
+        logger.info(f"Compliance prediction for {request.get('framework', 'SOC2')}")
+        result = compliance_predictor.predict_violations(
+            request.get('infrastructure_config', {}),
+            request.get('framework', 'SOC2')
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Compliance prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/ml/incident/classify", tags=["Enhanced ML"])
+async def classify_incident(request: Dict[str, Any]):
+    """
+    Automatically classify incidents by priority and category.
+    
+    Request body:
+    {
+        "incident_title": "API Gateway Down",
+        "incident_description": "Production API gateway is not responding",
+        "affected_users": 5000,
+        "business_impact": "critical"
+    }
+    """
+    try:
+        logger.info("Incident classification")
+        result = incident_classifier.classify(
+            request.get('incident_title', ''),
+            request.get('incident_description', ''),
+            request.get('affected_users', 0),
+            request.get('business_impact', 'unknown')
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Incident classification error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/ml/rootcause/analyze", tags=["Enhanced ML"])
+async def analyze_root_cause(request: Dict[str, Any]):
+    """
+    Identify root cause using dependency graph analysis.
+    
+    Request body:
+    {
+        "incident_data": {
+            "affected_services": ["api-gateway", "user-service"],
+            "symptoms": ["connection timeout", "high latency"],
+            "start_time": "2024-12-08T05:00:00Z"
+        },
+        "dependency_graph": {...},
+        "metrics": {...}
+    }
+    """
+    try:
+        logger.info("Root cause analysis")
+        result = root_cause_analyzer.analyze(
+            request.get('incident_data', {}),
+            request.get('dependency_graph'),
+            request.get('metrics')
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Root cause analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/ml/churn/predict", tags=["Enhanced ML"])
+async def predict_churn(request: Dict[str, Any]):
+    """
+    Predict customer churn probability.
+    
+    Request body:
+    {
+        "customer_id": "cust_12345",
+        "usage_data": {
+            "current_month_api_calls": 50000,
+            "previous_month_api_calls": 100000,
+            "days_since_last_login": 10
+        },
+        "engagement_data": {
+            "support_tickets_last_30_days": 3,
+            "features_used": 2,
+            "total_features": 10
+        },
+        "account_age_days": 365
+    }
+    """
+    try:
+        logger.info(f"Churn prediction for {request.get('customer_id')}")
+        result = churn_predictor.predict(
+            request.get('customer_id', 'unknown'),
+            request.get('usage_data', {}),
+            request.get('engagement_data', {}),
+            request.get('account_age_days', 0)
+        )
+        service_stats["predictions_count"] += 1
+        return result
+    except Exception as e:
+        logger.error(f"Churn prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============================================================================
 # Startup Event
 # ============================================================================
@@ -559,11 +816,23 @@ async def startup_event():
     logger.info("=" * 60)
     logger.info("IAC Dharma AIOps Engine v3.0 - Starting...")
     logger.info("=" * 60)
-    logger.info("🤖 ML Models:")
+    logger.info("🤖 ML Models (12 Total):")
+    logger.info("")
+    logger.info("  Core Models:")
     logger.info(f"  ✓ LSTM Failure Predictor (v{lstm_failure_predictor.model_version}) - {'Trained' if lstm_failure_predictor.is_trained else 'Not Trained'}")
     logger.info(f"  ✓ RF Threat Detector (v{rf_threat_detector.model_version}) - {'Trained' if rf_threat_detector.is_trained else 'Not Trained'}")
     logger.info(f"  ✓ XGBoost Capacity Forecaster (v{xgb_capacity_forecaster.model_version}) - {'Trained' if xgb_capacity_forecaster.is_trained else 'Not Trained'}")
     logger.info(f"  ✓ Anomaly Detector (v{anomaly_detector.model_version})")
+    logger.info("")
+    logger.info("  Enhanced ML Suite:")
+    logger.info(f"  ✓ Enhanced Cost Predictor (v{enhanced_cost_predictor.version}) - {enhanced_cost_predictor.accuracy:.1%} accuracy")
+    logger.info(f"  ✓ Enhanced Drift Predictor (v{enhanced_drift_predictor.version}) - {enhanced_drift_predictor.accuracy:.1%} accuracy")
+    logger.info(f"  ✓ Enhanced Resource Optimizer (v{enhanced_resource_optimizer.version}) - {enhanced_resource_optimizer.accuracy:.1%} accuracy")
+    logger.info(f"  ✓ Performance Optimizer (v{performance_optimizer.version}) - {performance_optimizer.accuracy:.1%} accuracy")
+    logger.info(f"  ✓ Compliance Predictor (v{compliance_predictor.version}) - {compliance_predictor.accuracy:.1%} accuracy")
+    logger.info(f"  ✓ Incident Classifier (v{incident_classifier.version}) - {incident_classifier.accuracy:.1%} accuracy")
+    logger.info(f"  ✓ Root Cause Analyzer (v{root_cause_analyzer.version}) - {root_cause_analyzer.accuracy:.1%} accuracy")
+    logger.info(f"  ✓ Churn Predictor (v{churn_predictor.version}) - {churn_predictor.accuracy:.1%} accuracy")
     logger.info("=" * 60)
     logger.info(f"📊 MLflow: {mlflow_pipeline.mlflow_tracking_uri}")
     logger.info("=" * 60)
