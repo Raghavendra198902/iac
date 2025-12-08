@@ -40,6 +40,13 @@ const DevOps = lazy(() => import('./pages/DevOps'));
 const DevOpsPipelines = lazy(() => import('./pages/DevOps/DevOpsPipelines'));
 const DevOpsContainers = lazy(() => import('./pages/DevOps/DevOpsContainers'));
 const DevOpsGit = lazy(() => import('./pages/DevOps/DevOpsGit'));
+const EA = lazy(() => import('./pages/EA'));
+const EABusiness = lazy(() => import('./pages/EA/EABusiness'));
+const EAApplication = lazy(() => import('./pages/EA/EAApplication'));
+const EAData = lazy(() => import('./pages/EA/EAData'));
+const EATechnology = lazy(() => import('./pages/EA/EATechnology'));
+const EAIntegration = lazy(() => import('./pages/EA/EAIntegration'));
+const EASecurity = lazy(() => import('./pages/EA/EASecurity'));
 
 function App() {
   return (
@@ -83,6 +90,13 @@ function App() {
                   <Route path="/devops/pipelines" element={<DevOpsPipelines />} />
                   <Route path="/devops/containers" element={<DevOpsContainers />} />
                   <Route path="/devops/git" element={<DevOpsGit />} />
+                  <Route path="/ea" element={<EA />} />
+                  <Route path="/ea/business" element={<EABusiness />} />
+                  <Route path="/ea/application" element={<EAApplication />} />
+                  <Route path="/ea/data" element={<EAData />} />
+                  <Route path="/ea/technology" element={<EATechnology />} />
+                  <Route path="/ea/integration" element={<EAIntegration />} />
+                  <Route path="/ea/security" element={<EASecurity />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
