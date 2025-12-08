@@ -944,6 +944,727 @@ log_structured('info', 'Trust score calculated',
 
 ---
 
-**Document Version**: 1.0  
+## 🚀 Advanced Development Topics
+
+### 1. Microservices Communication Patterns
+
+#### Service-to-Service HTTP Communication
+
+```typescript
+// backend/api-gateway/src/services/http-client.ts
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import CircuitBreaker from 'opossum';
+
+class ServiceClient {
+  private client: AxiosInstance;
+  private breaker: CircuitBreaker;
+  
+  constructor(
+    private serviceName: string,
+    private baseURL: string,
+    private timeout: number = 5000
+  ) {
+    this.client = axios.create({
+      baseURL,
+      timeout,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    // Circuit breaker configuration
+    this.breaker = new CircuitBreaker(this.makeRequest.bind(this), {
+      timeout: this.timeout,
+      errorThresholdPercentage: 50,
+      resetTimeout: 30000,
+      volumeThreshold: 10,
+    });
+    
+    // Add interceptors
+    this.setupInterceptors();
+  }
+  
+  private setupInterceptors() {
+    // Request interceptor
+    this.client.interceptors.request.use(
+      (config) => {
+        // Add trace ID for distributed tracing
+        const traceId = getTraceId();
+        config.headers['X-Trace-ID'] = traceId;
+        
+        // Add authentication token
+        const token = getAuthToken();
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        // Log request
+        logger.debug(`${config.method?.toUpperCase()} ${config.url}`, {
+          service: this.serviceName,
+          traceId,
+        });
+        
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+    
+    // Response interceptor
+    this.client.interceptors.response.use(
+      (response) => {
+        // Log successful response
+        logger.debug(`Response ${response.status}`, {
+          service: this.serviceName,
+          duration: response.config.metadata?.duration,
+        });
+        return response;
+      },
+      async (error) => {
+        // Retry logic
+        const config = error.config;
+        if (!config || !config.retry) {
+          return Promise.reject(error);
+        }
+        
+        config.retryCount = config.retryCount || 0;
+        if (config.retryCount >= config.retry) {
+          return Promise.reject(error);
+        }
+        
+        config.retryCount++;
+        
+        // Exponential backoff
+        const delay = Math.pow(2, config.retryCount) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        
+        return this.client(config);
+      }
+    );
+  }
+  
+  private async makeRequest(config: AxiosRequestConfig) {
+    const startTime = Date.now();
+    try {
+      const response = await this.client(config);
+      const duration = Date.now() - startTime;
+      
+      // Emit metrics
+      metrics.recordLatency(this.serviceName, duration);
+      metrics.incrementCounter(`${this.serviceName}.success`);
+      
+      return response.data;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      metrics.recordLatency(this.serviceName, duration);
+      metrics.incrementCounter(`${this.serviceName}.error`);
+      
+      throw error;
+    }
+  }
+  
+  async get<T>(path: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.breaker.fire({ ...config, method: 'GET', url: path });
+  }
+  
+  async post<T>(path: string, data: any, config?: AxiosRequestConfig): Promise<T> {
+    return this.breaker.fire({ ...config, method: 'POST', url: path, data });
+  }
+}
+
+// Usage
+const orchestratorClient = new ServiceClient(
+  'ai-orchestrator',
+  'http://ai-orchestrator:8000',
+  10000
+);
+
+const result = await orchestratorClient.post('/api/deploy', {
+  template: 'web-server',
+  parameters: { count: 3 },
+});
+```
+
+#### Event-Driven Communication with Kafka
+
+```typescript
+// backend/shared/kafka-producer.ts
+import { Kafka, Producer, ProducerRecord } from 'kafkajs';
+
+export class KafkaEventProducer {
+  private kafka: Kafka;
+  private producer: Producer;
+  private isConnected: boolean = false;
+  
+  constructor(brokers: string[]) {
+    this.kafka = new Kafka({
+      clientId: 'iac-dharma',
+      brokers,
+      retry: {
+        initialRetryTime: 100,
+        retries: 8,
+      },
+    });
+    
+    this.producer = this.kafka.producer({
+      allowAutoTopicCreation: false,
+      transactionTimeout: 30000,
+    });
+  }
+  
+  async connect(): Promise<void> {
+    await this.producer.connect();
+    this.isConnected = true;
+    logger.info('Kafka producer connected');
+  }
+  
+  async disconnect(): Promise<void> {
+    await this.producer.disconnect();
+    this.isConnected = false;
+  }
+  
+  async publishEvent<T>(
+    topic: string,
+    event: DomainEvent<T>,
+    key?: string
+  ): Promise<void> {
+    if (!this.isConnected) {
+      throw new Error('Producer not connected');
+    }
+    
+    const message: ProducerRecord = {
+      topic,
+      messages: [{
+        key: key || event.aggregateId,
+        value: JSON.stringify(event),
+        headers: {
+          'event-type': event.eventType,
+          'event-id': event.eventId,
+          'timestamp': event.timestamp.toISOString(),
+        },
+      }],
+    };
+    
+    try {
+      await this.producer.send(message);
+      
+      logger.info('Event published', {
+        topic,
+        eventType: event.eventType,
+        eventId: event.eventId,
+      });
+      
+      metrics.incrementCounter('kafka.events.published', { topic });
+    } catch (error) {
+      logger.error('Failed to publish event', { error, event });
+      throw error;
+    }
+  }
+  
+  async publishBatch<T>(
+    topic: string,
+    events: DomainEvent<T>[]
+  ): Promise<void> {
+    const messages = events.map(event => ({
+      key: event.aggregateId,
+      value: JSON.stringify(event),
+      headers: {
+        'event-type': event.eventType,
+        'event-id': event.eventId,
+      },
+    }));
+    
+    await this.producer.send({ topic, messages });
+  }
+}
+
+// Domain event interface
+interface DomainEvent<T> {
+  eventId: string;
+  eventType: string;
+  aggregateId: string;
+  aggregateType: string;
+  timestamp: Date;
+  data: T;
+  metadata?: Record<string, any>;
+}
+
+// Usage
+const producer = new KafkaEventProducer(['kafka:9092']);
+await producer.connect();
+
+await producer.publishEvent('infrastructure-events', {
+  eventId: uuid(),
+  eventType: 'InfrastructureDeployed',
+  aggregateId: 'infra-123',
+  aggregateType: 'Infrastructure',
+  timestamp: new Date(),
+  data: {
+    infrastructureId: 'infra-123',
+    provider: 'aws',
+    region: 'us-east-1',
+    resourceCount: 5,
+  },
+});
+```
+
+### 2. Advanced Testing Patterns
+
+#### Contract Testing with Pact
+
+```typescript
+// backend/api-gateway/tests/contract/ai-orchestrator.pact.spec.ts
+import { Pact } from '@pact-foundation/pact';
+import { like, eachLike } from '@pact-foundation/pact/dsl/matchers';
+
+describe('API Gateway -> AI Orchestrator Contract', () => {
+  const provider = new Pact({
+    consumer: 'api-gateway',
+    provider: 'ai-orchestrator',
+    port: 8989,
+    log: path.resolve(process.cwd(), 'logs', 'pact.log'),
+    dir: path.resolve(process.cwd(), 'pacts'),
+    logLevel: 'info',
+  });
+  
+  beforeAll(() => provider.setup());
+  afterAll(() => provider.finalize());
+  afterEach(() => provider.verify());
+  
+  describe('POST /api/deploy', () => {
+    beforeEach(() => {
+      return provider.addInteraction({
+        state: 'user is authenticated',
+        uponReceiving: 'a request to deploy infrastructure',
+        withRequest: {
+          method: 'POST',
+          path: '/api/deploy',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': like('Bearer token'),
+          },
+          body: {
+            template: 'web-server',
+            parameters: {
+              count: 3,
+              instance_type: 't3.medium',
+            },
+          },
+        },
+        willRespondWith: {
+          status: 202,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            jobId: like('job-123'),
+            status: 'queued',
+            estimatedDuration: like(300),
+          },
+        },
+      });
+    });
+    
+    it('returns job ID', async () => {
+      const client = new OrchestratorClient('http://localhost:8989');
+      const response = await client.deploy({
+        template: 'web-server',
+        parameters: { count: 3, instance_type: 't3.medium' },
+      });
+      
+      expect(response.jobId).toBeDefined();
+      expect(response.status).toBe('queued');
+    });
+  });
+});
+```
+
+#### Performance Testing with k6
+
+```javascript
+// tests/performance/load-test.js
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+import { Rate } from 'k6/metrics';
+
+const errorRate = new Rate('errors');
+
+export const options = {
+  stages: [
+    { duration: '2m', target: 100 },  // Ramp up
+    { duration: '5m', target: 100 },  // Steady state
+    { duration: '2m', target: 200 },  // Spike
+    { duration: '5m', target: 200 },  // Steady spike
+    { duration: '2m', target: 0 },    // Ramp down
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<500', 'p(99)<1000'],
+    http_req_failed: ['rate<0.01'],
+    errors: ['rate<0.1'],
+  },
+};
+
+const BASE_URL = 'http://localhost:4000';
+
+export function setup() {
+  // Login to get token
+  const loginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify({
+    username: 'testuser',
+    password: 'testpass',
+  }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  
+  return { token: loginRes.json('access_token') };
+}
+
+export default function(data) {
+  const headers = {
+    'Authorization': `Bearer ${data.token}`,
+    'Content-Type': 'application/json',
+  };
+  
+  // Test infrastructure listing
+  let res = http.get(`${BASE_URL}/api/infrastructure`, { headers });
+  const checkRes = check(res, {
+    'status is 200': (r) => r.status === 200,
+    'response time < 500ms': (r) => r.timings.duration < 500,
+  });
+  
+  errorRate.add(!checkRes);
+  
+  sleep(1);
+  
+  // Test deployment request
+  res = http.post(`${BASE_URL}/api/infrastructure/deploy`, JSON.stringify({
+    template: 'web-server',
+    parameters: { count: 1 },
+  }), { headers });
+  
+  check(res, {
+    'deployment accepted': (r) => r.status === 202,
+  });
+  
+  sleep(1);
+}
+
+export function teardown(data) {
+  // Cleanup
+}
+```
+
+**Run Performance Test**:
+```bash
+k6 run --vus 100 --duration 10m tests/performance/load-test.js
+```
+
+#### Chaos Testing
+
+```python
+# tests/chaos/network_chaos.py
+import time
+import subprocess
+from chaos_toolkit import experiment
+
+@experiment
+def simulate_network_partition():
+    """Simulate network partition between services"""
+    
+    # Block traffic to AI Orchestrator
+    subprocess.run([
+        'docker', 'exec', 'api-gateway',
+        'iptables', '-A', 'OUTPUT', '-d', 'ai-orchestrator', '-j', 'DROP'
+    ])
+    
+    print("Network partition introduced")
+    
+    # Wait and observe system behavior
+    time.sleep(60)
+    
+    # Restore network
+    subprocess.run([
+        'docker', 'exec', 'api-gateway',
+        'iptables', '-D', 'OUTPUT', '-d', 'ai-orchestrator', '-j', 'DROP'
+    ])
+    
+    print("Network restored")
+
+@experiment
+def simulate_high_latency():
+    """Add 500ms latency to database connections"""
+    
+    subprocess.run([
+        'docker', 'exec', 'postgres',
+        'tc', 'qdisc', 'add', 'dev', 'eth0', 'root', 'netem', 'delay', '500ms'
+    ])
+    
+    time.sleep(120)
+    
+    # Remove latency
+    subprocess.run([
+        'docker', 'exec', 'postgres',
+        'tc', 'qdisc', 'del', 'dev', 'eth0', 'root'
+    ])
+
+# Chaos experiment definition
+chaos_experiment = {
+    "title": "System resilience under network failures",
+    "description": "Test system behavior during network partitions",
+    "method": [
+        {
+            "type": "action",
+            "name": "introduce-network-partition",
+            "provider": {
+                "type": "python",
+                "module": "network_chaos",
+                "func": "simulate_network_partition"
+            }
+        }
+    ],
+    "steady-state-hypothesis": {
+        "title": "API Gateway is healthy",
+        "probes": [
+            {
+                "type": "probe",
+                "name": "api-gateway-health",
+                "tolerance": {
+                    "type": "http",
+                    "status": 200
+                },
+                "provider": {
+                    "type": "http",
+                    "url": "http://localhost:4000/health"
+                }
+            }
+        ]
+    }
+}
+```
+
+### 3. Database Migration Patterns
+
+#### Version-Safe Migrations
+
+```python
+# backend/shared/migrations/migration_base.py
+from abc import ABC, abstractmethod
+from typing import List, Dict
+import time
+
+class Migration(ABC):
+    """Base class for database migrations"""
+    
+    def __init__(self, connection):
+        self.connection = connection
+        self.batch_size = 1000
+        self.delay_between_batches = 0.1  # seconds
+    
+    @abstractmethod
+    def up(self):
+        """Apply migration"""
+        pass
+    
+    @abstractmethod
+    def down(self):
+        """Rollback migration"""
+        pass
+    
+    def backfill_in_batches(
+        self,
+        query: str,
+        log_progress: bool = True
+    ) -> int:
+        """Backfill data in small batches to avoid locking"""
+        total_updated = 0
+        
+        while True:
+            result = self.connection.execute(
+                query,
+                {'batch_size': self.batch_size}
+            )
+            
+            rows_updated = result.rowcount
+            total_updated += rows_updated
+            
+            if log_progress and rows_updated > 0:
+                print(f"Backfilled {total_updated} rows...")
+            
+            if rows_updated == 0:
+                break
+            
+            # Delay to reduce load
+            time.sleep(self.delay_between_batches)
+        
+        return total_updated
+    
+    def create_index_concurrently(
+        self,
+        table: str,
+        columns: List[str],
+        index_name: str
+    ):
+        """Create index without blocking writes"""
+        cols = ', '.join(columns)
+        self.connection.execute(f"""
+            CREATE INDEX CONCURRENTLY {index_name}
+            ON {table} ({cols})
+        """)
+
+# Example migration
+class AddUsernameColumn(Migration):
+    """Add username column to users table"""
+    
+    def up(self):
+        # Step 1: Add column (nullable initially)
+        self.connection.execute("""
+            ALTER TABLE users
+            ADD COLUMN IF NOT EXISTS username VARCHAR(50)
+        """)
+        
+        # Step 2: Create index concurrently
+        self.create_index_concurrently(
+            'users',
+            ['username'],
+            'idx_users_username'
+        )
+        
+        # Step 3: Backfill data
+        updated = self.backfill_in_batches("""
+            UPDATE users
+            SET username = user_name
+            WHERE username IS NULL
+            LIMIT %(batch_size)s
+        """)
+        
+        print(f"Backfilled {updated} users")
+        
+        # Step 4: Add NOT NULL constraint (after backfill)
+        # This should be done in a separate migration
+        # after verifying backfill completed
+    
+    def down(self):
+        self.connection.execute("""
+            DROP INDEX IF EXISTS idx_users_username
+        """)
+        self.connection.execute("""
+            ALTER TABLE users
+            DROP COLUMN IF EXISTS username
+        """)
+```
+
+### 4. Debugging Production Issues
+
+#### Structured Logging
+
+```typescript
+// backend/shared/logger.ts
+import winston from 'winston';
+import { ElasticsearchTransport } from 'winston-elasticsearch';
+
+const esTransport = new ElasticsearchTransport({
+  level: 'info',
+  clientOpts: { node: 'http://elasticsearch:9200' },
+  index: 'logs',
+});
+
+export const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: {
+    service: process.env.SERVICE_NAME,
+    environment: process.env.NODE_ENV,
+    version: process.env.APP_VERSION,
+  },
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    }),
+    esTransport,
+  ],
+});
+
+// Usage with structured data
+logger.info('Processing deployment', {
+  userId: 'user-123',
+  deploymentId: 'deploy-456',
+  template: 'web-server',
+  parameters: { count: 3 },
+  duration: 250,
+  traceId: 'trace-789',
+});
+
+// Error logging with context
+logger.error('Deployment failed', {
+  error: err.message,
+  stack: err.stack,
+  userId: 'user-123',
+  deploymentId: 'deploy-456',
+  traceId: 'trace-789',
+});
+```
+
+#### Remote Debugging
+
+```json
+// .vscode/launch.json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Docker: Attach to API Gateway",
+      "port": 9229,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}/backend/api-gateway",
+      "remoteRoot": "/app",
+      "protocol": "inspector",
+      "restart": true
+    },
+    {
+      "type": "python",
+      "request": "attach",
+      "name": "Docker: Attach to AI Orchestrator",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/backend/ai-orchestrator",
+          "remoteRoot": "/app"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Enable debugging in Docker**:
+```yaml
+# docker-compose.override.yml
+services:
+  api-gateway:
+    command: npm run debug
+    ports:
+      - "9229:9229"
+    environment:
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+  
+  ai-orchestrator:
+    command: python -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m uvicorn main:app
+    ports:
+      - "5678:5678"
+```
+
+---
+
+**Document Version**: 2.0 (Advanced Edition)  
 **Last Updated**: December 8, 2025  
 **Platform Version**: v3.0
