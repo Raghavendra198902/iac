@@ -1103,10 +1103,35 @@ function DashboardPage() {
 
       {/* Grafana Dashboards Section */}
       <div className="quick-links-section" style={{marginTop: '2rem'}}>
-        <h2>📊 Monitoring Dashboards</h2>
-        <p style={{color: '#94a3b8', marginBottom: '1.5rem', fontSize: '0.95rem'}}>
-          Real-time Grafana dashboards for comprehensive system monitoring
-        </p>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
+          <div>
+            <h2 style={{marginBottom: '0.5rem'}}>📊 Monitoring Dashboards</h2>
+            <p style={{color: '#94a3b8', fontSize: '0.95rem', margin: 0}}>
+              Real-time Grafana dashboards for comprehensive system monitoring
+            </p>
+          </div>
+          <Link 
+            to="/monitoring" 
+            className="btn-open-monitoring"
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '12px',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <span>🖥️</span>
+            Full Screen View
+          </Link>
+        </div>
         <div className="links-grid-modern">
           <a href="http://localhost:3020/d/iac-dharma-overview" target="_blank" rel="noopener noreferrer" className="link-card-modern dashboard-card">
             <div className="link-card-icon" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>📊</div>

@@ -7,6 +7,7 @@ import ServicesPage from './pages/ServicesPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import UserManagementPage from './pages/UserManagementPage'
+import MonitoringPage from './pages/MonitoringPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -16,6 +17,9 @@ function App() {
         {/* Auth Routes - No Layout */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Monitoring Route - Full Screen */}
+        <Route path="/monitoring" element={<MonitoringPage />} />
         
         {/* Main Routes - With Layout */}
         <Route path="/" element={<Layout />}>
