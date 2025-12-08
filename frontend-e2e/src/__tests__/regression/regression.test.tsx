@@ -16,6 +16,7 @@ import AdminLicense from '../../pages/Admin/AdminLicense';
 import CMDBAssets from '../../pages/CMDB/CMDBAssets';
 import CMDBConfigItems from '../../pages/CMDB/CMDBConfigItems';
 import CMDBRelationships from '../../pages/CMDB/CMDBRelationships';
+import AgentDownloads from '../../pages/Agents/AgentDownloads';
 
 const renderWithRouter = (component: React.ReactElement) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
@@ -685,6 +686,94 @@ describe('Regression Tests - Bug Prevention', () => {
       const escaped = searchTerm.replace(/[&<>"']/g, '');
       
       expect(escaped).not.toContain('<script>');
+    });
+  });
+
+  describe('Agent Downloads - Regression Tests', () => {
+    it('should maintain agent downloads page layout', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      expect(screen.getByText('Agent Downloads')).toBeInTheDocument();
+      expect(screen.getByText(/Download CMDB agents for your infrastructure monitoring needs/i)).toBeInTheDocument();
+    });
+
+    it('should preserve all agent cards after updates', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      expect(screen.getByText('Windows Agent')).toBeInTheDocument();
+      expect(screen.getByText('Windows CLI Tool')).toBeInTheDocument();
+      expect(screen.getByText('Windows Complete Package')).toBeInTheDocument();
+      expect(screen.getByText('Linux Agent')).toBeInTheDocument();
+      expect(screen.getByText('macOS Agent')).toBeInTheDocument();
+    });
+
+    it('should maintain platform filtering functionality', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      const windowsButton = screen.getByRole('button', { name: /windows/i });
+      fireEvent.click(windowsButton);
+      
+      expect(screen.getByText('Windows Agent')).toBeInTheDocument();
+      expect(screen.queryByText('Linux Agent')).not.toBeInTheDocument();
+    });
+
+    it('should preserve download button functionality', () => {
+      const mockOpen = vi.fn();
+      global.window.open = mockOpen;
+      
+      renderWithRouter(<AgentDownloads />);
+      
+      const downloadButtons = screen.getAllByRole('button', { name: /download/i });
+      fireEvent.click(downloadButtons[0]);
+      
+      expect(mockOpen).toHaveBeenCalled();
+    });
+
+    it('should maintain installation instructions display', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      expect(screen.getByText('Windows Installation')).toBeInTheDocument();
+      expect(screen.getByText('Linux Installation')).toBeInTheDocument();
+      expect(screen.getByText(/Invoke-WebRequest/)).toBeInTheDocument();
+      expect(screen.getByText(/wget/)).toBeInTheDocument();
+    });
+
+    it('should preserve agent features section', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      expect(screen.getByText('Agent Features')).toBeInTheDocument();
+      expect(screen.getByText('System Inventory')).toBeInTheDocument();
+      expect(screen.getByText('Security Monitoring')).toBeInTheDocument();
+      expect(screen.getByText('CLI Management')).toBeInTheDocument();
+    });
+
+    it('should maintain file size display format', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      expect(screen.getByText('8.5 MB')).toBeInTheDocument();
+      expect(screen.getByText('5.9 MB')).toBeInTheDocument();
+      expect(screen.getByText('6.0 MB')).toBeInTheDocument();
+    });
+
+    it('should preserve version number display', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      const versions = screen.getAllByText('v1.0.0');
+      expect(versions.length).toBe(5); // 5 agents
+    });
+
+    it('should maintain checksum display', () => {
+      renderWithRouter(<AgentDownloads />);
+      
+      const checksums = screen.getAllByText(/SHA256:/);
+      expect(checksums.length).toBeGreaterThan(0);
+    });
+
+    it('should preserve responsive grid layout', () => {
+      const { container } = renderWithRouter(<AgentDownloads />);
+      
+      const gridElements = container.querySelectorAll('.grid');
+      expect(gridElements.length).toBeGreaterThan(0);
     });
   });
 });

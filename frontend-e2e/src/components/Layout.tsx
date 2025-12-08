@@ -214,6 +214,11 @@ const navigation: NavItem[] = [
     ],
   },
   {
+    name: 'Agents',
+    path: '/agents/downloads',
+    icon: ServerIcon,
+  },
+  {
     name: 'Settings',
     path: '/settings',
     icon: Cog6ToothIcon,

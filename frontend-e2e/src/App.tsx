@@ -86,6 +86,7 @@ const Admin = lazy(() => import('./pages/Admin'));
 const AdminSystem = lazy(() => import('./pages/Admin/AdminSystem'));
 const AdminLicense = lazy(() => import('./pages/Admin/AdminLicense'));
 const AdminBackup = lazy(() => import('./pages/Admin/AdminBackup'));
+const AgentDownloads = lazy(() => import('./pages/Agents/AgentDownloads'));
 
 function App() {
   return (
@@ -175,6 +176,7 @@ function App() {
                   <Route path="/admin/system" element={<AdminSystem />} />
                   <Route path="/admin/license" element={<AdminLicense />} />
                   <Route path="/admin/backup" element={<AdminBackup />} />
+                  <Route path="/agents/downloads" element={<AgentDownloads />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
