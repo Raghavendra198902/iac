@@ -5,7 +5,7 @@ import {
   XCircleIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   UserGroupIcon,
   LockClosedIcon,
   DevicePhoneMobileIcon,
@@ -208,7 +208,7 @@ const SecurityCompliance: React.FC = () => {
               </div>
             </div>
             <div className="text-right">
-              <TrendingUpIcon className="w-16 h-16 text-white/80 mb-2" />
+              <ArrowTrendingUpIcon className="w-16 h-16 text-white/80 mb-2" />
               <p className="text-white/80 text-sm">Compliance Level</p>
               <p className="text-3xl font-bold text-white">{compliance.compliance_level}</p>
             </div>
