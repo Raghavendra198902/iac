@@ -2,6 +2,7 @@ package collectors
 
 import (
 	"context"
+	"runtime"
 
 	"github.com/iac/cmdb-agent/internal/config"
 	"github.com/iac/cmdb-agent/internal/logger"
@@ -33,6 +34,16 @@ func NewManager(log *logger.Logger, cfg *config.Config) *Manager {
 	m.Register(NewServiceCollector(log))
 	m.Register(NewUserCollector(log))
 	m.Register(NewCertificateCollector(log))
+
+	// Register Windows-specific collectors
+	if runtime.GOOS == "windows" {
+		m.Register(NewWindowsRegistryCollector(log))
+		m.Register(NewWindowsEventLogCollector(log))
+		m.Register(NewWindowsPerformanceCollector(log))
+		m.Register(NewWindowsSecurityCollector(log))
+		m.Register(NewWindowsWMICollector(log))
+		log.Info("Registered Windows-specific collectors", "count", 5)
+	}
 
 	return m
 }
