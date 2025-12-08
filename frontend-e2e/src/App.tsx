@@ -62,6 +62,10 @@ const SE = lazy(() => import('./pages/SE'));
 const SEDevelopment = lazy(() => import('./pages/SE/SEDevelopment'));
 const SEQuality = lazy(() => import('./pages/SE/SEQuality'));
 const SERelease = lazy(() => import('./pages/SE/SERelease'));
+const CMDB = lazy(() => import('./pages/CMDB'));
+const CMDBAssets = lazy(() => import('./pages/CMDB/CMDBAssets'));
+const CMDBConfigItems = lazy(() => import('./pages/CMDB/CMDBConfigItems'));
+const CMDBRelationships = lazy(() => import('./pages/CMDB/CMDBRelationships'));
 
 function App() {
   return (
@@ -127,6 +131,10 @@ function App() {
                   <Route path="/se/development" element={<SEDevelopment />} />
                   <Route path="/se/quality" element={<SEQuality />} />
                   <Route path="/se/release" element={<SERelease />} />
+                  <Route path="/cmdb" element={<CMDB />} />
+                  <Route path="/cmdb/assets" element={<CMDBAssets />} />
+                  <Route path="/cmdb/config-items" element={<CMDBConfigItems />} />
+                  <Route path="/cmdb/relationships" element={<CMDBRelationships />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
