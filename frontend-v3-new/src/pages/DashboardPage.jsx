@@ -1074,14 +1074,6 @@ function DashboardPage() {
             </div>
             <div className="link-card-arrow">→</div>
           </a>
-          <a href="http://localhost:3020" target="_blank" rel="noopener noreferrer" className="link-card-modern">
-            <div className="link-card-icon">📊</div>
-            <div className="link-card-content">
-              <h3>Grafana Dashboards</h3>
-              <p>Monitor system metrics</p>
-            </div>
-            <div className="link-card-arrow">→</div>
-          </a>
           <a href="http://localhost:5000" target="_blank" rel="noopener noreferrer" className="link-card-modern">
             <div className="link-card-icon">🧠</div>
             <div className="link-card-content">
@@ -1095,6 +1087,72 @@ function DashboardPage() {
             <div className="link-card-content">
               <h3>Neo4j Browser</h3>
               <p>Query graph database</p>
+            </div>
+            <div className="link-card-arrow">→</div>
+          </a>
+          <a href="http://localhost:3020" target="_blank" rel="noopener noreferrer" className="link-card-modern">
+            <div className="link-card-icon">📈</div>
+            <div className="link-card-content">
+              <h3>Grafana Home</h3>
+              <p>Access all monitoring dashboards</p>
+            </div>
+            <div className="link-card-arrow">→</div>
+          </a>
+        </div>
+      </div>
+
+      {/* Grafana Dashboards Section */}
+      <div className="quick-links-section" style={{marginTop: '2rem'}}>
+        <h2>📊 Monitoring Dashboards</h2>
+        <p style={{color: '#94a3b8', marginBottom: '1.5rem', fontSize: '0.95rem'}}>
+          Real-time Grafana dashboards for comprehensive system monitoring
+        </p>
+        <div className="links-grid-modern">
+          <a href="http://localhost:3020/d/iac-dharma-overview" target="_blank" rel="noopener noreferrer" className="link-card-modern dashboard-card">
+            <div className="link-card-icon" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>📊</div>
+            <div className="link-card-content">
+              <h3>Platform Overview</h3>
+              <p>Services health, request rates, CPU & memory</p>
+              <div className="dashboard-stats">
+                <span className="badge-mini">Live</span>
+                <span className="badge-mini">Auto-refresh</span>
+              </div>
+            </div>
+            <div className="link-card-arrow">→</div>
+          </a>
+          <a href="http://localhost:3020/d/iac-api-gateway" target="_blank" rel="noopener noreferrer" className="link-card-modern dashboard-card">
+            <div className="link-card-icon" style={{background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'}}>🚀</div>
+            <div className="link-card-content">
+              <h3>API Gateway</h3>
+              <p>Request metrics, response times, status codes</p>
+              <div className="dashboard-stats">
+                <span className="badge-mini">Live</span>
+                <span className="badge-mini">10s refresh</span>
+              </div>
+            </div>
+            <div className="link-card-arrow">→</div>
+          </a>
+          <a href="http://localhost:3020/d/iac-aiops-ml" target="_blank" rel="noopener noreferrer" className="link-card-modern dashboard-card">
+            <div className="link-card-icon" style={{background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'}}>🤖</div>
+            <div className="link-card-content">
+              <h3>AIOps & ML</h3>
+              <p>Predictions, anomalies, model accuracy</p>
+              <div className="dashboard-stats">
+                <span className="badge-mini">Live</span>
+                <span className="badge-mini">30s refresh</span>
+              </div>
+            </div>
+            <div className="link-card-arrow">→</div>
+          </a>
+          <a href="http://localhost:3020/d/iac-infrastructure" target="_blank" rel="noopener noreferrer" className="link-card-modern dashboard-card">
+            <div className="link-card-icon" style={{background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'}}>🖥️</div>
+            <div className="link-card-content">
+              <h3>Infrastructure</h3>
+              <p>Container resources, network & disk I/O</p>
+              <div className="dashboard-stats">
+                <span className="badge-mini">Live</span>
+                <span className="badge-mini">30s refresh</span>
+              </div>
             </div>
             <div className="link-card-arrow">→</div>
           </a>
