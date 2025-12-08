@@ -68,9 +68,6 @@ active_alerts = Gauge(
     registry=registry
 )
 
-# Initialize Instrumentator for automatic HTTP metrics
-Instrumentator().instrument(app).expose(app, endpoint="/metrics")
-
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
@@ -79,6 +76,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize Instrumentator for automatic HTTP metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # Logging configuration
 logging.basicConfig(
@@ -285,6 +285,11 @@ async def health_check():
         predictions_today=1543,
         remediations_today=42
     )
+
+@app.get("/metrics", tags=["Metrics"])
+async def metrics():
+    """Prometheus metrics endpoint"""
+    return Response(content=generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
 
 # ============================================================================
 # Prediction Endpoints

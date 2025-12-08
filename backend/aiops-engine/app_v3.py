@@ -5,12 +5,13 @@ Enhanced with Real ML Models
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, Response
 from typing import Dict, Any
 from datetime import datetime
 import logging
 import uuid
 import os
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Import ML models
 from models.failure_predictor import FailurePredictor
@@ -56,6 +57,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # Logging
 logging.basicConfig(level=logging.INFO)
