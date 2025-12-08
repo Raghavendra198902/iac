@@ -2,6 +2,7 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  scrape_timeout: 10s
   external_labels:
     cluster: 'iac-v3'
     environment: 'production'
@@ -25,71 +26,187 @@ scrape_configs:
       - targets: ['localhost:9090']
         labels:
           service: 'prometheus'
-
-  # PostgreSQL v3 Database
-  - job_name: 'postgres-v3'
-    static_configs:
-      - targets: ['postgres-v3:5432']
-        labels:
-          service: 'postgres'
-          tier: 'database'
-
-  # AIOps Engine v3
-  - job_name: 'aiops-engine-v3'
-    metrics_path: '/api/v3/aiops/metrics'
-    static_configs:
-      - targets: ['aiops-engine-v3:8100']
-        labels:
-          service: 'aiops'
-          tier: 'ml'
-
-  # User Management Service
-  - job_name: 'user-management-v3'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: ['user-management-v3:3025']
-        labels:
-          service: 'user-management'
-          tier: 'backend'
+          tier: 'monitoring'
 
   # API Gateway v3
   - job_name: 'api-gateway-v3'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['api-gateway-v3:3000']
+      - targets: ['iac-api-gateway-v3:4000']
         labels:
           service: 'api-gateway'
           tier: 'gateway'
+          version: 'v3'
 
-  # Frontend v3
-  - job_name: 'frontend-v3'
+  # Zero Trust Security
+  - job_name: 'zero-trust-security-v3'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['frontend-v3:80']
+      - targets: ['iac-zero-trust-security-v3:8500']
         labels:
-          service: 'frontend'
-          tier: 'ui'
+          service: 'zero-trust-security'
+          tier: 'security'
+          version: 'v3'
 
-  # Kafka v3
+  # User Management Service (if exists)
+  - job_name: 'user-management-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-user-management-v3:3025']
+        labels:
+          service: 'user-management'
+          tier: 'backend'
+          version: 'v3'
+
+  # AIOps Engine v3
+  - job_name: 'aiops-engine-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-aiops-engine-v3:8100']
+        labels:
+          service: 'aiops-engine'
+          tier: 'ml'
+          version: 'v3'
+
+  # AI Orchestrator v3
+  - job_name: 'ai-orchestrator-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-ai-orchestrator-v3:8200']
+        labels:
+          service: 'ai-orchestrator'
+          tier: 'ai'
+          version: 'v3'
+
+  # Self-Healing Engine v3
+  - job_name: 'self-healing-engine-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-self-healing-engine-v3:8300']
+        labels:
+          service: 'self-healing-engine'
+          tier: 'automation'
+          version: 'v3'
+
+  # Multi-Cloud Optimizer v3
+  - job_name: 'multi-cloud-optimizer-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-multi-cloud-optimizer-v3:8400']
+        labels:
+          service: 'multi-cloud-optimizer'
+          tier: 'optimization'
+          version: 'v3'
+
+  # Chaos Engineering v3
+  - job_name: 'chaos-engineering-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-chaos-engineering-v3:8600']
+        labels:
+          service: 'chaos-engineering'
+          tier: 'testing'
+          version: 'v3'
+
+  # CMDB Agent v3
+  - job_name: 'cmdb-agent-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-cmdb-agent-v3:8700']
+        labels:
+          service: 'cmdb-agent'
+          tier: 'discovery'
+          version: 'v3'
+
+  # Observability Suite v3
+  - job_name: 'observability-suite-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-observability-suite-v3:8800']
+        labels:
+          service: 'observability-suite'
+          tier: 'monitoring'
+          version: 'v3'
+
+  # PostgreSQL Exporter (if available)
+  - job_name: 'postgres-v3'
+    static_configs:
+      - targets: ['iac-postgres-v3:5432']
+        labels:
+          service: 'postgres'
+          tier: 'database'
+          version: 'v3'
+
+  # Redis Exporter (if available)
+  - job_name: 'redis-v3'
+    static_configs:
+      - targets: ['iac-redis-v3:6379']
+        labels:
+          service: 'redis'
+          tier: 'cache'
+          version: 'v3'
+
+  # Kafka JMX Exporter (if available)
   - job_name: 'kafka-v3'
     static_configs:
-      - targets: ['kafka-v3:9092']
+      - targets: ['iac-kafka-v3:9092']
         labels:
           service: 'kafka'
           tier: 'messaging'
+          version: 'v3'
+
+  # Neo4j Metrics (if available)
+  - job_name: 'neo4j-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-neo4j-v3:2004']
+        labels:
+          service: 'neo4j'
+          tier: 'database'
+          version: 'v3'
 
   # MLflow
   - job_name: 'mlflow-v3'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: ['mlflow-v3:5000']
+      - targets: ['iac-mlflow-v3:5000']
         labels:
           service: 'mlflow'
-          tier: 'ml'
+          tier: 'ml-tracking'
+          version: 'v3'
 
   # Grafana
   - job_name: 'grafana-v3'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: ['grafana-v3:3000']
+      - targets: ['iac-grafana-v3:3000']
         labels:
           service: 'grafana'
+          tier: 'monitoring'
+          version: 'v3'
+
+  # Frontend v3 (if it has metrics endpoint)
+  - job_name: 'frontend-v3'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iac-frontend-v3:80']
+        labels:
+          service: 'frontend'
+          tier: 'ui'
+          version: 'v3'
+
+  # Docker cAdvisor for container metrics (if available)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+          tier: 'monitoring'
+
+  # Node Exporter for host metrics (if available)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
           tier: 'monitoring'
