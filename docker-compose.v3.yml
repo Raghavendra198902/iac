@@ -60,6 +60,36 @@ services:
       timeout: 3s
       retries: 5
 
+  # PostgreSQL Exporter for Prometheus
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: iac-postgres-exporter-v3
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://iacadmin:${POSTGRES_PASSWORD:-iacadmin123}@iac-postgres-v3:5432/iac_v3?sslmode=disable"
+    networks:
+      - iac-v3-network
+    depends_on:
+      postgres-v3:
+        condition: service_healthy
+
+  # Redis Exporter for Prometheus
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: iac-redis-exporter-v3
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: "iac-redis-v3:6379"
+    networks:
+      - iac-v3-network
+    depends_on:
+      redis-v3:
+        condition: service_healthy
+
   # Zookeeper
   zookeeper-v3:
     image: confluentinc/cp-zookeeper:7.5.3

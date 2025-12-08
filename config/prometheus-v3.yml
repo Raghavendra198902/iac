@@ -137,10 +137,19 @@ scrape_configs:
           tier: 'database'
           version: 'v3'
 
-  # Redis Exporter (if available)
-  - job_name: 'redis-v3'
+  # PostgreSQL via Postgres Exporter
+  - job_name: 'postgres-exporter'
     static_configs:
-      - targets: ['iac-redis-v3:6379']
+      - targets: ['iac-postgres-exporter-v3:9187']
+        labels:
+          service: 'postgres'
+          tier: 'database'
+          version: 'v3'
+
+  # Redis via Redis Exporter
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['iac-redis-exporter-v3:9121']
         labels:
           service: 'redis'
           tier: 'cache'
