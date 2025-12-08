@@ -31,6 +31,7 @@ const Security = lazy(() => import('./pages/Security'));
 const SecurityCompliance = lazy(() => import('./pages/Security/SecurityCompliance'));
 const SecurityAudit = lazy(() => import('./pages/Security/SecurityAudit'));
 const SecurityAccess = lazy(() => import('./pages/Security/SecurityAccess'));
+const Cost = lazy(() => import('./pages/Cost'));
 const CostAnalytics = lazy(() => import('./pages/Cost/CostAnalytics'));
 const CostBudget = lazy(() => import('./pages/Cost/CostBudget'));
 const CostOptimization = lazy(() => import('./pages/Cost/CostOptimization'));
@@ -70,6 +71,7 @@ function App() {
                   <Route path="/security/compliance" element={<SecurityCompliance />} />
                   <Route path="/security/audit" element={<SecurityAudit />} />
                   <Route path="/security/access" element={<SecurityAccess />} />
+                  <Route path="/cost" element={<Cost />} />
                   <Route path="/cost/analytics" element={<CostAnalytics />} />
                   <Route path="/cost/budget" element={<CostBudget />} />
                   <Route path="/cost/optimization" element={<CostOptimization />} />
