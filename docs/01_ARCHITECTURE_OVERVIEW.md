@@ -147,13 +147,358 @@
 
 ### 1. Request Flow - User to Infrastructure (Advanced Multi-Path)
 
+```mermaid
+flowchart TB
+    Start([User Request<br/>HTTP/GraphQL/WebSocket<br/>X-Request-ID: req-abc123<br/>X-Trace-ID: trace-xyz789]) --> Gateway[API Gateway Layer<br/>Port 4000<br/>3ms]
+    
+    subgraph Gateway_Layer["API GATEWAY LAYER (Port 4000)"]
+        Gateway --> ConnPool{Connection Pool<br/>45/100 active<br/>1ms}
+        ConnPool -->|Capacity Available| RateLimit[Rate Limiter<br/>Redis Cluster<br/>2ms]
+        ConnPool -->|Pool Full| Error503[503 Service Unavailable<br/>Queue 30s or Reject]
+        
+        RateLimit --> RateCheck{Within Limits?<br/>IP: 342/1000<br/>User: 5000/h<br/>API Key: 10k/day}
+        RateCheck -->|✓ YES Pass| CacheLookup[Cache Lookup<br/>Redis<br/>2ms]
+        RateCheck -->|✗ NO Exceeded| Error429[429 Too Many Requests<br/>retry-after: 60s<br/>2ms]
+        
+        CacheLookup --> CacheHit{Cache Hit?<br/>Key: hash endpoint+params+user}
+        CacheHit -->|✓ YES 15%| FastReturn[Fast Return Cached Data<br/>X-Cache: HIT<br/>TTL: 60s<br/>Total: 8ms]
+        CacheHit -->|✗ NO 85%| Validation[Request Validation<br/>2ms]
+        
+        Validation --> ValidCheck{Valid Request?<br/>• Parse Headers<br/>• Parse Body<br/>• Schema v3.0<br/>• Content-Type}
+        ValidCheck -->|✓ YES Pass| Security
+        ValidCheck -->|✗ NO Invalid| Error400[400 Bad Request<br/>Validation errors<br/>2ms]
+    end
+    
+    subgraph Security_Layer["ZERO TRUST SECURITY LAYER (Port 8500)"]
+        Security[Identity & Context<br/>Extraction<br/>5ms] --> JWTParse[Parse JWT<br/>1ms]
+        JWTParse --> TokenVerify[Verify Token<br/>2ms]
+        TokenVerify --> TokenValid{Token Valid?}
+        TokenValid -->|✗ NO| Error401[401 Unauthorized<br/>Token expired/invalid<br/>7ms]
+        TokenValid -->|✓ YES| ExtractClaims[Extract Claims<br/>1ms]
+        ExtractClaims --> EnrichContext[Enrich Context<br/>3ms]
+        
+        EnrichContext --> ParallelTrust[Parallel Trust Scoring<br/>12ms Async]
+        
+        subgraph TrustScoring["Trust Score Calculation (Parallel)"]
+            ParallelTrust --> Device[Device Posture 35%<br/>OS, Patches, Encryption<br/>Compliance, Security SW<br/>Score: 98.0<br/>4ms]
+            ParallelTrust --> User[User Behavior 40%<br/>MFA, Auth Freshness<br/>History, Failed Attempts<br/>Score: 100.0<br/>5ms]
+            ParallelTrust --> Context[Context Trust 25%<br/>Time, IP, Geo<br/>Risk, Network<br/>Score: 75.0<br/>3ms]
+        end
+        
+        Device --> Aggregate[Aggregate Score<br/>98×0.35 + 100×0.40 + 75×0.25<br/>= 93.05<br/>Trust Level: FULL]
+        User --> Aggregate
+        Context --> Aggregate
+        
+        Aggregate --> PolicyEval[Policy Evaluation<br/>3ms]
+        PolicyEval --> MatchPolicy[Match Policy<br/>by Pattern<br/>1ms]
+        MatchPolicy --> CheckRoles[Check Roles<br/>& Permissions<br/>1ms]
+        CheckRoles --> VerifyTrust[Verify Trust<br/>Level<br/>1ms]
+        
+        VerifyTrust --> AccessDecision{Access Decision?<br/>Trust Score 93.05}
+        AccessDecision -->|✓ ALLOW ≥90<br/>Full Access| AuditLog[Audit & Logging<br/>PostgreSQL + Kafka<br/>2ms]
+        AccessDecision -->|⚠ CHALLENGE 60-74<br/>MFA Required| Error403MFA[403 MFA Challenge<br/>20ms]
+        AccessDecision -->|✗ DENY <60<br/>Blocked| Error403[403 Forbidden<br/>Access Denied<br/>20ms]
+    end
+    
+    subgraph Routing_Layer["SERVICE ROUTING LAYER"]
+        AuditLog --> LoadBalancer[Intelligent Load Balancer<br/>• Round Robin default<br/>• Least Connections<br/>• Weighted Distribution<br/>• Health-based Routing]
+        
+        LoadBalancer --> AIOrch[AI Orchestrator<br/>:8000]
+        LoadBalancer --> AIOps[AIOps Engine<br/>:8100]
+        LoadBalancer --> SelfHeal[Self-Healing<br/>:8200]
+        LoadBalancer --> Chaos[Chaos Eng.<br/>:8300]
+        LoadBalancer --> CostOpt[Cost Optimizer<br/>:8400]
+        LoadBalancer --> CMDB[CMDB Agent<br/>:8600]
+    end
+    
+    subgraph Processing["SERVICE PROCESSING PIPELINE (50-200ms)"]
+        AIOrch --> BizLogic[Business Logic<br/>Input Validation<br/>Permission Check<br/>Resource Allocation]
+        AIOps --> BizLogic
+        SelfHeal --> BizLogic
+        Chaos --> BizLogic
+        CostOpt --> BizLogic
+        CMDB --> BizLogic
+        
+        BizLogic --> DataLayer[Data Access Parallel<br/>PostgreSQL 15ms<br/>Neo4j 25ms<br/>Redis 2ms<br/>TimescaleDB 10ms]
+        
+        DataLayer --> ExtIntegrations[External Integrations<br/>ML Models 45-200ms<br/>Cloud APIs 100-500ms<br/>Third-party varies]
+        
+        ExtIntegrations --> EventPub[Event Publishing Async<br/>Kafka Topics<br/>infrastructure-events<br/>cost-events<br/>security-events]
+        
+        EventPub --> ResponseAsm[Response Assembly<br/>Format JSON/GraphQL<br/>Add Metadata<br/>Cache Result TTL 60s<br/>Emit Metrics]
+    end
+    
+    subgraph Response["RESPONSE PIPELINE (10ms)"]
+        ResponseAsm --> Compress[Compression gzip<br/>50KB → 8KB 84%]
+        Compress --> Headers[Add Response Headers<br/>X-Response-Time: 145ms<br/>X-Request-ID: req-abc123<br/>Cache-Control: max-age=60<br/>ETag: abc123def456]
+        Headers --> Metrics[Metrics & Tracing Async<br/>Prometheus: duration_ms<br/>Jaeger: span complete<br/>Log: access.log]
+    end
+    
+    Metrics --> FinalResponse([HTTP 200 OK<br/>Response to Client<br/><br/>Total Time:<br/>145ms p50<br/>285ms p95])
+    
+    FastReturn -.Cache Hit Path.-> FinalResponse
+    
+    subgraph Monitoring["PARALLEL MONITORING & OBSERVABILITY"]
+        Mon1[Prometheus Metrics<br/>→ Grafana Real-time]
+        Mon2[Jaeger Traces<br/>→ Distributed Tracing UI]
+        Mon3[Elasticsearch Logs<br/>→ Kibana Analysis]
+        Mon4[Kafka Events<br/>→ Stream Processing Flink]
+    end
+    
+    subgraph Errors["ERROR HANDLING PATHS"]
+        Err1[Connection Pool Full → 503]
+        Err2[Rate Limit Exceeded → 429]
+        Err3[Invalid Request → 400]
+        Err4[Authentication Failed → 401]
+        Err5[Authorization Denied → 403]
+        Err6[Service Unavailable → 503]
+        Err7[Internal Server Error → 500]
+        Err8[Gateway Timeout → 504]
+    end
+    
+    subgraph CircuitBreaker["CIRCUIT BREAKER STATES"]
+        CB1[CLOSED<br/>Normal operation<br/>failure rate < 20%]
+        CB2[OPEN<br/>Failing reject immediately<br/>30s timeout]
+        CB3[HALF_OPEN<br/>Testing<br/>3 probe requests]
+        CB1 -->|Failure| CB2
+        CB2 -->|Timer| CB3
+        CB3 -->|Success| CB1
+        CB3 -->|Failure| CB2
+    end
+    
+    style Start fill:#e1f5ff
+    style FinalResponse fill:#c8e6c9
+    style Error503 fill:#ffcdd2
+    style Error429 fill:#ffcdd2
+    style Error400 fill:#ffcdd2
+    style Error401 fill:#ffcdd2
+    style Error403 fill:#ffcdd2
+    style Error403MFA fill:#fff9c4
+    style FastReturn fill:#c8e6c9
+    style Gateway_Layer fill:#e3f2fd
+    style Security_Layer fill:#fff3e0
+    style Routing_Layer fill:#f3e5f5
+    style Processing fill:#e8f5e9
+    style Response fill:#e0f2f1
+    style Monitoring fill:#fce4ec
+    style Errors fill:#ffebee
+    style CircuitBreaker fill:#e8eaf6
 ```
-                        ┌────────────────────────────────────────┐
-                        │         USER REQUEST                    │
-                        │  HTTP/GraphQL/WebSocket                 │
-                        │  X-Request-ID: req-abc123               │
-                        │  X-Trace-ID: trace-xyz789               │
-                        └──────────────┬─────────────────────────┘
+
+**Performance Metrics:**
+- Cache Hit Rate: 15% (8ms response)
+- Cache Miss Rate: 85% (145ms p50, 285ms p95)
+- Security Layer: ~30ms
+- Service Processing: 50-200ms average
+- Total End-to-End: 145ms median, 285ms 95th percentile
+
+**Key Decision Points:**
+1. Connection Pool: Capacity check (accept/queue/reject)
+2. Rate Limiter: Within limits check (pass/reject 429)
+3. Cache: Hit/miss path (8ms vs 145ms)
+4. Token: Valid/invalid (continue/401)
+5. Trust Score: 93.05 → ALLOW (≥90=Full, 75-89=Limited, 60-74=MFA, <60=Deny)
+6. Circuit Breaker: CLOSED/OPEN/HALF_OPEN state transitions
+
+---
+
+### 2. AI Orchestrator - Natural Language Processing Flow (Advanced Decision Tree)
+
+```mermaid
+flowchart TB
+    Input([User Input: Natural Language<br/>Deploy 3 web servers with load balancer<br/>in AWS us-east-1 region]) --> Stage1
+    
+    subgraph Stage1["STAGE 1: INPUT PREPROCESSING & VALIDATION (10ms)"]
+        Stage1Start[Start Processing<br/>0ms] --> Normalize[Text Normalization<br/>• Lowercase<br/>• Remove special chars<br/>• Expand contractions<br/>• Spell check<br/>2ms]
+        
+        Normalize --> LangDetect[Language Detection<br/>5ms]
+        LangDetect --> LangValid{Supported?<br/>EN/ES/FR/DE}
+        LangValid -->|✗ NO| ErrLang[ERROR: Please use English]
+        LangValid -->|✓ YES<br/>English 0.99| InputCheck[Input Length Check<br/>3ms]
+        
+        InputCheck --> LengthValid{Valid Length?<br/>62 chars<br/>12 tokens<br/>Complexity: 0.4}
+        LengthValid -->|✗ NO<br/>Too short/long| ErrInput[ERROR: Invalid input]
+        LengthValid -->|✓ YES Simple| Stage2
+    end
+    
+    subgraph Stage2["STAGE 2: NLI PROCESSING & INTENT CLASSIFICATION (40ms)"]
+        Stage2Start[NLI Engine Start] --> Tokenize[Tokenization & POS Tagging<br/>deploy/VERB three/NUM<br/>web/NOUN servers/NOUN<br/>5ms]
+        
+        Tokenize --> NER[Named Entity Recognition<br/>BERT Model<br/>15ms]
+        
+        NER --> Entities[Entities Extracted:<br/>• web servers → INFRASTRUCTURE 0.94<br/>• 3 three → NUMBER 0.99<br/>• load balancer → INFRASTRUCTURE 0.91<br/>• AWS → CLOUD_PROVIDER 0.98<br/>• us-east-1 → REGION 0.97]
+        
+        Entities --> ConfCheck{Confidence > 0.85<br/>all entities?}
+        ConfCheck -->|⚠ NO<br/><0.70| Clarify[REQUEST CLARIFICATION<br/>Did you mean: load balancer<br/>or load sharing?<br/>Accept/Reject/Rephrase]
+        ConfCheck -->|✓ YES<br/>High conf| IntentClass[Intent Classification<br/>Multi-label Classifier<br/>20ms]
+        
+        IntentClass --> PrimaryIntent[Primary Intent:<br/>DEPLOY 0.95 ✓<br/>Alternatives:<br/>CREATE 0.88<br/>PROVISION 0.82]
+        
+        PrimaryIntent --> ResourceType[Resource Type:<br/>COMPUTE 0.92 ✓<br/>NETWORKING 0.89 ✓]
+        
+        ResourceType --> IntentConf{Intent Confidence?}
+        IntentConf -->|≥0.90 HIGH| Stage3
+        IntentConf -->|0.70-0.89 MEDIUM| ShowAlts[Show Alternatives<br/>Ask user to choose]
+        IntentConf -->|<0.70 LOW| ReqClarif[Request Clarification<br/>with suggestions]
+    end
+    
+    subgraph Stage3["STAGE 3: CONTEXT ENRICHMENT (35ms Parallel)"]
+        Stage3Start[Context Enrichment] --> ParallelQueries
+        
+        ParallelQueries --> CMDB[CMDB Query<br/>20ms<br/>✓ us-east-1a VPC subnet<br/>✓ No conflict]
+        ParallelQueries --> Perms[User Permissions<br/>8ms<br/>✓ Can deploy AWS<br/>✓ us-east-1 authorized]
+        ParallelQueries --> Creds[Provider Credentials<br/>12ms<br/>✓ AWS Account xxxx-1234<br/>✓ IAM Role valid]
+        ParallelQueries --> Defaults[Load Defaults<br/>5ms<br/>✓ t3.medium<br/>✓ Ubuntu 22.04<br/>✓ SG: default]
+        
+        CMDB --> PrereqCheck{Prerequisites Met?}
+        Perms --> PrereqCheck
+        Creds --> PrereqCheck
+        Defaults --> PrereqCheck
+        
+        PrereqCheck -->|✓ YES All OK| Stage4
+        PrereqCheck -->|⚠ PARTIAL<br/>No VPC| OfferVPC[OFFER: Create VPC first?<br/>YES/NO]
+        PrereqCheck -->|✗ NO<br/>Missing perms| ErrPerms[ERROR: Insufficient permissions]
+    end
+    
+    subgraph Stage4["STAGE 4: TEMPLATE SELECTION & CODE GENERATION (100ms)"]
+        Stage4Start[Template Engine] --> TemplateMatch[Template Matching<br/>Decision Tree<br/>15ms]
+        
+        TemplateMatch --> FilterProvider{Filter by Provider}
+        FilterProvider --> AWSTemplates[AWS → 23 templates]
+        FilterProvider --> AzureTemplates[Azure → 15 templates]
+        FilterProvider --> GCPTemplates[GCP → 9 templates]
+        
+        AWSTemplates --> FilterType{Filter by Type<br/>COMPUTE + NETWORKING}
+        FilterType --> Candidates[8 Candidates:<br/>• aws_ec2_basic.tf 0.65<br/>• aws_ec2_with_alb.tf 0.95 ✓ BEST<br/>• aws_ec2_with_nlb.tf 0.82<br/>• aws_asg_with_alb.tf 0.78<br/>• aws_ecs_fargate.tf 0.42]
+        
+        Candidates --> SelectedTemplate[Selected:<br/>aws_ec2_with_alb.tf<br/>Confidence: 0.95]
+        
+        SelectedTemplate --> ParamInfer[Parameter Inference<br/>30ms]
+        
+        ParamInfer --> ExplicitParams[Explicit Parameters:<br/>✓ instance_count: 3<br/>✓ region: us-east-1<br/>✓ provider: aws<br/>✓ enable_lb: true]
+        
+        ExplicitParams --> InferredParams[Inferred Parameters ML:<br/>⚙ instance_type: t3.medium 0.87<br/>⚙ ami_id: Ubuntu 22.04<br/>⚙ lb_type: application<br/>⚙ health_check: /health<br/>⚙ key_pair: user-keypair-123]
+        
+        InferredParams --> MissingParams{Missing Params?}
+        MissingParams -->|None or Auto| CodeGen[Terraform Code Gen<br/>40ms<br/>247 lines<br/>VPC, Subnets, SG<br/>EC2, ALB, Target Group]
+        MissingParams -->|AZ preference?| AutoSelect[Auto-select:<br/>us-east-1a, 1b, 1c]
+        
+        AutoSelect --> CodeGen
+        CodeGen --> Validate[Code Validation<br/>15ms]
+        
+        Validate --> TFValidation[• terraform fmt ✓<br/>• terraform validate ✓<br/>• tflint security ✓<br/>• best practices ⚠ 1 warning]
+        
+        TFValidation --> Stage5
+    end
+    
+    subgraph Stage5["STAGE 5: COST ESTIMATION & OPTIMIZATION (45ms)"]
+        Stage5Start[Cost Optimizer Service] --> CalcCost[Resource Cost Calculation]
+        
+        CalcCost --> EC2Cost[EC2 t3.medium × 3<br/>Compute: $91.10/mo<br/>EBS 100GB × 3: $24.00/mo<br/>Subtotal: $115.10/mo]
+        
+        CalcCost --> ALBCost[Application Load Balancer<br/>ALB Hour: $16.43/mo<br/>LCU: $5.50/mo<br/>Subtotal: $21.93/mo]
+        
+        CalcCost --> DataCost[Data Transfer<br/>Inter-AZ: $8.00/mo<br/>Internet 10GB: $0.90/mo<br/>Subtotal: $8.90/mo]
+        
+        EC2Cost --> TotalCost[TOTAL ESTIMATED COST<br/>$145.93/month<br/>Range: $140-$155]
+        ALBCost --> TotalCost
+        DataCost --> TotalCost
+        
+        TotalCost --> Optimize[ML-driven Optimizations<br/>25ms]
+        
+        Optimize --> Rec1[REC-1: Reserved Instances<br/>1-year no upfront<br/>Savings: 30% ~$27.33/mo<br/>New Cost: $118.60/mo<br/>Risk: LOW commitment]
+        
+        Optimize --> Rec2[REC-2: Use t3.small<br/>Right-sizing<br/>Savings: 50% ~$45.55/mo<br/>New Cost: $100.38/mo<br/>Risk: MEDIUM performance]
+        
+        Optimize --> Rec3[REC-3: Savings Plans<br/>compute 1-year<br/>Savings: 28% ~$25.66/mo<br/>New Cost: $120.27/mo<br/>Risk: LOW flexible]
+        
+        Rec1 --> UserChoice{Apply recommendations?}
+        Rec2 --> UserChoice
+        Rec3 --> UserChoice
+        
+        UserChoice -->|YES| Stage6
+        UserChoice -->|NO| Stage6
+        UserChoice -->|CUSTOMIZE| Stage6
+    end
+    
+    subgraph Stage6["STAGE 6: EXECUTION PLAN & RESPONSE (40ms)"]
+        Stage6Start[Response Generator] --> TFPlan[Terraform Plan Generation<br/>25ms]
+        
+        TFPlan --> PlanInit[terraform init cached ✓ 3s]
+        PlanInit --> PlanRun[terraform plan ✓ 8s]
+        
+        PlanRun --> PlanSummary[Plan Summary:<br/>+ 12 resources to add<br/>~ 0 resources to change<br/>- 0 resources to destroy]
+        
+        PlanSummary --> Resources[Resources:<br/>• aws_vpc.main<br/>• aws_subnet.public ×3<br/>• aws_security_group.web<br/>• aws_instance.web ×3<br/>• aws_lb.main<br/>• aws_lb_target_group.web<br/>• aws_lb_listener.http<br/>• aws_lb_target_group_attachment ×3]
+        
+        Resources --> ResponseAsm[Response Assembly<br/>15ms]
+        
+        ResponseAsm --> JSONResponse[JSON Response:<br/>status: success<br/>intent: DEPLOY 0.95<br/>entities: EC2, ALB, count:3<br/>terraform_code: 247 lines<br/>plan_summary: 12 resources<br/>cost_estimate: $145.93<br/>optimizations: 3 recommendations<br/>next_actions: REVIEW/APPROVE/OPTIMIZE<br/>processing_time_ms: 230<br/>model_version: nli-v3.2.1]
+    end
+    
+    JSONResponse --> Final([Return to User:<br/>• Infrastructure code Terraform<br/>• Cost breakdown with optimizations<br/>• Execution plan summary<br/>• Approval request<br/><br/>Total Processing Time: ~230ms<br/>10ms + 40ms + 35ms + 100ms + 45ms + 40ms])
+    
+    subgraph ErrorHandling["ERROR & EDGE CASE HANDLING"]
+        Err1[Low Confidence <0.70<br/>→ Request clarification]
+        Err2[Ambiguous Entities<br/>→ Show alternatives]
+        Err3[Missing Critical Params<br/>→ Interactive prompt]
+        Err4[Template Not Found<br/>→ Suggest closest match]
+        Err5[Invalid Cloud Region<br/>→ Suggest valid regions]
+        Err6[Insufficient Permissions<br/>→ List required + remediation]
+        Err7[Cost Exceeds Budget<br/>→ Alert + cheaper alternatives]
+        Err8[Validation Failures<br/>→ Display errors + fixes]
+        Err9[CMDB Conflicts<br/>→ Show conflicts + resolution]
+    end
+    
+    subgraph Optimizations["OPTIMIZATION TECHNIQUES"]
+        Opt1[Template Caching Redis<br/>→ 50ms saved]
+        Opt2[ML Model Warming<br/>→ Pre-loaded in memory]
+        Opt3[Parallel Processing<br/>→ Context enrichment concurrent]
+        Opt4[Query Result Caching<br/>→ CMDB 10min TTL]
+        Opt5[Connection Pooling<br/>→ DB connections reused]
+        Opt6[Async Event Publishing<br/>→ Non-blocking Kafka]
+    end
+    
+    style Input fill:#e1f5ff
+    style Final fill:#c8e6c9
+    style ErrLang fill:#ffcdd2
+    style ErrInput fill:#ffcdd2
+    style ErrPerms fill:#ffcdd2
+    style Clarify fill:#fff9c4
+    style ShowAlts fill:#fff9c4
+    style ReqClarif fill:#fff9c4
+    style OfferVPC fill:#fff9c4
+    style Stage1 fill:#e3f2fd
+    style Stage2 fill:#f3e5f5
+    style Stage3 fill:#fff3e0
+    style Stage4 fill:#e8f5e9
+    style Stage5 fill:#ffe0b2
+    style Stage6 fill:#e0f2f1
+    style ErrorHandling fill:#ffebee
+    style Optimizations fill:#e8eaf6
+```
+
+**Processing Stages Breakdown:**
+1. **Input Preprocessing** (10ms): Normalization, language detection, validation
+2. **NLI Processing** (40ms): BERT NER, intent classification with confidence thresholds
+3. **Context Enrichment** (35ms): Parallel CMDB/Permissions/Credentials/Defaults queries
+4. **Template Selection** (100ms): Decision tree from 47→23→8→1 best template, ML parameter inference
+5. **Cost Estimation** (45ms): Detailed cost breakdown + 3 ML-driven optimization recommendations
+6. **Execution Plan** (40ms): Terraform plan generation + JSON response assembly
+
+**Key Decision Points:**
+- Language: Supported (EN/ES/FR/DE) or error
+- Confidence: HIGH (≥0.90), MEDIUM (0.70-0.89), LOW (<0.70)
+- Prerequisites: All met, Partial (offer creation), or Missing (error)
+- Template: 47 total → Filter by provider → Filter by type → Score → Select best
+- Parameters: Explicit (from user), Inferred (ML), Missing (prompt/auto)
+- Cost: Apply optimizations? YES/NO/CUSTOMIZE
+
+**Total Processing Time:** ~230ms (with caching optimizations)
+
+---
+
+### 3. AIOps Engine - ML Model Prediction Flow
                                        │
                                        ▼ (3ms)
 ╔══════════════════════════════════════════════════════════════════════════╗
