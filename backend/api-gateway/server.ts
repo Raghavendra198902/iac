@@ -13,12 +13,55 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import jwt from 'jsonwebtoken';
 import { createClient } from 'redis';
+import { Registry, Counter, Histogram, Gauge, collectDefaultMetrics } from 'prom-client';
 
 import { resolvers } from './graphql/resolvers';
 import { PostgresDataSource } from './graphql/datasources/PostgresDataSource';
 import { AIOpsDataSource } from './graphql/datasources/AIOpsDataSource';
 import { verifyToken } from './graphql/resolvers/auth';
 import { NLIEngine } from './services/NLIEngine';
+
+// Prometheus metrics registry
+const register = new Registry();
+collectDefaultMetrics({ register, prefix: 'api_gateway_v3_' });
+
+// Custom metrics
+const httpRequestCounter = new Counter({
+  name: 'api_gateway_v3_http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'path', 'status_code'],
+  registers: [register],
+});
+
+const httpRequestDuration = new Histogram({
+  name: 'api_gateway_v3_http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'path', 'status_code'],
+  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+  registers: [register],
+});
+
+const graphqlOperationCounter = new Counter({
+  name: 'api_gateway_v3_graphql_operations_total',
+  help: 'Total number of GraphQL operations',
+  labelNames: ['operation_type', 'operation_name', 'status'],
+  registers: [register],
+});
+
+const graphqlOperationDuration = new Histogram({
+  name: 'api_gateway_v3_graphql_operation_duration_seconds',
+  help: 'Duration of GraphQL operations in seconds',
+  labelNames: ['operation_type', 'operation_name'],
+  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+  registers: [register],
+});
+
+const activeConnections = new Gauge({
+  name: 'api_gateway_v3_active_connections',
+  help: 'Number of active HTTP connections',
+  registers: [register],
+});
+
 
 // Redis client setup
 const redisClient = createClient({
@@ -152,6 +195,46 @@ async function startServer() {
   });
 
   await server.start();
+
+  // Metrics middleware
+  app.use((req: Request, res: Response, next: any) => {
+    const start = Date.now();
+    activeConnections.inc();
+
+    res.on('finish', () => {
+      const duration = (Date.now() - start) / 1000;
+      const path = req.route?.path || req.path;
+      const statusCode = res.statusCode.toString();
+
+      httpRequestCounter.inc({ method: req.method, path, status_code: statusCode });
+      httpRequestDuration.observe({ method: req.method, path, status_code: statusCode }, duration);
+      activeConnections.dec();
+    });
+
+    next();
+  });
+
+  // Prometheus metrics endpoint
+  app.get('/metrics', async (req: Request, res: Response) => {
+    try {
+      res.set('Content-Type', register.contentType);
+      const metrics = await register.metrics();
+      res.end(metrics);
+    } catch (error) {
+      console.error('Error collecting metrics:', error);
+      res.status(500).end('Error collecting metrics');
+    }
+  });
+
+  // Health check endpoint
+  app.get('/health', (req: Request, res: Response) => {
+    res.json({ 
+      status: 'healthy', 
+      service: 'api-gateway-v3',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    });
+  });
 
   // Middleware for body parsing
   app.use(bodyParser.json());

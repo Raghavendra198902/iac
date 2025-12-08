@@ -11,7 +11,7 @@ Features:
 - Policy enforcement
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, List, Optional, Any
@@ -21,6 +21,9 @@ import hashlib
 import logging
 import uuid
 from enum import Enum
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST, CollectorRegistry
+from prometheus_fastapi_instrumentator import Instrumentator
+import time
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -30,6 +33,40 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Prometheus metrics
+registry = CollectorRegistry()
+
+access_decisions_total = Counter(
+    'zero_trust_access_decisions_total',
+    'Total access decisions made',
+    ['decision', 'resource_type'],
+    registry=registry
+)
+
+trust_score_gauge = Gauge(
+    'zero_trust_trust_score',
+    'Current trust score of users',
+    ['user_id'],
+    registry=registry
+)
+
+policy_evaluations_total = Counter(
+    'zero_trust_policy_evaluations_total',
+    'Total policy evaluations',
+    ['policy', 'result'],
+    registry=registry
+)
+
+device_compliance_score = Gauge(
+    'zero_trust_device_compliance_score',
+    'Device compliance score',
+    ['device_id'],
+    registry=registry
+)
+
+# Initialize Instrumentator for automatic HTTP metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # CORS configuration
 app.add_middleware(
