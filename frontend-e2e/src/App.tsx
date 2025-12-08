@@ -47,6 +47,10 @@ const EAData = lazy(() => import('./pages/EA/EAData'));
 const EATechnology = lazy(() => import('./pages/EA/EATechnology'));
 const EAIntegration = lazy(() => import('./pages/EA/EAIntegration'));
 const EASecurity = lazy(() => import('./pages/EA/EASecurity'));
+const SA = lazy(() => import('./pages/SA'));
+const SADesign = lazy(() => import('./pages/SA/SADesign'));
+const SAStack = lazy(() => import('./pages/SA/SAStack'));
+const SAPatterns = lazy(() => import('./pages/SA/SAPatterns'));
 
 function App() {
   return (
@@ -97,6 +101,10 @@ function App() {
                   <Route path="/ea/technology" element={<EATechnology />} />
                   <Route path="/ea/integration" element={<EAIntegration />} />
                   <Route path="/ea/security" element={<EASecurity />} />
+                  <Route path="/sa" element={<SA />} />
+                  <Route path="/sa/design" element={<SADesign />} />
+                  <Route path="/sa/stack" element={<SAStack />} />
+                  <Route path="/sa/patterns" element={<SAPatterns />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

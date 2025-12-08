@@ -108,8 +108,14 @@ const navigation: NavItem[] = [
   },
   {
     name: 'SA - Solution',
-    path: '/ea/technology',
+    path: '/sa',
     icon: CpuChipIcon,
+    children: [
+      { name: 'Overview', path: '/sa', icon: CpuChipIcon },
+      { name: 'Architecture Design', path: '/sa/design', icon: CpuChipIcon },
+      { name: 'Technology Stack', path: '/sa/stack', icon: ServerIcon },
+      { name: 'Integration Patterns', path: '/sa/patterns', icon: PuzzlePieceIcon },
+    ],
   },
   {
     name: 'TA - Technical',
