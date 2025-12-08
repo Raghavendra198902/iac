@@ -3,7 +3,7 @@ Advanced Observability & Telemetry Suite for IAC Dharma v3.0
 OpenTelemetry integration with distributed tracing, metrics, and logs
 """
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
@@ -15,6 +15,8 @@ import uuid
 import logging
 import time
 from collections import defaultdict
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST, CollectorRegistry
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +27,40 @@ app = FastAPI(
     description="OpenTelemetry-based distributed tracing, metrics correlation, and SLO tracking",
     version="3.0.0"
 )
+
+# Prometheus metrics
+registry = CollectorRegistry()
+
+traces_total = Counter(
+    'observability_traces_total',
+    'Total traces processed',
+    ['service'],
+    registry=registry
+)
+
+spans_total = Counter(
+    'observability_spans_total',
+    'Total spans processed',
+    ['span_kind'],
+    registry=registry
+)
+
+slo_violations = Counter(
+    'observability_slo_violations_total',
+    'Total SLO violations',
+    ['slo_name', 'severity'],
+    registry=registry
+)
+
+trace_duration = Histogram(
+    'observability_trace_duration_seconds',
+    'Trace duration in seconds',
+    ['service'],
+    registry=registry
+)
+
+# Initialize Instrumentator
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # CORS middleware
 app.add_middleware(

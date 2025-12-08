@@ -10,7 +10,7 @@ This module provides the core AIOps functionality including:
 - Root cause analysis
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -19,6 +19,8 @@ import asyncio
 import logging
 from enum import Enum
 import uuid
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST, CollectorRegistry
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Import ML models
 from models.failure_predictor import FailurePredictor
@@ -34,6 +36,40 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Prometheus metrics
+registry = CollectorRegistry()
+
+predictions_total = Counter(
+    'aiops_predictions_total',
+    'Total ML predictions made',
+    ['model_type', 'result'],
+    registry=registry
+)
+
+anomalies_detected = Counter(
+    'aiops_anomalies_detected_total',
+    'Total anomalies detected',
+    ['severity'],
+    registry=registry
+)
+
+model_inference_duration = Histogram(
+    'aiops_model_inference_duration_seconds',
+    'ML model inference duration',
+    ['model_name'],
+    registry=registry
+)
+
+active_alerts = Gauge(
+    'aiops_active_alerts',
+    'Number of active alerts',
+    ['priority'],
+    registry=registry
+)
+
+# Initialize Instrumentator for automatic HTTP metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # CORS configuration
 app.add_middleware(
