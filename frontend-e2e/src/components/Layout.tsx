@@ -26,6 +26,12 @@ import {
   ChevronDownIcon,
   CloudIcon,
   ChatBubbleLeftRightIcon,
+  GlobeAltIcon,
+  CommandLineIcon,
+  CheckCircleIcon,
+  RocketLaunchIcon,
+  UserGroupIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
