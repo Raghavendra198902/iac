@@ -51,6 +51,17 @@ const SA = lazy(() => import('./pages/SA'));
 const SADesign = lazy(() => import('./pages/SA/SADesign'));
 const SAStack = lazy(() => import('./pages/SA/SAStack'));
 const SAPatterns = lazy(() => import('./pages/SA/SAPatterns'));
+const TA = lazy(() => import('./pages/TA'));
+const TAInfrastructure = lazy(() => import('./pages/TA/TAInfrastructure'));
+const TANetwork = lazy(() => import('./pages/TA/TANetwork'));
+const TACloud = lazy(() => import('./pages/TA/TACloud'));
+const PMTimeline = lazy(() => import('./pages/Projects/PMTimeline'));
+const PMResources = lazy(() => import('./pages/Projects/PMResources'));
+const PMRisks = lazy(() => import('./pages/Projects/PMRisks'));
+const SE = lazy(() => import('./pages/SE'));
+const SEDevelopment = lazy(() => import('./pages/SE/SEDevelopment'));
+const SEQuality = lazy(() => import('./pages/SE/SEQuality'));
+const SERelease = lazy(() => import('./pages/SE/SERelease'));
 
 function App() {
   return (
@@ -105,6 +116,17 @@ function App() {
                   <Route path="/sa/design" element={<SADesign />} />
                   <Route path="/sa/stack" element={<SAStack />} />
                   <Route path="/sa/patterns" element={<SAPatterns />} />
+                  <Route path="/ta" element={<TA />} />
+                  <Route path="/ta/infrastructure" element={<TAInfrastructure />} />
+                  <Route path="/ta/network" element={<TANetwork />} />
+                  <Route path="/ta/cloud" element={<TACloud />} />
+                  <Route path="/projects/timeline" element={<PMTimeline />} />
+                  <Route path="/projects/resources" element={<PMResources />} />
+                  <Route path="/projects/risks" element={<PMRisks />} />
+                  <Route path="/se" element={<SE />} />
+                  <Route path="/se/development" element={<SEDevelopment />} />
+                  <Route path="/se/quality" element={<SEQuality />} />
+                  <Route path="/se/release" element={<SERelease />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

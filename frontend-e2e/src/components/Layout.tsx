@@ -119,8 +119,14 @@ const navigation: NavItem[] = [
   },
   {
     name: 'TA - Technical',
-    path: '/ea/integration',
+    path: '/ta',
     icon: PuzzlePieceIcon,
+    children: [
+      { name: 'Overview', path: '/ta', icon: PuzzlePieceIcon },
+      { name: 'Infrastructure Design', path: '/ta/infrastructure', icon: ServerIcon },
+      { name: 'Network Architecture', path: '/ta/network', icon: GlobeAltIcon },
+      { name: 'Cloud Architecture', path: '/ta/cloud', icon: CloudIcon },
+    ],
   },
   {
     name: 'PM - Project',
@@ -130,12 +136,21 @@ const navigation: NavItem[] = [
       { name: 'Overview', path: '/projects', icon: FolderIcon },
       { name: 'List', path: '/projects/list', icon: FolderIcon },
       { name: 'Collaboration', path: '/projects/collaboration', icon: UsersIcon },
+      { name: 'Timeline', path: '/projects/timeline', icon: ChartBarIcon },
+      { name: 'Resources', path: '/projects/resources', icon: UserGroupIcon },
+      { name: 'Risks', path: '/projects/risks', icon: ExclamationTriangleIcon },
     ],
   },
   {
-    name: 'SE - Security',
-    path: '/ea/security',
-    icon: ShieldCheckIcon,
+    name: 'SE - Software',
+    path: '/se',
+    icon: CodeBracketIcon,
+    children: [
+      { name: 'Overview', path: '/se', icon: CodeBracketIcon },
+      { name: 'Development', path: '/se/development', icon: CommandLineIcon },
+      { name: 'Quality Assurance', path: '/se/quality', icon: CheckCircleIcon },
+      { name: 'Release Management', path: '/se/release', icon: RocketLaunchIcon },
+    ],
   },
   {
     name: 'CMDB',
