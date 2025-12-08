@@ -73,6 +73,20 @@ server {
         proxy_read_timeout 60s;
     }
 
+    # Proxy Zero Trust Security API
+    location /security/ {
+        proxy_pass http://iac-zero-trust-security-v3:8500/security/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$server_name;
+        proxy_http_version 1.1;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
     # Proxy GraphQL requests
     location /graphql {
         proxy_pass http://iac-api-gateway-v3:4000/graphql;

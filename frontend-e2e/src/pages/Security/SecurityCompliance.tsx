@@ -67,9 +67,8 @@ const SecurityCompliance: React.FC = () => {
     try {
       setRefreshing(true);
       setError(null);
-      const protocol = window.location.protocol === 'https:' ? 'http:' : 'http:';
-      const hostname = window.location.hostname;
-      const response = await fetch(`${protocol}//${hostname}:8500/security/compliance`);
+      // Use proxied endpoint through nginx to avoid mixed content and CORS issues
+      const response = await fetch('/security/compliance');
       
       if (response.ok) {
         const data = await response.json();
