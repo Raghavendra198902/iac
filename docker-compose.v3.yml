@@ -402,6 +402,36 @@ services:
       timeout: 10s
       retries: 3
 
+  # Zero Trust Security
+  zero-trust-security:
+    build:
+      context: ./backend/zero-trust-security
+      dockerfile: Dockerfile
+    image: iac-zero-trust-security:v3
+    container_name: iac-zero-trust-security-v3
+    restart: unless-stopped
+    ports:
+      - "8500:8500"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_HOST=postgres-v3
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=iac_v3
+      - POSTGRES_USER=iacadmin
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-iacadmin123}
+      - REDIS_HOST=redis-v3
+      - REDIS_PORT=6379
+    networks:
+      - iac-v3-network
+    depends_on:
+      - postgres-v3
+      - redis-v3
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8500/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   iac-v3-network:
     name: iac-v3-network

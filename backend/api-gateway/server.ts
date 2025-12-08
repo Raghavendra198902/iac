@@ -1929,6 +1929,7 @@ async function startServer() {
   // Multi-Cloud Cost Optimizer API endpoints (proxy to cost optimizer service)
   const AIOPS_URL = process.env.AIOPS_URL || 'http://aiops-engine-v3:8100';
   const COST_OPTIMIZER_URL = process.env.COST_OPTIMIZER_URL || 'http://multi-cloud-optimizer:8900';
+  const ZERO_TRUST_URL = process.env.ZERO_TRUST_URL || 'http://iac-zero-trust-security-v3:8500';
 
   app.get('/api/cost-optimizer/analysis', async (_req: Request, res: Response) => {
     try {
@@ -2145,6 +2146,93 @@ async function startServer() {
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ error: 'Churn prediction failed', message: error.message });
+    }
+  });
+
+  // ============================================================================
+  // Zero Trust Security API Endpoints
+  // ============================================================================
+
+  app.post('/api/zero-trust/verify', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${ZERO_TRUST_URL}/api/v3/zero-trust/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Access verification failed', message: error.message });
+    }
+  });
+
+  app.post('/api/zero-trust/authenticate', async (req: Request, res: Response) => {
+    try {
+      const { username, password, device_id, mfa_code } = req.body;
+      const response = await fetch(`${ZERO_TRUST_URL}/api/v3/zero-trust/authenticate?username=${username}&password=${password}&device_id=${device_id}${mfa_code ? `&mfa_code=${mfa_code}` : ''}`, {
+        method: 'POST'
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Authentication failed', message: error.message });
+    }
+  });
+
+  app.get('/api/zero-trust/policies', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${ZERO_TRUST_URL}/api/v3/zero-trust/policies`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch policies', message: error.message });
+    }
+  });
+
+  app.post('/api/zero-trust/policies', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${ZERO_TRUST_URL}/api/v3/zero-trust/policies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to create policy', message: error.message });
+    }
+  });
+
+  app.get('/api/zero-trust/audit', async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit || 100;
+      const response = await fetch(`${ZERO_TRUST_URL}/api/v3/zero-trust/audit?limit=${limit}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch audit log', message: error.message });
+    }
+  });
+
+  app.get('/api/zero-trust/trust-score/:user_id', async (req: Request, res: Response) => {
+    try {
+      const { user_id } = req.params;
+      const response = await fetch(`${ZERO_TRUST_URL}/api/v3/zero-trust/trust-score/${user_id}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch trust score', message: error.message });
+    }
+  });
+
+  app.get('/api/zero-trust/sessions/active', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${ZERO_TRUST_URL}/api/v3/zero-trust/sessions/active`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to fetch active sessions', message: error.message });
     }
   });
 
