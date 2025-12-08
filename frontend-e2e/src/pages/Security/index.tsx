@@ -11,28 +11,26 @@ const SecurityDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/security/overview');
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        console.error('Failed to fetch security data:', err);
-      } finally {
-        setLoading(false);
-      }
+    // Use mock data for standalone frontend
+    const mockData = {
+      securityScore: 87,
+      threats: [
+        { id: 1, severity: 'high', description: 'Unusual login attempt', timestamp: new Date().toISOString() },
+        { id: 2, severity: 'medium', description: 'Failed authentication', timestamp: new Date().toISOString() },
+      ],
+      compliance: [
+        { framework: 'PCI DSS', score: 92 },
+        { framework: 'SOC 2', score: 95 },
+        { framework: 'HIPAA', score: 88 },
+      ],
+      recentEvents: [
+        { id: 1, event: 'User logged in', timestamp: new Date().toISOString() },
+        { id: 2, event: 'Policy updated', timestamp: new Date().toISOString() },
+      ],
     };
 
-    // Initial fetch
-    fetchData();
-
-    // Auto-refresh every 0.1 seconds for live data
-    const interval = setInterval(() => {
-      fetchData();
-    }, 100);
-
-    // Cleanup interval on unmount
-    return () => clearInterval(interval);
+    setData(mockData);
+    setLoading(false);
   }, []);
 
   const securityScore = data.securityScore;
