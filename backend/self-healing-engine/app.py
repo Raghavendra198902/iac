@@ -20,6 +20,7 @@ from enum import Enum
 import asyncio
 import logging
 import random
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -30,6 +31,9 @@ app = FastAPI(
     description="Autonomous infrastructure healing and remediation",
     version="3.0.0"
 )
+
+# Initialize Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # CORS middleware
 app.add_middleware(

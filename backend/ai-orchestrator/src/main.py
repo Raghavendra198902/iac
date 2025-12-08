@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import uvicorn
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .api import projects, generation, artifacts, websocket
 from .utils.config import settings
@@ -24,6 +25,9 @@ app = FastAPI(
     version=settings.APP_VERSION,
     lifespan=lifespan
 )
+
+# Initialize Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # CORS
 app.add_middleware(

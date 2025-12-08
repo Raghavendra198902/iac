@@ -20,12 +20,16 @@ from datetime import datetime, timedelta
 from enum import Enum
 import random
 import uuid
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(
     title="Multi-Cloud Cost Optimizer",
     description="Intelligent cost optimization across AWS, Azure, GCP, and more",
     version="3.0.0"
 )
+
+# Initialize Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # ============================================================================
 # ENUMS & MODELS

@@ -72,7 +72,7 @@ scrape_configs:
   - job_name: 'ai-orchestrator-v3'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['iac-ai-orchestrator-v3:8200']
+      - targets: ['iac-ai-orchestrator-v3:8300']
         labels:
           service: 'ai-orchestrator'
           tier: 'ai'
@@ -82,7 +82,7 @@ scrape_configs:
   - job_name: 'self-healing-engine-v3'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['iac-self-healing-engine-v3:8300']
+      - targets: ['iac-self-healing-engine-v3:8400']
         labels:
           service: 'self-healing-engine'
           tier: 'automation'
@@ -92,7 +92,7 @@ scrape_configs:
   - job_name: 'multi-cloud-optimizer-v3'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['iac-multi-cloud-optimizer-v3:8400']
+      - targets: ['iac-multi-cloud-optimizer-v3:8900']
         labels:
           service: 'multi-cloud-optimizer'
           tier: 'optimization'
