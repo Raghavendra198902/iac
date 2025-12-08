@@ -1927,6 +1927,7 @@ async function startServer() {
   });
 
   // Multi-Cloud Cost Optimizer API endpoints (proxy to cost optimizer service)
+  const AIOPS_URL = process.env.AIOPS_URL || 'http://aiops-engine-v3:8100';
   const COST_OPTIMIZER_URL = process.env.COST_OPTIMIZER_URL || 'http://multi-cloud-optimizer:8900';
 
   app.get('/api/cost-optimizer/analysis', async (_req: Request, res: Response) => {
@@ -2020,6 +2021,130 @@ async function startServer() {
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ error: 'Failed to fetch arbitrage opportunities', message: error.message });
+    }
+  });
+
+  // ============================================================================
+  // Enhanced ML Models Suite - 8 Proxy Routes
+  // ============================================================================
+
+  // 1. Enhanced Cost Predictor
+  app.post('/api/ml/cost/predict', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/cost/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Cost prediction failed', message: error.message });
+    }
+  });
+
+  // 2. Enhanced Drift Predictor
+  app.post('/api/ml/drift/detect', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/drift/detect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Drift detection failed', message: error.message });
+    }
+  });
+
+  // 3. Enhanced Resource Optimizer
+  app.post('/api/ml/resource/optimize', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/resource/optimize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Resource optimization failed', message: error.message });
+    }
+  });
+
+  // 4. Performance Optimizer
+  app.post('/api/ml/performance/optimize', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/performance/optimize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Performance optimization failed', message: error.message });
+    }
+  });
+
+  // 5. Compliance Predictor
+  app.post('/api/ml/compliance/predict', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/compliance/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Compliance prediction failed', message: error.message });
+    }
+  });
+
+  // 6. Incident Classifier
+  app.post('/api/ml/incident/classify', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/incident/classify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Incident classification failed', message: error.message });
+    }
+  });
+
+  // 7. Root Cause Analyzer
+  app.post('/api/ml/rootcause/analyze', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/rootcause/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Root cause analysis failed', message: error.message });
+    }
+  });
+
+  // 8. Churn Predictor
+  app.post('/api/ml/churn/predict', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch(`${AIOPS_URL}/api/v3/ml/churn/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body)
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: 'Churn prediction failed', message: error.message });
     }
   });
 
