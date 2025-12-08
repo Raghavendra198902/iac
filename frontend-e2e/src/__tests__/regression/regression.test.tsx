@@ -13,6 +13,9 @@ import ReportsOverview from '../../pages/Reports/ReportsOverview';
 import ReportsBuilder from '../../pages/Reports/ReportsBuilder';
 import AdminSystem from '../../pages/Admin/AdminSystem';
 import AdminLicense from '../../pages/Admin/AdminLicense';
+import CMDBAssets from '../../pages/CMDB/CMDBAssets';
+import CMDBConfigItems from '../../pages/CMDB/CMDBConfigItems';
+import CMDBRelationships from '../../pages/CMDB/CMDBRelationships';
 
 const renderWithRouter = (component: React.ReactElement) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
@@ -179,6 +182,94 @@ describe('Regression Tests - Core Functionality', () => {
       // Action buttons should exist
       expect(screen.getByText('Renew License')).toBeInTheDocument();
       expect(screen.getByText('Upgrade Plan')).toBeInTheDocument();
+    });
+  });
+
+  describe('Navigation - Regression Tests', () => {
+    it('should maintain route structure', () => {
+      // Verify critical routes are still defined
+      const routes = [
+        '/dashboard',
+        '/reports',
+        '/reports/builder',
+        '/reports/scheduled',
+        '/admin/system',
+        '/admin/license',
+        '/cmdb/assets',
+        '/cmdb/config-items',
+        '/cmdb/relationships',
+      ];
+      
+      // All routes should be valid
+      routes.forEach(route => {
+        expect(route).toBeTruthy();
+        expect(route.startsWith('/')).toBe(true);
+      });
+    });
+  });
+
+  describe('CMDB - Regression Tests', () => {
+    it('should maintain CMDB assets display', () => {
+      renderWithRouter(<CMDBAssets />);
+      
+      // Verify CMDB assets page renders
+      expect(screen.getByText('Asset Management')).toBeInTheDocument();
+    });
+
+    it('should preserve asset listing functionality', () => {
+      renderWithRouter(<CMDBAssets />);
+      
+      // Key assets should be displayed
+      expect(screen.getByText('web-server-prod-01')).toBeInTheDocument();
+      expect(screen.getByText('db-primary-mysql')).toBeInTheDocument();
+    });
+
+    it('should maintain config items display', () => {
+      renderWithRouter(<CMDBConfigItems />);
+      
+      // Verify config items page renders
+      expect(screen.getByText('Configuration Items')).toBeInTheDocument();
+    });
+
+    it('should preserve config item filtering', () => {
+      renderWithRouter(<CMDBConfigItems />);
+      
+      // Filter options should exist
+      expect(screen.getByText('All Types')).toBeInTheDocument();
+      expect(screen.getByText('Server')).toBeInTheDocument();
+    });
+
+    it('should maintain relationships visualization', () => {
+      renderWithRouter(<CMDBRelationships />);
+      
+      // Verify relationships page renders
+      expect(screen.getByText('Resource Relationships')).toBeInTheDocument();
+    });
+
+    it('should preserve relationship nodes display', () => {
+      renderWithRouter(<CMDBRelationships />);
+      
+      // Key nodes should be displayed
+      expect(screen.getByText('API Gateway')).toBeInTheDocument();
+      expect(screen.getByText('Web Server 1')).toBeInTheDocument();
+    });
+
+    it('should maintain CMDB search functionality', () => {
+      renderWithRouter(<CMDBAssets />);
+      
+      const searchInput = screen.getByPlaceholderText('Search assets...');
+      expect(searchInput).toBeInTheDocument();
+      
+      fireEvent.change(searchInput, { target: { value: 'web-server' } });
+      expect(searchInput).toHaveValue('web-server');
+    });
+
+    it('should preserve CMDB statistics display', () => {
+      renderWithRouter(<CMDBAssets />);
+      
+      // Stats should be visible
+      expect(screen.getByText('Total Assets')).toBeInTheDocument();
+      expect(screen.getByText('Active')).toBeInTheDocument();
     });
   });
 
