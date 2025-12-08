@@ -1210,6 +1210,749 @@ X-RateLimit-Reset: 1701993660
 
 ---
 
-**Document Version**: 1.0  
+## 🚀 Advanced API Patterns
+
+### 1. Pagination Strategies
+
+#### Cursor-Based Pagination (Recommended)
+
+**Why Cursor-Based?**
+- Consistent results (no skipped/duplicate items)
+- Efficient for large datasets
+- Works with real-time data
+
+```http
+GET /api/infrastructure?limit=20&cursor=eyJpZCI6MTIzLCJ0aW1lc3RhbXAiOjE3MDE5OTM2NjB9
+```
+
+**Response**:
+```json
+{
+  "data": [
+    { "id": "infra-124", "name": "web-server", ... },
+    { "id": "infra-125", "name": "database", ... }
+  ],
+  "pagination": {
+    "next_cursor": "eyJpZCI6MTQ0LCJ0aW1lc3RhbXAiOjE3MDE5OTM3MjB9",
+    "prev_cursor": "eyJpZCI6MTAzLCJ0aW1lc3RhbXAiOjE3MDE5OTM2MDB9",
+    "has_more": true,
+    "count": 20
+  },
+  "meta": {
+    "total_count": 1520,
+    "request_id": "req-abc123"
+  }
+}
+```
+
+#### Offset-Based Pagination (Simple Queries)
+
+```http
+GET /api/infrastructure?limit=20&offset=40
+```
+
+**Response**:
+```json
+{
+  "data": [...],
+  "pagination": {
+    "limit": 20,
+    "offset": 40,
+    "total": 1520,
+    "page": 3,
+    "pages": 76
+  }
+}
+```
+
+### 2. Filtering and Sorting
+
+#### Complex Filtering with Query DSL
+
+```http
+POST /api/infrastructure/search
+Content-Type: application/json
+
+{
+  "filter": {
+    "and": [
+      { "field": "provider", "operator": "eq", "value": "aws" },
+      { "field": "status", "operator": "in", "value": ["running", "healthy"] },
+      {
+        "or": [
+          { "field": "cost", "operator": "gt", "value": 100 },
+          { "field": "tag", "operator": "contains", "value": "production" }
+        ]
+      }
+    ]
+  },
+  "sort": [
+    { "field": "cost", "direction": "desc" },
+    { "field": "created_at", "direction": "asc" }
+  ],
+  "pagination": {
+    "cursor": "...",
+    "limit": 50
+  },
+  "include": ["resources", "metrics", "cost_breakdown"]
+}
+```
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "infra-123",
+      "provider": "aws",
+      "status": "running",
+      "cost": 450.50,
+      "resources": [...],
+      "metrics": {...},
+      "cost_breakdown": {...}
+    }
+  ],
+  "pagination": {...},
+  "query_performance": {
+    "execution_time_ms": 45,
+    "scanned_records": 1520,
+    "returned_records": 50,
+    "cache_hit": false
+  }
+}
+```
+
+#### Simple Query Parameterssafe
+
+```http
+GET /api/infrastructure?provider=aws&status=running&cost_gt=100&sort=-cost,created_at&limit=50
+```
+
+**Query Operators**:
+- `field_eq`: Equal
+- `field_ne`: Not equal
+- `field_gt`: Greater than
+- `field_gte`: Greater than or equal
+- `field_lt`: Less than
+- `field_lte`: Less than or equal
+- `field_in`: In array
+- `field_contains`: Contains substring
+- `field_starts`: Starts with
+- `field_ends`: Ends with
+
+### 3. Batch Operations
+
+#### Batch Create/Update
+
+```http
+POST /api/infrastructure/batch
+Content-Type: application/json
+
+{
+  "operations": [
+    {
+      "operation": "create",
+      "resource_type": "ec2_instance",
+      "data": {
+        "name": "web-server-1",
+        "instance_type": "t3.medium",
+        "ami": "ami-12345678"
+      }
+    },
+    {
+      "operation": "update",
+      "resource_id": "infra-456",
+      "data": {
+        "tags": { "environment": "production" }
+      }
+    },
+    {
+      "operation": "delete",
+      "resource_id": "infra-789"
+    }
+  ],
+  "transaction": true,
+  "async": true
+}
+```
+
+**Synchronous Response** (transaction: false, async: false):
+```json
+{
+  "results": [
+    { "index": 0, "status": "success", "resource_id": "infra-999" },
+    { "index": 1, "status": "success", "resource_id": "infra-456" },
+    { "index": 2, "status": "error", "error": "Resource not found" }
+  ],
+  "summary": {
+    "total": 3,
+    "succeeded": 2,
+    "failed": 1
+  }
+}
+```
+
+**Asynchronous Response** (async: true):
+```json
+{
+  "job_id": "job-abc123",
+  "status": "queued",
+  "total_operations": 3,
+  "status_url": "/api/jobs/job-abc123",
+  "webhook_url": "https://your-domain.com/webhook"
+}
+```
+
+### 4. Webhooks
+
+#### Register Webhook
+
+```http
+POST /api/webhooks
+Content-Type: application/json
+
+{
+  "url": "https://your-domain.com/webhook",
+  "events": [
+    "infrastructure.created",
+    "infrastructure.updated",
+    "infrastructure.deleted",
+    "deployment.completed",
+    "deployment.failed",
+    "alert.triggered"
+  ],
+  "filters": {
+    "provider": ["aws", "azure"],
+    "cost_threshold": 1000
+  },
+  "secret": "your-webhook-secret",
+  "active": true
+}
+```
+
+**Response**:
+```json
+{
+  "webhook_id": "hook-123",
+  "url": "https://your-domain.com/webhook",
+  "events": [...],
+  "secret": "your-webhook-secret",
+  "created_at": "2025-12-08T12:00:00Z",
+  "status": "active"
+}
+```
+
+#### Webhook Payload Example
+
+```json
+{
+  "event_id": "evt-abc123",
+  "event_type": "infrastructure.created",
+  "timestamp": "2025-12-08T12:00:00Z",
+  "data": {
+    "infrastructure_id": "infra-123",
+    "provider": "aws",
+    "region": "us-east-1",
+    "resources": [...],
+    "cost": 150.50,
+    "user_id": "user-456"
+  },
+  "webhook_id": "hook-123"
+}
+```
+
+**Webhook Signature** (HMAC-SHA256):
+```http
+X-IAC-Signature: sha256=5f2b8c9d1e3a4b5c6d7e8f9g0h1i2j3k4l5m6n7o8p9q0r
+X-IAC-Event-Type: infrastructure.created
+X-IAC-Event-ID: evt-abc123
+X-IAC-Timestamp: 1701993660
+```
+
+**Verify Signature** (Python):
+```python
+import hmac
+import hashlib
+
+def verify_webhook(payload, signature, secret):
+    expected = hmac.new(
+        secret.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(f"sha256={expected}", signature)
+```
+
+### 5. API Versioning
+
+#### URL Versioning (Current)
+
+```http
+GET /api/v3/infrastructure
+GET /api/v2/infrastructure  # Legacy support
+```
+
+#### Header Versioning (Future)
+
+```http
+GET /api/infrastructure
+Accept: application/vnd.iac-dharma.v3+json
+```
+
+#### Version Deprecation Notice
+
+```json
+{
+  "data": {...},
+  "warnings": [
+    {
+      "code": "DEPRECATED_API",
+      "message": "API v2 will be deprecated on 2026-06-01",
+      "migration_guide": "https://docs.iac-dharma.io/migration/v2-to-v3"
+    }
+  ]
+}
+```
+
+### 6. GraphQL Advanced Patterns
+
+#### Query Complexity Limiting
+
+```graphql
+query ComplexQuery {
+  infrastructure(limit: 100) {
+    id
+    name
+    resources {
+      id
+      metrics {
+        cpu
+        memory
+      }
+    }
+  }
+}
+```
+
+**Complexity Calculation**:
+- Base: 1 point per field
+- List field: × items requested
+- Nested: Additional multiplier
+- **Example**: 100 infrastructure × 10 resources × 2 metrics = 2,000 points
+- **Limit**: 5,000 points per query
+
+**Exceeded Response**:
+```json
+{
+  "errors": [
+    {
+      "message": "Query complexity 6200 exceeds maximum 5000",
+      "extensions": {
+        "code": "QUERY_TOO_COMPLEX",
+        "complexity": 6200,
+        "limit": 5000,
+        "suggestion": "Reduce limit or remove nested fields"
+      }
+    }
+  ]
+}
+```
+
+#### Batched Queries (DataLoader Pattern)
+
+```graphql
+query BatchedQuery {
+  user1: user(id: "user-1") { name, email }
+  user2: user(id: "user-2") { name, email }
+  user3: user(id: "user-3") { name, email }
+}
+```
+
+**Optimization**:
+- Without DataLoader: 3 separate database queries
+- With DataLoader: 1 batched query
+- Performance improvement: ~70% faster
+
+#### Subscriptions for Real-Time Updates
+
+```graphql
+subscription DeploymentProgress {
+  deploymentStatus(deploymentId: "deploy-123") {
+    id
+    status
+    progress
+    logs {
+      timestamp
+      message
+      level
+    }
+  }
+}
+```
+
+**WebSocket Connection**:
+```javascript
+const ws = new WebSocket('ws://localhost:4000/graphql');
+ws.send(JSON.stringify({
+  type: 'subscribe',
+  query: `subscription { ... }`
+}));
+```
+
+### 7. Idempotency Keys
+
+#### POST with Idempotency
+
+```http
+POST /api/infrastructure
+Content-Type: application/json
+Idempotency-Key: unique-key-12345
+
+{
+  "name": "web-server",
+  "provider": "aws",
+  "instance_type": "t3.medium"
+}
+```
+
+**First Request**:
+```json
+{
+  "id": "infra-123",
+  "status": "created",
+  "idempotency_key": "unique-key-12345"
+}
+```
+
+**Duplicate Request** (within 24 hours):
+```json
+{
+  "id": "infra-123",
+  "status": "created",
+  "idempotency_key": "unique-key-12345",
+  "replayed": true
+}
+```
+
+**Benefits**:
+- Prevents duplicate operations
+- Safe retries after network failures
+- Consistent responses
+
+### 8. Field Selection (Sparse Fieldsets)
+
+#### Select Specific Fields
+
+```http
+GET /api/infrastructure/infra-123?fields=id,name,status,cost
+```
+
+**Response** (only requested fields):
+```json
+{
+  "id": "infra-123",
+  "name": "web-server",
+  "status": "running",
+  "cost": 150.50
+}
+```
+
+#### Include Related Resources
+
+```http
+GET /api/infrastructure/infra-123?include=resources,metrics,cost_breakdown
+```
+
+**Response**:
+```json
+{
+  "id": "infra-123",
+  "name": "web-server",
+  "resources": [...],
+  "metrics": {...},
+  "cost_breakdown": {...}
+}
+```
+
+### 9. ETags and Conditional Requests
+
+#### GET with ETag
+
+```http
+GET /api/infrastructure/infra-123
+```
+
+**Response**:
+```http
+HTTP/1.1 200 OK
+ETag: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+Content-Type: application/json
+
+{ "id": "infra-123", ... }
+```
+
+#### Conditional GET (Not Modified)
+
+```http
+GET /api/infrastructure/infra-123
+If-None-Match: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+```
+
+**Response** (if not modified):
+```http
+HTTP/1.1 304 Not Modified
+ETag: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+```
+
+#### Conditional UPDATE (Optimistic Locking)
+
+```http
+PUT /api/infrastructure/infra-123
+If-Match: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+Content-Type: application/json
+
+{ "name": "updated-name" }
+```
+
+**Conflict Response**:
+```json
+{
+  "error": {
+    "code": "PRECONDITION_FAILED",
+    "message": "Resource was modified by another request",
+    "current_etag": "4b5c6d7e8f9g0h1i2j3k4l5m6n7o8p9q0r1s2t3u4v"
+  }
+}
+```
+
+### 10. Long-Running Operations
+
+#### Async Operation Pattern
+
+```http
+POST /api/infrastructure/deploy
+Content-Type: application/json
+Prefer: respond-async
+
+{
+  "template": "...",
+  "parameters": {...}
+}
+```
+
+**Response** (202 Accepted):
+```http
+HTTP/1.1 202 Accepted
+Location: /api/jobs/job-abc123
+Content-Type: application/json
+
+{
+  "job_id": "job-abc123",
+  "status": "queued",
+  "status_url": "/api/jobs/job-abc123",
+  "estimated_duration": 300
+}
+```
+
+#### Poll Job Status
+
+```http
+GET /api/jobs/job-abc123
+```
+
+**In Progress**:
+```json
+{
+  "job_id": "job-abc123",
+  "status": "running",
+  "progress": 45,
+  "started_at": "2025-12-08T12:00:00Z",
+  "estimated_completion": "2025-12-08T12:05:00Z"
+}
+```
+
+**Completed**:
+```json
+{
+  "job_id": "job-abc123",
+  "status": "completed",
+  "progress": 100,
+  "result": {
+    "infrastructure_id": "infra-123",
+    "resources_created": 5
+  },
+  "started_at": "2025-12-08T12:00:00Z",
+  "completed_at": "2025-12-08T12:04:30Z"
+}
+```
+
+---
+
+## 🔐 OAuth 2.0 Flows (Detailed)
+
+### Authorization Code Flow (Web Apps)
+
+```
+┌────────┐                               ┌───────────┐
+│ Client │                               │   Auth    │
+│  App   │                               │  Server   │
+└───┬────┘                               └─────┬─────┘
+    │                                          │
+    │ 1. Redirect to /oauth/authorize         │
+    ├─────────────────────────────────────────►│
+    │                                          │
+    │ 2. User authenticates                    │
+    │                                          │
+    │ 3. Redirect with authorization code      │
+    │◄─────────────────────────────────────────┤
+    │                                          │
+    │ 4. POST /oauth/token                     │
+    │    (code + client_secret)                │
+    ├─────────────────────────────────────────►│
+    │                                          │
+    │ 5. Return access_token + refresh_token   │
+    │◄─────────────────────────────────────────┤
+    │                                          │
+```
+
+**Step 1: Authorization Request**
+```http
+GET /oauth/authorize?
+  response_type=code&
+  client_id=your-client-id&
+  redirect_uri=https://your-app.com/callback&
+  scope=infrastructure.read infrastructure.write&
+  state=random-state-string
+```
+
+**Step 3: Callback with Code**
+```http
+https://your-app.com/callback?
+  code=AUTH_CODE_HERE&
+  state=random-state-string
+```
+
+**Step 4: Token Exchange**
+```http
+POST /oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&
+code=AUTH_CODE_HERE&
+client_id=your-client-id&
+client_secret=your-client-secret&
+redirect_uri=https://your-app.com/callback
+```
+
+**Step 5: Token Response**
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIs...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "def502003abc123...",
+  "scope": "infrastructure.read infrastructure.write"
+}
+```
+
+### Client Credentials Flow (Machine-to-Machine)
+
+```http
+POST /oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&
+client_id=your-client-id&
+client_secret=your-client-secret&
+scope=infrastructure.read
+```
+
+**Response**:
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIs...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scope": "infrastructure.read"
+}
+```
+
+### Refresh Token Flow
+
+```http
+POST /oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token&
+refresh_token=def502003abc123...&
+client_id=your-client-id&
+client_secret=your-client-secret
+```
+
+---
+
+## 📊 API Performance Best Practices
+
+### 1. Response Compression
+
+**Request**:
+```http
+GET /api/infrastructure
+Accept-Encoding: gzip, deflate, br
+```
+
+**Response**:
+```http
+HTTP/1.1 200 OK
+Content-Encoding: gzip
+Content-Length: 15230
+```
+
+**Savings**: 70-90% reduction in payload size
+
+### 2. Conditional Requests (304 Not Modified)
+
+**Bandwidth Saved**: ~95% on unchanged resources
+
+### 3. Connection Pooling
+
+**Client Configuration**:
+```javascript
+// Node.js
+const agent = new http.Agent({
+  keepAlive: true,
+  maxSockets: 50
+});
+
+// Python
+import requests
+session = requests.Session()
+adapter = requests.adapters.HTTPAdapter(pool_maxsize=50)
+session.mount('http://', adapter)
+```
+
+### 4. Request Timeouts
+
+**Recommended Values**:
+```
+Connection timeout: 5 seconds
+Read timeout: 30 seconds
+Total timeout: 60 seconds
+```
+
+### 5. Circuit Breaker Implementation
+
+**Client-Side Protection**:
+```python
+from circuitbreaker import circuit
+
+@circuit(failure_threshold=5, recovery_timeout=60)
+def call_api():
+    return requests.get('http://api-gateway:4000/api/health')
+```
+
+---
+
+**Document Version**: 2.0 (Advanced Edition)  
 **Last Updated**: December 8, 2025  
 **API Version**: v3.0
