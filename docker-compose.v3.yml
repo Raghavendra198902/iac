@@ -427,10 +427,11 @@ services:
       - postgres-v3
       - redis-v3
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8500/health')"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8500/health').read()\" || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
 networks:
   iac-v3-network:
