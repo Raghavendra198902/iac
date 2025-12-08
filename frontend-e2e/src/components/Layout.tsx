@@ -38,6 +38,7 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
+  { name: 'Home', path: '/', icon: HomeIcon },
   { name: 'Dashboard', path: '/dashboard', icon: ChartBarIcon },
   {
     name: 'Infrastructure',
@@ -48,7 +49,6 @@ const navigation: NavItem[] = [
       { name: 'Resources', path: '/infrastructure/resources', icon: CubeIcon },
       { name: 'Templates', path: '/infrastructure/templates', icon: DocumentTextIcon },
       { name: 'Generator', path: '/infrastructure/generator', icon: CodeBracketIcon },
-      { name: 'Topology', path: '/infrastructure/topology', icon: PuzzlePieceIcon },
     ],
   },
   {
@@ -60,7 +60,6 @@ const navigation: NavItem[] = [
       { name: 'Performance', path: '/monitoring/performance', icon: ChartBarIcon },
       { name: 'Health', path: '/monitoring/health', icon: ShieldCheckIcon },
       { name: 'Alerts', path: '/monitoring/alerts', icon: BellIcon },
-      { name: 'Logs', path: '/monitoring/logs', icon: DocumentTextIcon },
     ],
   },
   {
@@ -75,24 +74,117 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    name: 'Cost Management',
-    path: '/cost/analytics',
+    name: 'Cost',
+    path: '/cost',
     icon: CurrencyDollarIcon,
     children: [
+      { name: 'Overview', path: '/cost', icon: CurrencyDollarIcon },
       { name: 'Analytics', path: '/cost/analytics', icon: ChartBarIcon },
       { name: 'Budget', path: '/cost/budget', icon: DocumentTextIcon },
       { name: 'Optimization', path: '/cost/optimization', icon: CpuChipIcon },
     ],
   },
   {
-    name: 'AI & NLI',
-    path: '/ai/nli',
-    icon: ChatBubbleLeftRightIcon,
+    name: 'DevOps',
+    path: '/devops',
+    icon: CodeBracketIcon,
+    children: [
+      { name: 'Overview', path: '/devops', icon: CodeBracketIcon },
+      { name: 'Pipelines', path: '/devops/pipelines', icon: CodeBracketIcon },
+      { name: 'Containers', path: '/devops/containers', icon: CubeIcon },
+      { name: 'Git', path: '/devops/git', icon: CodeBracketIcon },
+    ],
   },
   {
-    name: 'Deployments',
-    path: '/deployments/workflows',
-    icon: CodeBracketIcon,
+    name: 'EA - Enterprise',
+    path: '/ea',
+    icon: BuildingOfficeIcon,
+    children: [
+      { name: 'Overview', path: '/ea', icon: BuildingOfficeIcon },
+      { name: 'Business', path: '/ea/business', icon: BuildingOfficeIcon },
+      { name: 'Application', path: '/ea/application', icon: CubeIcon },
+      { name: 'Data', path: '/ea/data', icon: ServerIcon },
+    ],
+  },
+  {
+    name: 'SA - Solution',
+    path: '/ea/technology',
+    icon: CpuChipIcon,
+  },
+  {
+    name: 'TA - Technical',
+    path: '/ea/integration',
+    icon: PuzzlePieceIcon,
+  },
+  {
+    name: 'PM - Project',
+    path: '/projects',
+    icon: FolderIcon,
+    children: [
+      { name: 'Overview', path: '/projects', icon: FolderIcon },
+      { name: 'List', path: '/projects/list', icon: FolderIcon },
+      { name: 'Collaboration', path: '/projects/collaboration', icon: UsersIcon },
+    ],
+  },
+  {
+    name: 'SE - Security',
+    path: '/ea/security',
+    icon: ShieldCheckIcon,
+  },
+  {
+    name: 'CMDB',
+    path: '/cmdb',
+    icon: CubeIcon,
+    children: [
+      { name: 'Overview', path: '/cmdb', icon: CubeIcon },
+      { name: 'Assets', path: '/cmdb/assets', icon: ServerIcon },
+      { name: 'Config Items', path: '/cmdb/config-items', icon: Cog6ToothIcon },
+      { name: 'Relationships', path: '/cmdb/relationships', icon: PuzzlePieceIcon },
+    ],
+  },
+  {
+    name: 'AI & Automation',
+    path: '/ai',
+    icon: CpuChipIcon,
+    children: [
+      { name: 'Overview', path: '/ai', icon: CpuChipIcon },
+      { name: 'Models', path: '/ai/models', icon: CpuChipIcon },
+      { name: 'Automation', path: '/ai/automation', icon: CodeBracketIcon },
+      { name: 'Predictive', path: '/ai/predictive', icon: ChartBarIcon },
+      { name: 'Natural Language', path: '/ai/nli', icon: ChatBubbleLeftRightIcon },
+    ],
+  },
+  {
+    name: 'Integrations',
+    path: '/integrations',
+    icon: PuzzlePieceIcon,
+    children: [
+      { name: 'Overview', path: '/integrations', icon: PuzzlePieceIcon },
+      { name: 'API', path: '/integrations/api', icon: CodeBracketIcon },
+      { name: 'Webhooks', path: '/integrations/webhooks', icon: CodeBracketIcon },
+      { name: 'Services', path: '/integrations/services', icon: ServerIcon },
+    ],
+  },
+  {
+    name: 'Reports',
+    path: '/reports',
+    icon: DocumentTextIcon,
+    children: [
+      { name: 'Overview', path: '/reports', icon: DocumentTextIcon },
+      { name: 'Builder', path: '/reports/builder', icon: CodeBracketIcon },
+      { name: 'Scheduled', path: '/reports/scheduled', icon: DocumentTextIcon },
+      { name: 'Export', path: '/reports/export', icon: DocumentTextIcon },
+    ],
+  },
+  {
+    name: 'Admin',
+    path: '/admin',
+    icon: Cog6ToothIcon,
+    children: [
+      { name: 'System', path: '/admin/system', icon: Cog6ToothIcon },
+      { name: 'License', path: '/admin/license', icon: DocumentTextIcon },
+      { name: 'Backup', path: '/admin/backup', icon: ServerIcon },
+    ],
   },
   {
     name: 'Settings',
@@ -101,7 +193,6 @@ const navigation: NavItem[] = [
     children: [
       { name: 'General', path: '/settings', icon: Cog6ToothIcon },
       { name: 'Cloud Providers', path: '/settings/cloud', icon: CloudIcon },
-      { name: 'Backup & Recovery', path: '/settings/backup', icon: ServerIcon },
     ],
   },
   { name: 'Users', path: '/users', icon: UsersIcon },
@@ -287,6 +378,13 @@ const Layout: React.FC = () => {
 
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 glass-effect rounded-lg shadow-xl border border-white/20 dark:border-slate-700/50 py-2">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm hover:bg-white/50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-200"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
                     <Link
                       to="/settings"
                       className="block px-4 py-2 text-sm hover:bg-white/50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-200"

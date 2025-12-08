@@ -12,6 +12,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Auth/Login'));
 const Register = lazy(() => import('./pages/Auth/Register'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 const UserManagement = lazy(() => import('./pages/UserManagement'));
 const Settings = lazy(() => import('./pages/Settings'));
 const CloudSettings = lazy(() => import('./pages/Settings/CloudSettings').then(module => ({ default: module.CloudSettings })));
@@ -34,7 +35,6 @@ const CostAnalytics = lazy(() => import('./pages/Cost/CostAnalytics'));
 const CostBudget = lazy(() => import('./pages/Cost/CostBudget'));
 const CostOptimization = lazy(() => import('./pages/Cost/CostOptimization'));
 const DeploymentWorkflows = lazy(() => import('./pages/Deployments/DeploymentWorkflows'));
-const NaturalLanguageInfrastructure = lazy(() => import('./pages/NaturalLanguageInfrastructure'));
 
 function App() {
   return (
@@ -74,9 +74,8 @@ function App() {
                   <Route path="/cost/budget" element={<CostBudget />} />
                   <Route path="/cost/optimization" element={<CostOptimization />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
-                  <Route path="/ai/nli" element={<NaturalLanguageInfrastructure />} />
                 </Route>
-                <Route path="*" element={<Dashboard />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </AuthProvider>
