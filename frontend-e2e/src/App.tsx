@@ -36,6 +36,10 @@ const CostAnalytics = lazy(() => import('./pages/Cost/CostAnalytics'));
 const CostBudget = lazy(() => import('./pages/Cost/CostBudget'));
 const CostOptimization = lazy(() => import('./pages/Cost/CostOptimization'));
 const DeploymentWorkflows = lazy(() => import('./pages/Deployments/DeploymentWorkflows'));
+const DevOps = lazy(() => import('./pages/DevOps'));
+const DevOpsPipelines = lazy(() => import('./pages/DevOps/DevOpsPipelines'));
+const DevOpsContainers = lazy(() => import('./pages/DevOps/DevOpsContainers'));
+const DevOpsGit = lazy(() => import('./pages/DevOps/DevOpsGit'));
 
 function App() {
   return (
@@ -75,6 +79,10 @@ function App() {
                   <Route path="/cost/analytics" element={<CostAnalytics />} />
                   <Route path="/cost/budget" element={<CostBudget />} />
                   <Route path="/cost/optimization" element={<CostOptimization />} />
+                  <Route path="/devops" element={<DevOps />} />
+                  <Route path="/devops/pipelines" element={<DevOpsPipelines />} />
+                  <Route path="/devops/containers" element={<DevOpsContainers />} />
+                  <Route path="/devops/git" element={<DevOpsGit />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
