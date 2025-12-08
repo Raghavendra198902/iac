@@ -98,6 +98,7 @@ const InsightsDashboard = lazy(() => import('./pages/InsightsDashboard'));
 
 // Security Center
 const SecurityCenter = lazy(() => import('./pages/SecurityCenter'));
+const ZeroTrustDashboard = lazy(() => import('./pages/ZeroTrustDashboard'));
 
 // Cost Management
 const CostManagement = lazy(() => import('./pages/CostManagement'));
@@ -217,6 +218,8 @@ function App() {
                   
                   {/* Security Center */}
                   <Route path="/security" element={<SecurityCenter />} />
+                  <Route path="/security/zero-trust" element={<ZeroTrustDashboard />} />
+                  <Route path="/security/compliance" element={<ZeroTrustDashboard />} />
                   
                   {/* Cost Management */}
                   <Route path="/cost" element={<CostManagement />} />

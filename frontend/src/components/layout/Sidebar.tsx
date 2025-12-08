@@ -28,6 +28,8 @@ import {
   Star,
   Clock,
   TrendingUp,
+  Lock,
+  CheckCircle,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -38,6 +40,7 @@ interface MenuItem {
   badge?: string;
   badgeColor?: string;
   children?: MenuItem[];
+  subItems?: MenuItem[];
   roles?: string[];
 }
 
@@ -361,6 +364,26 @@ export default function Sidebar({ isOpen = true, onClose, userRole = 'EA' }: Sid
       path: '/security',
       badge: 'SOC2',
       badgeColor: 'bg-red-600',
+      subItems: [
+        {
+          id: 'security-overview',
+          label: 'Security Overview',
+          path: '/security',
+          icon: Shield,
+        },
+        {
+          id: 'zero-trust',
+          label: 'Zero Trust Dashboard',
+          path: '/security/zero-trust',
+          icon: Lock,
+        },
+        {
+          id: 'compliance',
+          label: 'Compliance Status',
+          path: '/security/compliance',
+          icon: CheckCircle,
+        },
+      ],
     },
     {
       id: 'cost',
