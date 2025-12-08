@@ -66,6 +66,12 @@ const CMDB = lazy(() => import('./pages/CMDB'));
 const CMDBAssets = lazy(() => import('./pages/CMDB/CMDBAssets'));
 const CMDBConfigItems = lazy(() => import('./pages/CMDB/CMDBConfigItems'));
 const CMDBRelationships = lazy(() => import('./pages/CMDB/CMDBRelationships'));
+const AI = lazy(() => import('./pages/AI'));
+const AIOverview = lazy(() => import('./pages/AI/AIOverview'));
+const AIModels = lazy(() => import('./pages/AI/AIModels'));
+const AIAutomation = lazy(() => import('./pages/AI/AIAutomation'));
+const AIPredictive = lazy(() => import('./pages/AI/AIPredictive'));
+const AINLI = lazy(() => import('./pages/AI/AINLI'));
 
 function App() {
   return (
@@ -135,6 +141,12 @@ function App() {
                   <Route path="/cmdb/assets" element={<CMDBAssets />} />
                   <Route path="/cmdb/config-items" element={<CMDBConfigItems />} />
                   <Route path="/cmdb/relationships" element={<CMDBRelationships />} />
+                  <Route path="/ai" element={<AI />} />
+                  <Route path="/ai/overview" element={<AIOverview />} />
+                  <Route path="/ai/models" element={<AIModels />} />
+                  <Route path="/ai/automation" element={<AIAutomation />} />
+                  <Route path="/ai/predictive" element={<AIPredictive />} />
+                  <Route path="/ai/nli" element={<AINLI />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
