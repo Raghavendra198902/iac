@@ -72,6 +72,11 @@ const AIModels = lazy(() => import('./pages/AI/AIModels'));
 const AIAutomation = lazy(() => import('./pages/AI/AIAutomation'));
 const AIPredictive = lazy(() => import('./pages/AI/AIPredictive'));
 const AINLI = lazy(() => import('./pages/AI/AINLI'));
+const Integrations = lazy(() => import('./pages/Integrations'));
+const IntegrationsOverview = lazy(() => import('./pages/Integrations/IntegrationsOverview'));
+const IntegrationsAPI = lazy(() => import('./pages/Integrations/IntegrationsAPI'));
+const IntegrationsWebhooks = lazy(() => import('./pages/Integrations/IntegrationsWebhooks'));
+const IntegrationsServices = lazy(() => import('./pages/Integrations/IntegrationsServices'));
 
 function App() {
   return (
@@ -147,6 +152,11 @@ function App() {
                   <Route path="/ai/automation" element={<AIAutomation />} />
                   <Route path="/ai/predictive" element={<AIPredictive />} />
                   <Route path="/ai/nli" element={<AINLI />} />
+                  <Route path="/integrations" element={<Integrations />} />
+                  <Route path="/integrations/overview" element={<IntegrationsOverview />} />
+                  <Route path="/integrations/api" element={<IntegrationsAPI />} />
+                  <Route path="/integrations/webhooks" element={<IntegrationsWebhooks />} />
+                  <Route path="/integrations/services" element={<IntegrationsServices />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
