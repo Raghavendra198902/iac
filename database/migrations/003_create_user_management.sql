@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS role_permissions (
 CREATE TABLE IF NOT EXISTS user_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token VARCHAR(500) UNIQUE NOT NULL,
-    refresh_token VARCHAR(500) UNIQUE,
+    token TEXT UNIQUE NOT NULL,
+    refresh_token TEXT UNIQUE,
     ip_address VARCHAR(45),
     user_agent TEXT,
     device_type VARCHAR(50),
