@@ -6,12 +6,17 @@ function MonitoringPage() {
   const [activeDashboard, setActiveDashboard] = useState('overview')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
+  // Use the same host as the current page to avoid CORS issues
+  const grafanaHost = window.location.hostname
+  const grafanaPort = '3020'
+  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}`
+
   const dashboards = [
     {
       id: 'overview',
       name: 'Platform Overview',
       icon: '📊',
-      url: 'http://localhost:3020/d/iac-dharma-overview?orgId=1&kiosk',
+      url: `${grafanaUrl}/d/iac-dharma-overview?orgId=1&kiosk`,
       description: 'Services health, request rates, CPU & memory',
       color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     },
@@ -19,7 +24,7 @@ function MonitoringPage() {
       id: 'api-gateway',
       name: 'API Gateway',
       icon: '🚀',
-      url: 'http://localhost:3020/d/iac-api-gateway?orgId=1&kiosk',
+      url: `${grafanaUrl}/d/iac-api-gateway?orgId=1&kiosk`,
       description: 'Request metrics, response times, status codes',
       color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     },
@@ -27,7 +32,7 @@ function MonitoringPage() {
       id: 'aiops-ml',
       name: 'AIOps & ML',
       icon: '🤖',
-      url: 'http://localhost:3020/d/iac-aiops-ml?orgId=1&kiosk',
+      url: `${grafanaUrl}/d/iac-aiops-ml?orgId=1&kiosk`,
       description: 'Predictions, anomalies, model accuracy',
       color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     },
@@ -35,7 +40,7 @@ function MonitoringPage() {
       id: 'infrastructure',
       name: 'Infrastructure',
       icon: '🖥️',
-      url: 'http://localhost:3020/d/iac-infrastructure?orgId=1&kiosk',
+      url: `${grafanaUrl}/d/iac-infrastructure?orgId=1&kiosk`,
       description: 'Container resources, network & disk I/O',
       color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
     },
@@ -93,7 +98,7 @@ function MonitoringPage() {
         {!sidebarCollapsed && (
           <div className="sidebar-actions">
             <a 
-              href="http://localhost:3020" 
+              href={grafanaUrl} 
               target="_blank" 
               rel="noopener noreferrer"
               className="action-link"
