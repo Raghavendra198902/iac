@@ -77,6 +77,15 @@ const IntegrationsOverview = lazy(() => import('./pages/Integrations/Integration
 const IntegrationsAPI = lazy(() => import('./pages/Integrations/IntegrationsAPI'));
 const IntegrationsWebhooks = lazy(() => import('./pages/Integrations/IntegrationsWebhooks'));
 const IntegrationsServices = lazy(() => import('./pages/Integrations/IntegrationsServices'));
+const Reports = lazy(() => import('./pages/Reports'));
+const ReportsOverview = lazy(() => import('./pages/Reports/ReportsOverview'));
+const ReportsBuilder = lazy(() => import('./pages/Reports/ReportsBuilder'));
+const ReportsScheduled = lazy(() => import('./pages/Reports/ReportsScheduled'));
+const ReportsExport = lazy(() => import('./pages/Reports/ReportsExport'));
+const Admin = lazy(() => import('./pages/Admin'));
+const AdminSystem = lazy(() => import('./pages/Admin/AdminSystem'));
+const AdminLicense = lazy(() => import('./pages/Admin/AdminLicense'));
+const AdminBackup = lazy(() => import('./pages/Admin/AdminBackup'));
 
 function App() {
   return (
@@ -157,6 +166,15 @@ function App() {
                   <Route path="/integrations/api" element={<IntegrationsAPI />} />
                   <Route path="/integrations/webhooks" element={<IntegrationsWebhooks />} />
                   <Route path="/integrations/services" element={<IntegrationsServices />} />
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/reports/overview" element={<ReportsOverview />} />
+                  <Route path="/reports/builder" element={<ReportsBuilder />} />
+                  <Route path="/reports/scheduled" element={<ReportsScheduled />} />
+                  <Route path="/reports/export" element={<ReportsExport />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin/system" element={<AdminSystem />} />
+                  <Route path="/admin/license" element={<AdminLicense />} />
+                  <Route path="/admin/backup" element={<AdminBackup />} />
                   <Route path="/deployments/workflows" element={<DeploymentWorkflows />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
