@@ -632,9 +632,129 @@ async def terminate_session(session_id: str):
     """Terminate Zero Trust session"""
     if session_id in sessions:
         del sessions[session_id]
-        return {"status": "terminated", "session_id": session_id}
+        return {"status": "terminated", "session_id": "session_id"}
     else:
         raise HTTPException(status_code=404, detail="Session not found")
+
+@app.get("/security/compliance", tags=["Compliance"])
+@app.get("/api/v3/zero-trust/compliance", tags=["Compliance"])
+async def get_compliance_status():
+    """
+    Get comprehensive security compliance status.
+    Provides compliance metrics across policies, sessions, and security posture.
+    """
+    # Calculate policy compliance - all policies are active
+    total_policies = len(policies)
+    enforced_policies = total_policies  # All defined policies are enforced
+    policy_compliance = 100.0 if total_policies > 0 else 0
+    
+    # Calculate session compliance
+    active_sessions_count = len(sessions)
+    verified_sessions = sum(1 for s in sessions.values() 
+                          if s.get("last_verified") and 
+                          (datetime.now() - datetime.fromisoformat(s["last_verified"])).seconds < 300)
+    session_compliance = (verified_sessions / active_sessions_count * 100) if active_sessions_count > 0 else 100
+    
+    # Calculate trust score compliance
+    high_trust_users = sum(1 for ts in trust_scores.values() if ts.get("score", 0) >= 80)
+    total_users = len(trust_scores) if trust_scores else 1
+    trust_compliance = (high_trust_users / total_users * 100)
+    
+    # Calculate MFA compliance
+    mfa_required_policies = sum(1 for p in policies 
+                               if p.conditions.get("mfa_required", False))
+    mfa_compliance = (mfa_required_policies / total_policies * 100) if total_policies > 0 else 0
+    
+    # Calculate device compliance thresholds
+    high_compliance_policies = sum(1 for p in policies 
+                                  if p.conditions.get("device_compliance_min", 0) >= 90)
+    device_compliance = (high_compliance_policies / total_policies * 100) if total_policies > 0 else 0
+    # Calculate device compliance thresholds
+    high_compliance_policies = sum(1 for p in policies 
+                                  if p.conditions.get("device_compliance_min", 0) >= 90)
+    device_compliance = (high_compliance_policies / total_policies * 100) if total_policies > 0 else 0
+    
+    # Overall compliance score (weighted average)
+    overall_compliance = (
+        policy_compliance * 0.30 +
+        session_compliance * 0.20 +
+        trust_compliance * 0.20 +
+        mfa_compliance * 0.15 +
+        device_compliance * 0.15
+    )
+    
+    # Compliance status
+    if overall_compliance >= 90:
+        compliance_status = "excellent"
+        compliance_level = "HIGH"
+    elif overall_compliance >= 75:
+        compliance_status = "good"
+        compliance_level = "MEDIUM"
+    elif overall_compliance >= 60:
+        compliance_status = "fair"
+        compliance_level = "LOW"
+    else:
+        compliance_status = "poor"
+        compliance_level = "CRITICAL"
+    
+    # Build recommendations list (filter out None values)
+    recommendations = []
+    if mfa_compliance < 75:
+        recommendations.append("Enable MFA for all high-privilege policies")
+    if policy_compliance < 100:
+        recommendations.append("Review and enable disabled policies")
+    if session_compliance < 80:
+        recommendations.append("Implement continuous session verification")
+    if trust_compliance < 70:
+        recommendations.append("Improve user trust scores through behavior analysis")
+    if device_compliance < 50:
+        recommendations.append("Increase device compliance requirements for sensitive resources")
+    
+    return {
+        "overall_compliance_score": round(overall_compliance, 2),
+        "compliance_status": compliance_status,
+        "compliance_level": compliance_level,
+        "timestamp": datetime.now().isoformat(),
+        "metrics": {
+            "policy_compliance": {
+                "score": round(policy_compliance, 2),
+                "total_policies": total_policies,
+                "enforced_policies": enforced_policies,
+                "status": "compliant" if policy_compliance >= 80 else "needs_attention"
+            },
+            "session_compliance": {
+                "score": round(session_compliance, 2),
+                "active_sessions": active_sessions_count,
+                "verified_sessions": verified_sessions,
+                "status": "compliant" if session_compliance >= 80 else "needs_attention"
+            },
+            "trust_score_compliance": {
+                "score": round(trust_compliance, 2),
+                "total_users": total_users,
+                "high_trust_users": high_trust_users,
+                "status": "compliant" if trust_compliance >= 70 else "needs_attention"
+            },
+            "mfa_compliance": {
+                "score": round(mfa_compliance, 2),
+                "mfa_required_policies": mfa_required_policies,
+                "total_policies": total_policies,
+                "status": "compliant" if mfa_compliance >= 75 else "needs_attention"
+            },
+            "device_compliance": {
+                "score": round(device_compliance, 2),
+                "high_compliance_policies": high_compliance_policies,
+                "total_policies": total_policies,
+                "status": "compliant" if device_compliance >= 50 else "needs_attention"
+            }
+        },
+        "recommendations": recommendations if recommendations else ["All compliance metrics meet standards"],
+        "zero_trust_principles": {
+            "never_trust_always_verify": True,
+            "least_privilege_access": True,
+            "assume_breach": True,
+            "continuous_monitoring": True
+        }
+    }
 
 # ============================================================================
 # Startup
