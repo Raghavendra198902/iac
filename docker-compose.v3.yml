@@ -466,6 +466,38 @@ services:
       retries: 3
       start_period: 40s
 
+  # Advanced RBAC Service
+  advanced-rbac:
+    build:
+      context: ./backend/advanced-rbac-service
+      dockerfile: Dockerfile
+    image: iac-advanced-rbac:v3
+    container_name: iac-advanced-rbac-v3
+    restart: unless-stopped
+    ports:
+      - "3050:3050"
+    environment:
+      - NODE_ENV=production
+      - PORT=3050
+      - POSTGRES_HOST=postgres-v3
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=iac_v3
+      - POSTGRES_USER=iacadmin
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-iacadmin123}
+      - REDIS_HOST=redis-v3
+      - REDIS_PORT=6379
+    networks:
+      - iac-v3-network
+    depends_on:
+      - postgres-v3
+      - redis-v3
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:3050/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
 networks:
   iac-v3-network:
     name: iac-v3-network
