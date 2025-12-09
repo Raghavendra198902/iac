@@ -41,10 +41,12 @@ func NewManager(log *logger.Logger, cfg *config.Config) *Manager {
 		m.Register(NewWindowsEventLogCollector(log))
 		m.Register(NewWindowsEventLogAPICollector(log))
 		m.Register(NewWindowsPerformanceCollector(log))
-		m.Register(NewWindowsSecurityCollector(log))
 		m.Register(NewWindowsWMICollector(log))
 		m.Register(NewWindowsPDHCollector(log))
-		log.Info("Registered Windows-specific collectors", "count", 7)
+		m.Register(NewWindowsDefenderCollector(log))
+		m.Register(NewWindowsFirewallCollector(log))
+		m.Register(NewWindowsUpdateCollector(log))
+		log.Info("Registered Windows-specific collectors", "count", 9)
 	}
 
 	return m
