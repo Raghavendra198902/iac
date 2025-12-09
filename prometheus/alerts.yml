@@ -1,0 +1,395 @@
+# Prometheus Alert Rules Configuration
+
+groups:
+  - name: platform_critical_alerts
+    interval: 30s
+    rules:
+      #═══════════════════════════════════════════════════════════════════
+      # Service Availability Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: ServiceDown
+        expr: up{job=~"rbac|api-gateway|aiops|self-healing|frontend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute. Immediate action required."
+          runbook: "https://docs.iac-platform.com/runbooks/service-down"
+      
+      - alert: ServiceHealthCheckFailing
+        expr: probe_success{job="health-checks"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Health check failing for {{ $labels.instance }}"
+          description: "Health check for {{ $labels.instance }} has been failing for 2 minutes."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # Resource Usage Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{name=~"iac-.*"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage on {{ $labels.name }}"
+          description: "CPU usage is {{ $value }}% on {{ $labels.name }} for the last 5 minutes."
+          dashboard: "https://grafana/d/container-metrics"
+      
+      - alert: CriticalCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{name=~"iac-.*"}[5m]) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "CRITICAL: CPU usage on {{ $labels.name }}"
+          description: "CPU usage is {{ $value }}% on {{ $labels.name }}. Service degradation likely."
+      
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes{name=~"iac-.*"} / container_spec_memory_limit_bytes{name=~"iac-.*"}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.name }}"
+          description: "Memory usage is {{ $value }}% on {{ $labels.name }}."
+      
+      - alert: CriticalMemoryUsage
+        expr: (container_memory_usage_bytes{name=~"iac-.*"} / container_spec_memory_limit_bytes{name=~"iac-.*"}) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: Memory usage on {{ $labels.name }}"
+          description: "Memory usage is {{ $value }}% on {{ $labels.name }}. OOM kill imminent."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # Database Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute."
+          runbook: "https://docs.iac-platform.com/runbooks/postgres-down"
+      
+      - alert: PostgreSQLHighConnections
+        expr: (pg_stat_database_numbackends / pg_settings_max_connections) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High number of PostgreSQL connections"
+          description: "PostgreSQL connection usage is {{ $value }}%. Consider scaling or optimizing queries."
+      
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_database_tup_returned[5m]) / rate(pg_stat_database_tup_fetched[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "Query performance degradation detected. Avg rows returned/fetched ratio is {{ $value }}."
+      
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been down for more than 1 minute."
+      
+      - alert: RedisHighMemoryUsage
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory usage is {{ $value }}%."
+      
+      - alert: Neo4jDown
+        expr: neo4j_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: graph-db
+        annotations:
+          summary: "Neo4j is down"
+          description: "Neo4j graph database has been down for more than 1 minute."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # API Performance Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: HighAPIResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~"rbac|api-gateway"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API response time on {{ $labels.job }}"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}."
+      
+      - alert: CriticalAPIResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~"rbac|api-gateway"}[5m])) > 3
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "CRITICAL: API response time on {{ $labels.job }}"
+          description: "95th percentile response time is {{ $value }}s. Service degradation likely."
+      
+      - alert: HighAPIErrorRate
+        expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API error rate on {{ $labels.job }}"
+          description: "Error rate is {{ $value }}% for {{ $labels.job }}."
+      
+      - alert: CriticalAPIErrorRate
+        expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) * 100 > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: API error rate on {{ $labels.job }}"
+          description: "Error rate is {{ $value }}% for {{ $labels.job }}. Major issue detected."
+      
+      - alert: APIRateLimitHit
+        expr: rate(http_requests_total{status="429"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API rate limit being hit frequently"
+          description: "Rate limit hit {{ $value }} times/sec on {{ $labels.job }}. Consider increasing limits."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # RBAC Service Specific Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: RBACPermissionCheckSlow
+        expr: histogram_quantile(0.95, rate(rbac_permission_check_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: rbac
+        annotations:
+          summary: "RBAC permission checks are slow"
+          description: "95th percentile permission check time is {{ $value }}s."
+      
+      - alert: RBACDatabaseConnectionFailure
+        expr: increase(rbac_db_connection_errors_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          component: rbac
+        annotations:
+          summary: "RBAC database connection failures"
+          description: "{{ $value }} database connection failures in the last 5 minutes."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # ML/AI Engine Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: MLModelPredictionSlow
+        expr: histogram_quantile(0.95, rate(ml_prediction_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: ml
+        annotations:
+          summary: "ML model predictions are slow"
+          description: "95th percentile prediction time is {{ $value }}s."
+      
+      - alert: MLModelAccuracyDrop
+        expr: ml_model_accuracy < 0.7
+        for: 10m
+        labels:
+          severity: warning
+          component: ml
+        annotations:
+          summary: "ML model accuracy has dropped"
+          description: "Model {{ $labels.model_name }} accuracy is {{ $value }}. Retraining may be needed."
+      
+      - alert: MLModelNotAvailable
+        expr: ml_model_loaded == 0
+        for: 5m
+        labels:
+          severity: critical
+          component: ml
+        annotations:
+          summary: "ML model not loaded"
+          description: "Model {{ $labels.model_name }} is not loaded. Predictions unavailable."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # Storage Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: DiskSpaceWarning
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+        for: 5m
+        labels:
+          severity: warning
+          component: storage
+        annotations:
+          summary: "Low disk space"
+          description: "Only {{ $value }}% disk space remaining on {{ $labels.instance }}."
+      
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+          component: storage
+        annotations:
+          summary: "CRITICAL: Very low disk space"
+          description: "Only {{ $value }}% disk space remaining on {{ $labels.instance }}. Immediate action required."
+      
+      - alert: HighDiskIOWait
+        expr: rate(node_disk_io_time_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk I/O wait time"
+          description: "Disk I/O wait is {{ $value }}s on {{ $labels.instance }}."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # Network Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: HighNetworkErrors
+        expr: rate(node_network_receive_errs_total[5m]) + rate(node_network_transmit_errs_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: network
+        annotations:
+          summary: "High network errors"
+          description: "{{ $value }} network errors/sec on {{ $labels.device }}."
+      
+      - alert: HighNetworkTraffic
+        expr: rate(node_network_receive_bytes_total[5m]) > 100000000
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "High network traffic"
+          description: "Network receive rate is {{ $value }}MB/s on {{ $labels.device }}."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # Container Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: ContainerRestarting
+        expr: rate(container_start_time_seconds{name=~"iac-.*"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} is restarting"
+          description: "Container has restarted {{ $value }} times in the last 5 minutes."
+      
+      - alert: ContainerOOMKilled
+        expr: container_oom_events_total{name=~"iac-.*"} > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container {{ $labels.name }} killed by OOM"
+          description: "Container was killed due to out of memory. Increase memory limits."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # Vault Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: VaultSealed
+        expr: vault_core_unsealed == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: vault
+        annotations:
+          summary: "Vault is sealed"
+          description: "HashiCorp Vault is sealed. Secrets unavailable."
+          runbook: "https://docs.iac-platform.com/runbooks/vault-sealed"
+      
+      - alert: VaultHighMemoryUsage
+        expr: vault_runtime_alloc_bytes / vault_runtime_sys_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: vault
+        annotations:
+          summary: "Vault high memory usage"
+          description: "Vault memory usage is {{ $value }}%."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # Backup Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: BackupFailed
+        expr: backup_last_success_timestamp < (time() - 86400)
+        for: 1h
+        labels:
+          severity: critical
+          component: backup
+        annotations:
+          summary: "Backup has not succeeded in 24 hours"
+          description: "Last successful backup was {{ $value }} seconds ago."
+      
+      - alert: BackupDurationTooLong
+        expr: backup_duration_seconds > 3600
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backup taking too long"
+          description: "Backup duration is {{ $value }}s (>1 hour)."
+      
+      #═══════════════════════════════════════════════════════════════════
+      # SSL Certificate Alerts
+      #═══════════════════════════════════════════════════════════════════
+      
+      - alert: SSLCertificateExpiringSoon
+        expr: (ssl_certificate_expiry_seconds < 86400 * 30)
+        for: 1h
+        labels:
+          severity: warning
+          component: ssl
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate for {{ $labels.instance }} expires in {{ $value }} days."
+      
+      - alert: SSLCertificateExpiredOrExpiringSoon
+        expr: (ssl_certificate_expiry_seconds < 86400 * 7)
+        for: 1h
+        labels:
+          severity: critical
+          component: ssl
+        annotations:
+          summary: "CRITICAL: SSL certificate expiring in <7 days"
+          description: "SSL certificate for {{ $labels.instance }} expires in {{ $value }} days. Renew immediately."
