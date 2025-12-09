@@ -479,6 +479,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3050
+      - DATABASE_URL=postgresql://iacadmin:${POSTGRES_PASSWORD:-iacadmin123}@postgres-v3:5432/iac_v3
       - POSTGRES_HOST=postgres-v3
       - POSTGRES_PORT=5432
       - POSTGRES_DB=iac_v3
