@@ -24,7 +24,7 @@ router.get('/controls', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching security controls:', error);
+    logger.error('Error fetching security controls:', { error });
     res.status(500).json({ error: 'Failed to fetch security controls', details: error.message });
   }
 });
@@ -44,7 +44,7 @@ router.get('/controls/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching security control:', error);
+    logger.error('Error fetching security control:', { error });
     res.status(500).json({ error: 'Failed to fetch security control', details: error.message });
   }
 });
@@ -73,7 +73,7 @@ router.post('/controls', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating security control:', error);
+    logger.error('Error creating security control:', { error });
     res.status(500).json({ error: 'Failed to create security control', details: error.message });
   }
 });
@@ -88,7 +88,7 @@ router.get('/threats', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching security threats:', error);
+    logger.error('Error fetching security threats:', { error });
     res.status(500).json({ error: 'Failed to fetch security threats', details: error.message });
   }
 });
@@ -108,7 +108,7 @@ router.get('/threats/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching security threat:', error);
+    logger.error('Error fetching security threat:', { error });
     res.status(500).json({ error: 'Failed to fetch security threat', details: error.message });
   }
 });
@@ -134,7 +134,7 @@ router.post('/threats', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating security threat:', error);
+    logger.error('Error creating security threat:', { error });
     res.status(500).json({ error: 'Failed to create security threat', details: error.message });
   }
 });

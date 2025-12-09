@@ -95,7 +95,7 @@ router.post(
         data: incident,
       });
     } catch (error: any) {
-      logger.error('Error creating incident:', error);
+      logger.error('Error creating incident:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create incident',
@@ -185,7 +185,7 @@ router.get(
         },
       });
     } catch (error: any) {
-      logger.error('Error fetching incidents:', error);
+      logger.error('Error fetching incidents:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch incidents',
@@ -270,7 +270,7 @@ router.get(
         data: fullIncident,
       });
     } catch (error: any) {
-      logger.error('Error fetching incident details:', error);
+      logger.error('Error fetching incident details:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch incident details',
@@ -399,7 +399,7 @@ router.patch(
         data: updated,
       });
     } catch (error: any) {
-      logger.error('Error updating incident:', error);
+      logger.error('Error updating incident:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to update incident',

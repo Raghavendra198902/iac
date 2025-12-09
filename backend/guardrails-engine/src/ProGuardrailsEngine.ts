@@ -154,7 +154,7 @@ export class ProGuardrailsEngine extends EventEmitter {
     
     const evaluationId = `eval_${Date.now()}`;
     
-    console.log(`🛡️ Starting Pro Policy Evaluation: ${evaluationId}`);
+    logger.info(`🛡️ Starting Pro Policy Evaluation: ${evaluationId}`);
     
     // Step 1: Traditional policy evaluation
     const violations = await this.detectViolations(input);
@@ -196,12 +196,12 @@ export class ProGuardrailsEngine extends EventEmitter {
     
     this.emit('evaluation:completed', evaluation);
     
-    console.log(`✅ Evaluation complete:`);
-    console.log(`   Risk Score: ${riskScore.toFixed(2)}/100`);
-    console.log(`   Compliance Score: ${complianceScore.toFixed(2)}%`);
-    console.log(`   Violations: ${violations.length}`);
-    console.log(`   Predictions: ${predictions.length}`);
-    console.log(`   Remediation Actions: ${autoRemediationSuggestions.length}`);
+    logger.info(`✅ Evaluation complete:`);
+    logger.info(`   Risk Score: ${riskScore.toFixed(2)}/100`);
+    logger.info(`   Compliance Score: ${complianceScore.toFixed(2)}%`);
+    logger.info(`   Violations: ${violations.length}`);
+    logger.info(`   Predictions: ${predictions.length}`);
+    logger.info(`   Remediation Actions: ${autoRemediationSuggestions.length}`);
     
     return evaluation;
   }
@@ -286,7 +286,7 @@ export class ProGuardrailsEngine extends EventEmitter {
     currentViolations: PolicyViolation[]
   ): Promise<PolicyPrediction[]> {
     
-    console.log(`🔮 Running predictive analysis...`);
+    logger.info(`🔮 Running predictive analysis...`);
     
     const predictions: PolicyPrediction[] = [];
     
@@ -325,7 +325,7 @@ export class ProGuardrailsEngine extends EventEmitter {
       });
     }
     
-    console.log(`   ✅ Generated ${predictions.length} predictions`);
+    logger.info(`   ✅ Generated ${predictions.length} predictions`);
     
     return predictions;
   }
@@ -450,7 +450,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
   }
 
   async executeAutoRemediation(actionId: string): Promise<{ success: boolean; message: string }> {
-    console.log(`🔧 Executing auto-remediation: ${actionId}`);
+    logger.info(`🔧 Executing auto-remediation: ${actionId}`);
     
     // Simulate remediation execution
     await this.delay(1000);
@@ -472,7 +472,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
     riskLevel: string;
   }> {
     
-    console.log(`🔍 Detecting drift for resource: ${resourceId}`);
+    logger.info(`🔍 Detecting drift for resource: ${resourceId}`);
     
     const baseline = this.driftBaseline.get(resourceId);
     

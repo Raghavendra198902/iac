@@ -109,7 +109,7 @@ router.get('/check', async (req: Request, res: Response) => {
       } : undefined,
     });
   } catch (error: any) {
-    console.error('Update check error:', error);
+    logger.error('Update check error:', { error });
     res.status(500).json({ error: 'Failed to check for updates' });
   }
 });
@@ -181,7 +181,7 @@ router.post('/upload', upload.single('package'), async (req: Request, res: Respo
       checksum,
     });
   } catch (error: any) {
-    console.error('Update upload error:', error);
+    logger.error('Update upload error:', { error });
     res.status(500).json({ error: 'Failed to upload update package' });
   }
 });
@@ -219,7 +219,7 @@ router.get('/download/:id', async (req: Request, res: Response) => {
     const fileStream = require('fs').createReadStream(filePath);
     fileStream.pipe(res);
   } catch (error: any) {
-    console.error('Download error:', error);
+    logger.error('Download error:', { error });
     res.status(500).json({ error: 'Failed to download update' });
   }
 });
@@ -264,7 +264,7 @@ router.get('/list', async (req: Request, res: Response) => {
       })),
     });
   } catch (error: any) {
-    console.error('List updates error:', error);
+    logger.error('List updates error:', { error });
     res.status(500).json({ error: 'Failed to list updates' });
   }
 });
@@ -304,7 +304,7 @@ router.post('/push', async (req: Request, res: Response) => {
       ...pushResult,
     });
   } catch (error: any) {
-    console.error('Push update error:', error);
+    logger.error('Push update error:', { error });
     res.status(500).json({ error: 'Failed to push update' });
   }
 });
@@ -327,7 +327,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     try {
       await fs.unlink(filePath);
     } catch (error) {
-      console.warn('Failed to delete file:', error);
+      console.warn('Failed to delete file:', { error });
     }
 
     // Remove from registry
@@ -339,7 +339,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       id,
     });
   } catch (error: any) {
-    console.error('Delete update error:', error);
+    logger.error('Delete update error:', { error });
     res.status(500).json({ error: 'Failed to delete update' });
   }
 });

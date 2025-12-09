@@ -99,7 +99,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error analyzing architecture:', error);
+      logger.error('Error analyzing architecture:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to analyze architecture',
@@ -197,7 +197,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error optimizing blueprint:', error);
+      logger.error('Error optimizing blueprint:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to optimize blueprint',
@@ -285,7 +285,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error comparing blueprints:', error);
+      logger.error('Error comparing blueprints:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to compare blueprints',
@@ -352,7 +352,7 @@ router.post(
         data: feedbackResult.rows[0],
       });
     } catch (error: any) {
-      logger.error('Error recording feedback:', error);
+      logger.error('Error recording feedback:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to record feedback',
@@ -420,7 +420,7 @@ router.get(
         count: history.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching history:', error);
+      logger.error('Error fetching history:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch history',
@@ -499,7 +499,7 @@ router.get(
         data: trends,
       });
     } catch (error: any) {
-      logger.error('Error fetching trends:', error);
+      logger.error('Error fetching trends:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch trends',
@@ -581,7 +581,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error predicting cost:', error);
+      logger.error('Error predicting cost:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to predict cost',
@@ -680,7 +680,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error analyzing risks:', error);
+      logger.error('Error analyzing risks:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to analyze risks',

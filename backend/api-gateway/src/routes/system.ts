@@ -157,7 +157,7 @@ router.get('/metrics', async (req, res) => {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error fetching system metrics:', error);
+    logger.error('Error fetching system metrics:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch system metrics',

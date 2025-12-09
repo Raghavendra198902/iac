@@ -24,7 +24,7 @@ router.get('/artifacts', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching artifacts:', error);
+    logger.error('Error fetching artifacts:', { error });
     res.status(500).json({ error: 'Failed to fetch artifacts', details: error.message });
   }
 });
@@ -44,7 +44,7 @@ router.get('/artifacts/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching artifact:', error);
+    logger.error('Error fetching artifact:', { error });
     res.status(500).json({ error: 'Failed to fetch artifact', details: error.message });
   }
 });
@@ -59,7 +59,7 @@ router.get('/models', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching models:', error);
+    logger.error('Error fetching models:', { error });
     res.status(500).json({ error: 'Failed to fetch models', details: error.message });
   }
 });
@@ -79,7 +79,7 @@ router.get('/models/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching model:', error);
+    logger.error('Error fetching model:', { error });
     res.status(500).json({ error: 'Failed to fetch model', details: error.message });
   }
 });
@@ -129,7 +129,7 @@ router.post('/artifacts', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating artifact:', error);
+    logger.error('Error creating artifact:', { error });
     res.status(500).json({ error: 'Failed to create artifact', details: error.message });
   }
 });
@@ -181,7 +181,7 @@ router.put('/artifacts/:id', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error updating artifact:', error);
+    logger.error('Error updating artifact:', { error });
     res.status(500).json({ error: 'Failed to update artifact', details: error.message });
   }
 });
@@ -204,7 +204,7 @@ router.delete('/artifacts/:id', async (req, res) => {
 
     res.json({ message: 'Artifact deleted successfully', id: result.rows[0].id });
   } catch (error: any) {
-    console.error('Error deleting artifact:', error);
+    logger.error('Error deleting artifact:', { error });
     res.status(500).json({ error: 'Failed to delete artifact', details: error.message });
   }
 });
@@ -241,7 +241,7 @@ router.post('/models', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating model:', error);
+    logger.error('Error creating model:', { error });
     res.status(500).json({ error: 'Failed to create model', details: error.message });
   }
 });
@@ -289,7 +289,7 @@ router.put('/models/:id', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error updating model:', error);
+    logger.error('Error updating model:', { error });
     res.status(500).json({ error: 'Failed to update model', details: error.message });
   }
 });
@@ -312,7 +312,7 @@ router.delete('/models/:id', async (req, res) => {
 
     res.json({ message: 'Model deleted successfully', id: result.rows[0].id });
   } catch (error: any) {
-    console.error('Error deleting model:', error);
+    logger.error('Error deleting model:', { error });
     res.status(500).json({ error: 'Failed to delete model', details: error.message });
   }
 });
@@ -340,7 +340,7 @@ router.post('/artifacts/generate', async (req, res) => {
 
     res.json(suggestions);
   } catch (error: any) {
-    console.error('Error generating AI suggestions:', error);
+    logger.error('Error generating AI suggestions:', { error });
     res.status(500).json({ error: 'Failed to generate suggestions', details: error.message });
   }
 });
@@ -511,7 +511,7 @@ router.post('/artifacts/generate-lld', async (req, res) => {
 
     res.json(lldDocument);
   } catch (error: any) {
-    console.error('Error generating LLD:', error);
+    logger.error('Error generating LLD:', { error });
     res.status(500).json({ error: 'Failed to generate LLD', details: error.message });
   }
 });
@@ -662,7 +662,7 @@ router.post('/artifacts/generate-sa', async (req, res) => {
 
     res.json(saDocument);
   } catch (error: any) {
-    console.error('Error generating SA:', error);
+    logger.error('Error generating SA:', { error });
     res.status(500).json({ error: 'Failed to generate SA', details: error.message });
   }
 });
@@ -940,7 +940,7 @@ router.post('/artifacts/generate-ta', async (req, res) => {
 
     res.json(taDocument);
   } catch (error: any) {
-    console.error('Error generating TA:', error);
+    logger.error('Error generating TA:', { error });
     res.status(500).json({ error: 'Failed to generate TA document', details: error.message });
   }
 });

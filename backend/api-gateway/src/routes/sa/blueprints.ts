@@ -67,7 +67,7 @@ router.post(
         data: blueprint,
       });
     } catch (error: any) {
-      logger.error('Error creating blueprint:', error);
+      logger.error('Error creating blueprint:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create blueprint',
@@ -144,7 +144,7 @@ router.get(
         count: blueprints.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching blueprints:', error);
+      logger.error('Error fetching blueprints:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch blueprints',
@@ -232,7 +232,7 @@ router.get(
         data: detailedBlueprint,
       });
     } catch (error: any) {
-      logger.error('Error fetching blueprint details:', error);
+      logger.error('Error fetching blueprint details:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch blueprint details',
@@ -329,7 +329,7 @@ router.patch(
         data: updated,
       });
     } catch (error: any) {
-      logger.error('Error updating blueprint:', error);
+      logger.error('Error updating blueprint:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to update blueprint',
@@ -403,7 +403,7 @@ router.post(
         data: versionResult.rows[0],
       });
     } catch (error: any) {
-      logger.error('Error creating blueprint version:', error);
+      logger.error('Error creating blueprint version:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create version',
@@ -475,7 +475,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error validating blueprint:', error);
+      logger.error('Error validating blueprint:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to validate blueprint',
@@ -539,7 +539,7 @@ router.post(
         data: clonedBlueprint,
       });
     } catch (error: any) {
-      logger.error('Error cloning blueprint:', error);
+      logger.error('Error cloning blueprint:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to clone blueprint',
@@ -602,7 +602,7 @@ router.get(
         data: diagramData,
       });
     } catch (error: any) {
-      logger.error('Error generating diagram:', error);
+      logger.error('Error generating diagram:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to generate diagram',

@@ -106,7 +106,7 @@ router.get(
         summary,
       });
     } catch (error: any) {
-      logger.error('Error fetching service health:', error);
+      logger.error('Error fetching service health:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch service health',
@@ -231,7 +231,7 @@ router.get(
         data: serviceHealth,
       });
     } catch (error: any) {
-      logger.error('Error fetching service health details:', error);
+      logger.error('Error fetching service health details:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch service health details',
@@ -348,7 +348,7 @@ router.get(
         data: infrastructure,
       });
     } catch (error: any) {
-      logger.error('Error fetching infrastructure health:', error);
+      logger.error('Error fetching infrastructure health:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch infrastructure health',
@@ -432,7 +432,7 @@ router.get(
         summary,
       });
     } catch (error: any) {
-      logger.error('Error fetching health alerts:', error);
+      logger.error('Error fetching health alerts:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch health alerts',

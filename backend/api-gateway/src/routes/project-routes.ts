@@ -17,7 +17,7 @@ export function createProjectRoutes(pool: Pool): Router {
       const projects = await projectRepo.getAllProjects();
       res.json(projects);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      logger.error('Error fetching projects:', { error });
       res.status(500).json({ error: 'Failed to fetch projects' });
     }
   });
@@ -31,7 +31,7 @@ export function createProjectRoutes(pool: Pool): Router {
       }
       res.json(project);
     } catch (error) {
-      console.error('Error fetching project:', error);
+      logger.error('Error fetching project:', { error });
       res.status(500).json({ error: 'Failed to fetch project' });
     }
   });
@@ -42,7 +42,7 @@ export function createProjectRoutes(pool: Pool): Router {
       const stats = await projectRepo.getProjectStats();
       res.json(stats);
     } catch (error) {
-      console.error('Error fetching project stats:', error);
+      logger.error('Error fetching project stats:', { error });
       res.status(500).json({ error: 'Failed to fetch project stats' });
     }
   });
@@ -76,7 +76,7 @@ export function createProjectRoutes(pool: Pool): Router {
       await invalidateCache('cache:*/projects*');
       res.status(201).json(project);
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project:', { error });
       res.status(500).json({ error: 'Failed to create project' });
     }
   });
@@ -95,7 +95,7 @@ export function createProjectRoutes(pool: Pool): Router {
       await invalidateCache('cache:*/projects*');
       res.json({ success: true });
     } catch (error) {
-      console.error('Error updating project progress:', error);
+      logger.error('Error updating project progress:', { error });
       res.status(500).json({ error: 'Failed to update project progress' });
     }
   });
@@ -114,7 +114,7 @@ export function createProjectRoutes(pool: Pool): Router {
       await invalidateCache('cache:*/projects*');
       res.json({ success: true });
     } catch (error) {
-      console.error('Error updating project status:', error);
+      logger.error('Error updating project status:', { error });
       res.status(500).json({ error: 'Failed to update project status' });
     }
   });
@@ -146,7 +146,7 @@ export function createProjectRoutes(pool: Pool): Router {
       await invalidateCache('cache:*/projects*');
       res.json({ success: true });
     } catch (error) {
-      console.error('Error updating workflow step:', error);
+      logger.error('Error updating workflow step:', { error });
       res.status(500).json({ error: 'Failed to update workflow step' });
     }
   });

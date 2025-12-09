@@ -92,7 +92,7 @@ router.get(
         },
       });
     } catch (error: any) {
-      logger.error('Error fetching deployment logs:', error);
+      logger.error('Error fetching deployment logs:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch deployment logs',
@@ -172,7 +172,7 @@ router.get(
             }
           }
         } catch (error) {
-          logger.error('Error streaming logs:', error);
+          logger.error('Error streaming logs:', { error });
         }
       }, 2000);
 
@@ -183,7 +183,7 @@ router.get(
         res.end();
       });
     } catch (error: any) {
-      logger.error('Error setting up log stream:', error);
+      logger.error('Error setting up log stream:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to stream deployment logs',
@@ -233,7 +233,7 @@ router.get(
         count: result.rows.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching deployment errors:', error);
+      logger.error('Error fetching deployment errors:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch deployment errors',
@@ -323,7 +323,7 @@ router.get(
         data: summary,
       });
     } catch (error: any) {
-      logger.error('Error fetching log summary:', error);
+      logger.error('Error fetching log summary:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch log summary',

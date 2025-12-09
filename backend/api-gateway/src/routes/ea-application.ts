@@ -24,7 +24,7 @@ router.get('/applications', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching applications:', error);
+    logger.error('Error fetching applications:', { error });
     res.status(500).json({ error: 'Failed to fetch applications', details: error.message });
   }
 });
@@ -44,7 +44,7 @@ router.get('/applications/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching application:', error);
+    logger.error('Error fetching application:', { error });
     res.status(500).json({ error: 'Failed to fetch application', details: error.message });
   }
 });
@@ -73,7 +73,7 @@ router.post('/applications', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating application:', error);
+    logger.error('Error creating application:', { error });
     res.status(500).json({ error: 'Failed to create application', details: error.message });
   }
 });
@@ -94,7 +94,7 @@ router.get('/integrations', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching integrations:', error);
+    logger.error('Error fetching integrations:', { error });
     res.status(500).json({ error: 'Failed to fetch integrations', details: error.message });
   }
 });
@@ -120,7 +120,7 @@ router.get('/integrations/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching integration:', error);
+    logger.error('Error fetching integration:', { error });
     res.status(500).json({ error: 'Failed to fetch integration', details: error.message });
   }
 });

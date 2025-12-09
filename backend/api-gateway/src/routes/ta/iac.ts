@@ -84,7 +84,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error generating IaC:', error);
+      logger.error('Error generating IaC:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to generate IaC',
@@ -146,7 +146,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error validating IaC:', error);
+      logger.error('Error validating IaC:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to validate IaC',
@@ -211,7 +211,7 @@ router.get(
         count: templates.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching templates:', error);
+      logger.error('Error fetching templates:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch templates',
@@ -271,7 +271,7 @@ router.get(
         count: result.rows.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching generations:', error);
+      logger.error('Error fetching generations:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch generations',
@@ -329,7 +329,7 @@ router.get(
         },
       });
     } catch (error: any) {
-      logger.error('Error fetching generation files:', error);
+      logger.error('Error fetching generation files:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch generation files',
@@ -392,7 +392,7 @@ router.post(
         data: template,
       });
     } catch (error: any) {
-      logger.error('Error creating template:', error);
+      logger.error('Error creating template:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create template',
@@ -442,7 +442,7 @@ router.get(
         count: standards.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching standards:', error);
+      logger.error('Error fetching standards:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch standards',
@@ -513,7 +513,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      logger.error('Error estimating cost:', error);
+      logger.error('Error estimating cost:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to estimate cost',

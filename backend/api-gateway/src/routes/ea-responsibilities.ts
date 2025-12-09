@@ -116,7 +116,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
 
     res.json(metrics);
   } catch (error) {
-    console.error('Error fetching responsibility metrics:', error);
+    logger.error('Error fetching responsibility metrics:', { error });
     res.status(500).json({ error: 'Failed to fetch metrics' });
   }
 });
@@ -140,7 +140,7 @@ router.get('/:area/details', async (req: Request, res: Response) => {
 
     res.json(details);
   } catch (error) {
-    console.error('Error fetching area details:', error);
+    logger.error('Error fetching area details:', { error });
     res.status(500).json({ error: 'Failed to fetch area details' });
   }
 });
@@ -179,7 +179,7 @@ router.get('/overview', async (req: Request, res: Response) => {
 
     res.json(overview);
   } catch (error) {
-    console.error('Error fetching overview:', error);
+    logger.error('Error fetching overview:', { error });
     res.status(500).json({ error: 'Failed to fetch overview' });
   }
 });
@@ -210,7 +210,7 @@ router.post('/:area/activities', async (req: Request, res: Response) => {
 
     res.status(201).json(activity);
   } catch (error) {
-    console.error('Error logging activity:', error);
+    logger.error('Error logging activity:', { error });
     res.status(500).json({ error: 'Failed to log activity' });
   }
 });
@@ -249,7 +249,7 @@ router.get('/statistics', async (req: Request, res: Response) => {
 
     res.json(statistics);
   } catch (error) {
-    console.error('Error fetching statistics:', error);
+    logger.error('Error fetching statistics:', { error });
     res.status(500).json({ error: 'Failed to fetch statistics' });
   }
 });

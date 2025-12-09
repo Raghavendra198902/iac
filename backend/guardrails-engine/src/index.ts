@@ -7,9 +7,9 @@ import { ProGuardrailsEngine } from './ProGuardrailsEngine';
 import { EvaluationRequest, EvaluationResult } from './types';
 
 const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
+  info: (msg: string, meta?: any) => logger.info(`[INFO] ${msg}`, meta || ''),
+  error: (msg: string, error?: any) => logger.error(`[ERROR] ${msg}`, error || ''),
+  warn: (msg: string, meta?: any) => logger.warn(`[WARN] ${msg}`, meta || ''),
   debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
 };
 

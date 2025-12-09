@@ -58,7 +58,7 @@ router.get(
         count: result.rows.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching compliance frameworks:', error);
+      logger.error('Error fetching compliance frameworks:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch compliance frameworks',
@@ -127,7 +127,7 @@ router.post(
         data: assessment,
       });
     } catch (error: any) {
-      logger.error('Error creating compliance assessment:', error);
+      logger.error('Error creating compliance assessment:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create assessment',
@@ -186,7 +186,7 @@ router.get(
         count: result.rows.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching compliance assessments:', error);
+      logger.error('Error fetching compliance assessments:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch assessments',
@@ -262,7 +262,7 @@ router.get(
         data: dashboard,
       });
     } catch (error: any) {
-      logger.error('Error fetching compliance dashboard:', error);
+      logger.error('Error fetching compliance dashboard:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch compliance dashboard',

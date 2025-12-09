@@ -1,5 +1,8 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
+import { createLogger } from '../../../../packages/logger/src/index';
+
+const logger = createLogger({ serviceName: 'api-gateway-websocket' });
 
 interface User {
   id: string;
@@ -32,7 +35,7 @@ class WebSocketService {
     });
 
     this.setupEventHandlers();
-    console.log('✅ WebSocket service initialized');
+    logger.info('✅ WebSocket service initialized');
   }
 
   private setupEventHandlers() {

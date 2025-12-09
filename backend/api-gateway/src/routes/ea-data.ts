@@ -24,7 +24,7 @@ router.get('/entities', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching data entities:', error);
+    logger.error('Error fetching data entities:', { error });
     res.status(500).json({ error: 'Failed to fetch data entities', details: error.message });
   }
 });
@@ -44,7 +44,7 @@ router.get('/entities/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching data entity:', error);
+    logger.error('Error fetching data entity:', { error });
     res.status(500).json({ error: 'Failed to fetch data entity', details: error.message });
   }
 });
@@ -70,7 +70,7 @@ router.post('/entities', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating data entity:', error);
+    logger.error('Error creating data entity:', { error });
     res.status(500).json({ error: 'Failed to create data entity', details: error.message });
   }
 });
@@ -85,7 +85,7 @@ router.get('/stores', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching data stores:', error);
+    logger.error('Error fetching data stores:', { error });
     res.status(500).json({ error: 'Failed to fetch data stores', details: error.message });
   }
 });
@@ -105,7 +105,7 @@ router.get('/stores/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching data store:', error);
+    logger.error('Error fetching data store:', { error });
     res.status(500).json({ error: 'Failed to fetch data store', details: error.message });
   }
 });
@@ -131,7 +131,7 @@ router.post('/stores', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating data store:', error);
+    logger.error('Error creating data store:', { error });
     res.status(500).json({ error: 'Failed to create data store', details: error.message });
   }
 });

@@ -6,6 +6,9 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import axios from 'axios';
+import { createLogger } from '../../../packages/logger/src/index';
+
+const logger = createLogger({ serviceName: 'guardrails-engine' });
 
 export interface EvaluationResult {
   allowed: boolean;
@@ -94,14 +97,14 @@ export class GuardrailsEnforcementService {
       await this.updateBlueprintStatus(blueprintId, 'blocked', evaluation.violations);
       await this.notifyArchitectureTeam(blueprintId, evaluation);
       
-      console.error(`Blueprint ${blueprintId} blocked due to policy violations:`, evaluation.violations);
+      logger.error(`Blueprint ${blueprintId} blocked due to policy violations:`, evaluation.violations);
       return false;
     }
     
     if (evaluation.warnings.length > 0) {
       // Allow but log warnings
       await this.logWarnings(blueprintId, evaluation.warnings);
-      console.warn(`Blueprint ${blueprintId} has warnings:`, evaluation.warnings);
+      logger.warn(`Blueprint ${blueprintId} has warnings:`, evaluation.warnings);
     }
     
     return true;
@@ -185,7 +188,7 @@ export class GuardrailsEnforcementService {
       
       return response.data.result || { deny: [], warn: [] };
     } catch (error) {
-      console.error('Error evaluating with OPA:', error);
+      logger.error('Error evaluating with OPA:', error);
       
       // Fallback to basic validation if OPA is not available
       return this.fallbackValidation(input);
@@ -244,7 +247,7 @@ export class GuardrailsEnforcementService {
       const policyPath = join(this.policiesPath, `${policyName}.rego`);
       return readFileSync(policyPath, 'utf-8');
     } catch (error) {
-      console.error(`Error loading policy ${policyName}:`, error);
+      logger.error(`Error loading policy ${policyName}:`, error);
       return '';
     }
   }
@@ -279,22 +282,22 @@ export class GuardrailsEnforcementService {
     status: string,
     violations: PolicyViolation[]
   ): Promise<void> {
-    console.log(`Updating blueprint ${blueprintId} status to ${status}`);
+    logger.info(`Updating blueprint ${blueprintId} status to ${status}`);
   }
   
   private async notifyArchitectureTeam(
     blueprintId: string,
     evaluation: EvaluationResult
   ): Promise<void> {
-    console.log(`Notifying architecture team about blueprint ${blueprintId} violations`);
+    logger.info(`Notifying architecture team about blueprint ${blueprintId} violations`);
   }
   
   private async logWarnings(blueprintId: string, warnings: PolicyWarning[]): Promise<void> {
-    console.warn(`Blueprint ${blueprintId} warnings:`, warnings);
+    logger.warn(`Blueprint ${blueprintId} warnings:`, warnings);
   }
   
   private async storeComplianceReport(projectId: string, result: EvaluationResult): Promise<void> {
-    console.log(`Storing compliance report for project ${projectId}`, result);
+    logger.info(`Storing compliance report for project ${projectId}`, result);
   }
 }
 

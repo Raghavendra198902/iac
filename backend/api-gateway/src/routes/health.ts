@@ -223,7 +223,7 @@ router.get('/health', async (req: Request, res: Response) => {
     } catch (error) {
       dbStatus = 'error';
       dbError = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Health check database error:', error);
+      logger.error('Health check database error:', { error });
     }
 
     // Get WebSocket status
@@ -252,7 +252,7 @@ router.get('/health', async (req: Request, res: Response) => {
         );
         criticalEvents = parseInt(criticalResult.rows[0]?.count || '0');
       } catch (error) {
-        logger.error('Health check stats error:', error);
+        logger.error('Health check stats error:', { error });
       }
     }
 
@@ -292,7 +292,7 @@ router.get('/health', async (req: Request, res: Response) => {
     const statusCode = overallStatus === 'healthy' ? 200 : overallStatus === 'degraded' ? 200 : 503;
     res.status(statusCode).json(healthStatus);
   } catch (error) {
-    logger.error('Health check failed:', error);
+    logger.error('Health check failed:', { error });
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -389,7 +389,7 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    logger.error('Detailed health check failed:', error);
+    logger.error('Detailed health check failed:', { error });
     res.status(500).json({
       status: 'fail',
       timestamp: new Date().toISOString(),

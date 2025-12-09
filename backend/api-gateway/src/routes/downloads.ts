@@ -40,7 +40,7 @@ router.get('/cmdb-agent-win.exe', downloadLimiter, (req: Request, res: Response)
     logger.info('Sending Windows executable');
     res.download(exePath, 'cmdb-agent-win.exe');
   } catch (error) {
-    logger.error('Error sending Windows executable:', error);
+    logger.error('Error sending Windows executable:', { error });
     res.status(500).json({ error: 'Failed to download file' });
   }
 });
@@ -61,7 +61,7 @@ router.get('/cmdb-agent-linux', downloadLimiter, (req: Request, res: Response) =
     logger.info('Sending Linux executable');
     res.download(exePath, 'cmdb-agent-linux');
   } catch (error) {
-    logger.error('Error sending Linux executable:', error);
+    logger.error('Error sending Linux executable:', { error });
     res.status(500).json({ error: 'Failed to download file' });
   }
 });
@@ -82,7 +82,7 @@ router.get('/cmdb-agent-installer.zip', downloadLimiter, (req: Request, res: Res
     logger.info('Sending Windows installer package');
     res.download(installerPath, 'cmdb-agent-installer.zip');
   } catch (error) {
-    logger.error('Error sending installer package:', error);
+    logger.error('Error sending installer package:', { error });
     res.status(500).json({ error: 'Failed to download file' });
   }
 });
@@ -103,7 +103,7 @@ router.get('/cmdb-agent-setup.run', downloadLimiter, (req: Request, res: Respons
     logger.info('Sending Linux self-extracting installer');
     res.download(runPath, 'cmdb-agent-setup.run');
   } catch (error) {
-    logger.error('Error sending Linux installer:', error);
+    logger.error('Error sending Linux installer:', { error });
     res.status(500).json({ error: 'Failed to download file' });
   }
 });
@@ -141,7 +141,7 @@ router.get('/cmdb-agent-linux.tar.gz', downloadLimiter, async (req: Request, res
     
     logger.info('Linux agent package sent successfully');
   } catch (error) {
-    logger.error('Error generating Linux package:', error);
+    logger.error('Error generating Linux package:', { error });
     res.status(500).json({ error: 'Failed to generate package' });
   }
 });
@@ -178,7 +178,7 @@ router.get('/cmdb-agent-windows.zip', downloadLimiter, async (req: Request, res:
     
     logger.info('Windows agent package sent successfully');
   } catch (error) {
-    logger.error('Error generating Windows package:', error);
+    logger.error('Error generating Windows package:', { error });
     res.status(500).json({ error: 'Failed to generate package' });
   }
 });
@@ -199,7 +199,7 @@ router.get('/docker-compose.yml', downloadLimiter, (req: Request, res: Response)
     logger.info('Sending docker-compose.yml');
     res.download(dockerComposePath, 'cmdb-agent-docker-compose.yml');
   } catch (error) {
-    logger.error('Error sending docker-compose.yml:', error);
+    logger.error('Error sending docker-compose.yml:', { error });
     res.status(500).json({ error: 'Failed to download file' });
   }
 });
@@ -284,7 +284,7 @@ router.get('/agent-manual.pdf', downloadLimiter, (req: Request, res: Response) =
     
     logger.info('Agent manual served');
   } catch (error) {
-    logger.error('Error serving agent manual:', error);
+    logger.error('Error serving agent manual:', { error });
     res.status(500).json({ error: 'Failed to retrieve agent manual' });
   }
 });
@@ -392,7 +392,7 @@ router.get('/agent-info', (req: Request, res: Response) => {
       res.status(404).json({ error: 'Agent package information not found' });
     }
   } catch (error) {
-    logger.error('Error getting agent info:', error);
+    logger.error('Error getting agent info:', { error });
     res.status(500).json({ error: 'Failed to get agent information' });
   }
 });

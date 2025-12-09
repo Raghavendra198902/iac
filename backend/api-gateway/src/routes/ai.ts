@@ -40,7 +40,7 @@ router.post('/generate', operationRateLimit('ai_generate'), async (req: Request,
 
     res.json(mockBlueprint);
   } catch (error: any) {
-    console.error('Error generating blueprint:', error);
+    logger.error('Error generating blueprint:', { error });
     res.status(500).json({
       error: 'Internal Server Error',
       message: error.message || 'Failed to generate blueprint'
@@ -77,7 +77,7 @@ router.get('/optimize/:blueprintId', operationRateLimit('ai_optimize'), async (r
 
     res.json({ suggestions });
   } catch (error: any) {
-    console.error('Error getting optimization suggestions:', error);
+    logger.error('Error getting optimization suggestions:', { error });
     res.status(500).json({
       error: 'Internal Server Error',
       message: error.message || 'Failed to get suggestions'
@@ -101,7 +101,7 @@ router.post('/validate/:blueprintId', async (req: Request, res: Response) => {
 
     res.json(validation);
   } catch (error: any) {
-    console.error('Error validating blueprint:', error);
+    logger.error('Error validating blueprint:', { error });
     res.status(500).json({
       error: 'Internal Server Error',
       message: error.message || 'Failed to validate blueprint'

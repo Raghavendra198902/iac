@@ -27,7 +27,7 @@ router.get('/principles', async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching principles:', error);
+    logger.error('Error fetching principles:', { error });
     res.status(500).json({ error: 'Failed to fetch principles' });
   }
 });
@@ -50,7 +50,7 @@ router.get('/principles/:id', async (req: Request, res: Response) => {
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching principle:', error);
+    logger.error('Error fetching principle:', { error });
     res.status(500).json({ error: 'Failed to fetch principle' });
   }
 });
@@ -76,7 +76,7 @@ router.post('/principles', async (req: Request, res: Response) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating principle:', error);
+    logger.error('Error creating principle:', { error });
     res.status(500).json({ error: 'Failed to create principle' });
   }
 });
@@ -109,7 +109,7 @@ router.put('/principles/:id', async (req: Request, res: Response) => {
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error updating principle:', error);
+    logger.error('Error updating principle:', { error });
     res.status(500).json({ error: 'Failed to update principle' });
   }
 });
@@ -133,7 +133,7 @@ router.delete('/principles/:id', async (req: Request, res: Response) => {
     
     res.json({ message: 'Principle deleted successfully' });
   } catch (error) {
-    console.error('Error deleting principle:', error);
+    logger.error('Error deleting principle:', { error });
     res.status(500).json({ error: 'Failed to delete principle' });
   }
 });
@@ -153,7 +153,7 @@ router.get('/goals', async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching goals:', error);
+    logger.error('Error fetching goals:', { error });
     res.status(500).json({ error: 'Failed to fetch goals' });
   }
 });
@@ -179,7 +179,7 @@ router.post('/goals', async (req: Request, res: Response) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating goal:', error);
+    logger.error('Error creating goal:', { error });
     res.status(500).json({ error: 'Failed to create goal' });
   }
 });
@@ -213,7 +213,7 @@ router.put('/goals/:id', async (req: Request, res: Response) => {
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error updating goal:', error);
+    logger.error('Error updating goal:', { error });
     res.status(500).json({ error: 'Failed to update goal' });
   }
 });
@@ -237,7 +237,7 @@ router.delete('/goals/:id', async (req: Request, res: Response) => {
     
     res.json({ message: 'Goal deleted successfully' });
   } catch (error) {
-    console.error('Error deleting goal:', error);
+    logger.error('Error deleting goal:', { error });
     res.status(500).json({ error: 'Failed to delete goal' });
   }
 });
@@ -267,7 +267,7 @@ router.get('/committees', async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching committees:', error);
+    logger.error('Error fetching committees:', { error });
     res.status(500).json({ error: 'Failed to fetch committees' });
   }
 });
@@ -301,7 +301,7 @@ router.get('/committees/:id', async (req: Request, res: Response) => {
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching committee:', error);
+    logger.error('Error fetching committee:', { error });
     res.status(500).json({ error: 'Failed to fetch committee' });
   }
 });
@@ -327,7 +327,7 @@ router.post('/committees', async (req: Request, res: Response) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating committee:', error);
+    logger.error('Error creating committee:', { error });
     res.status(500).json({ error: 'Failed to create committee' });
   }
 });
@@ -360,7 +360,7 @@ router.put('/committees/:id', async (req: Request, res: Response) => {
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error updating committee:', error);
+    logger.error('Error updating committee:', { error });
     res.status(500).json({ error: 'Failed to update committee' });
   }
 });
@@ -384,7 +384,7 @@ router.delete('/committees/:id', async (req: Request, res: Response) => {
     
     res.json({ message: 'Committee deleted successfully' });
   } catch (error) {
-    console.error('Error deleting committee:', error);
+    logger.error('Error deleting committee:', { error });
     res.status(500).json({ error: 'Failed to delete committee' });
   }
 });

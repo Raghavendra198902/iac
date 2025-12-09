@@ -86,7 +86,7 @@ router.get(
         totalPotentialSavings: totalSavings,
       });
     } catch (error: any) {
-      logger.error('Error fetching cost recommendations:', error);
+      logger.error('Error fetching cost recommendations:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch recommendations',
@@ -152,7 +152,7 @@ router.post(
         data: approved,
       });
     } catch (error: any) {
-      logger.error('Error approving recommendation:', error);
+      logger.error('Error approving recommendation:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to approve recommendation',
@@ -218,7 +218,7 @@ router.post(
         data: dismissed,
       });
     } catch (error: any) {
-      logger.error('Error dismissing recommendation:', error);
+      logger.error('Error dismissing recommendation:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to dismiss recommendation',
@@ -294,7 +294,7 @@ router.get(
         data: dashboard,
       });
     } catch (error: any) {
-      logger.error('Error fetching cost optimization dashboard:', error);
+      logger.error('Error fetching cost optimization dashboard:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch dashboard',

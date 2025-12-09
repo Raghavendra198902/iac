@@ -73,7 +73,7 @@ router.post(
         data: pattern,
       });
     } catch (error: any) {
-      logger.error('Error creating pattern:', error);
+      logger.error('Error creating pattern:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create pattern',
@@ -146,7 +146,7 @@ router.get(
         count: patterns.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching patterns:', error);
+      logger.error('Error fetching patterns:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch patterns',
@@ -214,7 +214,7 @@ router.post(
         data: approved,
       });
     } catch (error: any) {
-      logger.error('Error approving pattern:', error);
+      logger.error('Error approving pattern:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to approve pattern',
@@ -287,7 +287,7 @@ router.get(
         data: detailedPattern,
       });
     } catch (error: any) {
-      logger.error('Error fetching pattern details:', error);
+      logger.error('Error fetching pattern details:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch pattern details',

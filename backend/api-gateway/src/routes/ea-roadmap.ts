@@ -24,7 +24,7 @@ router.get('/initiatives', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching initiatives:', error);
+    logger.error('Error fetching initiatives:', { error });
     res.status(500).json({ error: 'Failed to fetch initiatives', details: error.message });
   }
 });
@@ -44,7 +44,7 @@ router.get('/initiatives/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching initiative:', error);
+    logger.error('Error fetching initiative:', { error });
     res.status(500).json({ error: 'Failed to fetch initiative', details: error.message });
   }
 });
@@ -63,7 +63,7 @@ router.get('/milestones', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching milestones:', error);
+    logger.error('Error fetching milestones:', { error });
     res.status(500).json({ error: 'Failed to fetch milestones', details: error.message });
   }
 });
@@ -87,7 +87,7 @@ router.get('/milestones/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching milestone:', error);
+    logger.error('Error fetching milestone:', { error });
     res.status(500).json({ error: 'Failed to fetch milestone', details: error.message });
   }
 });

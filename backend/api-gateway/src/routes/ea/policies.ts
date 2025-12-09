@@ -84,7 +84,7 @@ router.post(
         data: policy,
       });
     } catch (error: any) {
-      logger.error('Error creating policy:', error);
+      logger.error('Error creating policy:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create policy',
@@ -175,7 +175,7 @@ router.get(
         count: policies.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching policies:', error);
+      logger.error('Error fetching policies:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch policies',
@@ -251,7 +251,7 @@ router.get(
         count: result.rows.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching violations:', error);
+      logger.error('Error fetching violations:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch violations',
@@ -376,7 +376,7 @@ router.patch(
         data: updated,
       });
     } catch (error: any) {
-      logger.error('Error updating policy:', error);
+      logger.error('Error updating policy:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to update policy',

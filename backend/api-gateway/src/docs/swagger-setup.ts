@@ -23,6 +23,6 @@ export function setupSwaggerDocs(app: Application): void {
     res.send(swaggerSpec);
   });
 
-  console.log('📚 API Documentation available at /api-docs');
-  console.log('📄 OpenAPI Spec available at /api-docs.json');
+  logger.info('📚 API Documentation available at /api-docs');
+  logger.info('📄 OpenAPI Spec available at /api-docs.json');
 }

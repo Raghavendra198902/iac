@@ -6,8 +6,10 @@
 import { Router, Request, Response } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate } from '../middleware/validation';
+import { createLogger } from '../../../../packages/logger/src/index';
 
 const router = Router();
+const logger = createLogger({ serviceName: 'api-gateway-architecture-decisions' });
 
 interface ADRCreateRequest {
   title: string;
@@ -115,7 +117,7 @@ router.post('/api/adr',
         data: result.rows[0]
       });
     } catch (error) {
-      console.error('Error creating ADR:', error);
+      logger.error('Error creating ADR:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create ADR'
@@ -182,7 +184,7 @@ router.get('/api/adr', authenticate, async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching ADRs:', error);
+    logger.error('Error fetching ADRs:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch ADRs'
@@ -213,7 +215,7 @@ router.get('/api/adr/:id', authenticate, async (req: Request, res: Response) => 
       data: result.rows[0]
     });
   } catch (error) {
-    console.error('Error fetching ADR:', error);
+    logger.error('Error fetching ADR:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch ADR'
@@ -244,7 +246,7 @@ router.get('/api/adr/number/:number', authenticate, async (req: Request, res: Re
       data: result.rows[0]
     });
   } catch (error) {
-    console.error('Error fetching ADR:', error);
+    logger.error('Error fetching ADR:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch ADR'
@@ -318,7 +320,7 @@ router.put('/api/adr/:id',
         data: result.rows[0]
       });
     } catch (error) {
-      console.error('Error updating ADR:', error);
+      logger.error('Error updating ADR:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to update ADR'
@@ -355,7 +357,7 @@ router.post('/api/adr/:id/accept',
         data: result.rows[0]
       });
     } catch (error) {
-      console.error('Error accepting ADR:', error);
+      logger.error('Error accepting ADR:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to accept ADR'
@@ -395,7 +397,7 @@ router.post('/api/adr/:id/deprecate',
         message: `ADR deprecated${reason ? `: ${reason}` : ''}`
       });
     } catch (error) {
-      console.error('Error deprecating ADR:', error);
+      logger.error('Error deprecating ADR:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to deprecate ADR'
@@ -444,7 +446,7 @@ router.post('/api/adr/:id/supersede',
         message: 'ADR superseded successfully'
       });
     } catch (error) {
-      console.error('Error superseding ADR:', error);
+      logger.error('Error superseding ADR:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to supersede ADR'
@@ -483,7 +485,7 @@ router.post('/api/blueprints/:blueprintId/adr/:adrId',
         message: 'ADR linked to blueprint successfully'
       });
     } catch (error) {
-      console.error('Error linking ADR to blueprint:', error);
+      logger.error('Error linking ADR to blueprint:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to link ADR to blueprint'
@@ -511,7 +513,7 @@ router.get('/api/blueprints/:blueprintId/adr', authenticate, async (req: Request
       data: result.rows
     });
   } catch (error) {
-    console.error('Error fetching blueprint ADRs:', error);
+    logger.error('Error fetching blueprint ADRs:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch blueprint ADRs'
@@ -546,7 +548,7 @@ router.get('/api/adr/stats', authenticate, async (req: Request, res: Response) =
       data: stats.rows[0]
     });
   } catch (error) {
-    console.error('Error fetching ADR stats:', error);
+    logger.error('Error fetching ADR stats:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch ADR statistics'

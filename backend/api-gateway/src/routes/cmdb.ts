@@ -377,7 +377,7 @@ router.get('/cis', (req: Request, res: Response) => {
     // Return all CIs registered by agents
     res.json(configItems);
   } catch (error: any) {
-    console.error('Error fetching CIs:', error.message);
+    logger.error('Error fetching CIs:', error.message);
     res.status(500).json({ error: 'Failed to fetch configuration items' });
   }
 });
@@ -428,7 +428,7 @@ router.get('/agents/status', (req: Request, res: Response) => {
     
     res.json(agentStatuses);
   } catch (error: any) {
-    console.error('Error fetching agents:', error.message);
+    logger.error('Error fetching agents:', error.message);
     res.json([]); // Return empty array on error
   }
 });
@@ -673,7 +673,7 @@ router.post('/network-discovery', async (req: Request, res: Response) => {
     });
     
   } catch (error) {
-    console.error('Network discovery error:', error);
+    logger.error('Network discovery error:', { error });
     res.status(500).json({ 
       error: 'Network discovery failed',
       message: error instanceof Error ? error.message : 'Unknown error'

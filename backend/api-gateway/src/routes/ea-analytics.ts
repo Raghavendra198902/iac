@@ -24,7 +24,7 @@ router.get('/metrics', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching metrics:', error);
+    logger.error('Error fetching metrics:', { error });
     res.status(500).json({ error: 'Failed to fetch metrics', details: error.message });
   }
 });
@@ -44,7 +44,7 @@ router.get('/metrics/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching metric:', error);
+    logger.error('Error fetching metric:', { error });
     res.status(500).json({ error: 'Failed to fetch metric', details: error.message });
   }
 });
@@ -59,7 +59,7 @@ router.get('/reports', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching reports:', error);
+    logger.error('Error fetching reports:', { error });
     res.status(500).json({ error: 'Failed to fetch reports', details: error.message });
   }
 });
@@ -79,7 +79,7 @@ router.get('/reports/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching report:', error);
+    logger.error('Error fetching report:', { error });
     res.status(500).json({ error: 'Failed to fetch report', details: error.message });
   }
 });

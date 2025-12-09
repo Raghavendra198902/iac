@@ -6,8 +6,10 @@
 import { Router, Request, Response } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { pool } from '../utils/database';
+import { createLogger } from '../../../../packages/logger/src/index';
 
 const router = Router();
+const logger = createLogger({ serviceName: 'api-gateway-architecture-metrics' });
 
 /**
  * GET /api/architecture/metrics/overview
@@ -64,7 +66,7 @@ router.get('/api/architecture/metrics/overview', authenticate, async (req: Reque
       data: metrics
     });
   } catch (error) {
-    console.error('Error fetching architecture metrics:', error);
+    logger.error('Error fetching architecture metrics:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch architecture metrics'
@@ -91,7 +93,7 @@ router.get('/api/architecture/metrics/adrs', authenticate, async (req: Request, 
       data: adrs
     });
   } catch (error) {
-    console.error('Error fetching ADR metrics:', error);
+    logger.error('Error fetching ADR metrics:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch ADR metrics'
@@ -118,7 +120,7 @@ router.get('/api/architecture/metrics/technology', authenticate, async (req: Req
       data: tech
     });
   } catch (error) {
-    console.error('Error fetching technology metrics:', error);
+    logger.error('Error fetching technology metrics:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch technology metrics'
@@ -155,7 +157,7 @@ router.get('/api/architecture/metrics/portfolio', authenticate, async (req: Requ
       data: portfolio.rows[0]
     });
   } catch (error) {
-    console.error('Error fetching portfolio metrics:', error);
+    logger.error('Error fetching portfolio metrics:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch portfolio metrics'
@@ -210,7 +212,7 @@ router.get('/api/architecture/violations/active', authenticate, async (req: Requ
       }))
     });
   } catch (error) {
-    console.error('Error fetching active violations:', error);
+    logger.error('Error fetching active violations:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch active violations'
@@ -242,7 +244,7 @@ router.get('/api/architecture/metrics/compliance-trend', authenticate, async (re
       data: trend.rows
     });
   } catch (error) {
-    console.error('Error fetching compliance trend:', error);
+    logger.error('Error fetching compliance trend:', { error });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch compliance trend'

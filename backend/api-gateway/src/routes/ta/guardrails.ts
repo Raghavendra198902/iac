@@ -84,7 +84,7 @@ router.get(
         count: guardrails.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching guardrails:', error);
+      logger.error('Error fetching guardrails:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch guardrails',
@@ -150,7 +150,7 @@ router.post(
         data: guardrail,
       });
     } catch (error: any) {
-      logger.error('Error creating guardrail:', error);
+      logger.error('Error creating guardrail:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to create guardrail',
@@ -248,7 +248,7 @@ router.patch(
         data: updated,
       });
     } catch (error: any) {
-      logger.error('Error updating guardrail:', error);
+      logger.error('Error updating guardrail:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to update guardrail',
@@ -316,7 +316,7 @@ router.get(
         count: result.rows.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching violations:', error);
+      logger.error('Error fetching violations:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch violations',
@@ -387,7 +387,7 @@ router.post(
         data: overridden,
       });
     } catch (error: any) {
-      logger.error('Error overriding violation:', error);
+      logger.error('Error overriding violation:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to override violation',
@@ -445,7 +445,7 @@ router.get(
         count: result.rows.length,
       });
     } catch (error: any) {
-      logger.error('Error fetching audit log:', error);
+      logger.error('Error fetching audit log:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch audit log',
@@ -533,7 +533,7 @@ router.get(
         data: dashboard,
       });
     } catch (error: any) {
-      logger.error('Error fetching guardrails dashboard:', error);
+      logger.error('Error fetching guardrails dashboard:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch dashboard',
@@ -608,7 +608,7 @@ router.post(
         data: testResult,
       });
     } catch (error: any) {
-      logger.error('Error testing guardrail:', error);
+      logger.error('Error testing guardrail:', { error });
       res.status(500).json({
         success: false,
         error: 'Failed to test guardrail',

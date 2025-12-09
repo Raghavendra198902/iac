@@ -12,7 +12,7 @@ export function createAssetRoutes(pool: Pool): Router {
       const assets = await assetRepo.getProjectAssets(req.params.projectId);
       res.json(assets);
     } catch (error) {
-      console.error('Error fetching project assets:', error);
+      logger.error('Error fetching project assets:', { error });
       res.status(500).json({ error: 'Failed to fetch project assets' });
     }
   });
@@ -24,7 +24,7 @@ export function createAssetRoutes(pool: Pool): Router {
       const summary = await assetRepo.getProjectAssetSummary(projectId);
       res.json(summary);
     } catch (error) {
-      console.error('Error fetching asset summary:', error);
+      logger.error('Error fetching asset summary:', { error });
       res.status(500).json({ error: 'Failed to fetch asset summary' });
     }
   });
@@ -36,7 +36,7 @@ export function createAssetRoutes(pool: Pool): Router {
       const assets = await assetRepo.getStepAssets(projectId, stepId);
       res.json(assets);
     } catch (error) {
-      console.error('Error fetching step assets:', error);
+      logger.error('Error fetching step assets:', { error });
       res.status(500).json({ error: 'Failed to fetch step assets' });
     }
   });
@@ -56,7 +56,7 @@ export function createAssetRoutes(pool: Pool): Router {
       const asset = await assetRepo.linkAssetToProject(assetData);
       res.status(201).json(asset);
     } catch (error) {
-      console.error('Error linking asset:', error);
+      logger.error('Error linking asset:', { error });
       res.status(500).json({ error: 'Failed to link asset to project' });
     }
   });
@@ -74,7 +74,7 @@ export function createAssetRoutes(pool: Pool): Router {
       await assetRepo.updateAssetStatus(assetId, status);
       res.json({ success: true, message: 'Asset status updated' });
     } catch (error) {
-      console.error('Error updating asset status:', error);
+      logger.error('Error updating asset status:', { error });
       res.status(500).json({ error: 'Failed to update asset status' });
     }
   });
@@ -86,7 +86,7 @@ export function createAssetRoutes(pool: Pool): Router {
       await assetRepo.deleteAsset(assetId);
       res.json({ success: true, message: 'Asset link deleted' });
     } catch (error) {
-      console.error('Error deleting asset:', error);
+      logger.error('Error deleting asset:', { error });
       res.status(500).json({ error: 'Failed to delete asset' });
     }
   });

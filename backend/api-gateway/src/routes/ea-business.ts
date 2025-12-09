@@ -224,7 +224,7 @@ router.get('/services/:id', async (req: Request, res: Response) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching service:', error);
+    logger.error('Error fetching service:', { error });
     res.status(500).json({ error: 'Failed to fetch service' });
   }
 });
@@ -252,7 +252,7 @@ router.post('/services', async (req: Request, res: Response) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating service:', error);
+    logger.error('Error creating service:', { error });
     res.status(500).json({ error: 'Failed to create service' });
   }
 });
@@ -270,7 +270,7 @@ router.get('/value-streams', async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching value streams:', error);
+    logger.error('Error fetching value streams:', { error });
     res.status(500).json({ error: 'Failed to fetch value streams' });
   }
 });
@@ -293,7 +293,7 @@ router.get('/value-streams/:id', async (req: Request, res: Response) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching value stream:', error);
+    logger.error('Error fetching value stream:', { error });
     res.status(500).json({ error: 'Failed to fetch value stream' });
   }
 });
@@ -321,7 +321,7 @@ router.post('/value-streams', async (req: Request, res: Response) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating value stream:', error);
+    logger.error('Error creating value stream:', { error });
     res.status(500).json({ error: 'Failed to create value stream' });
   }
 });

@@ -85,7 +85,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     res.json({ users });
   } catch (error: any) {
-    console.error('Error fetching users:', error);
+    logger.error('Error fetching users:', { error });
     res.status(500).json({
       error: 'Failed to fetch users',
       message: error.message
@@ -144,7 +144,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       lastLogin: user.last_login_at
     });
   } catch (error: any) {
-    console.error('Error fetching user:', error);
+    logger.error('Error fetching user:', { error });
     res.status(500).json({
       error: 'Failed to fetch user',
       message: error.message
@@ -208,7 +208,7 @@ router.post('/', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     await client.query('ROLLBACK');
-    console.error('Error creating user:', error);
+    logger.error('Error creating user:', { error });
 
     if (error.code === '23505') {
       return res.status(409).json({
@@ -262,7 +262,7 @@ router.get('/settings/:userId', async (req: Request, res: Response) => {
       settings: user.preferences || {}
     });
   } catch (error) {
-    console.error('Error fetching user settings:', error);
+    logger.error('Error fetching user settings:', { error });
     res.status(500).json({ error: 'Failed to fetch user settings' });
   }
 });
@@ -307,7 +307,7 @@ router.put('/settings/:userId', async (req: Request, res: Response) => {
       settings: user.preferences
     });
   } catch (error) {
-    console.error('Error updating user settings:', error);
+    logger.error('Error updating user settings:', { error });
     res.status(500).json({ error: 'Failed to update user settings' });
   }
 });
@@ -366,7 +366,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     await client.query('ROLLBACK');
-    console.error('Error updating user:', error);
+    logger.error('Error updating user:', { error });
     res.status(500).json({
       error: 'Failed to update user',
       message: error.message
@@ -400,7 +400,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     res.json({ message: 'User deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting user:', error);
+    logger.error('Error deleting user:', { error });
     res.status(500).json({
       error: 'Failed to delete user',
       message: error.message
@@ -442,7 +442,7 @@ router.get('/roles/all', async (req: Request, res: Response) => {
 
     res.json({ roles });
   } catch (error: any) {
-    console.error('Error fetching roles:', error);
+    logger.error('Error fetching roles:', { error });
     res.status(500).json({
       error: 'Failed to fetch roles',
       message: error.message
@@ -488,7 +488,7 @@ router.post('/roles/create', async (req: Request, res: Response) => {
       color: getRoleColor(newRole.code)
     });
   } catch (error: any) {
-    console.error('Error creating role:', error);
+    logger.error('Error creating role:', { error });
 
     if (error.code === '23505') {
       return res.status(409).json({
@@ -540,7 +540,7 @@ router.put('/roles/:id', async (req: Request, res: Response) => {
       permissions: updatedRole.permissions
     });
   } catch (error: any) {
-    console.error('Error updating role:', error);
+    logger.error('Error updating role:', { error });
     res.status(500).json({
       error: 'Failed to update role',
       message: error.message
@@ -587,7 +587,7 @@ router.delete('/roles/:id', async (req: Request, res: Response) => {
 
     res.json({ message: 'Role deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting role:', error);
+    logger.error('Error deleting role:', { error });
     res.status(500).json({
       error: 'Failed to delete role',
       message: error.message
@@ -681,7 +681,7 @@ router.post('/roles/seed', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     await client.query('ROLLBACK');
-    console.error('Error seeding roles:', error);
+    logger.error('Error seeding roles:', { error });
     res.status(500).json({
       error: 'Failed to seed roles',
       message: error.message
@@ -814,7 +814,7 @@ router.post('/seed', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     await client.query('ROLLBACK');
-    console.error('Error seeding users:', error);
+    logger.error('Error seeding users:', { error });
     res.status(500).json({
       error: 'Failed to seed users',
       message: error.message

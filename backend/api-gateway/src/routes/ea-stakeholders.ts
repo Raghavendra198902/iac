@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { Pool } from 'pg';
+import { createLogger } from '../../../../packages/logger/src/index';
 
 const router = Router();
+const logger = createLogger({ serviceName: 'api-gateway-ea-stakeholders' });
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
@@ -21,10 +23,10 @@ router.get('/stakeholders', async (req, res) => {
       SELECT * FROM ea_stakeholders 
       WHERE deleted_at IS NULL 
       ORDER BY influence_level DESC, name
-    `);
+    );
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching stakeholders:', error);
+    logger.error('Error fetching stakeholders', { error });
     res.status(500).json({ error: 'Failed to fetch stakeholders', details: error.message });
   }
 });
@@ -44,7 +46,7 @@ router.get('/stakeholders/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching stakeholder:', error);
+    logger.error('Error fetching stakeholder:', { error });
     res.status(500).json({ error: 'Failed to fetch stakeholder', details: error.message });
   }
 });
@@ -63,7 +65,7 @@ router.get('/engagements', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching engagements:', error);
+    logger.error('Error fetching engagements:', { error });
     res.status(500).json({ error: 'Failed to fetch engagements', details: error.message });
   }
 });
@@ -87,7 +89,7 @@ router.get('/engagements/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching engagement:', error);
+    logger.error('Error fetching engagement:', { error });
     res.status(500).json({ error: 'Failed to fetch engagement', details: error.message });
   }
 });

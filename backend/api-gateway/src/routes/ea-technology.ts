@@ -24,7 +24,7 @@ router.get('/technologies', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching technologies:', error);
+    logger.error('Error fetching technologies:', { error });
     res.status(500).json({ error: 'Failed to fetch technologies', details: error.message });
   }
 });
@@ -44,7 +44,7 @@ router.get('/technologies/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching technology:', error);
+    logger.error('Error fetching technology:', { error });
     res.status(500).json({ error: 'Failed to fetch technology', details: error.message });
   }
 });
@@ -73,7 +73,7 @@ router.post('/technologies', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating technology:', error);
+    logger.error('Error creating technology:', { error });
     res.status(500).json({ error: 'Failed to create technology', details: error.message });
   }
 });
@@ -92,7 +92,7 @@ router.get('/standards', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching standards:', error);
+    logger.error('Error fetching standards:', { error });
     res.status(500).json({ error: 'Failed to fetch standards', details: error.message });
   }
 });
@@ -116,7 +116,7 @@ router.get('/standards/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error fetching standard:', error);
+    logger.error('Error fetching standard:', { error });
     res.status(500).json({ error: 'Failed to fetch standard', details: error.message });
   }
 });
@@ -142,7 +142,7 @@ router.post('/standards', async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
-    console.error('Error creating standard:', error);
+    logger.error('Error creating standard:', { error });
     res.status(500).json({ error: 'Failed to create standard', details: error.message });
   }
 });
