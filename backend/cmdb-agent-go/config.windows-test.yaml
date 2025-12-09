@@ -1,0 +1,88 @@
+server:
+  primary: http://localhost:3000
+  secondary: ""
+  ca_bundle: ""
+
+agent:
+  version: 1.1.0
+  hostname: "windows-agent-test"
+  data_dir: C:\Temp\cmdb-agent-data
+  socket_path: ""
+  tags:
+    env: test
+    platform: windows
+    enhanced: true
+  collectors:
+    # Cross-platform collectors
+    - name: system
+      schedule: "@every 30s"
+      enabled: true
+      mode: basic
+    - name: hardware
+      schedule: "@every 1m"
+      enabled: true
+      mode: basic
+    - name: network
+      schedule: "@every 1m"
+      enabled: true
+      mode: basic
+    - name: software
+      schedule: "@every 5m"
+      enabled: true
+      mode: basic
+    - name: process
+      schedule: "@every 1m"
+      enabled: false
+      mode: basic
+    - name: service
+      schedule: "@every 2m"
+      enabled: true
+      mode: basic
+    - name: user
+      schedule: "@every 5m"
+      enabled: true
+      mode: basic
+    - name: certificate
+      schedule: "@every 1h"
+      enabled: false
+      mode: basic
+    # Windows-specific collectors
+    - name: windows_registry
+      schedule: "@every 5m"
+      enabled: true
+      mode: basic
+    - name: windows_eventlog
+      schedule: "@every 2m"
+      enabled: true
+      mode: basic
+    - name: windows_performance
+      schedule: "@every 30s"
+      enabled: true
+      mode: basic
+    - name: windows_security
+      schedule: "@every 10m"
+      enabled: true
+      mode: basic
+    - name: windows_wmi
+      schedule: "@every 5m"
+      enabled: true
+      mode: basic
+
+webui:
+  enabled: true
+  listen_address: "0.0.0.0:8080"
+  auth_enabled: false
+  rate_limit: 60
+
+auth:
+  method: none
+  cert_file: ""
+  key_file: ""
+  token_url: ""
+  client_id: ""
+  client_secret: ""
+
+logging:
+  level: debug
+  format: text
+  output: stdout
