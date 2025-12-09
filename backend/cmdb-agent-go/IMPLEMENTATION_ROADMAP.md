@@ -1,7 +1,7 @@
 # Windows Agent - Implementation Roadmap
 
-**Version**: 1.1.0 → 1.2.0  
-**Status**: Phase 1 Complete, Phase 2 In Progress  
+**Version**: 1.4.0 → 1.5.0  
+**Status**: Phase 2 Complete, Phase 3 In Progress  
 **Date**: December 9, 2025
 
 ---
