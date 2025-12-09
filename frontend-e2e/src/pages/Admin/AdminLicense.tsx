@@ -42,7 +42,7 @@ const AdminLicense: React.FC = () => {
     ]
   });
 
-  const [licenseKey] = useState<string>('XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX');
+  const [licenseKey] = useState<string>(''); // License key loaded from backend
 
   const getStatusColor = (status: string) => {
     switch (status) {

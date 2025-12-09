@@ -1,0 +1,22 @@
+{
+  "name": "@iac/logger",
+  "version": "1.0.0",
+  "description": "Centralized logging package for IAC Platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": ["logging", "winston", "iac"],
+  "author": "IAC Platform Team",
+  "license": "MIT",
+  "dependencies": {
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}

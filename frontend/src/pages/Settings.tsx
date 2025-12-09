@@ -133,7 +133,7 @@ export default function Settings() {
 
   // API Settings
   const [apiSettings, setApiSettings] = useState({
-    apiKey: 'sk-iacdharma-xxxxxxxxxxxxxxxx',
+    apiKey: '', // Generate via API settings page
     webhookUrl: '',
     rateLimitPerMinute: '100',
     enableWebhooks: false
