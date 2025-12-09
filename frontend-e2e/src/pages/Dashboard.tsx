@@ -10,6 +10,7 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
 } from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -126,30 +127,34 @@ const Dashboard: React.FC = () => {
       trend: 'up',
       icon: ServerIcon,
       color: 'from-blue-500 to-cyan-500',
+      description: 'Monitored assets',
     },
     {
-      title: 'CPU Usage',
-      value: '67%',
-      change: '-3.2%',
-      trend: 'down',
+      title: 'Active Agents',
+      value: '847',
+      change: '+24',
+      trend: 'up',
       icon: CpuChipIcon,
       color: 'from-green-500 to-emerald-500',
+      description: 'Windows v1.4.0 agents',
     },
     {
-      title: 'Active Alerts',
-      value: '8',
-      change: '+4',
-      trend: 'up',
-      icon: BoltIcon,
-      color: 'from-yellow-500 to-orange-500',
-    },
-    {
-      title: 'Monthly Cost',
-      value: '$12.4K',
-      change: '-8.1%',
+      title: 'Security Alerts',
+      value: '3',
+      change: '-5',
       trend: 'down',
-      icon: CurrencyDollarIcon,
+      icon: ShieldCheckIcon,
       color: 'from-purple-500 to-pink-500',
+      description: 'Defender & Firewall',
+    },
+    {
+      title: 'Collectors Active',
+      value: '15',
+      change: '+9',
+      trend: 'up',
+      icon: ChartBarIcon,
+      color: 'from-orange-500 to-red-500',
+      description: 'All OS platforms',
     },
   ];
 
@@ -157,7 +162,7 @@ const Dashboard: React.FC = () => {
     labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
     datasets: [
       {
-        label: 'CPU Usage',
+        label: 'CPU Usage (%)',
         data: [65, 59, 80, 81, 76, 55, 67],
         borderColor: 'rgb(99, 102, 241)',
         backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -165,10 +170,10 @@ const Dashboard: React.FC = () => {
         tension: 0.4,
       },
       {
-        label: 'Memory Usage',
-        data: [45, 49, 60, 71, 56, 45, 48],
-        borderColor: 'rgb(168, 85, 247)',
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+        label: 'Memory Usage (%)',
+        data: [45, 52, 61, 58, 64, 59, 56],
+        borderColor: 'rgb(16, 185, 129)',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
         fill: true,
         tension: 0.4,
       },
@@ -462,16 +467,16 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm">Vulnerabilities</span>
+              <span className="text-sm">Windows Defender</span>
+              <span className="text-sm font-semibold text-green-600">● Active</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Firewall Status</span>
+              <span className="text-sm font-semibold text-green-600">● Enabled</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Security Alerts</span>
               <span className="text-sm font-semibold">3 Low</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Compliance</span>
-              <span className="text-sm font-semibold text-green-600">98%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Last Scan</span>
-              <span className="text-sm font-semibold">15 min ago</span>
             </div>
           </div>
         </div>
@@ -479,26 +484,152 @@ const Dashboard: React.FC = () => {
         <div className="glass-effect rounded-xl p-6 border border-white/20 dark:border-slate-700/50 animate-fade-in">
           <div className="flex items-center gap-3 mb-4">
             <BoltIcon className="w-8 h-8 text-yellow-500" />
-            <h3 className="text-lg font-bold">Deployments</h3>
+            <h3 className="text-lg font-bold">Agent Status</h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm">Today</span>
-              <span className="text-sm font-semibold">134</span>
+              <span className="text-sm">Windows v1.4.0</span>
+              <span className="text-sm font-semibold text-green-600">847 Active</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">Success Rate</span>
-              <span className="text-sm font-semibold text-green-600">97.8%</span>
+              <span className="text-sm">Linux/macOS</span>
+              <span className="text-sm font-semibold text-green-600">1,700 Active</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">Avg Duration</span>
-              <span className="text-sm font-semibold">4.2 min</span>
+              <span className="text-sm">Collectors</span>
+              <span className="text-sm font-semibold">15 Running</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Windows Agent v1.4.0 Highlights */}
+      <div className="glass-effect rounded-xl p-6 border border-white/20 dark:border-slate-700/50 animate-fade-in">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500">
+              <ServerIcon className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold gradient-text">Windows Agent v1.4.0</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Complete Security Monitoring & Performance Tracking</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span className="text-sm font-semibold text-green-600">Production Ready</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Security Monitoring</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                <span>Windows Defender Integration</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                <span>Firewall Management</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                <span>Windows Update Tracking</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                <span>Event Log API (5 sources)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                <span>Threat Detection</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Performance Metrics</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-blue-500" />
+                <span>PDH Counters (40+ metrics)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-blue-500" />
+                <span>CPU & Memory Monitoring</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-blue-500" />
+                <span>Disk I/O Tracking</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-blue-500" />
+                <span>Network Statistics</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-blue-500" />
+                <span>Process Monitoring</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">System Intelligence</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-purple-500" />
+                <span>WMI Integration (11 classes)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-purple-500" />
+                <span>Registry Monitoring</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-purple-500" />
+                <span>Hardware Detection</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-purple-500" />
+                <span>Software Inventory</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircleIcon className="w-4 h-4 text-purple-500" />
+                <span>Policy Enforcement</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
+          <div className="flex items-center gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold gradient-text">15</div>
+              <div className="text-xs text-slate-500">Collectors</div>
+            </div>
+            <div className="w-px h-12 bg-slate-300 dark:bg-slate-600"></div>
+            <div className="text-center">
+              <div className="text-2xl font-bold gradient-text">2,506</div>
+              <div className="text-xs text-slate-500">Code Lines</div>
+            </div>
+            <div className="w-px h-12 bg-slate-300 dark:bg-slate-600"></div>
+            <div className="text-center">
+              <div className="text-2xl font-bold gradient-text">13 MB</div>
+              <div className="text-xs text-slate-500">Binary Size</div>
+            </div>
+          </div>
+          <a
+            href="/agents/downloads"
+            className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold hover:shadow-lg transition-all"
+          >
+            Download Agent
+          </a>
         </div>
       </div>
     </div>
   );
 };
+
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
 export default Dashboard;
