@@ -42,7 +42,8 @@ func NewManager(log *logger.Logger, cfg *config.Config) *Manager {
 		m.Register(NewWindowsPerformanceCollector(log))
 		m.Register(NewWindowsSecurityCollector(log))
 		m.Register(NewWindowsWMICollector(log))
-		log.Info("Registered Windows-specific collectors", "count", 5)
+		m.Register(NewWindowsPDHCollector(log))
+		log.Info("Registered Windows-specific collectors", "count", 6)
 	}
 
 	return m
