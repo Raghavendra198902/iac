@@ -24,9 +24,26 @@ services:
     image: grafana/tempo:latest
     container_name: iac-tempo
     restart: unless-stopped
-    command: [ "-config.file=/etc/tempo.yaml" ]
+    command: 
+      - "-config.file=/etc/tempo.yaml"
+    environment:
+      - TEMPO_CONFIG_YAML=|
+        server:
+          http_listen_port: 3200
+        distributor:
+          receivers:
+            otlp:
+              protocols:
+                grpc:
+                  endpoint: 0.0.0.0:4317
+                http:
+                  endpoint: 0.0.0.0:4318
+        storage:
+          trace:
+            backend: local
+            local:
+              path: /tmp/tempo/blocks
     volumes:
-      - ./config/tempo.yaml:/etc/tempo.yaml
       - tempo-data:/tmp/tempo
     ports:
       - "3200:3200"   # Tempo
