@@ -361,7 +361,7 @@ services:
     networks:
       - iac-v3-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8400/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8400/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
