@@ -42,13 +42,13 @@ class WebSocketService {
     if (!this.io) return;
 
     this.io.on('connection', (socket: Socket) => {
-      console.log(`🔌 Client connected: ${socket.id}`);
+      logger.info(`🔌 Client connected: ${socket.id}`);
 
       // Handle user authentication
       socket.on('authenticate', (user: User) => {
         this.users.set(socket.id, { ...user, id: socket.id });
         socket.emit('authenticated', { socketId: socket.id });
-        console.log(`✅ User authenticated: ${user.name} (${socket.id})`);
+        logger.info(`✅ User authenticated: ${user.name} (${socket.id})`);
       });
 
       // Handle joining rooms (channels, blueprints, etc.)
@@ -80,7 +80,7 @@ class WebSocketService {
         const roomUsers = this.getRoomUsers(roomId);
         socket.emit('room_users', roomUsers);
 
-        console.log(`👥 User ${user.name} joined room: ${roomId}`);
+        logger.info(`👥 User ${user.name} joined room: ${roomId}`);
       });
 
       // Handle leaving rooms
@@ -98,7 +98,7 @@ class WebSocketService {
         };
         socket.to(roomId).emit('room_event', event);
 
-        console.log(`👋 User ${user.name} left room: ${roomId}`);
+        logger.info(`👋 User ${user.name} left room: ${roomId}`);
       });
 
       // Handle typing indicators
@@ -127,7 +127,7 @@ class WebSocketService {
           timestamp: new Date().toISOString()
         };
         this.io?.to(data.roomId).emit('new_message', event);
-        console.log(`💬 Message from ${user.name} in ${data.roomId}`);
+        logger.info(`💬 Message from ${user.name} in ${data.roomId}`);
       });
 
       // Handle blueprint updates (real-time collaboration)
@@ -142,7 +142,7 @@ class WebSocketService {
           timestamp: new Date().toISOString()
         };
         socket.to(`blueprint-${data.blueprintId}`).emit('blueprint_changed', event);
-        console.log(`📝 Blueprint update from ${user.name}`);
+        logger.info(`📝 Blueprint update from ${user.name}`);
       });
 
       // Handle cursor movements (collaborative editing)
@@ -173,12 +173,12 @@ class WebSocketService {
         }
 
         this.users.delete(socket.id);
-        console.log(`🔌 Client disconnected: ${socket.id}`);
+        logger.info(`🔌 Client disconnected: ${socket.id}`);
       });
 
       // Handle errors
       socket.on('error', (error) => {
-        console.error(`❌ Socket error for ${socket.id}:`, error);
+        logger.error(`❌ Socket error for ${socket.id}:`, error);
       });
     });
   }

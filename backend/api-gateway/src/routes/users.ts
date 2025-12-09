@@ -761,7 +761,7 @@ router.post('/seed', async (req: Request, res: Response) => {
       );
 
       if (roleResult.rows.length === 0) {
-        console.warn(`Role ${user.roleCode} not found, skipping user ${user.email}`);
+        logger.warn(`Role ${user.roleCode} not found, skipping user ${user.email}`);
         continue;
       }
 

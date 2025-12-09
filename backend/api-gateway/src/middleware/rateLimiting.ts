@@ -1,6 +1,9 @@
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import { createClient } from 'redis';
+import { createLogger } from '../../../../packages/logger/src/index';
+
+const logger = createLogger({ serviceName: 'api-gateway-rate-limiting' });
 
 // Redis client for rate limiting
 const redisClient = createClient({
@@ -10,11 +13,11 @@ const redisClient = createClient({
   }
 });
 
-redisClient.on('error', (err) => console.error('Redis Client Error:', err));
-redisClient.on('connect', () => console.log('✅ Redis connected for rate limiting'));
+redisClient.on('error', (err) => logger.error('Redis Client Error', { error: err }));
+redisClient.on('connect', () => logger.info('Redis connected for rate limiting'));
 
 // Initialize Redis connection
-redisClient.connect().catch(console.error);
+redisClient.connect().catch((err) => logger.error('Redis connection failed', { error: err }));
 
 // Default rate limiter - 100 requests per 15 minutes per IP
 export const defaultLimiter = rateLimit({

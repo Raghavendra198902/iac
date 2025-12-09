@@ -634,7 +634,7 @@ router.post('/agents/:agentId/discover', (req: Request, res: Response) => {
 // Network discovery - scan network for devices
 router.post('/network-discovery', async (req: Request, res: Response) => {
   try {
-    console.log('Network discovery triggered');
+    logger.info('Network discovery triggered');
     
     // In a real implementation, this would:
     // 1. Trigger all active agents to scan their networks

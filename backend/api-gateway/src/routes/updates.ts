@@ -327,7 +327,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     try {
       await fs.unlink(filePath);
     } catch (error) {
-      console.warn('Failed to delete file:', { error });
+      logger.warn('Failed to delete file:', { error });
     }
 
     // Remove from registry

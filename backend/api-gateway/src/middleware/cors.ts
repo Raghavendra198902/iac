@@ -50,7 +50,7 @@ export const corsOptions: cors.CorsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.warn(`⚠️ CORS blocked request from origin: ${origin}`);
+      logger.warn(`⚠️ CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -94,7 +94,7 @@ export const strictCorsOptions: cors.CorsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.error(`❌ CORS blocked request from unauthorized origin: ${origin}`);
+      logger.error(`❌ CORS blocked request from unauthorized origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -143,17 +143,17 @@ export const getCorsMiddleware = () => {
   const env = process.env.NODE_ENV;
   
   if (env === 'development' || env === 'test') {
-    console.log('🔓 Using permissive CORS for development');
+    logger.info('🔓 Using permissive CORS for development');
     return cors(devCorsOptions);
   }
   
   if (env === 'production') {
-    console.log('🔒 Using strict CORS for production');
+    logger.info('🔒 Using strict CORS for production');
     return cors(strictCorsOptions);
   }
   
   // Default to standard CORS
-  console.log('🔐 Using standard CORS');
+  logger.info('🔐 Using standard CORS');
   return cors(corsOptions);
 };
 
