@@ -3,8 +3,11 @@ import { Pool } from 'pg';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { createLogger } from '../../../packages/logger/src/index';
 
 dotenv.config();
+
+const logger = createLogger({ serviceName: 'advanced-rbac-service' });
 
 const app = express();
 const port = process.env.PORT || 3050;
@@ -24,7 +27,7 @@ app.use(express.json());
 
 // Request logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  logger.info('Request received', { method: req.method, path: req.path });
   next();
 });
 
@@ -79,7 +82,7 @@ app.get('/api/v1/permissions', async (req: Request, res: Response) => {
       permissions: result.rows
     });
   } catch (error) {
-    console.error('Error fetching permissions:', error);
+    logger.error('Error fetching permissions', { error });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch permissions' 
@@ -130,7 +133,7 @@ app.post('/api/v1/permissions/check', async (req: Request, res: Response) => {
       scope
     });
   } catch (error) {
-    console.error('Error checking permission:', error);
+    logger.error('Error checking permission', { error, userId: req.body.userId, resource: req.body.resource });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to check permission' 
@@ -166,7 +169,7 @@ app.get('/api/v1/users/:userId/permissions', async (req: Request, res: Response)
       permissions: result.rows
     });
   } catch (error) {
-    console.error('Error fetching user permissions:', error);
+    logger.error('Error fetching user permissions', { error, userId: req.params.userId });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch user permissions' 
@@ -197,7 +200,7 @@ app.post('/api/v1/permissions/grant', async (req: Request, res: Response) => {
       message: 'Permission granted successfully'
     });
   } catch (error) {
-    console.error('Error granting permission:', error);
+    logger.error('Error granting permission', { error, userId: req.body.userId, permissionId: req.body.permissionId });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to grant permission' 
@@ -227,7 +230,7 @@ app.post('/api/v1/permissions/revoke', async (req: Request, res: Response) => {
       message: result.rows[0].revoked ? 'Permission revoked successfully' : 'Grant not found or already revoked'
     });
   } catch (error) {
-    console.error('Error revoking permission:', error);
+    logger.error('Error revoking permission', { error, grantId: req.body.grantId });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to revoke permission' 
@@ -274,7 +277,7 @@ app.get('/api/v1/audit/permissions', async (req: Request, res: Response) => {
       logs: result.rows
     });
   } catch (error) {
-    console.error('Error fetching audit logs:', error);
+    logger.error('Error fetching audit logs', { error });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch audit logs' 
@@ -296,7 +299,7 @@ app.get('/api/v1/stats/permissions', async (req: Request, res: Response) => {
       statistics: result.rows
     });
   } catch (error) {
-    console.error('Error fetching permission stats:', error);
+    logger.error('Error fetching permission stats', { error });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch permission statistics' 
@@ -330,7 +333,7 @@ app.get('/api/v1/roles/:roleId/permissions', async (req: Request, res: Response)
       permissions: result.rows
     });
   } catch (error) {
-    console.error('Error fetching role permissions:', error);
+    logger.error('Error fetching role permissions', { error, roleId: req.params.roleId });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch role permissions' 
@@ -340,7 +343,7 @@ app.get('/api/v1/roles/:roleId/permissions', async (req: Request, res: Response)
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Unhandled error:', err);
+  logger.error('Unhandled error', { error: err, path: req.path, method: req.method });
   res.status(500).json({
     success: false,
     error: 'Internal server error'
@@ -357,15 +360,17 @@ app.use((req: Request, res: Response) => {
 
 // Start server
 app.listen(port, () => {
-  console.log(`🚀 Advanced RBAC Service listening on port ${port}`);
-  console.log(`📊 Health check: http://localhost:${port}/health`);
-  console.log(`🔐 Permissions API: http://localhost:${port}/api/v1/permissions`);
-});
-
+  logger.info('Advanced RBAC Service started', { 
+    port, 
+    healthCheck: `http://localhost:${port}/health`,
+    permissionsApi: `http://localhost:${port}/api/v1/permissions`
+  });
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, closing HTTP server...');
+  logger.info('SIGTERM received, closing HTTP server');
   await pool.end();
+  process.exit(0);
+});wait pool.end();
   process.exit(0);
 });
 

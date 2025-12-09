@@ -5,14 +5,10 @@ import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from './middleware/auth';
 import { validateBlueprint, validateBlueprintUpdate } from './validators';
+import { createLogger } from '../../../packages/logger/src/index';
 
-// Simple logger
-const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+// Winston logger
+const logger = createLogger({ serviceName: 'blueprint-service' });
 
 const app = express();
 const PORT = process.env.PORT || 3001;

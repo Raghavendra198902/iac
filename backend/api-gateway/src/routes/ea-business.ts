@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { Pool } from 'pg';
+import { createLogger } from '../../../../packages/logger/src/index';
 
 const router = Router();
+const logger = createLogger({ serviceName: 'api-gateway-ea-business' });
 
 // Database connection
 const pool = new Pool({
@@ -25,7 +27,7 @@ router.get('/capabilities', async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching capabilities:', error);
+    logger.error('Error fetching capabilities', { error });
     res.status(500).json({ error: 'Failed to fetch capabilities' });
   }
 });
@@ -62,7 +64,7 @@ router.get('/capabilities/:id', async (req: Request, res: Response) => {
       processes: processes.rows
     });
   } catch (error) {
-    console.error('Error fetching capability:', error);
+    logger.error('Error fetching capability', { error, capabilityId: req.params.id });
     res.status(500).json({ error: 'Failed to fetch capability' });
   }
 });
@@ -85,7 +87,7 @@ router.post('/capabilities', async (req: Request, res: Response) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating capability:', error);
+    logger.error('Error creating capability', { error });
     res.status(500).json({ error: 'Failed to create capability' });
   }
 });
@@ -107,7 +109,7 @@ router.get('/processes', async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching processes:', error);
+    logger.error('Error fetching processes', { error });
     res.status(500).json({ error: 'Failed to fetch processes' });
   }
 });
@@ -145,7 +147,7 @@ router.get('/processes/:id', async (req: Request, res: Response) => {
       metrics: metrics.rows
     });
   } catch (error) {
-    console.error('Error fetching process:', error);
+    logger.error('Error fetching process', { error, processId: req.params.id });
     res.status(500).json({ error: 'Failed to fetch process' });
   }
 });
@@ -174,7 +176,7 @@ router.post('/processes', async (req: Request, res: Response) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating process:', error);
+    logger.error('Error creating process', { error });
     res.status(500).json({ error: 'Failed to create process' });
   }
 });
@@ -196,7 +198,7 @@ router.get('/services', async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching services:', error);
+    logger.error('Error fetching services', { error });
     res.status(500).json({ error: 'Failed to fetch services' });
   }
 });

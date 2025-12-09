@@ -12,13 +12,9 @@ import {
   Budget,
   BudgetAlert
 } from './types';
+import { createLogger } from '../../../packages/logger/src/index';
 
-const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+const logger = createLogger({ serviceName: 'costing-service' });
 
 config();
 

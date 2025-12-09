@@ -32,6 +32,9 @@ app.use(passport.session());
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', service: 'sso-service' });
 });
+import { createLogger } from '../../../packages/logger/src/index';
+
+const logger = createLogger({ serviceName: 'sso-service' });
 
 app.use('/api/auth', authRouter);
 app.use('/api/auth/saml', samlRouter);
@@ -39,5 +42,5 @@ app.use('/api/auth/oauth2', oauth2Router);
 app.use('/api/auth/admin', adminRouter);
 
 app.listen(PORT, () => {
-  console.log(`🔐 SSO Service running on port ${PORT}`);
+  logger.info('SSO Service started', { port: PORT });
 });

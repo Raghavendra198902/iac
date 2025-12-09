@@ -4,14 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { DeploymentOrchestrator } from './orchestrator';
 import { StateManager } from './state-manager';
 import { DeploymentRequest, RollbackRequest } from './types';
+import { createLogger } from '../../../packages/logger/src/index';
 
-// Simple logger
-const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+// Winston logger
+const logger = createLogger({ serviceName: 'orchestrator-service' });
 
 const app = express();
 const PORT = process.env.PORT || 3004;

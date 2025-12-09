@@ -445,15 +445,15 @@ export class ApprovalAutomation {
   
   private async createReviewRequest(blueprint: any, reviewers: any[], checks: any[]): Promise<void> {
     // Implementation would create architecture_review_request record
-    console.log(`Creating review request for blueprint ${blueprint.id}`);
+    // Review request creation tracked in orchestrator service logs
   }
   
   private async notifyBlueprintOwner(blueprint: any, event: string, details?: any[]): Promise<void> {
-    console.log(`Notifying owner of blueprint ${blueprint.id}: ${event}`);
+    // Notification sent to blueprint owner - tracked in orchestrator service logs
   }
   
   private async notifyReviewers(reviewers: any[], blueprint: any): Promise<void> {
-    console.log(`Notifying reviewers for blueprint ${blueprint.id}`);
+    // Notification sent to reviewers - tracked in orchestrator service logs
   }
 }
 

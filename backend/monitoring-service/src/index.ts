@@ -5,14 +5,10 @@ import { DriftDetector } from './drift-detector';
 import { HealthMonitor } from './health-monitor';
 import { CostMonitor } from './cost-monitor';
 import { RemediationEngine } from './remediation-engine';
+import { createLogger } from '../../../packages/logger/src/index';
 
-// Simple logger
-const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+// Winston logger
+const logger = createLogger({ serviceName: 'monitoring-service' });
 
 const app = express();
 

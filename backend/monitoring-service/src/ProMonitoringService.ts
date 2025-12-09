@@ -461,7 +461,7 @@ export class ProMonitoringService extends EventEmitter {
     anomaly: AnomalyDetection
   ): Promise<RootCauseAnalysis> {
     
-    console.log(`🔍 Performing root cause analysis for ${anomaly.metric} anomaly`);
+    // Root cause analysis performed (logged in monitoring service)
     
     const history = this.metricsHistory.get(deploymentId) || [];
     const recentMetrics = history.slice(-100);

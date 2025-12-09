@@ -6,14 +6,10 @@ import { TerraformGenerator } from './generators/terraform';
 import { BicepGenerator } from './generators/bicep';
 import { CloudFormationGenerator } from './generators/cloudformation';
 import { GenerationRequest, GenerationJob } from './types';
+import { createLogger } from '../../../packages/logger/src/index';
 
-// Simple logger
-const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+// Winston logger
+const logger = createLogger({ serviceName: 'iac-generator' });
 
 const app = express();
 const PORT = process.env.PORT || 3002;
