@@ -365,12 +365,12 @@ app.listen(port, () => {
     healthCheck: `http://localhost:${port}/health`,
     permissionsApi: `http://localhost:${port}/api/v1/permissions`
   });
+});
+
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, closing HTTP server');
   await pool.end();
-  process.exit(0);
-});wait pool.end();
   process.exit(0);
 });
 
