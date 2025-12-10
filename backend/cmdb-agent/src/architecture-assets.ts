@@ -3,6 +3,8 @@
  * CMDB stores architecture artifacts and relationships
  */
 
+import logger from './utils/logger';
+
 export interface ArchitectureAsset {
   id: string;
   asset_type: 'blueprint' | 'template' | 'pattern' | 'standard' | 'adr' | 'component' | 'service';
@@ -355,7 +357,7 @@ export class ArchitectureRepository {
   
   private async indexForSearch(asset: ArchitectureAsset): Promise<void> {
     // Would integrate with search engine (Elasticsearch, etc.)
-    console.log(`Indexing asset ${asset.id} for search`);
+    logger.info(`Indexing asset ${asset.id} for search`);
   }
   
   private async resolveDependencies(dependencyIds: string[]): Promise<ArchitectureAsset[]> {

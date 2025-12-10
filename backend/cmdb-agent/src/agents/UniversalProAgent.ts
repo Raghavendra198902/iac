@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 #!/usr/bin/env node
 
 /**
@@ -25,11 +27,11 @@ class UniversalProAgent {
   private agentName: string = '';
 
   constructor() {
-    console.log('🌍 Universal Pro Agent Launcher v2.0');
-    console.log('=====================================');
+    logger.info('🌍 Universal Pro Agent Launcher v2.0');
+    logger.info('=====================================');
     
     this.platform = this.detectPlatform();
-    console.log(`📱 Detected Platform: ${this.platform.toUpperCase()}`);
+    logger.info(`📱 Detected Platform: ${this.platform.toUpperCase()}`);
     
     this.agent = this.initializeAgent();
   }
@@ -97,44 +99,44 @@ class UniversalProAgent {
   private initializeAgent(): any {
     switch (this.platform) {
       case 'windows':
-        console.log('🪟 Initializing Pro Windows Agent...');
+        logger.info('🪟 Initializing Pro Windows Agent...');
         this.agentName = 'Pro Windows Agent';
         return new ProWindowsAgent();
 
       case 'macos':
-        console.log('🍎 Initializing Pro macOS Agent...');
+        logger.info('🍎 Initializing Pro macOS Agent...');
         this.agentName = 'Pro macOS Agent';
         return new ProMacOSAgent();
 
       case 'linux':
-        console.log('🐧 Initializing Pro Linux Agent...');
+        logger.info('🐧 Initializing Pro Linux Agent...');
         this.agentName = 'Pro Linux Agent';
         // For now, use macOS agent (similar Unix commands)
         return new ProMacOSAgent();
 
       case 'android':
-        console.log('📱 Initializing Pro Android Agent...');
+        logger.info('📱 Initializing Pro Android Agent...');
         this.agentName = 'Pro Android Agent';
         return new ProAndroidAgent();
 
       case 'ios':
-        console.log('📱 Initializing Pro iOS Agent...');
+        logger.info('📱 Initializing Pro iOS Agent...');
         this.agentName = 'Pro iOS Agent';
         // iOS agent would be similar to Android
-        console.log('⚠️  iOS Pro Agent coming soon! Using basic monitoring...');
+        logger.info('⚠️  iOS Pro Agent coming soon! Using basic monitoring...');
         return new ProAndroidAgent();
 
       default:
-        console.error(`❌ Unsupported platform: ${this.platform}`);
-        console.error('Supported platforms: Windows, macOS, Linux, Android, iOS');
+        logger.error(`❌ Unsupported platform: ${this.platform}`);
+        logger.error('Supported platforms: Windows, macOS, Linux, Android, iOS');
         process.exit(1);
     }
   }
 
   async start(): Promise<void> {
-    console.log('');
-    console.log(`🚀 Starting ${this.agentName}...`);
-    console.log('=====================================');
+    logger.info('');
+    logger.info(`🚀 Starting ${this.agentName}...`);
+    logger.info('=====================================');
     
     // Display system info
     this.displaySystemInfo();
@@ -142,62 +144,62 @@ class UniversalProAgent {
     // Display configuration
     this.displayConfiguration();
     
-    console.log('');
+    logger.info('');
     
     // Start the agent
     try {
       await this.agent.start();
     } catch (error: any) {
-      console.error(`❌ Failed to start agent: ${error.message}`);
+      logger.error(`❌ Failed to start agent: ${error.message}`);
       process.exit(1);
     }
   }
 
   private displaySystemInfo(): void {
-    console.log('');
-    console.log('📊 System Information:');
-    console.log(`   Platform: ${this.platform}`);
-    console.log(`   Hostname: ${os.hostname()}`);
-    console.log(`   Architecture: ${os.arch()}`);
-    console.log(`   CPUs: ${os.cpus().length} cores`);
-    console.log(`   Total Memory: ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)} GB`);
-    console.log(`   Free Memory: ${(os.freemem() / 1024 / 1024 / 1024).toFixed(2)} GB`);
-    console.log(`   Uptime: ${(os.uptime() / 3600).toFixed(2)} hours`);
-    console.log(`   Node.js: ${process.version}`);
+    logger.info('');
+    logger.info('📊 System Information:');
+    logger.info(`   Platform: ${this.platform}`);
+    logger.info(`   Hostname: ${os.hostname()}`);
+    logger.info(`   Architecture: ${os.arch()}`);
+    logger.info(`   CPUs: ${os.cpus().length} cores`);
+    logger.info(`   Total Memory: ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)} GB`);
+    logger.info(`   Free Memory: ${(os.freemem() / 1024 / 1024 / 1024).toFixed(2)} GB`);
+    logger.info(`   Uptime: ${(os.uptime() / 3600).toFixed(2)} hours`);
+    logger.info(`   Node.js: ${process.version}`);
 
     // Platform-specific info
     if (this.platform === 'windows') {
       try {
         const version = execSync('ver', { encoding: 'utf-8' });
-        console.log(`   Windows Version: ${version.trim()}`);
+        logger.info(`   Windows Version: ${version.trim()}`);
       } catch (error) {}
     } else if (this.platform === 'macos') {
       try {
         const version = execSync('sw_vers -productVersion', { encoding: 'utf-8' });
-        console.log(`   macOS Version: ${version.trim()}`);
+        logger.info(`   macOS Version: ${version.trim()}`);
       } catch (error) {}
     } else if (this.platform === 'linux') {
       try {
         const version = execSync('cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d \'"\'', { encoding: 'utf-8' });
-        console.log(`   Linux Distribution: ${version.trim()}`);
+        logger.info(`   Linux Distribution: ${version.trim()}`);
       } catch (error) {}
     } else if (this.platform === 'android') {
       try {
         const version = execSync('getprop ro.build.version.release', { encoding: 'utf-8' });
-        console.log(`   Android Version: ${version.trim()}`);
+        logger.info(`   Android Version: ${version.trim()}`);
       } catch (error) {}
     }
   }
 
   private displayConfiguration(): void {
-    console.log('');
-    console.log('⚙️  Configuration:');
-    console.log(`   Server URL: ${process.env.CMDB_SERVER_URL || 'http://localhost:3001'}`);
-    console.log(`   API Key: ${process.env.CMDB_API_KEY ? '✓ Set' : '✗ Not Set'}`);
-    console.log(`   Collection Interval: ${process.env.COLLECTION_INTERVAL || '60000'}ms`);
-    console.log(`   AI Analytics: ${process.env.ENABLE_AI_ANALYTICS !== 'false' ? '✓ Enabled' : '✗ Disabled'}`);
-    console.log(`   Auto-Remediation: ${process.env.ENABLE_AUTO_REMEDIATION !== 'false' ? '✓ Enabled' : '✗ Disabled'}`);
-    console.log(`   Log Level: ${process.env.LOG_LEVEL || 'info'}`);
+    logger.info('');
+    logger.info('⚙️  Configuration:');
+    logger.info(`   Server URL: ${process.env.CMDB_SERVER_URL || 'http://localhost:3001'}`);
+    logger.info(`   API Key: ${process.env.CMDB_API_KEY ? '✓ Set' : '✗ Not Set'}`);
+    logger.info(`   Collection Interval: ${process.env.COLLECTION_INTERVAL || '60000'}ms`);
+    logger.info(`   AI Analytics: ${process.env.ENABLE_AI_ANALYTICS !== 'false' ? '✓ Enabled' : '✗ Disabled'}`);
+    logger.info(`   Auto-Remediation: ${process.env.ENABLE_AUTO_REMEDIATION !== 'false' ? '✓ Enabled' : '✗ Disabled'}`);
+    logger.info(`   Log Level: ${process.env.LOG_LEVEL || 'info'}`);
   }
 
   getInfo() {
@@ -222,51 +224,51 @@ if (require.main === module) {
 
   // Start agent
   agent.start().catch((error) => {
-    console.error('❌ Fatal error:', error);
+    logger.error('❌ Fatal error:', error);
     process.exit(1);
   });
 
   // Graceful shutdown handlers
   process.on('SIGINT', async () => {
-    console.log('\n');
-    console.log('🛑 Received SIGINT, shutting down gracefully...');
+    logger.info('\n');
+    logger.info('🛑 Received SIGINT, shutting down gracefully...');
     
     try {
       if (agent['agent'] && typeof agent['agent'].stop === 'function') {
         await agent['agent'].stop();
       }
-      console.log('✅ Agent stopped successfully');
+      logger.info('✅ Agent stopped successfully');
       process.exit(0);
     } catch (error: any) {
-      console.error('❌ Error during shutdown:', error.message);
+      logger.error('❌ Error during shutdown:', error.message);
       process.exit(1);
     }
   });
 
   process.on('SIGTERM', async () => {
-    console.log('\n');
-    console.log('🛑 Received SIGTERM, shutting down gracefully...');
+    logger.info('\n');
+    logger.info('🛑 Received SIGTERM, shutting down gracefully...');
     
     try {
       if (agent['agent'] && typeof agent['agent'].stop === 'function') {
         await agent['agent'].stop();
       }
-      console.log('✅ Agent stopped successfully');
+      logger.info('✅ Agent stopped successfully');
       process.exit(0);
     } catch (error: any) {
-      console.error('❌ Error during shutdown:', error.message);
+      logger.error('❌ Error during shutdown:', error.message);
       process.exit(1);
     }
   });
 
   // Handle uncaught exceptions
   process.on('uncaughtException', (error) => {
-    console.error('❌ Uncaught Exception:', error);
+    logger.error('❌ Uncaught Exception:', error);
     process.exit(1);
   });
 
   process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
     process.exit(1);
   });
 }

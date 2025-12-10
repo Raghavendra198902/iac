@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * CMDB Agent - Universal Launcher
  * 
@@ -92,55 +94,55 @@ class UniversalCMDBAgent {
   }
 
   private initializeAgent(): any {
-    console.log(`🔍 Detected platform: ${this.platform}`);
+    logger.info(`🔍 Detected platform: ${this.platform}`);
 
     switch (this.platform) {
       case 'windows':
-        console.log('🪟  Initializing Windows CMDB Agent...');
+        logger.info('🪟  Initializing Windows CMDB Agent...');
         return new WindowsCMDBAgent();
       
       case 'linux':
-        console.log('🐧  Initializing Linux CMDB Agent...');
+        logger.info('🐧  Initializing Linux CMDB Agent...');
         return new LinuxCMDBAgent();
       
       case 'macos':
-        console.log('🍎  Initializing macOS CMDB Agent...');
+        logger.info('🍎  Initializing macOS CMDB Agent...');
         return new MacOSCMDBAgent();
       
       case 'android':
-        console.log('🤖  Initializing Android CMDB Agent...');
+        logger.info('🤖  Initializing Android CMDB Agent...');
         return new AndroidCMDBAgent();
       
       case 'ios':
-        console.log('📱  Initializing iOS CMDB Agent...');
+        logger.info('📱  Initializing iOS CMDB Agent...');
         return new iOSCMDBAgent();
       
       default:
-        console.error(`❌ Unsupported platform: ${this.platform}`);
-        console.error('Supported platforms: Windows, Linux, macOS, Android, iOS');
+        logger.error(`❌ Unsupported platform: ${this.platform}`);
+        logger.error('Supported platforms: Windows, Linux, macOS, Android, iOS');
         process.exit(1);
     }
   }
 
   async start(): Promise<void> {
-    console.log('═══════════════════════════════════════════════════');
-    console.log('  IAC Dharma - Universal CMDB Agent');
-    console.log('═══════════════════════════════════════════════════');
-    console.log(`  Platform: ${this.platform}`);
-    console.log(`  Hostname: ${os.hostname()}`);
-    console.log(`  Architecture: ${os.arch()}`);
-    console.log(`  Node Version: ${process.version}`);
-    console.log('═══════════════════════════════════════════════════\n');
+    logger.info('═══════════════════════════════════════════════════');
+    logger.info('  IAC Dharma - Universal CMDB Agent');
+    logger.info('═══════════════════════════════════════════════════');
+    logger.info(`  Platform: ${this.platform}`);
+    logger.info(`  Hostname: ${os.hostname()}`);
+    logger.info(`  Architecture: ${os.arch()}`);
+    logger.info(`  Node Version: ${process.version}`);
+    logger.info('═══════════════════════════════════════════════════\n');
 
     if (!this.agent) {
-      console.error('❌ Failed to initialize agent');
+      logger.error('❌ Failed to initialize agent');
       process.exit(1);
     }
 
     try {
       await this.agent.start();
     } catch (error) {
-      console.error('❌ Agent failed to start:', error);
+      logger.error('❌ Agent failed to start:', error);
       process.exit(1);
     }
   }
@@ -163,17 +165,17 @@ if (require.main === module) {
   
   // Handle graceful shutdown
   process.on('SIGINT', () => {
-    console.log('\n⚠️  Received SIGINT, shutting down gracefully...');
+    logger.info('\n⚠️  Received SIGINT, shutting down gracefully...');
     process.exit(0);
   });
 
   process.on('SIGTERM', () => {
-    console.log('\n⚠️  Received SIGTERM, shutting down gracefully...');
+    logger.info('\n⚠️  Received SIGTERM, shutting down gracefully...');
     process.exit(0);
   });
 
   agent.start().catch((error) => {
-    console.error('Fatal error:', error);
+    logger.error('Fatal error:', error);
     process.exit(1);
   });
 }

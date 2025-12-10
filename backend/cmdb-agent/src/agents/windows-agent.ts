@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 #!/usr/bin/env node
 
 /**
@@ -109,7 +111,7 @@ class WindowsCMDBAgent {
   }
 
   async collectSystemInfo(): Promise<WindowsSystemInfo> {
-    console.log('📊 Collecting Windows system information...');
+    logger.info('📊 Collecting Windows system information...');
 
     const systemInfo: WindowsSystemInfo = {
       platform: 'windows',
@@ -192,7 +194,7 @@ class WindowsCMDBAgent {
         };
       }).filter(disk => disk.drive);
     } catch (error) {
-      console.error('Error getting disk info:', error);
+      logger.error('Error getting disk info:', error);
       return [];
     }
   }
@@ -232,7 +234,7 @@ class WindowsCMDBAgent {
       
       return interfaces;
     } catch (error) {
-      console.error('Error getting network info:', error);
+      logger.error('Error getting network info:', error);
       return [];
     }
   }
@@ -271,7 +273,7 @@ class WindowsCMDBAgent {
       
       return services.slice(0, 50); // Limit to 50 most important services
     } catch (error) {
-      console.error('Error getting Windows services:', error);
+      logger.error('Error getting Windows services:', error);
       return [];
     }
   }
@@ -290,7 +292,7 @@ class WindowsCMDBAgent {
         };
       }).filter(soft => soft.name).slice(0, 100); // Limit to 100 items
     } catch (error) {
-      console.error('Error getting installed software:', error);
+      logger.error('Error getting installed software:', error);
       return [];
     }
   }
@@ -390,20 +392,20 @@ class WindowsCMDBAgent {
         { headers }
       );
 
-      console.log('✅ Data sent successfully:', response.status);
+      logger.info('✅ Data sent successfully:', response.status);
     } catch (error: any) {
-      console.error('❌ Error sending data to server:', error.message);
+      logger.error('❌ Error sending data to server:', error.message);
       if (error.response) {
-        console.error('Response:', error.response.status, error.response.data);
+        logger.error('Response:', error.response.status, error.response.data);
       }
     }
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting Windows CMDB Agent...');
-    console.log(`📡 Server: ${this.serverUrl}`);
-    console.log(`🔄 Collection interval: ${this.interval}ms`);
-    console.log(`💻 Agent ID: ${this.agentId}`);
+    logger.info('🚀 Starting Windows CMDB Agent...');
+    logger.info(`📡 Server: ${this.serverUrl}`);
+    logger.info(`🔄 Collection interval: ${this.interval}ms`);
+    logger.info(`💻 Agent ID: ${this.agentId}`);
 
     // Initial collection
     await this.collectAndSend();
@@ -413,7 +415,7 @@ class WindowsCMDBAgent {
       await this.collectAndSend();
     }, this.interval);
 
-    console.log('✅ Agent is running. Press Ctrl+C to stop.');
+    logger.info('✅ Agent is running. Press Ctrl+C to stop.');
   }
 
   private async collectAndSend(): Promise<void> {
@@ -421,7 +423,7 @@ class WindowsCMDBAgent {
       const systemInfo = await this.collectSystemInfo();
       await this.sendToServer(systemInfo);
     } catch (error) {
-      console.error('Error in collection cycle:', error);
+      logger.error('Error in collection cycle:', error);
     }
   }
 }
@@ -429,7 +431,7 @@ class WindowsCMDBAgent {
 // Run the agent
 if (require.main === module) {
   const agent = new WindowsCMDBAgent();
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 }
 
 export default WindowsCMDBAgent;

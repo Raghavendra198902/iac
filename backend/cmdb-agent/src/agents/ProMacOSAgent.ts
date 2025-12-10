@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 #!/usr/bin/env node
 
 /**
@@ -195,10 +197,10 @@ export class ProMacOSAgent extends EventEmitter {
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting Pro macOS CMDB Agent...');
-    console.log(`📡 Server: ${this.config.serverUrl}`);
-    console.log(`🔄 Interval: ${this.config.collectionInterval}ms`);
-    console.log(`🤖 AI Analytics: ${this.config.aiAnalytics.enabled ? 'ENABLED' : 'DISABLED'}`);
+    logger.info('🚀 Starting Pro macOS CMDB Agent...');
+    logger.info(`📡 Server: ${this.config.serverUrl}`);
+    logger.info(`🔄 Interval: ${this.config.collectionInterval}ms`);
+    logger.info(`🤖 AI Analytics: ${this.config.aiAnalytics.enabled ? 'ENABLED' : 'DISABLED'}`);
 
     this.isRunning = true;
 
@@ -208,7 +210,7 @@ export class ProMacOSAgent extends EventEmitter {
     // Start monitoring loop
     this.monitoringLoop();
 
-    console.log('✅ Pro macOS Agent is running');
+    logger.info('✅ Pro macOS Agent is running');
   }
 
   private async monitoringLoop(): Promise<void> {
@@ -258,7 +260,7 @@ export class ProMacOSAgent extends EventEmitter {
         await this.sleep(this.config.collectionInterval);
 
       } catch (error: any) {
-        console.error('❌ Error in monitoring loop:', error.message);
+        logger.error('❌ Error in monitoring loop:', error.message);
         await this.sleep(10000);
       }
     }
@@ -572,7 +574,7 @@ export class ProMacOSAgent extends EventEmitter {
   }
 
   private async calculateBaselines(): Promise<void> {
-    console.log('📊 Calculating performance baselines...');
+    logger.info('📊 Calculating performance baselines...');
 
     const samples: MacOSMetrics[] = [];
     for (let i = 0; i < 10; i++) {
@@ -584,7 +586,7 @@ export class ProMacOSAgent extends EventEmitter {
     this.baselines.set('cpu', this.average(samples.map(m => m.cpu.usage)));
     this.baselines.set('memory', this.average(samples.map(m => m.memory.used)));
 
-    console.log('✅ Baselines calculated');
+    logger.info('✅ Baselines calculated');
   }
 
   private async detectAnomalies(metrics: MacOSMetrics): Promise<void> {
@@ -677,7 +679,7 @@ export class ProMacOSAgent extends EventEmitter {
     for (const volume of metrics.disk.volumes) {
       const usagePercent = (volume.used / volume.total) * 100;
       if (usagePercent > 90) {
-        console.log(`⚠️  Volume ${volume.name} is ${usagePercent.toFixed(1)}% full`);
+        logger.info(`⚠️  Volume ${volume.name} is ${usagePercent.toFixed(1)}% full`);
         
         if (this.config.autoRemediation.autoCleanCache) {
           await this.clearSystemCache();
@@ -701,7 +703,7 @@ export class ProMacOSAgent extends EventEmitter {
     const topProcess = processes.reduce((max, p) => p.cpu > max.cpu ? p : max, processes[0]);
 
     if (topProcess && topProcess.cpu > 80) {
-      console.log(`🔧 High CPU process: ${topProcess.name} (${topProcess.cpu}%)`);
+      logger.info(`🔧 High CPU process: ${topProcess.name} (${topProcess.cpu}%)`);
       
       this.emit('remediation:action', {
         type: 'cpu_optimization',
@@ -719,10 +721,10 @@ export class ProMacOSAgent extends EventEmitter {
       await this.sleep(2000);
       await execAsync(`launchctl load ${label}`);
       
-      console.log(`✅ Service ${label} restarted`);
+      logger.info(`✅ Service ${label} restarted`);
       this.emit('remediation:success', { action: 'restart_service', service: label });
     } catch (error: any) {
-      console.error(`❌ Failed to restart ${label}:`, error.message);
+      logger.error(`❌ Failed to restart ${label}:`, error.message);
     }
   }
 
@@ -730,10 +732,10 @@ export class ProMacOSAgent extends EventEmitter {
     try {
       await execAsync('sudo rm -rf /Library/Caches/*');
       await execAsync('rm -rf ~/Library/Caches/*');
-      console.log('✅ System cache cleared');
+      logger.info('✅ System cache cleared');
       this.emit('remediation:success', { action: 'clear_cache' });
     } catch (error: any) {
-      console.error('❌ Failed to clear cache:', error.message);
+      logger.error('❌ Failed to clear cache:', error.message);
     }
   }
 
@@ -755,7 +757,7 @@ export class ProMacOSAgent extends EventEmitter {
 
       await axios.post(`${this.config.serverUrl}/api/cmdb/pro/metrics`, payload, { headers });
     } catch (error: any) {
-      console.error('❌ Failed to send metrics:', error.message);
+      logger.error('❌ Failed to send metrics:', error.message);
     }
   }
 
@@ -795,7 +797,7 @@ export class ProMacOSAgent extends EventEmitter {
   }
 
   async stop(): Promise<void> {
-    console.log('🛑 Stopping Pro macOS Agent...');
+    logger.info('🛑 Stopping Pro macOS Agent...');
     this.isRunning = false;
   }
 
@@ -817,22 +819,22 @@ if (require.main === module) {
   const agent = new ProMacOSAgent();
 
   agent.on('metrics:collected', (metrics) => {
-    console.log(`📊 CPU=${metrics.cpu.usage.toFixed(1)}% MEM=${(metrics.memory.used / metrics.memory.total * 100).toFixed(1)}%`);
+    logger.info(`📊 CPU=${metrics.cpu.usage.toFixed(1)}% MEM=${(metrics.memory.used / metrics.memory.total * 100).toFixed(1)}%`);
   });
 
   agent.on('anomaly:detected', (anomaly) => {
-    console.log(`🚨 ANOMALY: ${anomaly.metric} = ${anomaly.value} (expected ${anomaly.expected}) [${anomaly.severity}]`);
+    logger.info(`🚨 ANOMALY: ${anomaly.metric} = ${anomaly.value} (expected ${anomaly.expected}) [${anomaly.severity}]`);
   });
 
   agent.on('prediction:generated', (prediction) => {
-    console.log(`🔮 PREDICTION: ${prediction.type} - ${prediction.prediction}`);
+    logger.info(`🔮 PREDICTION: ${prediction.type} - ${prediction.prediction}`);
   });
 
   agent.on('security:alert', (alert) => {
-    console.log(`🔒 SECURITY: ${alert.type} - ${alert.message}`);
+    logger.info(`🔒 SECURITY: ${alert.type} - ${alert.message}`);
   });
 
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 
   process.on('SIGINT', async () => {
     await agent.stop();

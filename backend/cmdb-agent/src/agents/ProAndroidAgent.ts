@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 #!/usr/bin/env node
 
 /**
@@ -204,11 +206,11 @@ export class ProAndroidAgent extends EventEmitter {
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting Pro Android CMDB Agent...');
-    console.log(`📡 Server: ${this.config.serverUrl}`);
-    console.log(`🔄 Interval: ${this.config.collectionInterval}ms`);
-    console.log(`🤖 AI Analytics: ${this.config.aiAnalytics.enabled ? 'ENABLED' : 'DISABLED'}`);
-    console.log(`📱 Termux: ${this.isTermux}, Root: ${this.hasRoot}`);
+    logger.info('🚀 Starting Pro Android CMDB Agent...');
+    logger.info(`📡 Server: ${this.config.serverUrl}`);
+    logger.info(`🔄 Interval: ${this.config.collectionInterval}ms`);
+    logger.info(`🤖 AI Analytics: ${this.config.aiAnalytics.enabled ? 'ENABLED' : 'DISABLED'}`);
+    logger.info(`📱 Termux: ${this.isTermux}, Root: ${this.hasRoot}`);
 
     this.isRunning = true;
 
@@ -218,7 +220,7 @@ export class ProAndroidAgent extends EventEmitter {
     // Start monitoring
     this.monitoringLoop();
 
-    console.log('✅ Pro Android Agent is running');
+    logger.info('✅ Pro Android Agent is running');
   }
 
   private async monitoringLoop(): Promise<void> {
@@ -251,7 +253,7 @@ export class ProAndroidAgent extends EventEmitter {
         await this.sleep(this.config.collectionInterval);
 
       } catch (error: any) {
-        console.error('❌ Error in monitoring loop:', error.message);
+        logger.error('❌ Error in monitoring loop:', error.message);
         await this.sleep(10000);
       }
     }
@@ -536,7 +538,7 @@ export class ProAndroidAgent extends EventEmitter {
   }
 
   private async calculateBaselines(): Promise<void> {
-    console.log('📊 Calculating baselines...');
+    logger.info('📊 Calculating baselines...');
 
     const samples: AndroidMetrics[] = [];
     for (let i = 0; i < 5; i++) {
@@ -548,7 +550,7 @@ export class ProAndroidAgent extends EventEmitter {
     this.baselines.set('battery_level', this.average(samples.map(m => m.battery.level)));
     this.baselines.set('cpu_usage', this.average(samples.map(m => m.cpu.usage)));
 
-    console.log('✅ Baselines calculated');
+    logger.info('✅ Baselines calculated');
   }
 
   private async optimizeBattery(metrics: AndroidMetrics): Promise<void> {
@@ -594,7 +596,7 @@ export class ProAndroidAgent extends EventEmitter {
     const usagePercent = (metrics.storage.internal.used / metrics.storage.internal.total) * 100;
 
     if (usagePercent > 90) {
-      console.log(`⚠️  Storage ${usagePercent.toFixed(1)}% full`);
+      logger.info(`⚠️  Storage ${usagePercent.toFixed(1)}% full`);
 
       if (this.config.autoRemediation.autoClearCache) {
         await this.clearAppCache();
@@ -605,20 +607,20 @@ export class ProAndroidAgent extends EventEmitter {
   private async enableBatterySaver(): Promise<void> {
     try {
       await this.execShell('settings put global low_power 1');
-      console.log('✅ Battery saver enabled');
+      logger.info('✅ Battery saver enabled');
       this.emit('remediation:success', { action: 'enable_battery_saver' });
     } catch (error: any) {
-      console.error('❌ Failed to enable battery saver:', error.message);
+      logger.error('❌ Failed to enable battery saver:', error.message);
     }
   }
 
   private async clearAppCache(): Promise<void> {
     try {
       await this.execShell('pm clear com.android.chrome'); // Example
-      console.log('✅ App cache cleared');
+      logger.info('✅ App cache cleared');
       this.emit('remediation:success', { action: 'clear_cache' });
     } catch (error: any) {
-      console.error('❌ Failed to clear cache:', error.message);
+      logger.error('❌ Failed to clear cache:', error.message);
     }
   }
 
@@ -640,7 +642,7 @@ export class ProAndroidAgent extends EventEmitter {
 
       await axios.post(`${this.config.serverUrl}/api/cmdb/pro/metrics`, payload, { headers });
     } catch (error: any) {
-      console.error('❌ Failed to send metrics:', error.message);
+      logger.error('❌ Failed to send metrics:', error.message);
     }
   }
 
@@ -670,7 +672,7 @@ export class ProAndroidAgent extends EventEmitter {
   }
 
   async stop(): Promise<void> {
-    console.log('🛑 Stopping Pro Android Agent...');
+    logger.info('🛑 Stopping Pro Android Agent...');
     this.isRunning = false;
   }
 
@@ -694,18 +696,18 @@ if (require.main === module) {
   const agent = new ProAndroidAgent();
 
   agent.on('metrics:collected', (metrics) => {
-    console.log(`📊 Battery=${metrics.battery.level}% CPU=${metrics.cpu.usage.toFixed(1)}%`);
+    logger.info(`📊 Battery=${metrics.battery.level}% CPU=${metrics.cpu.usage.toFixed(1)}%`);
   });
 
   agent.on('battery:low', (data) => {
-    console.log(`🔋 BATTERY LOW: ${data.level}% - ${data.recommendation}`);
+    logger.info(`🔋 BATTERY LOW: ${data.level}% - ${data.recommendation}`);
   });
 
   agent.on('prediction:generated', (prediction) => {
-    console.log(`🔮 PREDICTION: ${prediction.type} - ${prediction.prediction}`);
+    logger.info(`🔮 PREDICTION: ${prediction.type} - ${prediction.prediction}`);
   });
 
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 
   process.on('SIGINT', async () => {
     await agent.stop();

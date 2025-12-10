@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * CMDB Agent - iOS Platform
  * 
@@ -117,7 +119,7 @@ class iOSCMDBAgent {
   }
 
   async collectSystemInfo(): Promise<iOSSystemInfo> {
-    console.log('📱 Collecting iOS system information...');
+    logger.info('📱 Collecting iOS system information...');
 
     const systemInfo: iOSSystemInfo = {
       platform: 'ios',
@@ -404,17 +406,17 @@ class iOSCMDBAgent {
         { headers }
       );
 
-      console.log('✅ Data sent successfully:', response.status);
+      logger.info('✅ Data sent successfully:', response.status);
     } catch (error: any) {
-      console.error('❌ Error sending data to server:', error.message);
+      logger.error('❌ Error sending data to server:', error.message);
     }
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting iOS CMDB Agent...');
-    console.log(`📡 Server: ${this.serverUrl}`);
-    console.log(`🔄 Collection interval: ${this.interval}ms`);
-    console.log(`🔓 Jailbroken: ${this.isJailbroken}`);
+    logger.info('🚀 Starting iOS CMDB Agent...');
+    logger.info(`📡 Server: ${this.serverUrl}`);
+    logger.info(`🔄 Collection interval: ${this.interval}ms`);
+    logger.info(`🔓 Jailbroken: ${this.isJailbroken}`);
 
     // Initial collection
     await this.collectAndSend();
@@ -424,7 +426,7 @@ class iOSCMDBAgent {
       await this.collectAndSend();
     }, this.interval);
 
-    console.log('✅ Agent is running.');
+    logger.info('✅ Agent is running.');
   }
 
   private async collectAndSend(): Promise<void> {
@@ -432,7 +434,7 @@ class iOSCMDBAgent {
       const systemInfo = await this.collectSystemInfo();
       await this.sendToServer(systemInfo);
     } catch (error) {
-      console.error('Error in collection cycle:', error);
+      logger.error('Error in collection cycle:', error);
     }
   }
 }
@@ -440,7 +442,7 @@ class iOSCMDBAgent {
 // Run the agent
 if (require.main === module) {
   const agent = new iOSCMDBAgent();
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 }
 
 export default iOSCMDBAgent;

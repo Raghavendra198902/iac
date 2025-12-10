@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 #!/usr/bin/env node
 
 /**
@@ -121,7 +123,7 @@ class MacOSCMDBAgent {
   }
 
   async collectSystemInfo(): Promise<MacSystemInfo> {
-    console.log('📊 Collecting macOS system information...');
+    logger.info('📊 Collecting macOS system information...');
 
     const systemInfo: MacSystemInfo = {
       platform: 'darwin',
@@ -231,7 +233,7 @@ class MacOSCMDBAgent {
         };
       });
     } catch (error) {
-      console.error('Error getting disk info:', error);
+      logger.error('Error getting disk info:', error);
       return [];
     }
   }
@@ -272,7 +274,7 @@ class MacOSCMDBAgent {
       
       return interfaces;
     } catch (error) {
-      console.error('Error getting network info:', error);
+      logger.error('Error getting network info:', error);
       return [];
     }
   }
@@ -300,7 +302,7 @@ class MacOSCMDBAgent {
       
       return agents.filter(a => a.name);
     } catch (error) {
-      console.error('Error getting launch agents:', error);
+      logger.error('Error getting launch agents:', error);
       return [];
     }
   }
@@ -363,7 +365,7 @@ class MacOSCMDBAgent {
       
       return apps;
     } catch (error) {
-      console.error('Error getting applications:', error);
+      logger.error('Error getting applications:', error);
       return [];
     }
   }
@@ -469,20 +471,20 @@ class MacOSCMDBAgent {
         { headers }
       );
 
-      console.log('✅ Data sent successfully:', response.status);
+      logger.info('✅ Data sent successfully:', response.status);
     } catch (error: any) {
-      console.error('❌ Error sending data to server:', error.message);
+      logger.error('❌ Error sending data to server:', error.message);
       if (error.response) {
-        console.error('Response:', error.response.status, error.response.data);
+        logger.error('Response:', error.response.status, error.response.data);
       }
     }
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting macOS CMDB Agent...');
-    console.log(`📡 Server: ${this.serverUrl}`);
-    console.log(`🔄 Collection interval: ${this.interval}ms`);
-    console.log(`💻 Agent ID: ${this.agentId}`);
+    logger.info('🚀 Starting macOS CMDB Agent...');
+    logger.info(`📡 Server: ${this.serverUrl}`);
+    logger.info(`🔄 Collection interval: ${this.interval}ms`);
+    logger.info(`💻 Agent ID: ${this.agentId}`);
 
     // Initial collection
     await this.collectAndSend();
@@ -492,7 +494,7 @@ class MacOSCMDBAgent {
       await this.collectAndSend();
     }, this.interval);
 
-    console.log('✅ Agent is running. Press Ctrl+C to stop.');
+    logger.info('✅ Agent is running. Press Ctrl+C to stop.');
   }
 
   private async collectAndSend(): Promise<void> {
@@ -500,7 +502,7 @@ class MacOSCMDBAgent {
       const systemInfo = await this.collectSystemInfo();
       await this.sendToServer(systemInfo);
     } catch (error) {
-      console.error('Error in collection cycle:', error);
+      logger.error('Error in collection cycle:', error);
     }
   }
 }
@@ -508,7 +510,7 @@ class MacOSCMDBAgent {
 // Run the agent
 if (require.main === module) {
   const agent = new MacOSCMDBAgent();
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 }
 
 export default MacOSCMDBAgent;

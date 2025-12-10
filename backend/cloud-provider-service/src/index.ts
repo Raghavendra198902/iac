@@ -4,13 +4,9 @@ import { awsRouter } from './routes/aws';
 import { azureRouter } from './routes/azure';
 import { gcpRouter } from './routes/gcp';
 import { multiCloudRouter } from './routes/multi-cloud';
+import { createLogger } from '../../../packages/logger/src/index';
 
-const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+const logger = createLogger({ serviceName: 'cloud-provider-service' });
 
 const app = express();
 const PORT = process.env.PORT || 3010;
@@ -30,5 +26,5 @@ app.use('/api/cloud/gcp', gcpRouter);
 app.use('/api/cloud/multi', multiCloudRouter);
 
 app.listen(PORT, () => {
-  console.log(`☁️  Cloud Provider Service running on port ${PORT}`);
+  logger.info(`☁️  Cloud Provider Service running on port ${PORT}`);
 });

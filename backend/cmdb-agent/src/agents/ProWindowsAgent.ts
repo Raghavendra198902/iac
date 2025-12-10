@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 #!/usr/bin/env node
 
 /**
@@ -200,10 +202,10 @@ export class ProWindowsAgent extends EventEmitter {
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting Pro Windows CMDB Agent...');
-    console.log(`📡 Server: ${this.config.serverUrl}`);
-    console.log(`🔄 Interval: ${this.config.collectionInterval}ms`);
-    console.log(`🤖 AI Analytics: ${this.config.aiAnalytics.enabled ? 'ENABLED' : 'DISABLED'}`);
+    logger.info('🚀 Starting Pro Windows CMDB Agent...');
+    logger.info(`📡 Server: ${this.config.serverUrl}`);
+    logger.info(`🔄 Interval: ${this.config.collectionInterval}ms`);
+    logger.info(`🤖 AI Analytics: ${this.config.aiAnalytics.enabled ? 'ENABLED' : 'DISABLED'}`);
 
     this.isRunning = true;
 
@@ -213,7 +215,7 @@ export class ProWindowsAgent extends EventEmitter {
     // Start monitoring loop
     this.monitoringLoop();
 
-    console.log('✅ Pro Windows Agent is running');
+    logger.info('✅ Pro Windows Agent is running');
   }
 
   private async monitoringLoop(): Promise<void> {
@@ -258,7 +260,7 @@ export class ProWindowsAgent extends EventEmitter {
         await this.sleep(this.config.collectionInterval);
 
       } catch (error: any) {
-        console.error('❌ Error in monitoring loop:', error.message);
+        logger.error('❌ Error in monitoring loop:', error.message);
         await this.sleep(10000); // Wait 10s on error
       }
     }
@@ -512,7 +514,7 @@ export class ProWindowsAgent extends EventEmitter {
   }
 
   private async calculateBaselines(): Promise<void> {
-    console.log('📊 Calculating performance baselines...');
+    logger.info('📊 Calculating performance baselines...');
 
     const samples: WindowsMetrics[] = [];
     for (let i = 0; i < 10; i++) {
@@ -526,7 +528,7 @@ export class ProWindowsAgent extends EventEmitter {
     this.baselines.set('memory', this.average(samples.map(m => m.memory.used)));
     this.baselines.set('disk_iops', this.average(samples.map(m => m.disk.iops)));
 
-    console.log('✅ Baselines calculated');
+    logger.info('✅ Baselines calculated');
   }
 
   private async detectAnomalies(metrics: WindowsMetrics): Promise<void> {
@@ -620,7 +622,7 @@ export class ProWindowsAgent extends EventEmitter {
     // Check for stopped critical services
     for (const service of metrics.services) {
       if (service.status !== 'running' && this.config.autoRemediation.autoRestartServices) {
-        console.log(`⚠️  Service ${service.name} is stopped, attempting restart...`);
+        logger.info(`⚠️  Service ${service.name} is stopped, attempting restart...`);
         await this.restartService(service.name);
       }
     }
@@ -629,7 +631,7 @@ export class ProWindowsAgent extends EventEmitter {
     for (const drive of metrics.disk.drives) {
       const usagePercent = (drive.used / drive.total) * 100;
       if (usagePercent > 90) {
-        console.log(`⚠️  Disk ${drive.drive} is ${usagePercent.toFixed(1)}% full`);
+        logger.info(`⚠️  Disk ${drive.drive} is ${usagePercent.toFixed(1)}% full`);
         
         if (this.config.autoRemediation.autoClearLogs) {
           await this.clearOldLogs();
@@ -661,7 +663,7 @@ export class ProWindowsAgent extends EventEmitter {
     const topProcess = processes.reduce((max, p) => p.cpu > max.cpu ? p : max, processes[0]);
 
     if (topProcess && topProcess.cpu > 80) {
-      console.log(`🔧 Auto-remediation: High CPU process detected: ${topProcess.name} (${topProcess.cpu}%)`);
+      logger.info(`🔧 Auto-remediation: High CPU process detected: ${topProcess.name} (${topProcess.cpu}%)`);
       
       // Log but don't kill (safety measure)
       this.emit('remediation:action', {
@@ -680,10 +682,10 @@ export class ProWindowsAgent extends EventEmitter {
       await this.sleep(2000);
       await execAsync(`net start ${serviceName}`);
       
-      console.log(`✅ Service ${serviceName} restarted successfully`);
+      logger.info(`✅ Service ${serviceName} restarted successfully`);
       this.emit('remediation:success', { action: 'restart_service', service: serviceName });
     } catch (error: any) {
-      console.error(`❌ Failed to restart service ${serviceName}:`, error.message);
+      logger.error(`❌ Failed to restart service ${serviceName}:`, error.message);
       this.emit('remediation:failed', { action: 'restart_service', service: serviceName, error: error.message });
     }
   }
@@ -691,10 +693,10 @@ export class ProWindowsAgent extends EventEmitter {
   private async clearOldLogs(): Promise<void> {
     try {
       await execAsync('forfiles /p "C:\\Windows\\Logs" /s /m *.log /d -30 /c "cmd /c del @path"');
-      console.log('✅ Old logs cleared');
+      logger.info('✅ Old logs cleared');
       this.emit('remediation:success', { action: 'clear_old_logs' });
     } catch (error: any) {
-      console.error('❌ Failed to clear logs:', error.message);
+      logger.error('❌ Failed to clear logs:', error.message);
     }
   }
 
@@ -716,7 +718,7 @@ export class ProWindowsAgent extends EventEmitter {
 
       await axios.post(`${this.config.serverUrl}/api/cmdb/pro/metrics`, payload, { headers });
     } catch (error: any) {
-      console.error('❌ Failed to send metrics:', error.message);
+      logger.error('❌ Failed to send metrics:', error.message);
     }
   }
 
@@ -757,7 +759,7 @@ export class ProWindowsAgent extends EventEmitter {
   }
 
   async stop(): Promise<void> {
-    console.log('🛑 Stopping Pro Windows Agent...');
+    logger.info('🛑 Stopping Pro Windows Agent...');
     this.isRunning = false;
   }
 
@@ -780,33 +782,33 @@ if (require.main === module) {
 
   // Event listeners
   agent.on('metrics:collected', (metrics) => {
-    console.log(`📊 Metrics collected: CPU=${metrics.cpu.usage}% MEM=${(metrics.memory.used / metrics.memory.total * 100).toFixed(1)}%`);
+    logger.info(`📊 Metrics collected: CPU=${metrics.cpu.usage}% MEM=${(metrics.memory.used / metrics.memory.total * 100).toFixed(1)}%`);
   });
 
   agent.on('anomaly:detected', (anomaly) => {
-    console.log(`🚨 ANOMALY: ${anomaly.metric} = ${anomaly.value} (expected ${anomaly.expected}) [${anomaly.severity}]`);
+    logger.info(`🚨 ANOMALY: ${anomaly.metric} = ${anomaly.value} (expected ${anomaly.expected}) [${anomaly.severity}]`);
   });
 
   agent.on('prediction:generated', (prediction) => {
-    console.log(`🔮 PREDICTION: ${prediction.type} - ${prediction.prediction} (${(prediction.confidence * 100).toFixed(0)}% confidence)`);
+    logger.info(`🔮 PREDICTION: ${prediction.type} - ${prediction.prediction} (${(prediction.confidence * 100).toFixed(0)}% confidence)`);
   });
 
   agent.on('security:alert', (alert) => {
-    console.log(`🔒 SECURITY: ${alert.type} - Event ID ${alert.eventId}`);
+    logger.info(`🔒 SECURITY: ${alert.type} - Event ID ${alert.eventId}`);
   });
 
   // Start agent
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 
   // Graceful shutdown
   process.on('SIGINT', async () => {
-    console.log('\n🛑 Received SIGINT, shutting down...');
+    logger.info('\n🛑 Received SIGINT, shutting down...');
     await agent.stop();
     process.exit(0);
   });
 
   process.on('SIGTERM', async () => {
-    console.log('\n🛑 Received SIGTERM, shutting down...');
+    logger.info('\n🛑 Received SIGTERM, shutting down...');
     await agent.stop();
     process.exit(0);
   });

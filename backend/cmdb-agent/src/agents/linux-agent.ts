@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 #!/usr/bin/env node
 
 /**
@@ -116,7 +118,7 @@ class LinuxCMDBAgent {
   }
 
   async collectSystemInfo(): Promise<LinuxSystemInfo> {
-    console.log('📊 Collecting Linux system information...');
+    logger.info('📊 Collecting Linux system information...');
 
     const systemInfo: LinuxSystemInfo = {
       platform: 'linux',
@@ -218,7 +220,7 @@ class LinuxCMDBAgent {
         };
       });
     } catch (error) {
-      console.error('Error getting disk info:', error);
+      logger.error('Error getting disk info:', error);
       return [];
     }
   }
@@ -242,7 +244,7 @@ class LinuxCMDBAgent {
         })
         .filter((iface: NetworkInfo) => iface.ip);
     } catch (error) {
-      console.error('Error getting network info:', error);
+      logger.error('Error getting network info:', error);
       return [];
     }
   }
@@ -262,7 +264,7 @@ class LinuxCMDBAgent {
         };
       }).filter(s => s.name);
     } catch (error) {
-      console.error('Error getting systemd services:', error);
+      logger.error('Error getting systemd services:', error);
       return [];
     }
   }
@@ -297,7 +299,7 @@ class LinuxCMDBAgent {
         }).filter(p => p.name);
       }
     } catch (error) {
-      console.error('Error getting installed packages:', error);
+      logger.error('Error getting installed packages:', error);
       return [];
     }
   }
@@ -318,7 +320,7 @@ class LinuxCMDBAgent {
         };
       }).filter(p => p.pid);
     } catch (error) {
-      console.error('Error getting processes:', error);
+      logger.error('Error getting processes:', error);
       return [];
     }
   }
@@ -397,20 +399,20 @@ class LinuxCMDBAgent {
         { headers }
       );
 
-      console.log('✅ Data sent successfully:', response.status);
+      logger.info('✅ Data sent successfully:', response.status);
     } catch (error: any) {
-      console.error('❌ Error sending data to server:', error.message);
+      logger.error('❌ Error sending data to server:', error.message);
       if (error.response) {
-        console.error('Response:', error.response.status, error.response.data);
+        logger.error('Response:', error.response.status, error.response.data);
       }
     }
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting Linux CMDB Agent...');
-    console.log(`📡 Server: ${this.serverUrl}`);
-    console.log(`🔄 Collection interval: ${this.interval}ms`);
-    console.log(`💻 Agent ID: ${this.agentId}`);
+    logger.info('🚀 Starting Linux CMDB Agent...');
+    logger.info(`📡 Server: ${this.serverUrl}`);
+    logger.info(`🔄 Collection interval: ${this.interval}ms`);
+    logger.info(`💻 Agent ID: ${this.agentId}`);
 
     // Initial collection
     await this.collectAndSend();
@@ -420,7 +422,7 @@ class LinuxCMDBAgent {
       await this.collectAndSend();
     }, this.interval);
 
-    console.log('✅ Agent is running. Press Ctrl+C to stop.');
+    logger.info('✅ Agent is running. Press Ctrl+C to stop.');
   }
 
   private async collectAndSend(): Promise<void> {
@@ -428,7 +430,7 @@ class LinuxCMDBAgent {
       const systemInfo = await this.collectSystemInfo();
       await this.sendToServer(systemInfo);
     } catch (error) {
-      console.error('Error in collection cycle:', error);
+      logger.error('Error in collection cycle:', error);
     }
   }
 }
@@ -436,7 +438,7 @@ class LinuxCMDBAgent {
 // Run the agent
 if (require.main === module) {
   const agent = new LinuxCMDBAgent();
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 }
 
 export default LinuxCMDBAgent;

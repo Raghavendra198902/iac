@@ -12,6 +12,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as crypto from 'crypto';
 import * as os from 'os';
+import logger from '../utils/logger';
 
 const execAsync = promisify(exec);
 
@@ -72,10 +73,10 @@ export class AutoUpdater {
    * Start automatic update checking
    */
   start(): void {
-    console.log('🔄 Auto-updater started');
-    console.log(`   Current version: ${this.currentVersion}`);
-    console.log(`   Check interval: ${this.updateCheckInterval}ms`);
-    console.log(`   Platform: ${this.platform} ${this.architecture}`);
+    logger.info('🔄 Auto-updater started');
+    logger.info(`   Current version: ${this.currentVersion}`);
+    logger.info(`   Check interval: ${this.updateCheckInterval}ms`);
+    logger.info(`   Platform: ${this.platform} ${this.architecture}`);
 
     // Initial check
     this.checkForUpdates();
@@ -91,7 +92,7 @@ export class AutoUpdater {
    */
   async checkForUpdates(): Promise<UpdateCheckResult> {
     try {
-      console.log('🔍 Checking for updates...');
+      logger.info('🔍 Checking for updates...');
 
       const headers: any = {
         'Content-Type': 'application/json',
@@ -122,21 +123,21 @@ export class AutoUpdater {
       };
 
       if (result.updateAvailable) {
-        console.log(`✨ Update available: ${result.latestVersion}`);
+        logger.info(`✨ Update available: ${result.latestVersion}`);
         
         // Auto-install if enabled and not in progress
         if (process.env.AUTO_UPDATE === 'true' && !this.updateInProgress) {
           await this.downloadAndInstall(result.updateInfo!);
         } else {
-          console.log('ℹ️  Auto-update is disabled. Update available but not installing.');
+          logger.info('ℹ️  Auto-update is disabled. Update available but not installing.');
         }
       } else {
-        console.log('✅ Agent is up to date');
+        logger.info('✅ Agent is up to date');
       }
 
       return result;
     } catch (error: any) {
-      console.error('❌ Update check failed:', error.message);
+      logger.error('❌ Update check failed:', error.message);
       return {
         updateAvailable: false,
         currentVersion: this.currentVersion,
@@ -149,38 +150,38 @@ export class AutoUpdater {
    */
   private async downloadAndInstall(updateInfo: UpdateInfo): Promise<void> {
     if (this.updateInProgress) {
-      console.log('⚠️  Update already in progress');
+      logger.info('⚠️  Update already in progress');
       return;
     }
 
     this.updateInProgress = true;
 
     try {
-      console.log(`📥 Downloading update ${updateInfo.version}...`);
+      logger.info(`📥 Downloading update ${updateInfo.version}...`);
 
       // Download update
       const updateFile = await this.downloadUpdate(updateInfo);
 
       // Verify checksum
-      console.log('🔐 Verifying checksum...');
+      logger.info('🔐 Verifying checksum...');
       const isValid = await this.verifyChecksum(updateFile, updateInfo.checksum, updateInfo.checksumAlgorithm);
       
       if (!isValid) {
         throw new Error('Checksum verification failed');
       }
 
-      console.log('✅ Checksum verified');
+      logger.info('✅ Checksum verified');
 
       // Install update based on platform
       await this.installUpdate(updateFile, updateInfo);
 
-      console.log('✅ Update installed successfully');
-      console.log('🔄 Restarting agent...');
+      logger.info('✅ Update installed successfully');
+      logger.info('🔄 Restarting agent...');
 
       // Restart agent
       await this.restartAgent();
     } catch (error: any) {
-      console.error('❌ Update installation failed:', error.message);
+      logger.error('❌ Update installation failed:', error.message);
     } finally {
       this.updateInProgress = false;
     }
@@ -204,7 +205,7 @@ export class AutoUpdater {
       },
     });
 
-    console.log(''); // New line after progress
+    logger.info(''); // New line after progress
 
     const tempDir = os.tmpdir();
     const extension = this.getUpdateFileExtension();
@@ -245,7 +246,7 @@ export class AutoUpdater {
    * Install update based on platform
    */
   private async installUpdate(updateFile: string, updateInfo: UpdateInfo): Promise<void> {
-    console.log(`🔧 Installing update for ${this.platform}...`);
+    logger.info(`🔧 Installing update for ${this.platform}...`);
 
     switch (this.platform) {
       case 'windows':

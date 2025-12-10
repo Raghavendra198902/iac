@@ -2,14 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import { AutomationOrchestrator } from './orchestrator';
 import { ProAutomationEngine } from './ProAutomationEngine';
+import { createLogger } from '../../../packages/logger/src/index';
 
-// Simple logger
-const logger = {
-  info: (msg: string, meta?: any) => console.log(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => console.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+const logger = createLogger({ serviceName: 'automation-engine' });
 
 const app = express();
 const PORT = process.env.PORT || 3010;

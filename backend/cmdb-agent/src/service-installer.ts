@@ -20,7 +20,7 @@ let installPath = process.argv[3] || process.cwd();
 // Sanitize install path to prevent path traversal
 installPath = path.resolve(installPath);
 if (!installPath.startsWith('/') && !installPath.match(/^[A-Za-z]:\\/)) {
-  console.error('ERROR: Install path must be an absolute path');
+  logger.error('ERROR: Install path must be an absolute path');
   process.exit(1);
 }
 
@@ -34,24 +34,24 @@ const agentConfig: AgentServiceConfig = {
 
 async function install() {
   try {
-    console.log('Installing CMDB Agent service...');
-    console.log(`Install path: ${installPath}`);
-    console.log(`Platform: ${ServiceFactory.getPlatformName()}`);
+    logger.info('Installing CMDB Agent service...');
+    logger.info(`Install path: ${installPath}`);
+    logger.info(`Platform: ${ServiceFactory.getPlatformName()}`);
 
     // Check if elevated
     if (!ServiceFactory.isElevated()) {
-      console.error('ERROR: Administrator/root privileges required');
-      console.error('Please run with sudo (Linux) or as Administrator (Windows)');
+      logger.error('ERROR: Administrator/root privileges required');
+      logger.error('Please run with sudo (Linux) or as Administrator (Windows)');
       process.exit(1);
     }
 
     // Create install directory
-    console.log('Creating installation directory...');
+    logger.info('Creating installation directory...');
     if (!fs.existsSync(installPath)) {
       fs.mkdirSync(installPath, { recursive: true, mode: 0o755 });
-      console.log(`✓ Created directory: ${installPath}`);
+      logger.info(`✓ Created directory: ${installPath}`);
     } else {
-      console.log(`✓ Directory exists: ${installPath}`);
+      logger.info(`✓ Directory exists: ${installPath}`);
     }
 
     // Copy executable to install location
@@ -64,7 +64,7 @@ async function install() {
       ? path.join(installPath, 'cmdb-agent.exe')
       : path.join(installPath, 'cmdb-agent');
 
-    console.log('Copying executable...');
+    logger.info('Copying executable...');
     if (fs.existsSync(sourceExe)) {
       fs.copyFileSync(sourceExe, targetExe);
       
@@ -73,10 +73,10 @@ async function install() {
         fs.chmodSync(targetExe, 0o755);
       }
       
-      console.log(`✓ Copied: ${path.basename(sourceExe)} -> ${targetExe}`);
+      logger.info(`✓ Copied: ${path.basename(sourceExe)} -> ${targetExe}`);
     } else {
-      console.error(`ERROR: Source executable not found: ${sourceExe}`);
-      console.error('Please build the agent first: npm run build');
+      logger.error(`ERROR: Source executable not found: ${sourceExe}`);
+      logger.error('Please build the agent first: npm run build');
       process.exit(1);
     }
 
@@ -86,27 +86,27 @@ async function install() {
     // Check if already installed
     const isInstalled = await serviceManager.isInstalled();
     if (isInstalled) {
-      console.log('Service is already installed');
-      console.log('Checking service status...');
+      logger.info('Service is already installed');
+      logger.info('Checking service status...');
       
       const status = await serviceManager.getStatus();
-      console.log(`Current status: ${status}`);
+      logger.info(`Current status: ${status}`);
 
       if (status !== 'active' && status !== 'RUNNING') {
-        console.log('Starting service...');
+        logger.info('Starting service...');
         await serviceManager.start();
-        console.log('Service started successfully');
+        logger.info('Service started successfully');
       }
 
       return;
     }
 
     // Install service
-    console.log('Installing service...');
+    logger.info('Installing service...');
     await serviceManager.install();
 
     // Enable auto-start
-    console.log('Enabling auto-start...');
+    logger.info('Enabling auto-start...');
     await serviceManager.enableAutoStart();
 
     // Verify executable exists at target location
@@ -115,7 +115,7 @@ async function install() {
     }
 
     // Start service
-    console.log('Starting service...');
+    logger.info('Starting service...');
     await serviceManager.start();
 
     // Wait for service to stabilize
@@ -125,34 +125,34 @@ async function install() {
     const finalStatus = await serviceManager.getStatus();
     const isRunning = await serviceManager.isRunning();
 
-    console.log('');
-    console.log('═══════════════════════════════════════════════════');
-    console.log('  ✓ CMDB Agent Service Installed Successfully!');
-    console.log('═══════════════════════════════════════════════════');
-    console.log('');
-    console.log('Service Details:');
-    console.log(`  Name:         ${agentConfig.serviceName}`);
-    console.log(`  Display Name: ${agentConfig.displayName}`);
-    console.log(`  Install Path: ${installPath}`);
-    console.log(`  Executable:   ${targetExe}`);
-    console.log(`  Status:       ${finalStatus}`);
-    console.log(`  Running:      ${isRunning ? 'Yes' : 'No'}`);
-    console.log(`  Auto-start:   Enabled`);
-    console.log('');
-    console.log('Service Management Commands:');
+    logger.info('');
+    logger.info('═══════════════════════════════════════════════════');
+    logger.info('  ✓ CMDB Agent Service Installed Successfully!');
+    logger.info('═══════════════════════════════════════════════════');
+    logger.info('');
+    logger.info('Service Details:');
+    logger.info(`  Name:         ${agentConfig.serviceName}`);
+    logger.info(`  Display Name: ${agentConfig.displayName}`);
+    logger.info(`  Install Path: ${installPath}`);
+    logger.info(`  Executable:   ${targetExe}`);
+    logger.info(`  Status:       ${finalStatus}`);
+    logger.info(`  Running:      ${isRunning ? 'Yes' : 'No'}`);
+    logger.info(`  Auto-start:   Enabled`);
+    logger.info('');
+    logger.info('Service Management Commands:');
     if (platform === 'win32') {
-      console.log(`  Start:   sc start ${agentConfig.serviceName}`);
-      console.log(`  Stop:    sc stop ${agentConfig.serviceName}`);
-      console.log(`  Status:  sc query ${agentConfig.serviceName}`);
+      logger.info(`  Start:   sc start ${agentConfig.serviceName}`);
+      logger.info(`  Stop:    sc stop ${agentConfig.serviceName}`);
+      logger.info(`  Status:  sc query ${agentConfig.serviceName}`);
     } else {
-      console.log(`  Start:   sudo systemctl start ${agentConfig.serviceName}`);
-      console.log(`  Stop:    sudo systemctl stop ${agentConfig.serviceName}`);
-      console.log(`  Status:  sudo systemctl status ${agentConfig.serviceName}`);
-      console.log(`  Logs:    sudo journalctl -u ${agentConfig.serviceName} -f`);
+      logger.info(`  Start:   sudo systemctl start ${agentConfig.serviceName}`);
+      logger.info(`  Stop:    sudo systemctl stop ${agentConfig.serviceName}`);
+      logger.info(`  Status:  sudo systemctl status ${agentConfig.serviceName}`);
+      logger.info(`  Logs:    sudo journalctl -u ${agentConfig.serviceName} -f`);
     }
 
   } catch (error: any) {
-    console.error('Installation failed:', error.message);
+    logger.error('Installation failed:', error.message);
     logger.error('Service installation failed', { error: error.message, stack: error.stack });
     process.exit(1);
   }
@@ -160,12 +160,12 @@ async function install() {
 
 async function uninstall() {
   try {
-    console.log('Uninstalling CMDB Agent service...');
+    logger.info('Uninstalling CMDB Agent service...');
 
     // Check if elevated
     if (!ServiceFactory.isElevated()) {
-      console.error('ERROR: Administrator/root privileges required');
-      console.error('Please run with sudo (Linux) or as Administrator (Windows)');
+      logger.error('ERROR: Administrator/root privileges required');
+      logger.error('Please run with sudo (Linux) or as Administrator (Windows)');
       process.exit(1);
     }
 
@@ -175,30 +175,30 @@ async function uninstall() {
     // Check if installed
     const isInstalled = await serviceManager.isInstalled();
     if (!isInstalled) {
-      console.log('Service is not installed');
+      logger.info('Service is not installed');
       return;
     }
 
     // Stop service
-    console.log('Stopping service...');
+    logger.info('Stopping service...');
     try {
       await serviceManager.stop();
-      console.log('✓ Service stopped');
+      logger.info('✓ Service stopped');
     } catch (error) {
-      console.log('Service was not running');
+      logger.info('Service was not running');
     }
 
     // Uninstall service
-    console.log('Removing service...');
+    logger.info('Removing service...');
     await serviceManager.uninstall();
 
-    console.log('✓ Service uninstalled successfully');
-    console.log('');
-    console.log('Note: Installation files remain at:', installPath);
-    console.log('To remove completely, manually delete the installation directory.');
+    logger.info('✓ Service uninstalled successfully');
+    logger.info('');
+    logger.info('Note: Installation files remain at:', installPath);
+    logger.info('To remove completely, manually delete the installation directory.');
 
   } catch (error: any) {
-    console.error('Uninstallation failed:', error.message);
+    logger.error('Uninstallation failed:', error.message);
     logger.error('Service uninstallation failed', { error: error.message, stack: error.stack });
     process.exit(1);
   }
@@ -210,53 +210,53 @@ async function status() {
 
     const isInstalled = await serviceManager.isInstalled();
     if (!isInstalled) {
-      console.log('Service Status: Not Installed');
+      logger.info('Service Status: Not Installed');
       return;
     }
 
     const status = await serviceManager.getStatus();
     const isRunning = await serviceManager.isRunning();
 
-    console.log('CMDB Agent Service Status:');
-    console.log(`  Installed: Yes`);
-    console.log(`  Status: ${status}`);
-    console.log(`  Running: ${isRunning ? 'Yes' : 'No'}`);
+    logger.info('CMDB Agent Service Status:');
+    logger.info(`  Installed: Yes`);
+    logger.info(`  Status: ${status}`);
+    logger.info(`  Running: ${isRunning ? 'Yes' : 'No'}`);
 
   } catch (error: any) {
-    console.error('Failed to get status:', error.message);
+    logger.error('Failed to get status:', error.message);
     process.exit(1);
   }
 }
 
 function showHelp() {
-  console.log('CMDB Agent Service Installer');
-  console.log('');
-  console.log('Usage:');
-  console.log('  node service-installer.js <command> [install-path]');
-  console.log('');
-  console.log('Commands:');
-  console.log('  install     Install and start the service');
-  console.log('  uninstall   Stop and remove the service');
-  console.log('  status      Show service status');
-  console.log('  help        Show this help message');
-  console.log('');
-  console.log('Examples:');
-  console.log('  Windows (Administrator):');
-  console.log('    node service-installer.js install "C:\\Program Files\\CMDB Agent"');
-  console.log('');
-  console.log('  Linux (root):');
-  console.log('    sudo node service-installer.js install /opt/cmdb-agent');
-  console.log('');
-  console.log('Note: Administrator/root privileges are required for service operations');
+  logger.info('CMDB Agent Service Installer');
+  logger.info('');
+  logger.info('Usage:');
+  logger.info('  node service-installer.js <command> [install-path]');
+  logger.info('');
+  logger.info('Commands:');
+  logger.info('  install     Install and start the service');
+  logger.info('  uninstall   Stop and remove the service');
+  logger.info('  status      Show service status');
+  logger.info('  help        Show this help message');
+  logger.info('');
+  logger.info('Examples:');
+  logger.info('  Windows (Administrator):');
+  logger.info('    node service-installer.js install "C:\\Program Files\\CMDB Agent"');
+  logger.info('');
+  logger.info('  Linux (root):');
+  logger.info('    sudo node service-installer.js install /opt/cmdb-agent');
+  logger.info('');
+  logger.info('Note: Administrator/root privileges are required for service operations');
 }
 
 // Main
 async function main() {
-  console.log('');
-  console.log('═══════════════════════════════════════════════════');
-  console.log('  CMDB Enterprise Agent - Service Installer');
-  console.log('═══════════════════════════════════════════════════');
-  console.log('');
+  logger.info('');
+  logger.info('═══════════════════════════════════════════════════');
+  logger.info('  CMDB Enterprise Agent - Service Installer');
+  logger.info('═══════════════════════════════════════════════════');
+  logger.info('');
 
   switch (command) {
     case 'install':
@@ -272,16 +272,16 @@ async function main() {
       showHelp();
       break;
     default:
-      console.error(`Unknown command: ${command}`);
-      console.log('');
+      logger.error(`Unknown command: ${command}`);
+      logger.info('');
       showHelp();
       process.exit(1);
   }
 
-  console.log('');
+  logger.info('');
 }
 
 main().catch((error) => {
-  console.error('Fatal error:', error.message);
+  logger.error('Fatal error:', error.message);
   process.exit(1);
 });

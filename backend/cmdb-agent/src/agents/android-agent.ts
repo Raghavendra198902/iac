@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * CMDB Agent - Android Platform
  * 
@@ -97,7 +99,7 @@ class AndroidCMDBAgent {
   }
 
   async collectSystemInfo(): Promise<AndroidSystemInfo> {
-    console.log('📱 Collecting Android system information...');
+    logger.info('📱 Collecting Android system information...');
 
     const systemInfo: AndroidSystemInfo = {
       platform: 'android',
@@ -244,7 +246,7 @@ class AndroidCMDBAgent {
         storage.internal = { total, used, free };
       }
     } catch (error) {
-      console.error('Error getting storage info:', error);
+      logger.error('Error getting storage info:', error);
     }
 
     return storage;
@@ -274,7 +276,7 @@ class AndroidCMDBAgent {
       const healthLine = lines.find(l => l.includes('health:'));
       battery.health = healthLine?.split(':')[1]?.trim() || 'unknown';
     } catch (error) {
-      console.error('Error getting battery info:', error);
+      logger.error('Error getting battery info:', error);
     }
 
     return battery;
@@ -300,7 +302,7 @@ class AndroidCMDBAgent {
         network.ip = ipOut.trim();
       } catch (e) {}
     } catch (error) {
-      console.error('Error getting network info:', error);
+      logger.error('Error getting network info:', error);
     }
 
     return network;
@@ -324,7 +326,7 @@ class AndroidCMDBAgent {
         };
       }).filter((app): app is InstalledApp => app !== null);
     } catch (error) {
-      console.error('Error getting installed apps:', error);
+      logger.error('Error getting installed apps:', error);
       return [];
     }
   }
@@ -380,16 +382,16 @@ class AndroidCMDBAgent {
         { headers }
       );
 
-      console.log('✅ Data sent successfully:', response.status);
+      logger.info('✅ Data sent successfully:', response.status);
     } catch (error: any) {
-      console.error('❌ Error sending data to server:', error.message);
+      logger.error('❌ Error sending data to server:', error.message);
     }
   }
 
   async start(): Promise<void> {
-    console.log('🚀 Starting Android CMDB Agent...');
-    console.log(`📡 Server: ${this.serverUrl}`);
-    console.log(`🔄 Collection interval: ${this.interval}ms`);
+    logger.info('🚀 Starting Android CMDB Agent...');
+    logger.info(`📡 Server: ${this.serverUrl}`);
+    logger.info(`🔄 Collection interval: ${this.interval}ms`);
 
     // Initial collection
     await this.collectAndSend();
@@ -399,7 +401,7 @@ class AndroidCMDBAgent {
       await this.collectAndSend();
     }, this.interval);
 
-    console.log('✅ Agent is running.');
+    logger.info('✅ Agent is running.');
   }
 
   private async collectAndSend(): Promise<void> {
@@ -407,7 +409,7 @@ class AndroidCMDBAgent {
       const systemInfo = await this.collectSystemInfo();
       await this.sendToServer(systemInfo);
     } catch (error) {
-      console.error('Error in collection cycle:', error);
+      logger.error('Error in collection cycle:', error);
     }
   }
 }
@@ -415,7 +417,7 @@ class AndroidCMDBAgent {
 // Run the agent
 if (require.main === module) {
   const agent = new AndroidCMDBAgent();
-  agent.start().catch(console.error);
+  agent.start().catch((err) => logger.error('Agent error', { error: err }));
 }
 
 export default AndroidCMDBAgent;

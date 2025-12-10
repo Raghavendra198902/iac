@@ -1,4 +1,7 @@
 import { EventEmitter } from 'events';
+import { createLogger } from '../../../packages/logger/src/index';
+
+const logger = createLogger({ serviceName: 'automation-engine-pro' });
 
 /**
  * Pro-Level Automation Engine with Intelligent Orchestration
@@ -94,11 +97,11 @@ export class ProAutomationEngine extends EventEmitter {
     
     this.workflows.set(workflowId, config);
     
-    console.log(`🚀 Starting Pro Workflow: ${workflowId}`);
-    console.log(`   Automation Level: ${config.automationLevel}/5`);
-    console.log(`   AI Optimization: ${config.aiOptimization ? '✅' : '❌'}`);
-    console.log(`   Self-Healing: ${config.selfHealing ? '✅' : '❌'}`);
-    console.log(`   Predictive Analysis: ${config.predictiveAnalysis ? '✅' : '❌'}`);
+    logger.info(`🚀 Starting Pro Workflow: ${workflowId}`);
+    logger.info(`   Automation Level: ${config.automationLevel}/5`);
+    logger.info(`   AI Optimization: ${config.aiOptimization ? '✅' : '❌'}`);
+    logger.info(`   Self-Healing: ${config.selfHealing ? '✅' : '❌'}`);
+    logger.info(`   Predictive Analysis: ${config.predictiveAnalysis ? '✅' : '❌'}`);
     
     // Emit workflow started event
     this.emit('workflow:started', { workflowId, config });
@@ -141,7 +144,7 @@ export class ProAutomationEngine extends EventEmitter {
       this.emit('workflow:completed', { workflowId, status: 'success' });
       
     } catch (error: any) {
-      console.error(`❌ Workflow ${workflowId} failed:`, error.message);
+      logger.error(`❌ Workflow ${workflowId} failed:`, error.message);
       
       if (config.selfHealing) {
         await this.attemptSelfHealing(workflowId, error);
@@ -152,7 +155,7 @@ export class ProAutomationEngine extends EventEmitter {
   }
 
   private async optimizeWorkflowPlan(workflowId: string): Promise<void> {
-    console.log(`🤖 Optimizing workflow plan using AI for ${workflowId}`);
+    logger.info(`🤖 Optimizing workflow plan using AI for ${workflowId}`);
     
     const config = this.workflows.get(workflowId);
     if (!config) return;
@@ -167,9 +170,9 @@ export class ProAutomationEngine extends EventEmitter {
     
     this.emit('workflow:optimized', { workflowId, optimization });
     
-    console.log(`   ✅ Optimization complete:`);
-    console.log(`      - Parallel steps identified: ${optimization.parallelization.length}`);
-    console.log(`      - Estimated improvement: ${optimization.estimatedImprovement}`);
+    logger.info(`   ✅ Optimization complete:`);
+    logger.info(`      - Parallel steps identified: ${optimization.parallelization.length}`);
+    logger.info(`      - Estimated improvement: ${optimization.estimatedImprovement}`);
   }
 
   private identifyParallelSteps(requirements: any): Array<{ stepId: string; canParallelize: boolean }> {
@@ -204,7 +207,7 @@ export class ProAutomationEngine extends EventEmitter {
   }
 
   private async predictWorkflowOutcome(workflowId: string): Promise<WorkflowStepPrediction[]> {
-    console.log(`🔮 Running predictive analysis for ${workflowId}`);
+    logger.info(`🔮 Running predictive analysis for ${workflowId}`);
     
     const predictions: WorkflowStepPrediction[] = [
       {
@@ -233,16 +236,16 @@ export class ProAutomationEngine extends EventEmitter {
       }
     ];
     
-    console.log(`   ✅ Predictive analysis complete:`);
+    logger.info(`   ✅ Predictive analysis complete:`);
     predictions.forEach(p => {
-      console.log(`      - ${p.stepName}: ${(p.successProbability * 100).toFixed(1)}% success probability`);
+      logger.info(`      - ${p.stepName}: ${(p.successProbability * 100).toFixed(1)}% success probability`);
     });
     
     return predictions;
   }
 
   private async setupMultiCloudOrchestration(workflowId: string): Promise<void> {
-    console.log(`☁️ Setting up multi-cloud orchestration for ${workflowId}`);
+    logger.info(`☁️ Setting up multi-cloud orchestration for ${workflowId}`);
     
     const orchestration: CloudOrchestration = {
       providers: ['aws', 'azure', 'gcp'],
@@ -253,14 +256,14 @@ export class ProAutomationEngine extends EventEmitter {
     
     this.emit('workflow:cloud_orchestration', { workflowId, orchestration });
     
-    console.log(`   ✅ Multi-cloud setup complete:`);
-    console.log(`      - Providers: ${orchestration.providers.join(', ')}`);
-    console.log(`      - Strategy: ${orchestration.strategy}`);
-    console.log(`      - Failover: ${orchestration.failover ? 'Enabled' : 'Disabled'}`);
+    logger.info(`   ✅ Multi-cloud setup complete:`);
+    logger.info(`      - Providers: ${orchestration.providers.join(', ')}`);
+    logger.info(`      - Strategy: ${orchestration.strategy}`);
+    logger.info(`      - Failover: ${orchestration.failover ? 'Enabled' : 'Disabled'}`);
   }
 
   private async executeWorkflowSteps(workflowId: string): Promise<void> {
-    console.log(`⚙️ Executing workflow steps for ${workflowId}`);
+    logger.info(`⚙️ Executing workflow steps for ${workflowId}`);
     
     const steps = [
       'Analyze Requirements',
@@ -275,7 +278,7 @@ export class ProAutomationEngine extends EventEmitter {
     
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
-      console.log(`   [${i + 1}/${steps.length}] ${step}...`);
+      logger.info(`   [${i + 1}/${steps.length}] ${step}...`);
       
       this.emit('workflow:step_started', { 
         workflowId, 
@@ -289,7 +292,7 @@ export class ProAutomationEngine extends EventEmitter {
       // Simulate intelligent monitoring
       await this.monitorStepExecution(workflowId, step);
       
-      console.log(`   ✅ ${step} completed`);
+      logger.info(`   ✅ ${step} completed`);
       
       this.emit('workflow:step_completed', { 
         workflowId, 
@@ -321,13 +324,13 @@ export class ProAutomationEngine extends EventEmitter {
     
     // Detect anomalies
     if (metrics.errorRate > 3) {
-      console.log(`   ⚠️ High error rate detected in ${step}: ${metrics.errorRate.toFixed(2)}%`);
+      logger.info(`   ⚠️ High error rate detected in ${step}: ${metrics.errorRate.toFixed(2)}%`);
       this.emit('workflow:anomaly', { workflowId, step, metric: 'error_rate', value: metrics.errorRate });
     }
   }
 
   private async monitorAndHeal(workflowId: string): Promise<void> {
-    console.log(`🏥 Monitoring for issues and self-healing: ${workflowId}`);
+    logger.info(`🏥 Monitoring for issues and self-healing: ${workflowId}`);
     
     // Simulate health checks
     const healthChecks = [
@@ -345,7 +348,7 @@ export class ProAutomationEngine extends EventEmitter {
   }
 
   private async attemptSelfHealing(workflowId: string, error: Error): Promise<void> {
-    console.log(`🏥 Attempting self-healing for ${workflowId}`);
+    logger.info(`🏥 Attempting self-healing for ${workflowId}`);
     
     const action: SelfHealingAction = {
       actionId: `heal_${Date.now()}`,
@@ -367,13 +370,13 @@ export class ProAutomationEngine extends EventEmitter {
     action.status = 'completed';
     action.result = { success: true, message: 'Components restarted successfully' };
     
-    console.log(`   ✅ Self-healing completed: ${action.action}`);
+    logger.info(`   ✅ Self-healing completed: ${action.action}`);
     
     this.emit('workflow:self_healed', { workflowId, action });
   }
 
   private async triggerSelfHealing(workflowId: string, service: string): Promise<void> {
-    console.log(`   🏥 Self-healing triggered for ${service}`);
+    logger.info(`   🏥 Self-healing triggered for ${service}`);
     
     const action: SelfHealingAction = {
       actionId: `heal_${Date.now()}`,
@@ -395,7 +398,7 @@ export class ProAutomationEngine extends EventEmitter {
     action.status = 'completed';
     action.result = { success: true, message: `${service} restarted` };
     
-    console.log(`      ✅ ${service} healed`);
+    logger.info(`      ✅ ${service} healed`);
     
     this.emit('workflow:self_healed', { workflowId, action });
   }
@@ -426,7 +429,7 @@ export class ProAutomationEngine extends EventEmitter {
   }
 
   async cancelWorkflow(workflowId: string): Promise<void> {
-    console.log(`🛑 Cancelling workflow: ${workflowId}`);
+    logger.info(`🛑 Cancelling workflow: ${workflowId}`);
     this.workflows.delete(workflowId);
     this.emit('workflow:cancelled', { workflowId });
   }

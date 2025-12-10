@@ -5,13 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { PolicyEngine } from './policy-engine';
 import { ProGuardrailsEngine } from './ProGuardrailsEngine';
 import { EvaluationRequest, EvaluationResult } from './types';
+import { createLogger } from '../../../packages/logger/src/index';
 
-const logger = {
-  info: (msg: string, meta?: any) => logger.info(`[INFO] ${msg}`, meta || ''),
-  error: (msg: string, error?: any) => logger.error(`[ERROR] ${msg}`, error || ''),
-  warn: (msg: string, meta?: any) => logger.warn(`[WARN] ${msg}`, meta || ''),
-  debug: (msg: string, meta?: any) => console.debug(`[DEBUG] ${msg}`, meta || '')
-};
+const logger = createLogger({ serviceName: 'guardrails-engine' });
 
 const app = express();
 const PORT = process.env.PORT || 3003;
